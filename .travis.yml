@@ -1,3 +1,4 @@
+language: go
 install: 
   - go get github.com/joncalhoun/pipe
   - go get github.com/fatih/color
