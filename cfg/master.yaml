@@ -531,7 +531,7 @@ groups:
   checks:
     - id: 1.4.1
       text: "Ensure that the apiserver file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/apiserver"
+      audit: "if test -e $kubeConfDir/apiserver; then stat -c %a $kubeConfDir/apiserver; fi"
       tests:
         test_items:
         - flag: "644"
@@ -542,7 +542,7 @@ groups:
 
     - id: 1.4.2
       text: "Ensure that the apiserver file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/apiserver"
+      audit: "if test -e $kubeConfDir/apiserver; then stat -c %U:%G $kubeConfDir/apiserver; fi"
       tests:
         test_items:
         - flag: "root:root"
@@ -553,7 +553,7 @@ groups:
 
     - id: 1.4.3
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/config"
+      audit: "if test -e $kubeConfDir/config; then stat -c %a $kubeConfDir/config; fi"
       tests:
         test_items:
         - flag: "644"
@@ -564,7 +564,7 @@ groups:
 
     - id: 1.4.4
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/config"
+      audit: "if test -e $kubeConfDir/config; then stat -c %U:%G $kubeConfDir/config; fi"
       tests:
         test_items:
         - flag: "root:root"
@@ -575,7 +575,7 @@ groups:
 
     - id: 1.4.5
       text: "Ensure that the scheduler file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/scheduler"
+      audit: "if test -e $kubeConfDir/scheduler; then stat -c %a $kubeConfDir/scheduler; fi"
       tests:
         test_items:
           - flag: "644"
@@ -586,7 +586,7 @@ groups:
 
     - id: 1.4.6
       text: "Ensure that the scheduler file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/scheduler"
+      audit: "if test -e $kubeConfDir/scheduler; then stat -c %U:%G $kubeConfDir/scheduler; fi"
       tests:
         test_items:
           - flag: "root:root"
@@ -597,7 +597,7 @@ groups:
 
     - id: 1.4.7
       text: "Ensure that the etcd.conf file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $etcdConfDir/etcd.conf"
+      audit: "if test -e $etcdConfDir/etcd.conf; then stat -c %a $etcdConfDir/etcd.conf; fi"
       tests:
         test_items:
           - flag: "644"
@@ -608,7 +608,7 @@ groups:
 
     - id: 1.4.8
       text: "Ensure that the etcd.conf file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $etcdConfDir/etcd.conf"
+      audit: "if test -e $etcdConfDir/kubelet; then stat -c %U:%G $etcdConfDir/etcd.conf; fi"
       tests:
         test_items:
         - flag: "root:root"
@@ -619,7 +619,7 @@ groups:
 
     - id: 1.4.9
       text: "Ensure that the flanneld file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a /etc/sysconfig/flanneld"
+      audit: "if test -e /etc/sysconfig/flanneld; then stat -c %a /etc/sysconfig/flanneld; fi"
       tests:
         test_items:
         - flag: "644"
@@ -630,7 +630,7 @@ groups:
 
     - id: 1.4.10
       text: "Ensure that the flanneld file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G /etc/sysconfig/flanneld"
+      audit: "if test -e /etc/sysconfig/flanneld; then stat -c %U:%G /etc/sysconfig/flanneld; fi"
       tests:
         test_items:
         - flag: "root:root"
