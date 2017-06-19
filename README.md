@@ -15,24 +15,19 @@ If Go is installed on the target machines, you can simply clone this repository 
 ## Usage
 ```./cis_kubernetes [command]```
 
+```
 Available Commands:
   master      Checks for Kubernetes master node
-  
   node        Checks for Kubernetes node
-  
   federated   Checks for Kubernetes federated deployment
-  
   help        Help information
 
 Flags:
-  
   -c, --check string   A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
-  
   -g, --group string   Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-  
   -h, --help           help for cis_kubernetes
-  
   --json               Output results as JSON
+```
 
 ## Test config YAML representation
 The tests are represented as YAML documents (installed by default into ./cfg).
