@@ -193,7 +193,7 @@ groups:
   checks:
     - id: 2.2.1
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/config"
+      audit: "if test -e $kubeConfDir/config; then stat -c %a $kubeConfDir/config; fi"
       tests:
         test_items:
           - flag: "644"
@@ -204,7 +204,7 @@ groups:
 
     - id: 2.2.2
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/config"
+      audit: "if test -e $kubeConfDir/config; then stat -c %U:%G $kubeConfDir/config; fi"
       tests:
         test_items:
           - flag: "root:root"
@@ -215,7 +215,7 @@ groups:
 
     - id: 2.2.3
       text: "Ensure that the kubelet file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/kubelet"
+      audit: "if test -e $kubeConfDir/kubelet; then stat -c %a $kubeConfDir/kubelet; fi"
       tests:
         test_items:
           - flag: "644"
@@ -226,7 +226,7 @@ groups:
 
     - id: 2.2.4
       text: "Ensure that the kubelet file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/kubelet"
+      audit: "if test -e $kubeConfDir/kubelet; then stat -c %U:%G $kubeConfDir/kubelet; fi"
       tests:
         test_items:
           - flag: "root:root"
@@ -237,7 +237,7 @@ groups:
 
     - id: 2.2.5
       text: "Ensure that the proxy file permissions are set to 644 or more restrictive (Scored)"
-      audit: "stat -c %a $kubeConfDir/proxy"
+      audit: "if test -e $kubeConfDir/proxy; then stat -c %a $kubeConfDir/proxy; fi"
       tests:
         test_items:
           - flag: "644"
@@ -248,7 +248,7 @@ groups:
 
     - id: 2.2.6
       text: "Ensure that the proxy file ownership is set to root:root (Scored)"
-      audit: "stat -c %U:%G $kubeConfDir/proxy"
+      audit: "if test -e $kubeConfDir/proxy; then stat -c %U:%G $kubeConfDir/proxy; fi"
       tests:
         test_items:
           - flag: "root:root"
