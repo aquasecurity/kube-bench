@@ -3,9 +3,9 @@
 # These are YAML files that hold all the details for running checks.
 #
 ## Uncomment to use different control file paths.
-# masterControls: $HOME/.cis_kubernetes/master.yaml
-# nodeControls: $HOME/.cis_kubernetes/node.yaml
-# federatedControls: $HOME/.cis_kubernetes/federated.yaml
+# masterControls: ./cfg/master.yaml
+# nodeControls: ./cfg/node.yaml
+# federatedControls: ./cfg/federated.yaml
 
 ## Configuration Directories.
 # Specifies the directories to look for configuration files

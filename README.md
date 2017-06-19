@@ -8,15 +8,27 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 You will need to run this application on the target machines that you want to test. 
 
-If Go is installed on the target machines, you can simply clone this repository, build and install as follows: 
+If Go is installed on the target machines, you can simply clone this repository and as follows: 
 
 ```go build -o cis_kubernetes .```
-```./install.sh```
 
-The installation script creates a directory ~/.cis_kubernetes and copies the test config files there. 
+## Usage
+```./cis_kubernetes [command]```
+
+Available Commands:
+  master      Checks for Kubernetes master node
+  node        Checks for Kubernetes node
+  federated   Checks for Kubernetes federated deployment
+  help        Help information
+
+Flags:
+  -c, --check string   A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
+  -g, --group string   Run all the checks under this comma-delimited list of groups. Example --group="1.1"
+  -h, --help           help for cis_kubernetes
+      --json           Output results as JSON
 
 ## Test config YAML representation
-The tests are represented as YAML documents (installed by default into ~/.cis_kubernetes).
+The tests are represented as YAML documents (installed by default into ./cfg).
 
 An example is as listed below:
 ```

@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	cfgDir  = os.Getenv("HOME") + "/.cis_kubernetes"
+	cfgDir  = "./cfg"
 	cfgFile string
 
 	jsonFmt       bool
