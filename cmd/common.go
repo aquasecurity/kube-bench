@@ -152,7 +152,7 @@ func verifyNodeType(t check.NodeType) {
 		out, _ = cmd.Output()
 		if matched, _ := regexp.MatchString(kubeVersion, string(out)); !matched {
 			fmt.Fprintf(os.Stderr,
-				"%s unsupported version, expected v%s, got %s\n",
+				"%s unsupported version, expected %s, got %s\n",
 				b,
 				kubeVersion,
 				string(out),
