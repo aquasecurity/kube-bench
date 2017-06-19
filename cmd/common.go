@@ -140,11 +140,13 @@ func verifyNodeType(t check.NodeType) {
 		confPath = kubeFederatedConf
 	}
 
+	// These executables might not be on the user's path.
+	// TODO! Check the version number using kubectl, which is more likely to be on the path.
 	for _, b := range binPath {
 		_, err := exec.LookPath(b)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: command not found\n", b)
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "WARNING: %s: command not found on path - version check skipped\n", b)
+			continue
 		}
 
 		// Check version
@@ -159,9 +161,11 @@ func verifyNodeType(t check.NodeType) {
 			)
 			os.Exit(1)
 		}
+	}
 
-		// Check if running
-		cmd = exec.Command("ps", "-ef")
+	for _, b := range binPath {
+		// Check if running.
+		cmd := exec.Command("ps", "-ef")
 		out, _ = cmd.Output()
 		if matched, _ := regexp.MatchString(".*"+b, string(out)); !matched {
 			fmt.Fprintf(os.Stderr, "%s is not running\n", b)
@@ -171,8 +175,8 @@ func verifyNodeType(t check.NodeType) {
 
 	for _, c := range confPath {
 		if _, err := os.Stat(c); os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "config file %s does not exist\n", c)
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "WARNING: config file %s does not exist\n", c)
+			// os.Exit(1)
 		}
 	}
 }
