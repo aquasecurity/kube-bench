@@ -4,7 +4,7 @@ The Kubernetes Bench for Security is a Go application that checks whether Kubern
 
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve. 
 
-## Installation
+## Installation
 
 Install by cloning this repository and running 
 
