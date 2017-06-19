@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/aquasecurity/kubernetes-bench-security.svg?branch=master)](https://travis-ci.org/aquasecurity/kubernetes-bench-security)
+
 # kubernetes-bench-security
 
 The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes 1.6 Benchmark v1.0.0.
