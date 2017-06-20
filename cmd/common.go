@@ -42,6 +42,14 @@ var (
 
 	// Used for variable substitution
 	symbols = map[string]string{}
+
+	// Print colors
+	colors = map[check.State]*color.Color{
+		check.PASS: color.New(color.FgGreen),
+		check.FAIL: color.New(color.FgRed),
+		check.WARN: color.New(color.FgYellow),
+		check.INFO: color.New(color.FgWhite),
+	}
 )
 
 func runChecks(t check.NodeType) {
@@ -145,7 +153,7 @@ func verifyNodeType(t check.NodeType) {
 	for _, b := range binPath {
 		_, err := exec.LookPath(b)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "WARNING: %s: command not found on path - version check skipped\n", b)
+			colorPrint(check.WARN, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
 			continue
 		}
 
@@ -153,12 +161,13 @@ func verifyNodeType(t check.NodeType) {
 		cmd := exec.Command(b, "--version")
 		out, _ = cmd.Output()
 		if matched, _ := regexp.MatchString(kubeVersion, string(out)); !matched {
-			fmt.Fprintf(os.Stderr,
-				"%s unsupported version, expected %s, got %s\n",
-				b,
-				kubeVersion,
-				string(out),
-			)
+			colorPrint(check.FAIL,
+				fmt.Sprintf(
+					"%s unsupported version, expected %s, got %s\n",
+					b,
+					kubeVersion,
+					string(out),
+				))
 			os.Exit(1)
 		}
 	}
@@ -168,35 +177,34 @@ func verifyNodeType(t check.NodeType) {
 		cmd := exec.Command("ps", "-ef")
 		out, _ = cmd.Output()
 		if matched, _ := regexp.MatchString(".*"+b, string(out)); !matched {
-			fmt.Fprintf(os.Stderr, "%s is not running\n", b)
+			colorPrint(check.FAIL, fmt.Sprintf("%s is not running\n", b))
 			os.Exit(1)
 		}
 	}
 
 	for _, c := range confPath {
 		if _, err := os.Stat(c); os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "WARNING: config file %s does not exist\n", c)
-			// os.Exit(1)
+			colorPrint(check.WARN, fmt.Sprintf("config file %s does not exist\n", c))
 		}
 	}
 }
 
-func prettyPrint(r *check.Controls, summary check.Summary) {
-	colors := map[check.State]*color.Color{
-		check.PASS: color.New(color.FgGreen),
-		check.FAIL: color.New(color.FgRed),
-		check.WARN: color.New(color.FgYellow),
-	}
+// colorPrint outputs the state in a specific colour, along with a message string
+func colorPrint(state check.State, s string) {
+	colors[state].Printf("[%s] ", state)
+	fmt.Printf("%s", s)
+}
 
+func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print checks and results.
-	fmt.Printf("[INFO] %s %s\n", r.ID, r.Text)
+	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
 		fmt.Printf("[INFO] %s %s\n", g.ID, g.Text)
 		for _, c := range g.Checks {
-			colors[c.State].Printf("[%s] ", c.State)
-			fmt.Printf("%s %s\n", c.ID, c.Text)
+			colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
 		}
 	}
+
 	fmt.Println()
 
 	// Print remediations.

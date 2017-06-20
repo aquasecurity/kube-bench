@@ -38,6 +38,8 @@ const (
 	FAIL = "FAIL"
 	// WARN could not carry out check.
 	WARN = "WARN"
+	// INFO informational message
+	INFO = "INFO"
 
 	// MASTER a master node
 	MASTER NodeType = "master"
