@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/aquasecurity/kubernetes-bench-security.svg?branch=master)](https://travis-ci.org/aquasecurity/kubernetes-bench-security)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# kubernetes-bench-security
+# kube-bench
 
 The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes 1.6 Benchmark v1.0.0.
 
@@ -8,11 +9,16 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ## Installation
 
-You will need to run this application on the target machines that you want to test. 
+You can either install kube-bench through a dedicated container, or compile it from source:
 
-If Go is installed on the target machines, you can simply clone this repository and as follows: 
+1. Container installation:
+Run ```docker run --rm -v \`pwd\`:/host aquasec/kube-bench:latest```. This will copy the kube-bench binary and configuration to you host. You can then run ```./kube-bench <master|node>```.
 
-```go build -o cis_kubernetes .```
+2. Install from sources:
+If Go is installed on the target machines, you can simply clone this repository and run as follows: 
+```go get github.com/aquasecurity/kube-bench```
+```cp $GOROOT/bin/kube-bench .```
+```./kube-bench <master|node>```
 
 ## Usage
 ```./cis_kubernetes [command]```
