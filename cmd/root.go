@@ -40,7 +40,7 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "cis_kubernetes",
+	Use:   os.Args[0],
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes 1.6 Benchmark v1.0.0 checks.`,
 }

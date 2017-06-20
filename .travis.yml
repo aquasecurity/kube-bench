@@ -6,4 +6,4 @@ install:
   - go get github.com/spf13/viper
   - go get gopkg.in/yaml.v2
 script:
-  - go build -o cis_kubernetes .
+  - go build -o kube-bench .

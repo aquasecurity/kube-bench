@@ -21,7 +21,7 @@ If Go is installed on the target machines, you can simply clone this repository 
 ```./kube-bench <master|node>```
 
 ## Usage
-```./cis_kubernetes [command]```
+```./kube-bench [command]```
 
 ```
 Available Commands:
@@ -33,7 +33,7 @@ Available Commands:
 Flags:
   -c, --check string   A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
   -g, --group string   Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-  -h, --help           help for cis_kubernetes
+  -h, --help           help for kube-bench
   --json               Output results as JSON
 ```
 
@@ -89,7 +89,3 @@ These operations are:
 - `lte`: tests if the flag value is less than or equal to the compared value.
 - `has`: tests if the flag value contains the compared value.
 - `nothave`: tests if the flag value does not contain the compared value.
-
-
-
-
