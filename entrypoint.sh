@@ -5,7 +5,7 @@ if [ -d /host ]; then
   yes | cp -rf ./kube-bench/kube-bench /host/
   echo "=== You can now run ./kube-bench from your host ==="
 else
-  echo "Error: please mount a host directory as /host volume"
-  echo "docker run --rm -v `pwd`:/host aquasec/kube-bench"
+  echo "Usage:"
+  echo "  docker run --rm -v \`pwd\`:/host aquasec/kube-bench"
   exit 
 fi
