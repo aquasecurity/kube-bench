@@ -608,7 +608,7 @@ groups:
 
     - id: 1.4.8
       text: "Ensure that the etcd.conf file ownership is set to root:root (Scored)"
-      audit: "if test -e $etcdConfDir/kubelet; then stat -c %U:%G $etcdConfDir/etcd.conf; fi"
+      audit: "if test -e $etcdConfDir/etcd.conf; then stat -c %U:%G $etcdConfDir/etcd.conf; fi"
       tests:
         test_items:
         - flag: "root:root"
