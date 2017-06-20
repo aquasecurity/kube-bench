@@ -59,16 +59,19 @@ groups:
               the --insecure-allow-any-token argument from the KUBE_API_ARGS parameter."
       scored: true
 
-    - id: 1.1.5
+   - id: 1.1.5
       text: "Ensure that the --kubelet-https argument is set to true (Scored)"
       audit: "ps -ef | grep kube-apiserver | grep -v grep"
       tests: 
         test_items:
+        bin_flag: or
         - flag: "--kubelet-https"
           compare:
             op: eq
             value: true
           set: true
+        - flag: "--kubelet-https"
+          set: false
       remediation: "Edit the $kubeConfDir/apiserver file on the master node and remove 
               the --kubelet-https argument from the KUBE_API_ARGS parameter."
       scored: true
