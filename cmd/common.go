@@ -48,7 +48,7 @@ var (
 		check.PASS: color.New(color.FgGreen),
 		check.FAIL: color.New(color.FgRed),
 		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgWhite),
+		check.INFO: color.New(color.FgBlue),
 	}
 )
 
@@ -199,7 +199,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print checks and results.
 	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
-		fmt.Printf("[INFO] %s %s\n", g.ID, g.Text)
+		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
 		for _, c := range g.Checks {
 			colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
 		}
