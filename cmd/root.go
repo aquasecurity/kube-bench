@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -96,6 +97,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	}
 }
