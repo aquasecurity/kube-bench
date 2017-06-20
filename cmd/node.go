@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/aquasecurity/kubernetes-bench-security/check"
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 )
 

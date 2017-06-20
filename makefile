@@ -1,8 +1,7 @@
 SOURCES := $(shell find . -name '*.go')
 TARGET_OS := linux
+BINARY := kube-bench
 
-cis_kubernetes: $(SOURCES)
-	GOOS=$(TARGET_OS) go build -o cis_kubernetes .
+$(BINARY): $(SOURCES)
+	GOOS=$(TARGET_OS) go build -o $(BINARY) .
 
-install: cis_kubernetes 
-	./install.sh

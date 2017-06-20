@@ -22,7 +22,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aquasecurity/kubernetes-bench-security/check"
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )

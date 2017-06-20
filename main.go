@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/aquasecurity/kubernetes-bench-security/cmd"
+import "github.com/aquasecurity/kube-bench/cmd"
 
 func main() {
 	cmd.Execute()
