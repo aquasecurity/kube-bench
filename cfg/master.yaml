@@ -641,17 +641,22 @@ groups:
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root /etc/sysconfig/flanneld"
       scored: true
-
-      # TODO: Resolve issue get pipeline to work.
-      #  - id: 1.4.11
-      #  - text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-      #  - audit: "ps -ef | grep etcd | grep -v grep | sed 's,.*--data-dir=\\(.*\\)\\s.*,\\1,' | xargs stat -c %a"
-      #  - tests:
-      #  -   test_items:
-      #  -     - flag: "700"
-      #  -       set: true
-      #  - remediation: ""
-      #  - scored: true
+      
+    - id: 1.4.11
+      text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
+      # audit: ps -ef | grep etcd | grep -v grep | sed 's,.*--data-dir=\(.*\)\s*.*,\1,' | xargs stat -c %a
+      audit: "ps -ef | grep etcd | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %a"
+      # audit: xargs stat -c %a /etc/etcd
+      tests:
+        test_items:
+        - flag: "700"
+          set: true
+      remediation: "On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
+              from the below command:\n
+              ps -ef | grep etcd\n
+              Run the below command (based on the etcd data directory found above). For example,\n
+              chmod 700 /var/lib/etcd/default.etcd"
+      scored: true
 
 - id: 1.5
   text: "etcd"

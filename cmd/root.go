@@ -58,7 +58,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Output results as JSON")
+	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().StringVarP(&checkList,
 		"check",
 		"c",

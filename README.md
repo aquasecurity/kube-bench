@@ -58,8 +58,12 @@ groups:
       text: "Ensure that the --allow-privileged argument is set (Scored)"
       audit: "ps -ef | grep kube-apiserver | grep -v grep"
       tests:
+      bin_op: or
+      test_items:
       - flag: "--allow-privileged"
         set: true
+      - flag: "--some-other-flag"
+        set: false
       remediation: "Edit the /etc/kubernetes/config file on the master node and set the KUBE_ALLOW_PRIV parameter to '--allow-privileged=false'"
       scored: true
 ```
