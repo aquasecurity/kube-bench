@@ -22,8 +22,8 @@ import (
 // nodeCmd represents the node command
 var federatedCmd = &cobra.Command{
 	Use:   "federated",
-	Short: "Checks for Kubernetes federated deployment.",
-	Long:  `Checks for Kubernetes federated deployment.`,
+	Short: "Run benchmark checks for a Kubernetes federated deployment.",
+	Long:  `Run benchmark checks for a Kubernetes federated deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		runChecks(check.FEDERATED)
 	},

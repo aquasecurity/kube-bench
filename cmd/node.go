@@ -22,8 +22,8 @@ import (
 // nodeCmd represents the node command
 var nodeCmd = &cobra.Command{
 	Use:   "node",
-	Short: "Checks for Kubernetes node.",
-	Long:  `Checks for Kubernetes node.`,
+	Short: "Run benchmark checks for a Kubernetes node.",
+	Long:  `Run benchmark checks for a Kubernetes node.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		runChecks(check.NODE)
 	},

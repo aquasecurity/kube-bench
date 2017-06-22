@@ -22,8 +22,8 @@ import (
 // masterCmd represents the master command
 var masterCmd = &cobra.Command{
 	Use:   "master",
-	Short: "Checks for Kubernetes master node.",
-	Long:  `Checks for Kubernetes master node.`,
+	Short: "Run benchmark checks for a Kubernetes master node.",
+	Long:  `Run benchmark checks for a Kubernetes master node.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		runChecks(check.MASTER)
 	},
