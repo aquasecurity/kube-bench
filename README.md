@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/aquasecurity/kubernetes-bench-security.svg?branch=master)](https://travis-ci.org/aquasecurity/kubernetes-bench-security)
+[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=master)](https://travis-ci.org/aquasecurity/kube-bench)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # kube-bench
