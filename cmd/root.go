@@ -71,17 +71,17 @@ func init() {
 		"",
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
-
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigName("config") // name of config file (without extension)
+		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
-
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.AddConfigPath(cfgDir)   // adding home directory as first search path
 
 	viper.SetEnvPrefix("CISK8S")
 	viper.AutomaticEnv() // read in environment variables that match
