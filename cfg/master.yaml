@@ -63,8 +63,8 @@ groups:
       text: "Ensure that the --kubelet-https argument is set to true (Scored)"
       audit: "ps -ef | grep kube-apiserver | grep -v grep"
       tests: 
+        bin_op: or
         test_items:
-        - bin_flag: or
         - flag: "--kubelet-https"
           compare:
             op: eq
