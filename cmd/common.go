@@ -54,6 +54,7 @@ var (
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
+	var warnings []string
 	var file string
 
 	// Set up for config file check.
@@ -66,7 +67,15 @@ func runChecks(t check.NodeType) {
 	kubeNodeConf = append(kubeNodeConf, viper.Get("kubeConfDir").(string)+"/kubelet")
 	kubeNodeConf = append(kubeNodeConf, viper.Get("kubeConfDir").(string)+"/proxy")
 
-	verifyNodeType(t)
+	warnings, err := verifyNodeType(t, warnings)
+	if err != nil {
+		for _, w := range warnings {
+			colorPrint(check.WARN, w)
+		}
+
+		fmt.Fprintf(os.Stderr, "failed to verify node type: %v\n", err)
+		os.Exit(1)
+	}
 
 	switch t {
 	case check.MASTER:
@@ -91,17 +100,14 @@ func runChecks(t check.NodeType) {
 	controls := check.NewControls(t, []byte(s))
 
 	if groupList != "" && checkList == "" {
-		// log.Println("group: set, checks: not set")
 		ids := cleanIDs(groupList)
 		summary = controls.RunGroup(ids...)
 
 	} else if checkList != "" && groupList == "" {
-		// log.Println("group: not set, checks: set")
 		ids := cleanIDs(checkList)
 		summary = controls.RunChecks(ids...)
 
 	} else if checkList != "" && groupList != "" {
-		// log.Println("group: set, checks: set")
 		fmt.Fprintf(os.Stderr, "group option and check option can't be used together\n")
 		os.Exit(1)
 
@@ -109,7 +115,8 @@ func runChecks(t check.NodeType) {
 		summary = controls.RunGroup()
 	}
 
-	if jsonFmt {
+	// if we successfully ran some tests and it's json format, ignore the warnings
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed to output in JSON format: %v\n", err)
@@ -118,7 +125,7 @@ func runChecks(t check.NodeType) {
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(controls, summary)
+		prettyPrint(warnings, controls, summary)
 	}
 }
 
@@ -133,7 +140,8 @@ func cleanIDs(list string) []string {
 	return ids
 }
 
-func verifyNodeType(t check.NodeType) {
+// verifyNodeType checks the executables and config files are as expected for the specified tests (master, node or federated)
+func verifyNodeType(t check.NodeType, w []string) ([]string, error) {
 	var binPath []string
 	var confPath []string
 	var out []byte
@@ -155,40 +163,58 @@ func verifyNodeType(t check.NodeType) {
 	for _, b := range binPath {
 		_, err := exec.LookPath(b)
 		if err != nil {
-			colorPrint(check.WARN, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
+			w = append(w, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
 			continue
 		}
 
 		// Check version
 		cmd := exec.Command(b, "--version")
-		out, _ = cmd.Output()
-		if matched, _ := regexp.MatchString(kubeVersion, string(out)); !matched {
-			colorPrint(check.FAIL,
-				fmt.Sprintf(
-					"%s unsupported version, expected %s, got %s\n",
-					b,
-					kubeVersion,
-					string(out),
-				))
-			os.Exit(1)
+		out, err = cmd.Output()
+		if err != nil {
+			return w, fmt.Errorf("failed executing %s --version: %v", b, err)
+		}
+
+		matched, err := regexp.MatchString(kubeVersion, string(out))
+		if err != nil {
+			return w, fmt.Errorf("regexp match for version failed: %v", err)
+		}
+
+		if !matched {
+			return w, fmt.Errorf(
+				"%s unsupported version, expected %s, got %s",
+				b,
+				kubeVersion,
+				string(out),
+			)
 		}
 	}
 
+	// Check if the executables for this type of node are running.
 	for _, b := range binPath {
-		// Check if running.
 		cmd := exec.Command("ps", "-ef")
-		out, _ = cmd.Output()
-		if matched, _ := regexp.MatchString(".*"+b, string(out)); !matched {
-			colorPrint(check.FAIL, fmt.Sprintf("%s is not running\n", b))
-			os.Exit(1)
+		out, err := cmd.Output()
+		if err != nil {
+			return w, fmt.Errorf("failed executing ps -ef: %v", err)
+		}
+
+		matched, err := regexp.MatchString(".*"+b, string(out))
+		if err != nil {
+			return w, fmt.Errorf("regexp match for ps output failed: %v", err)
+		}
+
+		if !matched {
+			return w, fmt.Errorf("%s is not running", b)
 		}
 	}
 
+	// Check whether the config files for this type of node are in the expected location
 	for _, c := range confPath {
 		if _, err := os.Stat(c); os.IsNotExist(err) {
-			colorPrint(check.WARN, fmt.Sprintf("config file %s does not exist\n", c))
+			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
 		}
 	}
+
+	return w, nil
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -197,8 +223,12 @@ func colorPrint(state check.State, s string) {
 	fmt.Printf("%s", s)
 }
 
-func prettyPrint(r *check.Controls, summary check.Summary) {
-	// Print checks and results.
+// prettyPrint outputs the results to stdout in human-readable format
+func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
+	for _, w := range warnings {
+		colorPrint(check.WARN, w)
+	}
+
 	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
 		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
