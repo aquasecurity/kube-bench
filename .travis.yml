@@ -2,4 +2,5 @@ language: go
 install: 
   - go get github.com/aquasecurity/kube-bench
 script:
+  - go test ./...
   - go build -o kube-bench .
