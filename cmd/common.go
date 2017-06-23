@@ -86,7 +86,7 @@ func runChecks(t check.NodeType) {
 	// Variable substitutions. Replace all occurrences of variables in controls file.
 	s := strings.Replace(string(in), "$kubeConfDir", viper.Get("kubeConfDir").(string), -1)
 	s = strings.Replace(s, "$etcdConfDir", viper.Get("etcdConfDir").(string), -1)
-	s = strings.Replace(s, "$flanneldConfDir", viper.Get("etcdConfDir").(string), -1)
+	s = strings.Replace(s, "$flanneldConfDir", viper.Get("flanneldConfDir").(string), -1)
 
 	controls := check.NewControls(t, []byte(s))
 
