@@ -99,7 +99,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	} else {
-		colorPrint(check.FAIL, fmt.Sprintf("Faied to read config file: %v\n", err))
+		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
 		os.Exit(1)
 	}
 }
