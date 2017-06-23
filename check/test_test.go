@@ -30,7 +30,10 @@ func init() {
 	if err != nil {
 		panic("Failed reading test data: " + err.Error())
 	}
-	controls = NewControls(MASTER, in)
+	controls, err = NewControls(MASTER, in)
+	if err != nil {
+		panic("Failed creating test controls: " + err.Error())
+	}
 }
 
 func TestTestExecute(t *testing.T) {

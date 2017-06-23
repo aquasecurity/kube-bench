@@ -88,7 +88,7 @@ func runChecks(t check.NodeType) {
 
 	in, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error opening %s controls file: %s\n", t, err)
+		fmt.Fprintf(os.Stderr, "error opening %s controls file: %v\n", t, err)
 		os.Exit(1)
 	}
 
@@ -97,7 +97,11 @@ func runChecks(t check.NodeType) {
 	s = strings.Replace(s, "$etcdConfDir", viper.Get("etcdConfDir").(string), -1)
 	s = strings.Replace(s, "$flanneldConfDir", viper.Get("flanneldConfDir").(string), -1)
 
-	controls := check.NewControls(t, []byte(s))
+	controls, err := check.NewControls(t, []byte(s))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error setting up %s controls: %v\n", t, err)
+		os.Exit(1)
+	}
 
 	if groupList != "" && checkList == "" {
 		ids := cleanIDs(groupList)

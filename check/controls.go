@@ -17,7 +17,6 @@ package check
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -46,19 +45,16 @@ type Summary struct {
 }
 
 // NewControls instantiates a new master Controls object.
-func NewControls(t NodeType, in []byte) *Controls {
-	var err error
+func NewControls(t NodeType, in []byte) (*Controls, error) {
 	c := new(Controls)
 
-	err = yaml.Unmarshal(in, c)
+	err := yaml.Unmarshal(in, c)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to unmarshal YAML: %s", err)
 	}
 
 	if t != c.Type {
-		fmt.Fprintf(os.Stderr, "non-%s controls file specified\n", t)
-		os.Exit(1)
+		return nil, fmt.Errorf("non-%s controls file specified", t)
 	}
 
 	// Prepare audit commands
@@ -68,7 +64,7 @@ func NewControls(t NodeType, in []byte) *Controls {
 		}
 	}
 
-	return c
+	return c, nil
 }
 
 // RunGroup runs all checks in a group.
