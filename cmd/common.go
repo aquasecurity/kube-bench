@@ -225,6 +225,8 @@ func colorPrint(state check.State, s string) {
 
 // prettyPrint outputs the results to stdout in human-readable format
 func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
+	colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+
 	for _, w := range warnings {
 		colorPrint(check.WARN, w)
 	}
