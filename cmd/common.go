@@ -112,6 +112,8 @@ func runChecks(t check.NodeType) {
 	if jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to output in JSON format: %v\n", err)
+			os.Exit(1)
 		}
 
 		fmt.Println(string(out))
