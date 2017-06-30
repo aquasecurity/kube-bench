@@ -15,14 +15,12 @@
 package check
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/joncalhoun/pipe"
 )
 
 // NodeType indicates the type of node (master, node, federated).
@@ -65,7 +63,7 @@ type Check struct {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) Run() {
-	var out string
+	var out bytes.Buffer
 
 	// Check if command exists or exit with WARN.
 	for _, cmd := range c.Commands {
@@ -77,47 +75,59 @@ func (c *Check) Run() {
 	}
 
 	// Run commands.
-	if len(c.Commands) == 0 {
+	n := len(c.Commands)
+	if n == 0 {
 		// Likely a warning message.
 		c.State = WARN
 		return
 	}
 
-	p, err := pipe.New(c.Commands...)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "init: error creating command pipeline %s\n", err)
-		os.Exit(1)
+	// Each command runs,
+	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
+	//   cmd0 err should terminate chain
+	cs := c.Commands
+
+	cs[0].Stderr = os.Stderr
+	cs[n-1].Stdout = &out
+	i := 1
+
+	for _, v := range cs {
+		fmt.Println(v.Args)
 	}
 
-	pr, pw := io.Pipe()
-	p.Stdout = pw
-	defer pw.Close()
-
-	if err := p.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "start: error running audit command %s\n", err)
-		os.Exit(1)
-	}
-
-	// Read output of command chain into string for check.
-	go func() {
-		defer pr.Close()
-		scanner := bufio.NewScanner(pr)
-		for scanner.Scan() {
-			out += scanner.Text()
-		}
-
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "error accumulating  output %s\n", err)
+	var err error
+	for i < n {
+		cs[i-1].Stdout, err = cs[i].StdinPipe()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Path, err)
 			os.Exit(1)
 		}
-	}()
 
-	if err := p.Wait(); err != nil {
-		fmt.Fprintf(os.Stderr, "wait: error running audit command %s\n", err)
-		os.Exit(1)
+		cs[i].Stderr = os.Stderr
+		i++
 	}
 
-	res := c.Tests.execute(out)
+	i = 0
+	for i < n {
+		err := cs[i].Start()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
+			os.Exit(1)
+		}
+
+		errw := cs[i].Wait()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, errw)
+			os.Exit(1)
+		}
+
+		if i < n-1 {
+			cs[i].Stdout.(io.Closer).Close()
+		}
+		i++
+	}
+
+	res := c.Tests.execute(out.String())
 	if res {
 		c.State = PASS
 	} else {
