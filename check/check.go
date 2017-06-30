@@ -91,10 +91,6 @@ func (c *Check) Run() {
 	cs[n-1].Stdout = &out
 	i := 1
 
-	for _, v := range cs {
-		fmt.Println(v.Args)
-	}
-
 	var err error
 	for i < n {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
