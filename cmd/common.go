@@ -56,11 +56,6 @@ func runChecks(t check.NodeType) {
 	var file string
 
 	warns := verifyNodeType(t)
-	if len(warns) > 0 {
-		for _, w := range warns {
-			colorPrint(check.WARN, w)
-		}
-	}
 
 	switch t {
 	case check.MASTER:
