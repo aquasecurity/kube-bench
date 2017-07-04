@@ -55,14 +55,11 @@ func runChecks(t check.NodeType) {
 	var summary check.Summary
 	var file string
 
-	fails := verifyNodeType(t)
-	if len(fails) > 0 {
-		fmt.Fprintf(os.Stderr, "%s could not start: please resolve these issues\n", os.Args[0])
-		for _, w := range fails {
-			colorPrint(check.FAIL, w)
+	warns := verifyNodeType(t)
+	if len(warns) > 0 {
+		for _, w := range warns {
+			colorPrint(check.WARN, w)
 		}
-
-		os.Exit(1)
 	}
 
 	switch t {
@@ -117,7 +114,7 @@ func runChecks(t check.NodeType) {
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(fails, controls, summary)
+		prettyPrint(warns, controls, summary)
 	}
 }
 
@@ -246,10 +243,7 @@ func verifyBin(binPath []string) []string {
 
 	// Run ps command
 	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	out, err := cmd.Output()
-	if err != nil {
-		w = append(w, fmt.Sprintf("%v could not get process information\n", binPath))
-	}
+	out, _ := cmd.Output()
 
 	// Actual verification
 	for _, b := range binPath {
@@ -277,10 +271,7 @@ func verifyKubeVersion(binPath []string) []string {
 
 		// Check version
 		cmd := exec.Command(b, "--version")
-		out, err := cmd.Output()
-		if err != nil {
-			w = append(w, fmt.Sprintf("failed executing %s --version: %v\n", b, err))
-		}
+		out, _ := cmd.Output()
 
 		matched := strings.Contains(string(out), kubeVersion)
 		if !matched {
