@@ -19,7 +19,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -29,16 +28,16 @@ import (
 
 var (
 	kubeMasterBin  = []string{"kube-apiserver", "kube-scheduler", "kube-controller-manager"}
+	xMasterBin     = []string{"etcd", "flanneld"}
 	kubeMasterConf = []string{}
 
 	kubeNodeBin  = []string{"kubelet"}
 	kubeNodeConf = []string{}
 
-	kubeFederatedBin  = []string{"federation-apiserver", "federation-controller-manager"}
-	kubeFederatedConf = []string{}
+	kubeFederatedBin = []string{"federation-apiserver", "federation-controller-manager"}
 
 	// TODO: Consider specifying this in config file.
-	kubeVersion = "Kubernetes v1.6"
+	kubeVersion = "1.6"
 
 	// Used for variable substitution
 	symbols = map[string]string{}
@@ -54,28 +53,9 @@ var (
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
-	var warnings []string
 	var file string
 
-	// Set up for config file check.
-	kubeMasterConf = append(kubeMasterConf, viper.Get("kubeConfDir").(string)+"/apiserver")
-	kubeMasterConf = append(kubeMasterConf, viper.Get("kubeConfDir").(string)+"/scheduler")
-	kubeMasterConf = append(kubeMasterConf, viper.Get("kubeConfDir").(string)+"/controller-manager")
-	kubeMasterConf = append(kubeMasterConf, viper.Get("kubeConfDir").(string)+"/config")
-	kubeMasterConf = append(kubeMasterConf, viper.Get("etcdConfDir").(string)+"/etcd.conf")
-	kubeMasterConf = append(kubeMasterConf, viper.Get("flanneldConfDir").(string)+"/flanneld")
-	kubeNodeConf = append(kubeNodeConf, viper.Get("kubeConfDir").(string)+"/kubelet")
-	kubeNodeConf = append(kubeNodeConf, viper.Get("kubeConfDir").(string)+"/proxy")
-
-	warnings, err := verifyNodeType(t, warnings)
-	if err != nil {
-		for _, w := range warnings {
-			colorPrint(check.WARN, w)
-		}
-
-		fmt.Fprintf(os.Stderr, "failed to verify node type: %v\n", err)
-		os.Exit(1)
-	}
+	warns := verifyNodeType(t)
 
 	switch t {
 	case check.MASTER:
@@ -129,7 +109,7 @@ func runChecks(t check.NodeType) {
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(warnings, controls, summary)
+		prettyPrint(warns, controls, summary)
 	}
 }
 
@@ -144,81 +124,42 @@ func cleanIDs(list string) []string {
 	return ids
 }
 
-// verifyNodeType checks the executables and config files are as expected for the specified tests (master, node or federated)
-func verifyNodeType(t check.NodeType, w []string) ([]string, error) {
-	var binPath []string
-	var confPath []string
-	var out []byte
+// verifyNodeType checks the executables and config files are as expected
+// for the specified tests (master, node or federated).
+// Any check failing here is a show stopper.
+func verifyNodeType(t check.NodeType) []string {
+	var w []string
+
+	// Set up and check for config files.
+	kubeConfDir = viper.Get("kubeConfDir").(string)
+	etcdConfDir = viper.Get("etcdConfDir").(string)
+	flanneldConfDir = viper.Get("flanneldConfDir").(string)
+
+	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/apiserver")
+	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/scheduler")
+	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/controller-manager")
+	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/config")
+	kubeMasterConf = append(kubeMasterConf, etcdConfDir+"/etcd.conf")
+	kubeMasterConf = append(kubeMasterConf, flanneldConfDir+"/flanneld")
+
+	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/kubelet")
+	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/proxy")
+
+	w = append(w, verifyKubeVersion(kubeMasterBin)...)
 
 	switch t {
 	case check.MASTER:
-		binPath = kubeMasterBin
-		confPath = kubeMasterConf
+		w = append(w, verifyBin(kubeMasterBin)...)
+		w = append(w, verifyBin(xMasterBin)...)
+		w = append(w, verifyConf(kubeMasterConf)...)
 	case check.NODE:
-		binPath = kubeNodeBin
-		confPath = kubeNodeConf
+		w = append(w, verifyBin(kubeNodeBin)...)
+		w = append(w, verifyConf(kubeNodeConf)...)
 	case check.FEDERATED:
-		binPath = kubeFederatedBin
-		confPath = kubeFederatedConf
+		w = append(w, verifyBin(kubeFederatedBin)...)
 	}
 
-	// These executables might not be on the user's path.
-	// TODO! Check the version number using kubectl, which is more likely to be on the path.
-	for _, b := range binPath {
-		_, err := exec.LookPath(b)
-		if err != nil {
-			w = append(w, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
-			continue
-		}
-
-		// Check version
-		cmd := exec.Command(b, "--version")
-		out, err = cmd.Output()
-		if err != nil {
-			return w, fmt.Errorf("failed executing %s --version: %v", b, err)
-		}
-
-		matched, err := regexp.MatchString(kubeVersion, string(out))
-		if err != nil {
-			return w, fmt.Errorf("regexp match for version failed: %v", err)
-		}
-
-		if !matched {
-			return w, fmt.Errorf(
-				"%s unsupported version, expected %s, got %s",
-				b,
-				kubeVersion,
-				string(out),
-			)
-		}
-	}
-
-	// Check if the executables for this type of node are running.
-	for _, b := range binPath {
-		cmd := exec.Command("ps", "-ef")
-		out, err := cmd.Output()
-		if err != nil {
-			return w, fmt.Errorf("failed executing ps -ef: %v", err)
-		}
-
-		matched, err := regexp.MatchString(".*"+b, string(out))
-		if err != nil {
-			return w, fmt.Errorf("regexp match for ps output failed: %v", err)
-		}
-
-		if !matched {
-			return w, fmt.Errorf("%s is not running", b)
-		}
-	}
-
-	// Check whether the config files for this type of node are in the expected location
-	for _, c := range confPath {
-		if _, err := os.Stat(c); os.IsNotExist(err) {
-			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
-		}
-	}
-
-	return w, nil
+	return w
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -272,4 +213,79 @@ func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
 	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
 		summary.Pass, summary.Fail, summary.Warn,
 	)
+}
+
+func verifyConf(confPath []string) []string {
+	var w []string
+	for _, c := range confPath {
+		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
+			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
+		}
+	}
+
+	return w
+}
+
+func verifyBin(binPath []string) []string {
+	var w []string
+	var binList string
+
+	// Construct proc name for ps(1)
+	for _, b := range binPath {
+		binList += b + ","
+	}
+	binList = strings.Trim(binList, ",")
+
+	// Run ps command
+	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
+	}
+
+	// Actual verification
+	for _, b := range binPath {
+		matched := strings.Contains(string(out), b)
+
+		if !matched {
+			w = append(w, fmt.Sprintf("%s is not running\n", b))
+		}
+	}
+
+	return w
+}
+
+func verifyKubeVersion(binPath []string) []string {
+	// These executables might not be on the user's path.
+	// TODO! Check the version number using kubectl, which is more likely to be on the path.
+	var w []string
+
+	for _, b := range binPath {
+		_, err := exec.LookPath(b)
+		if err != nil {
+			w = append(w, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
+			continue
+		}
+
+		// Check version
+		cmd := exec.Command(b, "--version")
+		cmd.Stderr = os.Stderr
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
+		}
+
+		matched := strings.Contains(string(out), kubeVersion)
+		if !matched {
+			w = append(w, fmt.Sprintf(
+				"%s unsupported version, expected %s, got %s\n",
+				b,
+				kubeVersion,
+				string(out),
+			))
+		}
+	}
+
+	return w
 }

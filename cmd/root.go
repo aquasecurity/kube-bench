@@ -34,9 +34,9 @@ var (
 	nodeFile      string
 	federatedFile string
 
-	kubeConfDir    string
-	etcdConfDir    string
-	flannelConfDir string
+	kubeConfDir     string
+	etcdConfDir     string
+	flanneldConfDir string
 )
 
 // RootCmd represents the base command when called without any subcommands
