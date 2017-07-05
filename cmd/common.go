@@ -238,7 +238,11 @@ func verifyBin(binPath []string) []string {
 
 	// Run ps command
 	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	out, _ := cmd.Output()
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
+	}
 
 	// Actual verification
 	for _, b := range binPath {
@@ -266,7 +270,11 @@ func verifyKubeVersion(binPath []string) []string {
 
 		// Check version
 		cmd := exec.Command(b, "--version")
-		out, _ := cmd.Output()
+		cmd.Stderr = os.Stderr
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
+		}
 
 		matched := strings.Contains(string(out), kubeVersion)
 		if !matched {

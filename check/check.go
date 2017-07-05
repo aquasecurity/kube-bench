@@ -63,7 +63,7 @@ type Check struct {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) Run() {
-	var out, serr bytes.Buffer
+	var out bytes.Buffer
 
 	// Check if command exists or exit with WARN.
 	for _, cmd := range c.Commands {
@@ -88,7 +88,7 @@ func (c *Check) Run() {
 	cs := c.Commands
 
 	// Initialize command pipeline
-	cs[0].Stderr = &serr
+	cs[0].Stderr = os.Stderr
 	cs[n-1].Stdout = &out
 	i := 1
 
@@ -96,25 +96,30 @@ func (c *Check) Run() {
 	for i < n {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Path, err)
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
 		}
 
-		cs[i].Stderr = &serr
+		cs[i].Stderr = os.Stderr
 		i++
 	}
 
 	// Start command pipeline
 	i = 0
 	for i < n {
-		cs[i].Start()
+		err := cs[i].Start()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
+		}
 		i++
 	}
 
 	// Complete command pipeline
 	i = 0
 	for i < n {
-		cs[i].Wait()
+		err := cs[i].Wait()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
+		}
 
 		if i < n-1 {
 			cs[i].Stdout.(io.Closer).Close()
