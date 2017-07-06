@@ -145,18 +145,19 @@ func verifyNodeType(t check.NodeType) []string {
 	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/kubelet")
 	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/proxy")
 
-	w = append(w, verifyKubeVersion(kubeMasterBin)...)
-
 	switch t {
 	case check.MASTER:
 		w = append(w, verifyBin(kubeMasterBin)...)
 		w = append(w, verifyBin(xMasterBin)...)
 		w = append(w, verifyConf(kubeMasterConf)...)
+		w = append(w, verifyKubeVersion(kubeMasterBin[0])...)
 	case check.NODE:
 		w = append(w, verifyBin(kubeNodeBin)...)
 		w = append(w, verifyConf(kubeNodeConf)...)
+		w = append(w, verifyKubeVersion(kubeNodeBin[0])...)
 	case check.FEDERATED:
 		w = append(w, verifyBin(kubeFederatedBin)...)
+		w = append(w, verifyKubeVersion(kubeFederatedBin[0])...)
 	}
 
 	return w
@@ -256,35 +257,22 @@ func verifyBin(binPath []string) []string {
 	return w
 }
 
-func verifyKubeVersion(binPath []string) []string {
+func verifyKubeVersion(b string) []string {
 	// These executables might not be on the user's path.
 	// TODO! Check the version number using kubectl, which is more likely to be on the path.
 	var w []string
 
-	for _, b := range binPath {
-		_, err := exec.LookPath(b)
-		if err != nil {
-			w = append(w, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
-			continue
-		}
+	// Check version
+	cmd := exec.Command(b, "--version")
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
+	}
 
-		// Check version
-		cmd := exec.Command(b, "--version")
-		cmd.Stderr = os.Stderr
-		out, err := cmd.Output()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
-		}
-
-		matched := strings.Contains(string(out), kubeVersion)
-		if !matched {
-			w = append(w, fmt.Sprintf(
-				"%s unsupported version, expected %s, got %s\n",
-				b,
-				kubeVersion,
-				string(out),
-			))
-		}
+	matched := strings.Contains(string(out), kubeVersion)
+	if !matched {
+		w = append(w, fmt.Sprintf("%s unsupported version.", b))
 	}
 
 	return w
