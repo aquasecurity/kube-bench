@@ -37,6 +37,8 @@ var (
 	kubeConfDir     string
 	etcdConfDir     string
 	flanneldConfDir string
+
+	verbose bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -72,6 +74,7 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output (default false)")
 }
 
 // initConfig reads in config file and ENV variables if set.

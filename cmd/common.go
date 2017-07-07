@@ -27,6 +27,8 @@ import (
 )
 
 var (
+	errmsgs string
+
 	kubeMasterBin  = []string{"kube-apiserver", "kube-scheduler", "kube-controller-manager"}
 	xMasterBin     = []string{"etcd", "flanneld"}
 	kubeMasterConf = []string{}
@@ -50,6 +52,13 @@ var (
 		check.INFO: color.New(color.FgBlue),
 	}
 )
+
+func handleError(err error, context string) (errmsg string) {
+	if err != nil {
+		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
+	}
+	return
+}
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
@@ -85,18 +94,18 @@ func runChecks(t check.NodeType) {
 
 	if groupList != "" && checkList == "" {
 		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(ids...)
+		summary = controls.RunGroup(verbose, ids...)
 
 	} else if checkList != "" && groupList == "" {
 		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(ids...)
+		summary = controls.RunChecks(verbose, ids...)
 
 	} else if checkList != "" && groupList != "" {
 		fmt.Fprintf(os.Stderr, "group option and check option can't be used together\n")
 		os.Exit(1)
 
 	} else {
-		summary = controls.RunGroup()
+		summary = controls.RunGroup(verbose)
 	}
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
@@ -129,6 +138,8 @@ func cleanIDs(list string) []string {
 // Any check failing here is a show stopper.
 func verifyNodeType(t check.NodeType) []string {
 	var w []string
+	// Always clear out error messages.
+	errmsgs = ""
 
 	// Set up and check for config files.
 	kubeConfDir = viper.Get("kubeConfDir").(string)
@@ -158,6 +169,10 @@ func verifyNodeType(t check.NodeType) []string {
 	case check.FEDERATED:
 		w = append(w, verifyBin(kubeFederatedBin)...)
 		w = append(w, verifyKubeVersion(kubeFederatedBin[0])...)
+	}
+
+	if verbose {
+		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
 	}
 
 	return w
@@ -239,11 +254,11 @@ func verifyBin(binPath []string) []string {
 
 	// Run ps command
 	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	cmd.Stderr = os.Stderr
 	out, err := cmd.Output()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
-	}
+	errmsgs += handleError(
+		err,
+		fmt.Sprintf("verifyBin: %s failed", binList),
+	)
 
 	// Actual verification
 	for _, b := range binPath {
@@ -264,15 +279,15 @@ func verifyKubeVersion(b string) []string {
 
 	// Check version
 	cmd := exec.Command(b, "--version")
-	cmd.Stderr = os.Stderr
 	out, err := cmd.Output()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
-	}
+	errmsgs += handleError(
+		err,
+		fmt.Sprintf("verifyKubeVersion: failed"),
+	)
 
 	matched := strings.Contains(string(out), kubeVersion)
 	if !matched {
-		w = append(w, fmt.Sprintf("%s unsupported version.", b))
+		w = append(w, fmt.Sprintf("%s unsupported version\n", b))
 	}
 
 	return w

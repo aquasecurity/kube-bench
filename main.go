@@ -14,7 +14,9 @@
 
 package main
 
-import "github.com/aquasecurity/kube-bench/cmd"
+import (
+	"github.com/aquasecurity/kube-bench/cmd"
+)
 
 func main() {
 	cmd.Execute()
