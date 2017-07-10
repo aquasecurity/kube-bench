@@ -96,7 +96,6 @@ func (c *Check) Run(verbose bool) {
 	cs := c.Commands
 
 	// Initialize command pipeline
-	// cs[0].Stderr = os.Stderr
 	cs[n-1].Stdout = &out
 	i := 1
 
@@ -113,7 +112,6 @@ func (c *Check) Run(verbose bool) {
 			),
 		)
 
-		// 	cs[i].Stderr = os.Stderr
 		i++
 	}
 
@@ -150,7 +148,7 @@ func (c *Check) Run(verbose bool) {
 		i++
 	}
 
-	if verbose {
+	if verbose && errmsgs != "" {
 		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
 	}
 

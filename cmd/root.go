@@ -38,7 +38,8 @@ var (
 	etcdConfDir     string
 	flanneldConfDir string
 
-	verbose bool
+	verbose      bool
+	installation string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -61,13 +62,21 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
-	RootCmd.PersistentFlags().StringVarP(&checkList,
+	RootCmd.PersistentFlags().StringVar(
+		&installation,
+		"installation",
+		"default",
+		"Specify how kubernetes cluster was installed. Possible values are default,hyperkube,kops,kubeadm",
+	)
+	RootCmd.PersistentFlags().StringVarP(
+		&checkList,
 		"check",
 		"c",
 		"",
 		`A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"`,
 	)
-	RootCmd.PersistentFlags().StringVarP(&groupList,
+	RootCmd.PersistentFlags().StringVarP(
+		&groupList,
 		"group",
 		"g",
 		"",

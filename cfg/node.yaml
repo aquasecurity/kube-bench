@@ -9,7 +9,7 @@ groups:
   checks:
     - id: 2.1.1
       text: "Ensure that the --allow-privileged argument is set to false (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--allow-privileged"
@@ -17,13 +17,13 @@ groups:
               op: eq
               value: false
             set: true
-      remediation: "Edit the $kubeConfDir/config file on each node and set the KUBE_ALLOW_PRIV 
+      remediation: "Edit the $kubeConfig file on each node and set the KUBE_ALLOW_PRIV 
               parameter to \"--allow-privileged=false\""
       scored: true
 
     - id: 2.1.2
       text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--anonymous-auth"
@@ -31,13 +31,13 @@ groups:
               op: eq
               value: false
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on the master node and set the 
+      remediation: "Edit the $kubeletConf file on the master node and set the 
               KUBELET_ARGS parameter to \"--anonymous-auth=false\""
       scored: true
  
     - id: 2.1.3
       text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--authorization-mode"
@@ -45,25 +45,25 @@ groups:
               op: nothave
               value: "AlwaysAllow"
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the 
+      remediation: "Edit the $kubeletConf file on each node and set the 
               KUBELET_ARGS parameter to \"--authorization-mode=Webhook\""
       scored: true
    
     - id: 2.1.4
       text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--client-ca-file"
             set: true 
       remediation: "Follow the Kubernetes documentation and setup the TLS connection between 
-              the apiserver and kubelets. Then, edit the $kubeConfDir/kubelet file on each node 
+              the apiserver and kubelets. Then, edit the $kubeletConf file on each node 
               and set the KUBELET_ARGS parameter to \"--client-ca-file=<path/to/client-ca-file>\""
       scored: true
 
     - id: 2.1.5
       text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--read-only-port"
@@ -71,13 +71,13 @@ groups:
               op: eq
               value: 0
             set: true 
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS 
               parameter to \"--read-only-port=0\""
       scored: true
  
     - id: 2.1.6
       text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--streaming-connection-idle-timeout"
@@ -85,13 +85,13 @@ groups:
               op: gt
               value: 0
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS 
               parameter to \"--streaming-connection-idle-timeout=<appropriate-timeout-value>\""
       scored: true
 
     - id: 2.1.7
       text: "Ensure that the --protect-kernel-defaults argument is set to true (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--protect-kernel-defaults"
@@ -99,13 +99,13 @@ groups:
               op: eq
               value: true
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS 
               parameter to \"--protect-kernel-defaults=true\""
       scored: true
 
     - id: 2.1.8
       text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         bin_op: or
         test_items:
@@ -116,13 +116,13 @@ groups:
             set: true
           - flag: "--make-iptables-util-chains"
             set: false
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and remove the 
+      remediation: "Edit the $kubeletConf file on each node and remove the 
               --make-iptables-util-chains argument from the KUBELET_ARGS parameter."
       scored: true
 
     - id: 2.1.9
       text: "Ensure that the --keep-terminated-pod-volumes argument is set to false (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--keep-terminated-pod-volumes"
@@ -130,24 +130,24 @@ groups:
               op: eq
               value: false
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS 
               parameter to \"--keep-terminated-pod-volumes=false\""
       scored: true
 
     - id: 2.1.10
       text: "Ensure that the --hostname-override argument is not set (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--hostname-override"
             set: false
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_HOSTNAME 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_HOSTNAME 
               parameter to \"\""
       scored: true
 
     - id: 2.1.11
       text: "Ensure that the --event-qps argument is set to 0 (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--event-qps"
@@ -155,13 +155,13 @@ groups:
               op: eq
               value: 0
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS 
               parameter to \"--event-qps=0\""
       scored: true
 
     - id: 2.1.12
       text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--tls-cert-file"
@@ -169,14 +169,14 @@ groups:
           - flag: "--tls-private-key-file"
             set: true
       remediation: "Follow the Kubernetes documentation and set up the TLS connection on the Kubelet. 
-              Then, edit the $kubeConfDir/kubelet file on the master node and set the KUBELET_ARGS 
+              Then, edit the $kubeletConf file on the master node and set the KUBELET_ARGS 
               parameter to include \"--tls-cert-file=<path/to/tls-certificate-file>\" and 
               \"--tls-private-key-file=<path/to/tls-key-file>\""
       scored: true
 
     - id: 2.1.13
       text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
-      audit: "ps -ef | grep kubelet | grep -v grep"
+      audit: "ps -ef | grep $kubeletBin | grep -v grep"
       tests:
         test_items:
           - flag: "--cadvisor-port"
@@ -184,7 +184,7 @@ groups:
               op: eq
               value: 0
             set: true
-      remediation: "Edit the $kubeConfDir/kubelet file on each node and set the KUBELET_ARGS parameter 
+      remediation: "Edit the $kubeletConf file on each node and set the KUBELET_ARGS parameter 
               to \"--cadvisor-port=0\""
       scored: true
 
@@ -193,66 +193,66 @@ groups:
   checks:
     - id: 2.2.1
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $kubeConfDir/config; then stat -c %a $kubeConfDir/config; fi"
+      audit: "if test -e $kubeConfig; then stat -c %a $kubeConfig; fi"
       tests:
         test_items:
           - flag: "644"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chmod 644 $kubeConfDir/config"
+              \nFor example, chmod 644 $kubeConfig"
       scored: true
 
     - id: 2.2.2
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "if test -e $kubeConfDir/config; then stat -c %U:%G $kubeConfDir/config; fi"
+      audit: "if test -e $kubeConfig; then stat -c %U:%G $kubeConfig; fi"
       tests:
         test_items:
           - flag: "root:root"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chown root:root $kubeConfDir/config"
+              \nFor example, chown root:root $kubeConfig"
       scored: true
 
     - id: 2.2.3
       text: "Ensure that the kubelet file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $kubeConfDir/kubelet; then stat -c %a $kubeConfDir/kubelet; fi"
+      audit: "if test -e $kubeletConf; then stat -c %a $kubeletConf; fi"
       tests:
         test_items:
           - flag: "644"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chmod 644 $kubeConfDir/kubelet"
+              \nFor example, chmod 644 $kubeletConf"
       scored: true
 
     - id: 2.2.4
       text: "Ensure that the kubelet file ownership is set to root:root (Scored)"
-      audit: "if test -e $kubeConfDir/kubelet; then stat -c %U:%G $kubeConfDir/kubelet; fi"
+      audit: "if test -e $kubeletConf; then stat -c %U:%G $kubeletConf; fi"
       tests:
         test_items:
           - flag: "root:root"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chown root:root $kubeConfDir/kubelet"
+              \nFor example, chown root:root $kubeletConf"
       scored: true
 
     - id: 2.2.5
       text: "Ensure that the proxy file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $kubeConfDir/proxy; then stat -c %a $kubeConfDir/proxy; fi"
+      audit: "if test -e $kubeProxyConf; then stat -c %a $kubeProxyConf; fi"
       tests:
         test_items:
           - flag: "644"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chmod 644 $kubeConfDir/proxy"
+              \nFor example, chmod 644 $kubeProxyConf"
       scored: true
 
     - id: 2.2.6
       text: "Ensure that the proxy file ownership is set to root:root (Scored)"
-      audit: "if test -e $kubeConfDir/proxy; then stat -c %U:%G $kubeConfDir/proxy; fi"
+      audit: "if test -e $kubeProxyConf; then stat -c %U:%G $kubeProxyConf; fi"
       tests:
         test_items:
           - flag: "root:root"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chown root:root $kubeConfDir/proxy"
+              \nFor example, chown root:root $kubeProxyConf"
       scored: true
