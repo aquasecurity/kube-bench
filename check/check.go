@@ -106,7 +106,7 @@ func (c *Check) Run(verbose bool) {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
 		errmsgs += handleError(
 			err,
-			fmt.Sprintf("check.Run: Audit %s failed\nfailing command: %s",
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
 				c.Audit,
 				cs[i].Args,
 			),
@@ -121,7 +121,7 @@ func (c *Check) Run(verbose bool) {
 		err := cs[i].Start()
 		errmsgs += handleError(
 			err,
-			fmt.Sprintf("check.Run: Audit %s failed\nfailing command: %s",
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
 				c.Audit,
 				cs[i].Args,
 			),
@@ -135,7 +135,7 @@ func (c *Check) Run(verbose bool) {
 		err := cs[i].Wait()
 		errmsgs += handleError(
 			err,
-			fmt.Sprintf("check.Run: Audit %s failed\nfailing command: %s",
+			fmt.Sprintf("failed to run: %s\nfailed command:%s",
 				c.Audit,
 				cs[i].Args,
 			),

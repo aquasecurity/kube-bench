@@ -56,7 +56,13 @@ func verifyBin(binPath ...string) []string {
 	// Construct proc name for ps(1)
 	for _, b := range binPath {
 		binList += b + ","
+		_, err := exec.LookPath(b)
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("%s: command not found in path", b),
+		)
 	}
+
 	binList = strings.Trim(binList, ",")
 
 	// Run ps command
@@ -64,7 +70,7 @@ func verifyBin(binPath ...string) []string {
 	out, err := cmd.Output()
 	errmsgs += handleError(
 		err,
-		fmt.Sprintf("verifyBin: %s failed", binList),
+		fmt.Sprintf("failed to run: %s", cmd.Args),
 	)
 
 	// Actual verification
@@ -84,12 +90,18 @@ func verifyKubeVersion(b string) []string {
 	// TODO! Check the version number using kubectl, which is more likely to be on the path.
 	var w []string
 
+	_, err := exec.LookPath(b)
+	errmsgs += handleError(
+		err,
+		fmt.Sprintf("%s: command not found on path - version check skipped", b),
+	)
+
 	// Check version
 	cmd := exec.Command(b, "--version")
 	out, err := cmd.Output()
 	errmsgs += handleError(
 		err,
-		fmt.Sprintf("verifyKubeVersion: failed\nCommand:%s", cmd.Args),
+		fmt.Sprintf("failed to run:%s", cmd.Args),
 	)
 
 	matched := strings.Contains(string(out), kubeVersion)
