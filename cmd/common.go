@@ -18,162 +18,64 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
-	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )
 
 var (
-	errmsgs        string
-	kubeMasterBin  map[string]string
-	kubeMasterConf map[string]string
+	apiserverBin            string
+	apiserverConf           string
+	schedulerBin            string
+	schedulerConf           string
+	controllerManagerBin    string
+	controllerManagerConf   string
+	config                  string
+	etcdBin                 string
+	etcdConf                string
+	flanneldBin             string
+	flanneldConf            string
+	kubeletBin              string
+	kubeletConf             string
+	proxyBin                string
+	proxyConf               string
+	fedApiserverBin         string
+	fedControllerManagerBin string
 
-	kubeNodeBin      map[string]string
-	kubeNodeConf     map[string]string
-	kubeFederatedBin map[string]string
+	errmsgs string
 
 	// TODO: Consider specifying this in config file.
 	kubeVersion = "1.6"
-
-	// Used for variable substitution
-	symbols = map[string]string{}
-
-	// Print colors
-	colors = map[check.State]*color.Color{
-		check.PASS: color.New(color.FgGreen),
-		check.FAIL: color.New(color.FgRed),
-		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgBlue),
-	}
 )
-
-func handleError(err error, context string) (errmsg string) {
-	if err != nil {
-		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
-	}
-	return
-}
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
 	var file string
 
-	// Set up binary and configuration.
-	switch installation {
-	default:
-		fallthrough
-	case "kops":
-		// Master
-		kubeMasterBin = map[string]string{
-			"apiserver":          "apiserver",
-			"scheduler":          "scheduler",
-			"controller-manager": "controller-manager",
-			"etcd":               "etcd",
-			"flanneld":           "flanneld",
-		}
+	// Master variables
+	apiserverBin = viper.GetString("installation." + installation + ".master.bin.apiserver")
+	apiserverConf = viper.GetString("installation." + installation + ".master.conf.apiserver")
+	schedulerBin = viper.GetString("installation." + installation + ".master.bin.scheduler")
+	schedulerConf = viper.GetString("installation." + installation + ".master.conf.scheduler")
+	controllerManagerBin = viper.GetString("installation." + installation + ".master.bin.controller-manager")
+	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controler-manager")
+	config = viper.GetString("installation." + installation + ".config")
 
-		kubeMasterConf = map[string]string{
-			"apiserver":          "/etc/kubernetes/apiserver",
-			"scheduler":          "/etc/kubernetes/scheduler",
-			"controller-manager": "/etc/kubernetes/controller-manager",
-			"config":             "/etc/kubernetes/config",
-			"etcd":               "/etc/etcd/etcd.conf",
-			"flanneld":           "/etc/sysconfig/flanneld",
-		}
+	etcdBin = viper.GetString("etcd.bin")
+	etcdConf = viper.GetString("etcd.conf")
+	flanneldBin = viper.GetString("flanneld.bin")
+	flanneldConf = viper.GetString("flanneld.conf")
 
-		// Node
-		kubeNodeBin = map[string]string{
-			"kubelet": "kubelet",
-			"proxy":   "proxy",
-		}
+	// Node variables
+	kubeletBin = viper.GetString("installation." + installation + ".node.bin.kubelet")
+	kubeletConf = viper.GetString("installation." + installation + ".node.conf.kubelet")
+	proxyBin = viper.GetString("installation." + installation + ".node.bin.proxy")
+	proxyConf = viper.GetString("installation." + installation + ".node.conf.proxy")
 
-		kubeNodeConf = map[string]string{
-			"kubelet": "/etc/kubernetes/kubelet",
-			"proxy":   "/etc/kubernetes/proxy",
-		}
-
-		// Federated
-		kubeFederatedBin = map[string]string{
-			"apiserver":          "federation-apiserver",
-			"controller-manager": "federation-controller-manager",
-		}
-
-	case "hyperkube":
-		// Master
-		kubeMasterBin = map[string]string{
-			"apiserver":          "hyperkube apiserver",
-			"scheduler":          "hyperkube scheduler",
-			"controller-manager": "hyperkube controller-manager",
-			"etcd":               "etcd",
-			"flanneld":           "flanneld",
-		}
-
-		kubeMasterConf = map[string]string{
-			"apiserver":          "/etc/kubernetes/apiserver",
-			"scheduler":          "/etc/kubernetes/scheduler",
-			"controller-manager": "/etc/kubernetes/controller-manager",
-			"config":             "/etc/kubernetes/config",
-			"etcd":               "/etc/etcd/etcd.conf",
-			"flanneld":           "/etc/sysconfig/flanneld",
-		}
-
-		// Node
-		kubeNodeBin = map[string]string{
-			"kubelet": "hyperkube kubelet",
-			"proxy":   "hyperkube kube-proxy",
-		}
-
-		kubeNodeConf = map[string]string{
-			"kubelet": "/etc/kubernetes/kubelet",
-			"proxy":   "/etc/kubernetes/proxy",
-		}
-
-		// Federated
-		kubeFederatedBin = map[string]string{
-			"apiserver":          "federation-apiserver",
-			"controller-manager": "federation-controller-manager",
-		}
-	case "kubeadm":
-		// TODO: Complete config and binary file list for kubeadm.
-
-		// Master
-		kubeMasterBin = map[string]string{
-			"apiserver":          "hyperkube",
-			"scheduler":          "hyperkube",
-			"controller-manager": "hyperkube",
-			"etcd":               "etcd",
-			"flanneld":           "flanneld",
-		}
-
-		kubeMasterConf = map[string]string{
-			"apiserver":          "/etc/kubernetes/admin.conf",
-			"scheduler":          "/etc/kubernetes/scheduler.conf",
-			"controller-manager": "/etc/kubernetes/controller-manager.conf",
-			"config":             "/etc/kubernetes/config",
-			"etcd":               "/etc/etcd/etcd.conf",
-			"flanneld":           "/etc/sysconfig/flanneld",
-		}
-
-		// Node
-		kubeNodeBin = map[string]string{
-			"kubelet": "hyperkube",
-			"proxy":   "hyperkube",
-		}
-
-		kubeNodeConf = map[string]string{
-			"kubelet": "/etc/kubernetes/kubelet.conf",
-			"proxy":   "/etc/kubernetes/proxy.conf",
-		}
-
-		// Federated
-		kubeFederatedBin = map[string]string{
-			"apiserver":          "federation-apiserver",
-			"controller-manager": "federation-controller-manager",
-		}
-	}
+	// Federated
+	fedApiserverBin = viper.GetString("installation." + installation + ".federated.bin.apiserver")
+	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
 
 	// Run kubernetes installation validation checks.
 	warns := verifyNodeType(t)
@@ -193,32 +95,28 @@ func runChecks(t check.NodeType) {
 		os.Exit(1)
 	}
 
-	// Variable substitutions. Replace all occurrences of variables in controls file.
-	// Master
-	s := strings.Replace(string(in), "$kubeApiserver", kubeMasterBin["apiserver"], -1)
-	s = strings.Replace(s, "$apiserverConf", kubeMasterConf["apiserver"], -1)
+	// Variable substitutions. Replace all occurrences of variables in controls files.
+	s := strings.Replace(string(in), "$apiserverbin", apiserverBin, -1)
+	s = strings.Replace(s, "$apiserverconf", apiserverConf, -1)
+	s = strings.Replace(s, "$schedulerbin", schedulerBin, -1)
+	s = strings.Replace(s, "$schedulerconf", schedulerConf, -1)
+	s = strings.Replace(s, "$controllermanagerbin", controllerManagerBin, -1)
+	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
+	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
+	s = strings.Replace(s, "$config", config, -1)
 
-	s = strings.Replace(s, "$kubeScheduler", kubeMasterBin["scheduler"], -1)
-	s = strings.Replace(s, "$schedulerConf", kubeMasterConf["scheduler"], -1)
+	s = strings.Replace(s, "$etcdbin", etcdBin, -1)
+	s = strings.Replace(s, "$etcdconf", etcdConf, -1)
+	s = strings.Replace(s, "$flanneldbin", flanneldBin, -1)
+	s = strings.Replace(s, "$flanneldconf", flanneldConf, -1)
 
-	s = strings.Replace(s, "$kubeControllerManager", kubeMasterBin["controller-manager"], -1)
-	s = strings.Replace(s, "$controllerManagerConf", kubeMasterConf["controller-manager"], -1)
+	s = strings.Replace(s, "$kubeletbin", kubeletBin, -1)
+	s = strings.Replace(s, "$kubeletconf", kubeletConf, -1)
+	s = strings.Replace(s, "$proxybin", proxyBin, -1)
+	s = strings.Replace(s, "$proxyconf", proxyConf, -1)
 
-	s = strings.Replace(s, "$etcd", kubeMasterBin["etcd"], -1)
-	s = strings.Replace(s, "$flanneld", kubeMasterBin["flanneld"], -1)
-
-	s = strings.Replace(s, "$kubeConfig", kubeMasterConf["config"], -1)
-	s = strings.Replace(s, "$etcdConf", kubeMasterConf["etcd"], -1)
-	s = strings.Replace(s, "$flanneldConf", kubeMasterConf["flanneld"], -1)
-
-	// Node
-	s = strings.Replace(s, "$kubeletBin", kubeNodeBin["kubelet"], -1)
-	s = strings.Replace(s, "$kubeletConf", kubeNodeConf["kubelet"], -1)
-	s = strings.Replace(s, "$kubeProxyConf", kubeNodeConf["proxy"], -1)
-
-	// Federated
-	s = strings.Replace(s, "$federationApiserver", kubeFederatedBin["apiserver"], -1)
-	s = strings.Replace(s, "$federationControllerManager", kubeFederatedBin["controller-manager"], -1)
+	s = strings.Replace(s, "$fedapiserverbin", fedApiserverBin, -1)
+	s = strings.Replace(s, "$fedcontrollermanagerbin", fedControllerManagerBin, -1)
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
@@ -253,20 +151,8 @@ func runChecks(t check.NodeType) {
 	}
 }
 
-func cleanIDs(list string) []string {
-	list = strings.Trim(list, ",")
-	ids := strings.Split(list, ",")
-
-	for _, id := range ids {
-		id = strings.Trim(id, " ")
-	}
-
-	return ids
-}
-
 // verifyNodeType checks the executables and config files are as expected
 // for the specified tests (master, node or federated).
-// Any check failing here is a show stopper.
 func verifyNodeType(t check.NodeType) []string {
 	var w []string
 	// Always clear out error messages.
@@ -274,18 +160,16 @@ func verifyNodeType(t check.NodeType) []string {
 
 	switch t {
 	case check.MASTER:
-		w = append(w, verifyBin(values(kubeMasterBin))...)
-		w = append(w, verifyConf(values(kubeMasterConf))...)
-		w = append(w, verifyKubeVersion(kubeMasterBin["apiserver"])...)
+		w = append(w, verifyBin(apiserverBin, schedulerBin, controllerManagerBin)...)
+		w = append(w, verifyConf(apiserverConf, schedulerConf, controllerManagerConf)...)
+		w = append(w, verifyKubeVersion(apiserverBin)...)
 	case check.NODE:
-		w = append(w, verifyBin(values(kubeNodeBin))...)
-		w = append(w, verifyConf(values(kubeNodeConf))...)
-		w = append(w, verifyKubeVersion(kubeNodeBin["kubelet"])...)
-		/*
-			case check.FEDERATED:
-				w = append(w, verifyBin(kubeFederatedBin)...)
-				w = append(w, verifyKubeVersion(kubeFederatedBin[0])...)
-		*/
+		w = append(w, verifyBin(kubeletBin, proxyBin)...)
+		w = append(w, verifyConf(kubeletConf, proxyConf)...)
+		w = append(w, verifyKubeVersion(kubeletBin)...)
+	case check.FEDERATED:
+		w = append(w, verifyBin(fedApiserverBin, fedControllerManagerBin)...)
+		w = append(w, verifyKubeVersion(fedApiserverBin)...)
 	}
 
 	if verbose {
@@ -346,74 +230,4 @@ func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
 	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
 		summary.Pass, summary.Fail, summary.Warn,
 	)
-}
-
-func verifyConf(confPath []string) []string {
-	var w []string
-	for _, c := range confPath {
-		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
-			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
-		}
-	}
-
-	return w
-}
-
-func verifyBin(binPath []string) []string {
-	var w []string
-	var binList string
-
-	// Construct proc name for ps(1)
-	for _, b := range binPath {
-		binList += b + ","
-	}
-	binList = strings.Trim(binList, ",")
-
-	// Run ps command
-	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	out, err := cmd.Output()
-	errmsgs += handleError(
-		err,
-		fmt.Sprintf("verifyBin: %s failed", binList),
-	)
-
-	// Actual verification
-	for _, b := range binPath {
-		matched := strings.Contains(string(out), b)
-
-		if !matched {
-			w = append(w, fmt.Sprintf("%s is not running\n", b))
-		}
-	}
-
-	return w
-}
-
-func verifyKubeVersion(b string) []string {
-	// These executables might not be on the user's path.
-	// TODO! Check the version number using kubectl, which is more likely to be on the path.
-	var w []string
-
-	// Check version
-	cmd := exec.Command(b, "--version")
-	out, err := cmd.Output()
-	errmsgs += handleError(
-		err,
-		fmt.Sprintf("verifyKubeVersion: failed\nCommand:%s", cmd.Args),
-	)
-
-	matched := strings.Contains(string(out), kubeVersion)
-	if !matched {
-		w = append(w, fmt.Sprintf("%s unsupported version\n", b))
-	}
-
-	return w
-}
-
-// values returns the values in a string map.
-func values(m map[string]string) (vals []string) {
-	for _, v := range m {
-		vals = append(vals, v)
-	}
-	return
 }

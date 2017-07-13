@@ -99,17 +99,11 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// Set defaults
-	viper.SetDefault("kubeConfDir", "/etc/kubernetes")
-	viper.SetDefault("etcdConfDir", "/etc/etcd")
-	viper.SetDefault("flanneldConfDir", "/etc/sysconfig")
-
-	viper.SetDefault("masterFile", cfgDir+"/master.yaml")
-	viper.SetDefault("nodeFile", cfgDir+"/node.yaml")
-	viper.SetDefault("federatedFile", cfgDir+"/federated.yaml")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
 		os.Exit(1)
 	}
+
 }
