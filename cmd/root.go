@@ -95,10 +95,8 @@ func initConfig() {
 		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
 
-	viper.SetEnvPrefix("CISK8S")
+	viper.SetEnvPrefix("KUBE_BENCH")
 	viper.AutomaticEnv() // read in environment variables that match
-
-	// Set defaults
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
