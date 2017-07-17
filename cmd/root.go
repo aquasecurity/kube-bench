@@ -37,6 +37,9 @@ var (
 	kubeConfDir     string
 	etcdConfDir     string
 	flanneldConfDir string
+
+	verbose      bool
+	installation string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -59,19 +62,28 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
-	RootCmd.PersistentFlags().StringVarP(&checkList,
+	RootCmd.PersistentFlags().StringVar(
+		&installation,
+		"installation",
+		"default",
+		"Specify how kubernetes cluster was installed. Possible values are default,hyperkube,kops,kubeadm",
+	)
+	RootCmd.PersistentFlags().StringVarP(
+		&checkList,
 		"check",
 		"c",
 		"",
 		`A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"`,
 	)
-	RootCmd.PersistentFlags().StringVarP(&groupList,
+	RootCmd.PersistentFlags().StringVarP(
+		&groupList,
 		"group",
 		"g",
 		"",
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output (default false)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -83,21 +95,13 @@ func initConfig() {
 		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
 
-	viper.SetEnvPrefix("CISK8S")
+	viper.SetEnvPrefix("KUBE_BENCH")
 	viper.AutomaticEnv() // read in environment variables that match
-
-	// Set defaults
-	viper.SetDefault("kubeConfDir", "/etc/kubernetes")
-	viper.SetDefault("etcdConfDir", "/etc/etcd")
-	viper.SetDefault("flanneldConfDir", "/etc/sysconfig")
-
-	viper.SetDefault("masterFile", cfgDir+"/master.yaml")
-	viper.SetDefault("nodeFile", cfgDir+"/node.yaml")
-	viper.SetDefault("federatedFile", cfgDir+"/federated.yaml")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
 		os.Exit(1)
 	}
+
 }

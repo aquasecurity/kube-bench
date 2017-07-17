@@ -18,43 +18,66 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
-	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )
 
 var (
-	kubeMasterBin  = []string{"kube-apiserver", "kube-scheduler", "kube-controller-manager"}
-	xMasterBin     = []string{"etcd", "flanneld"}
-	kubeMasterConf = []string{}
+	apiserverBin            string
+	apiserverConf           string
+	schedulerBin            string
+	schedulerConf           string
+	controllerManagerBin    string
+	controllerManagerConf   string
+	config                  string
+	etcdBin                 string
+	etcdConf                string
+	flanneldBin             string
+	flanneldConf            string
+	kubeletBin              string
+	kubeletConf             string
+	proxyBin                string
+	proxyConf               string
+	fedApiserverBin         string
+	fedControllerManagerBin string
 
-	kubeNodeBin  = []string{"kubelet"}
-	kubeNodeConf = []string{}
-
-	kubeFederatedBin = []string{"federation-apiserver", "federation-controller-manager"}
+	errmsgs string
 
 	// TODO: Consider specifying this in config file.
 	kubeVersion = "1.6"
-
-	// Used for variable substitution
-	symbols = map[string]string{}
-
-	// Print colors
-	colors = map[check.State]*color.Color{
-		check.PASS: color.New(color.FgGreen),
-		check.FAIL: color.New(color.FgRed),
-		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgBlue),
-	}
 )
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
 	var file string
 
+	// Master variables
+	apiserverBin = viper.GetString("installation." + installation + ".master.bin.apiserver")
+	apiserverConf = viper.GetString("installation." + installation + ".master.conf.apiserver")
+	schedulerBin = viper.GetString("installation." + installation + ".master.bin.scheduler")
+	schedulerConf = viper.GetString("installation." + installation + ".master.conf.scheduler")
+	controllerManagerBin = viper.GetString("installation." + installation + ".master.bin.controller-manager")
+	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controler-manager")
+	config = viper.GetString("installation." + installation + ".config")
+
+	etcdBin = viper.GetString("etcd.bin")
+	etcdConf = viper.GetString("etcd.conf")
+	flanneldBin = viper.GetString("flanneld.bin")
+	flanneldConf = viper.GetString("flanneld.conf")
+
+	// Node variables
+	kubeletBin = viper.GetString("installation." + installation + ".node.bin.kubelet")
+	kubeletConf = viper.GetString("installation." + installation + ".node.conf.kubelet")
+	proxyBin = viper.GetString("installation." + installation + ".node.bin.proxy")
+	proxyConf = viper.GetString("installation." + installation + ".node.conf.proxy")
+
+	// Federated
+	fedApiserverBin = viper.GetString("installation." + installation + ".federated.bin.apiserver")
+	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
+
+	// Run kubernetes installation validation checks.
 	warns := verifyNodeType(t)
 
 	switch t {
@@ -72,10 +95,28 @@ func runChecks(t check.NodeType) {
 		os.Exit(1)
 	}
 
-	// Variable substitutions. Replace all occurrences of variables in controls file.
-	s := strings.Replace(string(in), "$kubeConfDir", viper.Get("kubeConfDir").(string), -1)
-	s = strings.Replace(s, "$etcdConfDir", viper.Get("etcdConfDir").(string), -1)
-	s = strings.Replace(s, "$flanneldConfDir", viper.Get("flanneldConfDir").(string), -1)
+	// Variable substitutions. Replace all occurrences of variables in controls files.
+	s := strings.Replace(string(in), "$apiserverbin", apiserverBin, -1)
+	s = strings.Replace(s, "$apiserverconf", apiserverConf, -1)
+	s = strings.Replace(s, "$schedulerbin", schedulerBin, -1)
+	s = strings.Replace(s, "$schedulerconf", schedulerConf, -1)
+	s = strings.Replace(s, "$controllermanagerbin", controllerManagerBin, -1)
+	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
+	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
+	s = strings.Replace(s, "$config", config, -1)
+
+	s = strings.Replace(s, "$etcdbin", etcdBin, -1)
+	s = strings.Replace(s, "$etcdconf", etcdConf, -1)
+	s = strings.Replace(s, "$flanneldbin", flanneldBin, -1)
+	s = strings.Replace(s, "$flanneldconf", flanneldConf, -1)
+
+	s = strings.Replace(s, "$kubeletbin", kubeletBin, -1)
+	s = strings.Replace(s, "$kubeletconf", kubeletConf, -1)
+	s = strings.Replace(s, "$proxybin", proxyBin, -1)
+	s = strings.Replace(s, "$proxyconf", proxyConf, -1)
+
+	s = strings.Replace(s, "$fedapiserverbin", fedApiserverBin, -1)
+	s = strings.Replace(s, "$fedcontrollermanagerbin", fedControllerManagerBin, -1)
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
@@ -85,18 +126,15 @@ func runChecks(t check.NodeType) {
 
 	if groupList != "" && checkList == "" {
 		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(ids...)
-
+		summary = controls.RunGroup(verbose, ids...)
 	} else if checkList != "" && groupList == "" {
 		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(ids...)
-
+		summary = controls.RunChecks(verbose, ids...)
 	} else if checkList != "" && groupList != "" {
 		fmt.Fprintf(os.Stderr, "group option and check option can't be used together\n")
 		os.Exit(1)
-
 	} else {
-		summary = controls.RunGroup()
+		summary = controls.RunGroup(verbose)
 	}
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
@@ -113,50 +151,29 @@ func runChecks(t check.NodeType) {
 	}
 }
 
-func cleanIDs(list string) []string {
-	list = strings.Trim(list, ",")
-	ids := strings.Split(list, ",")
-
-	for _, id := range ids {
-		id = strings.Trim(id, " ")
-	}
-
-	return ids
-}
-
 // verifyNodeType checks the executables and config files are as expected
 // for the specified tests (master, node or federated).
-// Any check failing here is a show stopper.
 func verifyNodeType(t check.NodeType) []string {
 	var w []string
-
-	// Set up and check for config files.
-	kubeConfDir = viper.Get("kubeConfDir").(string)
-	etcdConfDir = viper.Get("etcdConfDir").(string)
-	flanneldConfDir = viper.Get("flanneldConfDir").(string)
-
-	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/apiserver")
-	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/scheduler")
-	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/controller-manager")
-	kubeMasterConf = append(kubeMasterConf, kubeConfDir+"/config")
-	kubeMasterConf = append(kubeMasterConf, etcdConfDir+"/etcd.conf")
-	kubeMasterConf = append(kubeMasterConf, flanneldConfDir+"/flanneld")
-
-	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/kubelet")
-	kubeNodeConf = append(kubeNodeConf, kubeConfDir+"/proxy")
-
-	w = append(w, verifyKubeVersion(kubeMasterBin)...)
+	// Always clear out error messages.
+	errmsgs = ""
 
 	switch t {
 	case check.MASTER:
-		w = append(w, verifyBin(kubeMasterBin)...)
-		w = append(w, verifyBin(xMasterBin)...)
-		w = append(w, verifyConf(kubeMasterConf)...)
+		w = append(w, verifyBin(apiserverBin, schedulerBin, controllerManagerBin)...)
+		w = append(w, verifyConf(apiserverConf, schedulerConf, controllerManagerConf)...)
+		w = append(w, verifyKubeVersion(apiserverBin)...)
 	case check.NODE:
-		w = append(w, verifyBin(kubeNodeBin)...)
-		w = append(w, verifyConf(kubeNodeConf)...)
+		w = append(w, verifyBin(kubeletBin, proxyBin)...)
+		w = append(w, verifyConf(kubeletConf, proxyConf)...)
+		w = append(w, verifyKubeVersion(kubeletBin)...)
 	case check.FEDERATED:
-		w = append(w, verifyBin(kubeFederatedBin)...)
+		w = append(w, verifyBin(fedApiserverBin, fedControllerManagerBin)...)
+		w = append(w, verifyKubeVersion(fedApiserverBin)...)
+	}
+
+	if verbose {
+		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
 	}
 
 	return w
@@ -213,79 +230,4 @@ func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
 	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
 		summary.Pass, summary.Fail, summary.Warn,
 	)
-}
-
-func verifyConf(confPath []string) []string {
-	var w []string
-	for _, c := range confPath {
-		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
-			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
-		}
-	}
-
-	return w
-}
-
-func verifyBin(binPath []string) []string {
-	var w []string
-	var binList string
-
-	// Construct proc name for ps(1)
-	for _, b := range binPath {
-		binList += b + ","
-	}
-	binList = strings.Trim(binList, ",")
-
-	// Run ps command
-	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	cmd.Stderr = os.Stderr
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
-	}
-
-	// Actual verification
-	for _, b := range binPath {
-		matched := strings.Contains(string(out), b)
-
-		if !matched {
-			w = append(w, fmt.Sprintf("%s is not running\n", b))
-		}
-	}
-
-	return w
-}
-
-func verifyKubeVersion(binPath []string) []string {
-	// These executables might not be on the user's path.
-	// TODO! Check the version number using kubectl, which is more likely to be on the path.
-	var w []string
-
-	for _, b := range binPath {
-		_, err := exec.LookPath(b)
-		if err != nil {
-			w = append(w, fmt.Sprintf("%s: command not found on path - version check skipped\n", b))
-			continue
-		}
-
-		// Check version
-		cmd := exec.Command(b, "--version")
-		cmd.Stderr = os.Stderr
-		out, err := cmd.Output()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cmd.Args, err)
-		}
-
-		matched := strings.Contains(string(out), kubeVersion)
-		if !matched {
-			w = append(w, fmt.Sprintf(
-				"%s unsupported version, expected %s, got %s\n",
-				b,
-				kubeVersion,
-				string(out),
-			))
-		}
-	}
-
-	return w
 }

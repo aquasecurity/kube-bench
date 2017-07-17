@@ -47,6 +47,13 @@ const (
 	FEDERATED NodeType = "federated"
 )
 
+func handleError(err error, context string) (errmsg string) {
+	if err != nil {
+		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
+	}
+	return
+}
+
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
@@ -62,8 +69,9 @@ type Check struct {
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run() {
+func (c *Check) Run(verbose bool) {
 	var out bytes.Buffer
+	var errmsgs string
 
 	// Check if command exists or exit with WARN.
 	for _, cmd := range c.Commands {
@@ -88,18 +96,22 @@ func (c *Check) Run() {
 	cs := c.Commands
 
 	// Initialize command pipeline
-	cs[0].Stderr = os.Stderr
 	cs[n-1].Stdout = &out
 	i := 1
 
 	var err error
+	errmsgs = ""
+
 	for i < n {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
-		}
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
+				c.Audit,
+				cs[i].Args,
+			),
+		)
 
-		cs[i].Stderr = os.Stderr
 		i++
 	}
 
@@ -107,9 +119,13 @@ func (c *Check) Run() {
 	i = 0
 	for i < n {
 		err := cs[i].Start()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
-		}
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
+				c.Audit,
+				cs[i].Args,
+			),
+		)
 		i++
 	}
 
@@ -117,15 +133,23 @@ func (c *Check) Run() {
 	i = 0
 	for i < n {
 		err := cs[i].Wait()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", cs[i].Args, err)
-		}
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command:%s",
+				c.Audit,
+				cs[i].Args,
+			),
+		)
 
 		if i < n-1 {
 			cs[i].Stdout.(io.Closer).Close()
 		}
 
 		i++
+	}
+
+	if verbose && errmsgs != "" {
+		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
 	}
 
 	res := c.Tests.execute(out.String())
