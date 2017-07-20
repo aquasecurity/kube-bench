@@ -30,17 +30,24 @@ If Go is installed on the target machines, you can simply clone this repository 
 
 ```
 Available Commands:
-  master      Checks for Kubernetes master node
-  node        Checks for Kubernetes node
-  federated   Checks for Kubernetes federated deployment
-  help        Help information
+  federated   Run benchmark checks for a Kubernetes federated deployment.
+  help        Help about any command
+  master      Run benchmark checks for a Kubernetes master node.
+  node        Run benchmark checks for a Kubernetes node.
 
 Flags:
-  -c, --check string   A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
-  -g, --group string   Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-  -h, --help           help for kube-bench
-  --json               Output results as JSON
+  -c, --check string          A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
+      --config string         config file (default is ./cfg/config.yaml)
+  -g, --group string          Run all the checks under this comma-delimited list of groups. Example --group="1.1"
+      --installation string   Specify how kubernetes cluster was installed. Possible values are default,hyperkube,kops,kubeadm (default "default")
+      --json                  Prints the results as JSON
+  -v, --verbose               verbose output (default false)
 ```
+
+## Configuration
+Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file. 
+
+They also tend to vary according to which tool was used to install Kubernetes. You can use the `--installation` flag to pick up a different default set of file names and locations. Again these defaults are configurable through `cfg/config.yaml` (and pull requests to correct or add default file locations are especially welcome). 
 
 ## Test config YAML representation
 The tests are represented as YAML documents (installed by default into ./cfg).
