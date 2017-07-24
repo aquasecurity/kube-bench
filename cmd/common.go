@@ -46,7 +46,7 @@ var (
 	errmsgs string
 
 	// TODO: Consider specifying this in config file.
-	kubeVersion = "1.6"
+	kubeVersion = "1.7.0"
 )
 
 func runChecks(t check.NodeType) {
