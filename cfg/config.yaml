@@ -29,7 +29,7 @@ installation:
       conf:
         apiserver: /etc/kubernetes/apiserver
         scheduler: /etc/kubernetes/scheduler
-        controller-manager: /etc/kubernetes/apiserver
+        controller-manager: /etc/kubernetes/controller-manager
     node:
       bin:
         kubelet: kubelet

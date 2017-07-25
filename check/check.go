@@ -18,9 +18,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/golang/glog"
 )
 
 // NodeType indicates the type of node (master, node, federated).
@@ -69,7 +70,7 @@ type Check struct {
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run(verbose bool) {
+func (c *Check) Run() {
 	var out bytes.Buffer
 	var errmsgs string
 
@@ -148,9 +149,7 @@ func (c *Check) Run(verbose bool) {
 		i++
 	}
 
-	if verbose && errmsgs != "" {
-		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
-	}
+	glog.V(2).Info("%s\n", errmsgs)
 
 	res := c.Tests.execute(out.String())
 	if res {

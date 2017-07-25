@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	goflag "flag"
 	"fmt"
 	"os"
 
@@ -34,11 +35,12 @@ var (
 	nodeFile      string
 	federatedFile string
 
+	loud bool
+
 	kubeConfDir     string
 	etcdConfDir     string
 	flanneldConfDir string
 
-	verbose      bool
 	installation string
 )
 
@@ -52,6 +54,9 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	goflag.Set("logtostderr", "true")
+	goflag.CommandLine.Parse([]string{})
+
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(-1)
@@ -83,7 +88,11 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
-	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output (default false)")
+
+	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
+		RootCmd.PersistentFlags().AddGoFlag(goflag)
+	})
+
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -103,5 +112,4 @@ func initConfig() {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
 		os.Exit(1)
 	}
-
 }
