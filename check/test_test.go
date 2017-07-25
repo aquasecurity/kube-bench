@@ -87,6 +87,16 @@ func TestTestExecute(t *testing.T) {
 			"text",
 			"644",
 		},
+		{
+			controls.Groups[0].Checks[9].Tests,
+			"flag value is comma-separated",
+			"2:35 ../kubelet --features-gates=KubeletClient=true,KubeletServer=true",
+		},
+		{
+			controls.Groups[0].Checks[9].Tests,
+			"flag value is comma-separated",
+			"2:35 ../kubelet --features-gates=KubeletServer=true,KubeletClient=true",
+		},
 	}
 
 	for _, c := range cases {

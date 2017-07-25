@@ -124,3 +124,16 @@ groups:
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. For example, chmod 644 /etc/kubernetes/apiserver"
       scored: true
+
+    - id: 2.1.14
+      text: "Ensure that the apiserver file permissions are set to 644 or more restrictive (Scored)"
+      audit: "ps -ef | grep kubelet | grep -v grep"
+      tests:
+        test_items:
+        - flag: "KubeletClient"
+          compare:
+            op: eq
+            value: true
+          set: true
+      remediation: "Run the below command (based on the file location on your system) on the master node. For example, chmod 644 /etc/kubernetes/apiserver"
+      scored: true

@@ -57,7 +57,7 @@ func (t *testItem) execute(s string) (result bool) {
 		isset := match
 
 		if isset && t.Compare.Op != "" {
-			pttn := t.Flag + `=(\S*) *`
+			pttn := t.Flag + `=([^\s,]*) *`
 			flagRe := regexp.MustCompile(pttn)
 			vals := flagRe.FindStringSubmatch(s)
 
