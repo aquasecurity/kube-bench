@@ -1,6 +1,18 @@
+sudo: true
+services:
+  - docker
+
 language: go
+
 install: 
   - go get github.com/aquasecurity/kube-bench
 script:
   - go test ./...
   - go build -o kube-bench .
+  
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker build -t aquasec/kube-bench .;
+    docker push aquasec/kube-bench;
+    fi
