@@ -21,14 +21,14 @@ var (
 	}
 )
 
-func printWarn(msg string) {
+func printlnWarn(msg string) {
 	fmt.Fprintf(os.Stderr, "[%s] %s\n",
 		colors[check.WARN].Sprintf("%s", check.WARN),
 		msg,
 	)
 }
 
-func printWarn(msg string) string {
+func sprintlnWarn(msg string) string {
 	return fmt.Sprintf("[%s] %s",
 		colors[check.WARN].Sprintf("%s", check.WARN),
 		msg,
@@ -75,7 +75,7 @@ func verifyConf(confPath ...string) {
 
 	if len(missing) > 0 {
 		missing = strings.Trim(missing, ", ")
-		printWarn(fmt.Sprintf("Missing kubernetes config files: %s", missing))
+		printlnWarn(fmt.Sprintf("Missing kubernetes config files: %s", missing))
 	}
 
 }
@@ -114,12 +114,12 @@ func verifyBin(binPath ...string) {
 
 	if len(missing) > 0 {
 		missing = strings.Trim(missing, ", ")
-		printWarn(fmt.Sprintf("Missing kubernetes binaries: %s", missing))
+		printlnWarn(fmt.Sprintf("Missing kubernetes binaries: %s", missing))
 	}
 
 	if len(notRunning) > 0 {
 		notRunning = strings.Trim(notRunning, ", ")
-		printWarn(fmt.Sprintf("Kubernetes binaries not running: %s", notRunning))
+		printlnWarn(fmt.Sprintf("Kubernetes binaries not running: %s", notRunning))
 	}
 }
 
@@ -129,19 +129,19 @@ func verifyKubeVersion(b string) {
 
 	_, err := exec.LookPath(b)
 	if err != nil {
-		continueWithError(err, printfWarn("Kubernetes version check skipped"))
+		continueWithError(err, sprintlnWarn("Kubernetes version check skipped"))
 		return
 	}
 
 	cmd := exec.Command(b, "--version")
 	out, err := cmd.Output()
 	if err != nil {
-		continueWithError(err, printfWarn("Kubernetes version check skipped"))
+		continueWithError(err, sprintlnWarn("Kubernetes version check skipped"))
 		return
 	}
 
 	matched := strings.Contains(string(out), kubeVersion)
 	if !matched {
-		printWarn(fmt.Sprintf("Unsupported kubernetes version: %s", out))
+		printlnWarn(fmt.Sprintf("Unsupported kubernetes version: %s", out))
 	}
 }
