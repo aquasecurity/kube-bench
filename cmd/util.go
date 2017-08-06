@@ -28,7 +28,7 @@ func printWarn(msg string) {
 	)
 }
 
-func printfWarn(msg string) string {
+func printWarn(msg string) string {
 	return fmt.Sprintf("[%s] %s",
 		colors[check.WARN].Sprintf("%s", check.WARN),
 		msg,
