@@ -68,7 +68,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunGroup runs all checks in a group.
-func (controls *Controls) RunGroup(verbose bool, gids ...string) Summary {
+func (controls *Controls) RunGroup(gids ...string) Summary {
 	g := []*Group{}
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn = 0, 0, 0
 
@@ -82,7 +82,7 @@ func (controls *Controls) RunGroup(verbose bool, gids ...string) Summary {
 		for _, gid := range gids {
 			if gid == group.ID {
 				for _, check := range group.Checks {
-					check.Run(verbose)
+					check.Run()
 					summarize(controls, check)
 				}
 
@@ -96,7 +96,7 @@ func (controls *Controls) RunGroup(verbose bool, gids ...string) Summary {
 }
 
 // RunChecks runs the checks with the supplied IDs.
-func (controls *Controls) RunChecks(verbose bool, ids ...string) Summary {
+func (controls *Controls) RunChecks(ids ...string) Summary {
 	g := []*Group{}
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn = 0, 0, 0
@@ -110,7 +110,7 @@ func (controls *Controls) RunChecks(verbose bool, ids ...string) Summary {
 		for _, check := range group.Checks {
 			for _, id := range ids {
 				if id == check.ID {
-					check.Run(verbose)
+					check.Run()
 					summarize(controls, check)
 
 					// Check if we have already added this checks group.

@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -59,7 +58,7 @@ func runChecks(t check.NodeType) {
 	schedulerBin = viper.GetString("installation." + installation + ".master.bin.scheduler")
 	schedulerConf = viper.GetString("installation." + installation + ".master.conf.scheduler")
 	controllerManagerBin = viper.GetString("installation." + installation + ".master.bin.controller-manager")
-	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controler-manager")
+	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controller-manager")
 	config = viper.GetString("installation." + installation + ".config")
 
 	etcdBin = viper.GetString("etcd.bin")
@@ -78,7 +77,7 @@ func runChecks(t check.NodeType) {
 	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
 
 	// Run kubernetes installation validation checks.
-	warns := verifyNodeType(t)
+	verifyNodeType(t)
 
 	switch t {
 	case check.MASTER:
@@ -91,8 +90,7 @@ func runChecks(t check.NodeType) {
 
 	in, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error opening %s controls file: %v\n", t, err)
-		os.Exit(1)
+		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
 	}
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
@@ -101,7 +99,6 @@ func runChecks(t check.NodeType) {
 	s = strings.Replace(s, "$schedulerbin", schedulerBin, -1)
 	s = strings.Replace(s, "$schedulerconf", schedulerConf, -1)
 	s = strings.Replace(s, "$controllermanagerbin", controllerManagerBin, -1)
-	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
 	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
 	s = strings.Replace(s, "$config", config, -1)
 
@@ -120,63 +117,50 @@ func runChecks(t check.NodeType) {
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error setting up %s controls: %v\n", t, err)
-		os.Exit(1)
+		exitWithError(fmt.Errorf("error setting up %s controls: %v", t, err))
 	}
 
 	if groupList != "" && checkList == "" {
 		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(verbose, ids...)
+		summary = controls.RunGroup(ids...)
 	} else if checkList != "" && groupList == "" {
 		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(verbose, ids...)
+		summary = controls.RunChecks(ids...)
 	} else if checkList != "" && groupList != "" {
-		fmt.Fprintf(os.Stderr, "group option and check option can't be used together\n")
-		os.Exit(1)
+		exitWithError(fmt.Errorf("group option and check option can't be used together"))
 	} else {
-		summary = controls.RunGroup(verbose)
+		summary = controls.RunGroup()
 	}
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
 	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to output in JSON format: %v\n", err)
-			os.Exit(1)
+			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 		}
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(warns, controls, summary)
+		prettyPrint(controls, summary)
 	}
 }
 
 // verifyNodeType checks the executables and config files are as expected
 // for the specified tests (master, node or federated).
-func verifyNodeType(t check.NodeType) []string {
-	var w []string
-	// Always clear out error messages.
-	errmsgs = ""
-
+func verifyNodeType(t check.NodeType) {
 	switch t {
 	case check.MASTER:
-		w = append(w, verifyBin(apiserverBin, schedulerBin, controllerManagerBin)...)
-		w = append(w, verifyConf(apiserverConf, schedulerConf, controllerManagerConf)...)
-		w = append(w, verifyKubeVersion(apiserverBin)...)
+		verifyKubeVersion(apiserverBin)
+		verifyBin(apiserverBin, schedulerBin, controllerManagerBin)
+		verifyConf(apiserverConf, schedulerConf, controllerManagerConf)
 	case check.NODE:
-		w = append(w, verifyBin(kubeletBin, proxyBin)...)
-		w = append(w, verifyConf(kubeletConf, proxyConf)...)
-		w = append(w, verifyKubeVersion(kubeletBin)...)
+		verifyKubeVersion(kubeletBin)
+		verifyBin(kubeletBin, proxyBin)
+		verifyConf(kubeletConf, proxyConf)
 	case check.FEDERATED:
-		w = append(w, verifyBin(fedApiserverBin, fedControllerManagerBin)...)
-		w = append(w, verifyKubeVersion(fedApiserverBin)...)
+		verifyKubeVersion(fedApiserverBin)
+		verifyBin(fedApiserverBin, fedControllerManagerBin)
 	}
-
-	if verbose {
-		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
-	}
-
-	return w
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -186,12 +170,8 @@ func colorPrint(state check.State, s string) {
 }
 
 // prettyPrint outputs the results to stdout in human-readable format
-func prettyPrint(warnings []string, r *check.Controls, summary check.Summary) {
+func prettyPrint(r *check.Controls, summary check.Summary) {
 	colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-
-	for _, w := range warnings {
-		colorPrint(check.WARN, w)
-	}
 
 	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
