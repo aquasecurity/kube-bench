@@ -71,7 +71,7 @@ type Check struct {
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run(verbose bool) {
+func (c *Check) Run() {
 	// If check type is manual, force result to WARN.
 	if c.Type == "manual" {
 		c.State = WARN
