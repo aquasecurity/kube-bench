@@ -61,7 +61,6 @@ type Check struct {
 	ID          string `yaml:"id" json:"id"`
 	Text        string
 	Audit       string      `json:"omit"`
-	Type        string      `json:"type"`
 	Commands    []*exec.Cmd `json:"omit"`
 	Tests       *tests      `json:"omit"`
 	Set         bool        `json:"omit"`
@@ -71,13 +70,7 @@ type Check struct {
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run(verbose bool) {
-	// If check type is manual, force result to WARN.
-	if c.Type == "manual" {
-		c.State = WARN
-		return
-	}
-
+func (c *Check) Run() {
 	var out bytes.Buffer
 	var errmsgs string
 

@@ -285,6 +285,7 @@ groups:
               \nFor example, chown root:root $proxyconf"
       scored: true
 
+# TODO: provide flag to WARN about manual checks.
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
               644 or more restrictive (Scored)"
@@ -297,6 +298,7 @@ groups:
               \nchmod 644 <filename>"
       scored: true
 
+# TODO: provide flag to WARN about manual checks.
     - id: 2.2.8
       text: "Ensure that the client certificate authorities file ownership is set to root:root"
       audit: "if test -e $ca-file; then stat -c %U:%G $ca-file; fi"

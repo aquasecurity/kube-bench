@@ -479,13 +479,18 @@ groups:
               parameter to \"--experimental-encryption-provider-config=</path/to/EncryptionConfig/File>\""
       scored: true
 
+# TODO: provide flag to WARN of manual tasks which we can't automate.
     - id: 1.1.35
       text: "Ensure that the encryption provider is set to aescbc (Scored)"
       audit: "ps -ef | grep $apiserverbin | grep -v grep"
-      type: "manual"
+      tests:
+        test_items:
+        - flag: "requires manual intervention"
+          set: true
       remediation: "Follow the Kubernetes documentation and configure a EncryptionConfig file. In this file,
               choose aescbc as the encryption provider"
       scored: true
+
 
 - id: 1.2
   text: "Scheduler"
@@ -568,13 +573,7 @@ groups:
               KUBE_CONTROLLER_MANAGER_ARGS parameter to include --root-ca-file=<file>"
       scored: true
 
-    - id: 1.3.6
-      text: "Apply Security Context to Your Pods and Containers (Not Scored)"
-      type: "manual"
-      remediation: "Edit the /etc/kubernetes/controller-manager file on the master node and set the
-              KUBE_CONTROLLER_MANAGER_ARGS parameter to a value to include 
-              \"--feature-gates=RotateKubeletServerCertificate=true\""
-      scored: false
+# TODO: 1.3.6 is manual, provide way to WARN
 
     - id: 1.3.7
       text: " Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
@@ -716,20 +715,6 @@ groups:
               ps -ef | grep $etcdbin\n
               Run the below command (based on the etcd data directory found above). For example,\n
               chmod 700 /var/lib/etcd/default.etcd"
-      scored: true
-
-    - id: 1.4.12
-      text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-      audit: "ps -ef | grep $etcdbin | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %U:%G"
-      tests:
-        test_items:
-        - flag: "etcd:etcd"
-          set: true
-      remediation: "On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
-              from the below command:\n
-                      ps -ef | grep etcd\n
-              Run the below command (based on the etcd data directory found above). For example,\n
-                      chown etcd:etcd /var/lib/etcd/default.etcd"
       scored: true
 
 - id: 1.5
@@ -874,65 +859,3 @@ groups:
       remediation: "Follow the etcd documentation and create a dedicated certificate authority setup for the 
               etcd service."
       scored: false 
-
-- id: 1.6
-  text: "General Security Primitives"
-  checks:
-    - id: 1.6.1
-      text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
-      type: "manual"
-      remediation: "Remove any unneeded clusterrolebindings: kubectl delete clusterrolebinding [name]"
-      scored: false
-
-    - id: 1.6.2
-      text: "Create Pod Security Policies for your cluster (Not Scored)"
-      type: "manual"
-      remediation: "Follow the documentation and create and enforce Pod Security Policies for your cluster.
-              Additionally, you could refer the \"CIS Security Benchmark for Docker\" and follow the
-              suggested Pod Security Policies for your environment."
-      scored: false
-
-    - id: 1.6.3
-      text: "Create administrative boundaries between resources using namespaces (Not Scored)"
-      type: "manual"
-      remediation: "Follow the documentation and create namespaces for objects in your deployment as you
-              need them."
-      scored: false
-
-    - id: 1.6.4
-      text: "Create network segmentation using Network Policies (Not Scored)"
-      type: "manual"
-      remediation: "Follow the documentation and create NetworkPolicy objects as you need them."
-      scored: false
-
-    - id: 1.6.5
-      text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
-      type: "manual"
-      remediation: "Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
-              would need to enable alpha features in the apiserver by passing \"--feature-
-              gates=AllAlpha=true\" argument.\n
-              Edit the $apiserverconf file on the master node and set the KUBE_API_ARGS
-              parameter to \"--feature-gates=AllAlpha=true\"
-              KUBE_API_ARGS=\"--feature-gates=AllAlpha=true\""
-      scored: false
-
-    - id: 1.6.6
-      text: "Apply Security Context to Your Pods and Containers (Not Scored)"
-      type: "manual"
-      remediation: "Follow the Kubernetes documentation and apply security contexts to your pods. For a
-              suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
-              Containers."
-      scored: false
-
-    - id: 1.6.7
-      text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
-      type: "manual"
-      remediation: "Follow the Kubernetes documentation and setup image provenance."
-      scored: false
-
-    - id: 1.6.8
-      text: "Configure Network policies as appropriate (Not Scored)"
-      type: "manual"
-      remediation: "Follow the Kubernetes documentation and setup network policies as appropriate."
-      scored: false
-
