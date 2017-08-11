@@ -105,3 +105,6 @@ These operations are:
 - `lte`: tests if the flag value is less than or equal to the compared value.
 - `has`: tests if the flag value contains the compared value.
 - `nothave`: tests if the flag value does not contain the compared value.
+
+# Roadmap 
+The tests are up-to-date with the CIS Benchmark 1.1.0, which refers to Kubernetes 1.7. Going forward we should release updates to kube-bench to reflect new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release. 
