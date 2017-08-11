@@ -45,7 +45,8 @@ var (
 	errmsgs string
 
 	// TODO: Consider specifying this in config file.
-	kubeVersion = "1.7.0"
+	kubeMajorVersion = "1"
+	kubeMinorVersion = "7"
 )
 
 func runChecks(t check.NodeType) {
@@ -77,6 +78,7 @@ func runChecks(t check.NodeType) {
 	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
 
 	// Run kubernetes installation validation checks.
+	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
 	verifyNodeType(t)
 
 	switch t {
@@ -150,15 +152,12 @@ func runChecks(t check.NodeType) {
 func verifyNodeType(t check.NodeType) {
 	switch t {
 	case check.MASTER:
-		verifyKubeVersion(apiserverBin)
 		verifyBin(apiserverBin, schedulerBin, controllerManagerBin)
 		verifyConf(apiserverConf, schedulerConf, controllerManagerConf)
 	case check.NODE:
-		verifyKubeVersion(kubeletBin)
 		verifyBin(kubeletBin, proxyBin)
 		verifyConf(kubeletConf, proxyConf)
 	case check.FEDERATED:
-		verifyKubeVersion(fedApiserverBin)
 		verifyBin(fedApiserverBin, fedControllerManagerBin)
 	}
 }
