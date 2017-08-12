@@ -221,7 +221,7 @@ groups:
   checks:
     - id: 2.2.1
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $config; then stat -c %a $config; fi"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
       tests:
         test_items:
           - flag: "644"
@@ -232,10 +232,13 @@ groups:
 
     - id: 2.2.2
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "if test -e $config; then stat -c %U:%G $config; fi"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %U:%G $config; fi'"
       tests:
         test_items:
           - flag: "root:root"
+            compare:
+              op: eq
+              value: root:root
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
               \nFor example, chown root:root $config"
@@ -243,10 +246,13 @@ groups:
 
     - id: 2.2.3
       text: "Ensure that the kubelet file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $kubeletconf; then stat -c %a $kubeletconf; fi"
+      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'"
       tests:
         test_items:
           - flag: "644"
+            compare:
+              op: eq
+              value: 644
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
               \nFor example, chmod 644 $kubeletconf"
@@ -254,7 +260,7 @@ groups:
 
     - id: 2.2.4
       text: "Ensure that the kubelet file ownership is set to root:root (Scored)"
-      audit: "if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi"
+      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'"
       tests:
         test_items:
           - flag: "root:root"
@@ -265,7 +271,7 @@ groups:
 
     - id: 2.2.5
       text: "Ensure that the proxy file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $proxyconf; then stat -c %a $proxyconf; fi"
+      audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %a $proxyconf; fi'"
       tests:
         test_items:
           - flag: "644"
@@ -276,7 +282,7 @@ groups:
 
     - id: 2.2.6
       text: "Ensure that the proxy file ownership is set to root:root (Scored)"
-      audit: "if test -e $proxyconf; then stat -c %U:%G $proxyconf; fi"
+      audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %U:%G $proxyconf; fi'"
       tests:
         test_items:
           - flag: "root:root"
@@ -285,11 +291,10 @@ groups:
               \nFor example, chown root:root $proxyconf"
       scored: true
 
-# TODO: provide flag to WARN about manual checks.
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
               644 or more restrictive (Scored)"
-      audit: "if test -e $ca-file; then stat -c %a $ca-file; fi"
+      audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %a $ca-file; fi'"
       tests:
         test_items:
           - flag: "644"
@@ -298,10 +303,9 @@ groups:
               \nchmod 644 <filename>"
       scored: true
 
-# TODO: provide flag to WARN about manual checks.
     - id: 2.2.8
       text: "Ensure that the client certificate authorities file ownership is set to root:root"
-      audit: "if test -e $ca-file; then stat -c %U:%G $ca-file; fi"
+      audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %U:%G $ca-file; fi'"
       tests:
         test_items:
           - flag: "notexist:notexist"

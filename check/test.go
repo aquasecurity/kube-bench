@@ -38,6 +38,7 @@ const (
 
 type testItem struct {
 	Flag    string
+	Output  string
 	Value   string
 	Set     bool
 	Compare compare
@@ -57,14 +58,22 @@ func (t *testItem) execute(s string) (result bool) {
 		isset := match
 
 		if isset && t.Compare.Op != "" {
-			pttn := t.Flag + `=([^\s,]*) *`
+			// Expects flags in the form;
+			// --flag=somevalue
+			// --flag
+			// somevalue
+			pttn := `(` + t.Flag + `)(=)*([^\s,]*) *`
 			flagRe := regexp.MustCompile(pttn)
 			vals := flagRe.FindStringSubmatch(s)
 
 			if len(vals) > 0 {
-				flagVal = vals[1]
+				if vals[3] != "" {
+					flagVal = vals[3]
+				} else {
+					flagVal = vals[1]
+				}
 			} else {
-				fmt.Fprintf(os.Stderr, "expected value for %s but none found\n", t.Flag)
+				fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
 				os.Exit(1)
 			}
 

@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -75,8 +76,7 @@ func (c *Check) Run(verbose bool) {
 
 	// Check if command exists or exit with WARN.
 	for _, cmd := range c.Commands {
-		_, err := exec.LookPath(cmd.Path)
-		if err != nil {
+		if !isShellCommand(cmd.Path) {
 			c.State = WARN
 			return
 		}
@@ -111,7 +111,6 @@ func (c *Check) Run(verbose bool) {
 				cs[i].Args,
 			),
 		)
-
 		i++
 	}
 
@@ -160,22 +159,63 @@ func (c *Check) Run(verbose bool) {
 	}
 }
 
-// textToCommand transforms a text representation of commands to be
+// textToCommand transforms an input text representation of commands to be
 // run into a slice of commands.
 // TODO: Make this more robust.
 func textToCommand(s string) []*exec.Cmd {
 	cmds := []*exec.Cmd{}
 
 	cp := strings.Split(s, "|")
-	// fmt.Println("check.toCommand:", cp)
 
 	for _, v := range cp {
 		v = strings.Trim(v, " ")
-		cs := strings.Split(v, " ")
+
+		// TODO:
+		// GOAL: To split input text into arguments for exec.Cmd.
+		//
+		// CHALLENGE: The input text may contain quoted strings that
+		// must be passed as a unit to exec.Cmd.
+		// eg. bash -c 'foo bar'
+		// 'foo bar' must be passed as unit to exec.Cmd if not the command
+		// will fail when it is executed.
+		// eg. exec.Cmd("bash", "-c", "foo bar")
+		//
+		// PROBLEM: Current solution assumes the grouped string will always
+		// be at the end of the input text.
+		re := regexp.MustCompile(`^(.*)(['"].*['"])$`)
+		grps := re.FindStringSubmatch(v)
+
+		var cs []string
+		if len(grps) > 0 {
+			s := strings.Trim(grps[1], " ")
+			cs = strings.Split(s, " ")
+
+			s1 := grps[len(grps)-1]
+			s1 = strings.Trim(s1, "'\"")
+
+			cs = append(cs, s1)
+		} else {
+			cs = strings.Split(v, " ")
+		}
 
 		cmd := exec.Command(cs[0], cs[1:]...)
 		cmds = append(cmds, cmd)
 	}
 
 	return cmds
+}
+
+func isShellCommand(s string) bool {
+	cmd := exec.Command("/bin/sh", "-c", "command -v "+s)
+
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+
+	if strings.Contains(string(out), s) {
+		return true
+	}
+	return false
 }
