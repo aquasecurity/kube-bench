@@ -18,10 +18,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/golang/glog"
 )
 
 // NodeType indicates the type of node (master, node, federated).
@@ -61,6 +62,7 @@ type Check struct {
 	ID          string `yaml:"id" json:"id"`
 	Text        string
 	Audit       string      `json:"omit"`
+	Type        string      `json:"type"`
 	Commands    []*exec.Cmd `json:"omit"`
 	Tests       *tests      `json:"omit"`
 	Set         bool        `json:"omit"`
@@ -70,7 +72,13 @@ type Check struct {
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run(verbose bool) {
+func (c *Check) Run() {
+	// If check type is manual, force result to WARN.
+	if c.Type == "manual" {
+		c.State = WARN
+		return
+	}
+
 	var out bytes.Buffer
 	var errmsgs string
 
@@ -147,9 +155,7 @@ func (c *Check) Run(verbose bool) {
 		i++
 	}
 
-	if verbose && errmsgs != "" {
-		fmt.Fprintf(os.Stderr, "%s\n", errmsgs)
-	}
+	glog.V(2).Info("%s\n", errmsgs)
 
 	res := c.Tests.execute(out.String())
 	if res {

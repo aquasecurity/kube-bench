@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
+	"github.com/golang/glog"
 )
 
 var (
@@ -20,11 +22,35 @@ var (
 	}
 )
 
-func handleError(err error, context string) (errmsg string) {
+func printlnWarn(msg string) {
+	fmt.Fprintf(os.Stderr, "[%s] %s\n",
+		colors[check.WARN].Sprintf("%s", check.WARN),
+		msg,
+	)
+}
+
+func sprintlnWarn(msg string) string {
+	return fmt.Sprintf("[%s] %s",
+		colors[check.WARN].Sprintf("%s", check.WARN),
+		msg,
+	)
+}
+
+func exitWithError(err error) {
+	fmt.Fprintf(os.Stderr, "\n%v\n", err)
+	os.Exit(1)
+}
+
+func continueWithError(err error, msg string) string {
 	if err != nil {
-		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
+		glog.V(1).Info(err)
 	}
-	return
+
+	if msg != "" {
+		fmt.Fprintf(os.Stderr, "%s\n", msg)
+	}
+
+	return ""
 }
 
 func cleanIDs(list string) []string {
@@ -38,76 +64,121 @@ func cleanIDs(list string) []string {
 	return ids
 }
 
-func verifyConf(confPath ...string) []string {
-	var w []string
+func verifyConf(confPath ...string) {
+	var missing string
+
 	for _, c := range confPath {
 		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
-			w = append(w, fmt.Sprintf("config file %s does not exist\n", c))
+			continueWithError(err, "")
+			missing += c + ", "
 		}
 	}
 
-	return w
+	if len(missing) > 0 {
+		missing = strings.Trim(missing, ", ")
+		printlnWarn(fmt.Sprintf("Missing kubernetes config files: %s", missing))
+	}
+
 }
 
-func verifyBin(binPath ...string) []string {
-	var w []string
-	var binList string
+func verifyBin(binPath ...string) {
+	var binSlice []string
+	var bin string
+	var missing string
+	var notRunning string
 
 	// Construct proc name for ps(1)
 	for _, b := range binPath {
-		binList += b + ","
 		_, err := exec.LookPath(b)
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("%s: command not found in path", b),
-		)
+		bin = bin + "," + b
+		binSlice = append(binSlice, b)
+		if err != nil {
+			missing += b + ", "
+			continueWithError(err, "")
+		}
+	}
+	bin = strings.Trim(bin, ",")
+
+	cmd := exec.Command("ps", "-C", bin, "-o", "cmd", "--no-headers")
+	out, err := cmd.Output()
+	if err != nil {
+		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
 	}
 
-	binList = strings.Trim(binList, ",")
-
-	// Run ps command
-	cmd := exec.Command("ps", "-C", binList, "-o", "cmd", "--no-headers")
-	out, err := cmd.Output()
-	errmsgs += handleError(
-		err,
-		fmt.Sprintf("failed to run: %s", cmd.Args),
-	)
-
-	// Actual verification
-	for _, b := range binPath {
+	for _, b := range binSlice {
 		matched := strings.Contains(string(out), b)
 
 		if !matched {
-			w = append(w, fmt.Sprintf("%s is not running\n", b))
+			notRunning += b + ", "
 		}
 	}
 
-	return w
-}
-
-func verifyKubeVersion(b string) []string {
-	// These executables might not be on the user's path.
-	// TODO! Check the version number using kubectl, which is more likely to be on the path.
-	var w []string
-
-	_, err := exec.LookPath(b)
-	errmsgs += handleError(
-		err,
-		fmt.Sprintf("%s: command not found on path - version check skipped", b),
-	)
-
-	// Check version
-	cmd := exec.Command(b, "--version")
-	out, err := cmd.Output()
-	errmsgs += handleError(
-		err,
-		fmt.Sprintf("failed to run:%s", cmd.Args),
-	)
-
-	matched := strings.Contains(string(out), kubeVersion)
-	if !matched {
-		w = append(w, fmt.Sprintf("%s unsupported version\n", b))
+	if len(missing) > 0 {
+		missing = strings.Trim(missing, ", ")
+		printlnWarn(fmt.Sprintf("Missing kubernetes binaries: %s", missing))
 	}
 
-	return w
+	if len(notRunning) > 0 {
+		notRunning = strings.Trim(notRunning, ", ")
+		printlnWarn(fmt.Sprintf("Kubernetes binaries not running: %s", notRunning))
+	}
+}
+
+func verifyKubeVersion(major string, minor string) {
+	// These executables might not be on the user's path.
+
+	_, err := exec.LookPath("kubectl")
+	if err != nil {
+		continueWithError(err, sprintlnWarn("Kubernetes version check skipped"))
+		return
+	}
+
+	cmd := exec.Command("kubectl", "version")
+	out, err := cmd.Output()
+	if err != nil {
+		s := fmt.Sprintf("Kubernetes version check skipped with error %v", err)
+		continueWithError(err, sprintlnWarn(s))
+		return
+	}
+
+	msg := checkVersion("Client", string(out), major, minor)
+	if msg != "" {
+		continueWithError(fmt.Errorf(msg), msg)
+	}
+
+	msg = checkVersion("Server", string(out), major, minor)
+	if msg != "" {
+		continueWithError(fmt.Errorf(msg), msg)
+	}
+}
+
+var regexVersionMajor = regexp.MustCompile("Major:\"([0-9]+)\"")
+var regexVersionMinor = regexp.MustCompile("Minor:\"([0-9]+)\"")
+
+func checkVersion(x string, s string, expMajor string, expMinor string) string {
+	regexVersion, err := regexp.Compile(x + " Version: version.Info{(.*)}")
+	if err != nil {
+		return fmt.Sprintf("Error checking Kubernetes version: %v", err)
+	}
+
+	ss := regexVersion.FindString(s)
+	major := versionMatch(regexVersionMajor, ss)
+	minor := versionMatch(regexVersionMinor, ss)
+	if major == "" || minor == "" {
+		return fmt.Sprintf("Couldn't find %s version from kubectl output '%s'", x, s)
+	}
+
+	if major != expMajor || minor != expMinor {
+		return fmt.Sprintf("Unexpected %s version %s.%s", x, major, minor)
+	}
+
+	return ""
+}
+
+func versionMatch(r *regexp.Regexp, s string) string {
+	match := r.FindStringSubmatch(s)
+	if len(match) < 2 {
+		return ""
+	}
+	return match[1]
 }
