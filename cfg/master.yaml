@@ -596,10 +596,25 @@ groups:
   checks:
     - id: 1.4.1
       text: "Ensure that the apiserver file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $apiserverconf; then stat -c %a $apiserverconf; fi"
+      # audit: "/bin/bash -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
+      audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
       tests:
+        bin_op: or
         test_items:
         - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chmod 644 $apiserverconf"
@@ -607,10 +622,13 @@ groups:
 
     - id: 1.4.2
       text: "Ensure that the apiserver file ownership is set to root:root (Scored)"
-      audit: "if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi"
+      audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
       tests:
         test_items:
         - flag: "root:root"
+          compare:
+            op: eq
+            value: "root:root"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root $apiserverconf"
@@ -618,10 +636,24 @@ groups:
 
     - id: 1.4.3
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $config; then stat -c %a $config; fi"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
       tests:
+        bin_op: or
         test_items:
         - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chmod 644 $config"
@@ -629,10 +661,13 @@ groups:
 
     - id: 1.4.4
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "if test -e $config; then stat -c %U:%G $config; fi"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %U:%G $config; fi'"
       tests:
         test_items:
         - flag: "root:root"
+          compare:
+            op: eq
+            value: "root:root"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root $config"
@@ -640,10 +675,24 @@ groups:
 
     - id: 1.4.5
       text: "Ensure that the scheduler file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $schedulerconf; then stat -c %a $schedulerconf; fi"
+      audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
       tests:
+        bin_op: or
         test_items:
           - flag: "644"
+            compare:
+              op: eq
+              value: "644"
+            set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
+            set: true
+          - flag: "600"
+            compare:
+              op: eq
+              value: "600"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chmod 644 $schedulerconf"
@@ -651,10 +700,13 @@ groups:
 
     - id: 1.4.6
       text: "Ensure that the scheduler file ownership is set to root:root (Scored)"
-      audit: "if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi"
+      audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
       tests:
         test_items:
           - flag: "root:root"
+            compare:
+              op: eq
+              value: "root:root"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root $schedulerconf"
@@ -662,10 +714,24 @@ groups:
 
     - id: 1.4.7
       text: "Ensure that the etcd.conf file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $etcdconf; then stat -c %a $etcdconf; fi"
+      audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %a $etcdconf; fi'"
       tests:
+        bin_op: or
         test_items:
           - flag: "644"
+            compare:
+              op: eq
+              value: "644"
+            set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
+            set: true
+          - flag: "600"
+            compare:
+              op: eq
+              value: "600"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chmod 644 $etcdconf"
@@ -673,10 +739,13 @@ groups:
 
     - id: 1.4.8
       text: "Ensure that the etcd.conf file ownership is set to root:root (Scored)"
-      audit: "if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi"
+      audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
       tests:
         test_items:
         - flag: "root:root"
+          compare:
+            op: eq
+            value: "root:root"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root $etcdconf"
@@ -684,10 +753,24 @@ groups:
 
     - id: 1.4.9
       text: "Ensure that the flanneld file permissions are set to 644 or more restrictive (Scored)"
-      audit: "if test -e $flanneldconf; then stat -c %a $flanneldconf; fi"
+      audit: "/bin/sh -c 'if test -e $flanneldconf; then stat -c %a $flanneldconf; fi'"
       tests:
+        bin_op: or
         test_items:
         - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chmod 644 $flanneldconf"
@@ -695,10 +778,13 @@ groups:
 
     - id: 1.4.10
       text: "Ensure that the flanneld file ownership is set to root:root (Scored)"
-      audit: "if test -e $flanneldconf; then stat -c %U:%G $flanneldconf; fi"
+      audit: "/bin/sh -c 'if test -e $flanneldconf; then stat -c %U:%G $flanneldconf; fi'"
       tests:
         test_items:
         - flag: "root:root"
+          compare:
+            op: eq
+            value: "root:root"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
               \nFor example, chown root:root $flanneldconf"
@@ -710,6 +796,9 @@ groups:
       tests:
         test_items:
         - flag: "700"
+          compare:
+            op: eq
+            value: "700"
           set: true
       remediation: "On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
               from the below command:\n
