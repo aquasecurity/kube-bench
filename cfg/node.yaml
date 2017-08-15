@@ -230,6 +230,11 @@ groups:
               op: eq
               value: "644"
             set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
+            set: true
           - flag: "600"
             compare:
               op: eq
@@ -264,6 +269,11 @@ groups:
               op: eq
               value: 644
             set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
+            set: true
           - flag: "600"
             compare:
               op: eq
@@ -294,6 +304,11 @@ groups:
             compare:
               op: eq
               value: "644"
+            set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
             set: true
           - flag: "600"
             compare:
@@ -326,6 +341,11 @@ groups:
             compare:
               op: eq
               value: "644"
+            set: true
+          - flag: "640"
+            compare:
+              op: eq
+              value: "640"
             set: true
           - flag: "600"
             compare:
