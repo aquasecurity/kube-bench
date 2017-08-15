@@ -86,6 +86,14 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[8],
 			"644",
 		},
+		{
+			controls.Groups[0].Checks[9],
+			"640",
+		},
+		{
+			controls.Groups[0].Checks[9],
+			"600",
+		},
 	}
 
 	for _, c := range cases {
