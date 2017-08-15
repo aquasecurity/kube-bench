@@ -113,11 +113,6 @@ func verifyBin(binPath ...string) {
 		}
 	}
 
-	if len(missing) > 0 {
-		missing = strings.Trim(missing, ", ")
-		printlnWarn(fmt.Sprintf("Missing kubernetes binaries: %s", missing))
-	}
-
 	if len(notRunning) > 0 {
 		notRunning = strings.Trim(notRunning, ", ")
 		printlnWarn(fmt.Sprintf("Kubernetes binaries not running: %s", notRunning))
