@@ -73,16 +73,16 @@ installation:
         scheduler: hyperkube scheduler
         controller-manager: hyperkube controller-manager
       conf:
-        apiserver: /etc/kubernetes/apiserver
-        scheduler: /etc/kubernetes/scheduler
-        controller-manager: /etc/kubernetes/apiserver
+        apiserver: /etc/kubernetes/manifests/kube-apiserver.yaml
+        scheduler: /etc/kubernetes/manifests/kube-scheduler.yaml
+        controller-manager: /etc/kubernetes/manifests/kube-controller-manager.yaml
     node:
       bin:
         kubelet: hyperkube kubelet
         proxy: hyperkube proxy
       conf:
         kubelet: /etc/kubernetes/kubelet
-        proxy: /etc/kubernetes/proxy
+        proxy: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
     federated:
       bin:
         apiserver: hyperkube federation-apiserver
