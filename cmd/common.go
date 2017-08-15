@@ -17,7 +17,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
+	"os"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -96,26 +96,26 @@ func runChecks(t check.NodeType) {
 	}
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
-	s := strings.Replace(string(in), "$apiserverbin", apiserverBin, -1)
-	s = strings.Replace(s, "$apiserverconf", apiserverConf, -1)
-	s = strings.Replace(s, "$schedulerbin", schedulerBin, -1)
-	s = strings.Replace(s, "$schedulerconf", schedulerConf, -1)
-	s = strings.Replace(s, "$controllermanagerbin", controllerManagerBin, -1)
-	s = strings.Replace(s, "$controllermanagerconf", controllerManagerConf, -1)
-	s = strings.Replace(s, "$config", config, -1)
+	s := multiWordReplace(string(in), "$apiserverbin", apiserverBin)
+	s = multiWordReplace(s, "$apiserverconf", apiserverConf)
+	s = multiWordReplace(s, "$schedulerbin", schedulerBin)
+	s = multiWordReplace(s, "$schedulerconf", schedulerConf)
+	s = multiWordReplace(s, "$controllermanagerbin", controllerManagerBin)
+	s = multiWordReplace(s, "$controllermanagerconf", controllerManagerConf)
+	s = multiWordReplace(s, "$config", config)
 
-	s = strings.Replace(s, "$etcdbin", etcdBin, -1)
-	s = strings.Replace(s, "$etcdconf", etcdConf, -1)
-	s = strings.Replace(s, "$flanneldbin", flanneldBin, -1)
-	s = strings.Replace(s, "$flanneldconf", flanneldConf, -1)
+	s = multiWordReplace(s, "$etcdbin", etcdBin)
+	s = multiWordReplace(s, "$etcdconf", etcdConf)
+	s = multiWordReplace(s, "$flanneldbin", flanneldBin)
+	s = multiWordReplace(s, "$flanneldconf", flanneldConf)
 
-	s = strings.Replace(s, "$kubeletbin", kubeletBin, -1)
-	s = strings.Replace(s, "$kubeletconf", kubeletConf, -1)
-	s = strings.Replace(s, "$proxybin", proxyBin, -1)
-	s = strings.Replace(s, "$proxyconf", proxyConf, -1)
+	s = multiWordReplace(s, "$kubeletbin", kubeletBin)
+	s = multiWordReplace(s, "$kubeletconf", kubeletConf)
+	s = multiWordReplace(s, "$proxybin", proxyBin)
+	s = multiWordReplace(s, "$proxyconf", proxyConf)
 
-	s = strings.Replace(s, "$fedapiserverbin", fedApiserverBin, -1)
-	s = strings.Replace(s, "$fedcontrollermanagerbin", fedControllerManagerBin, -1)
+	s = multiWordReplace(s, "$fedapiserverbin", fedApiserverBin)
+	s = multiWordReplace(s, "$fedcontrollermanagerbin", fedControllerManagerBin)
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
@@ -150,15 +150,35 @@ func runChecks(t check.NodeType) {
 // verifyNodeType checks the executables and config files are as expected
 // for the specified tests (master, node or federated).
 func verifyNodeType(t check.NodeType) {
+	var bins []string
+	var confs []string
+
 	switch t {
 	case check.MASTER:
-		verifyBin(apiserverBin, schedulerBin, controllerManagerBin)
-		verifyConf(apiserverConf, schedulerConf, controllerManagerConf)
+		bins = []string{apiserverBin, schedulerBin, controllerManagerBin}
+		confs = []string{apiserverConf, schedulerConf, controllerManagerConf}
 	case check.NODE:
-		verifyBin(kubeletBin, proxyBin)
-		verifyConf(kubeletConf, proxyConf)
+		bins = []string{kubeletBin, proxyBin}
+		confs = []string{kubeletConf, proxyConf}
 	case check.FEDERATED:
-		verifyBin(fedApiserverBin, fedControllerManagerBin)
+		bins = []string{fedApiserverBin, fedControllerManagerBin}
+	}
+
+	for _, bin := range bins {
+		if !verifyBin(bin, ps) {
+			printlnWarn(fmt.Sprintf("%s is not running", bin))
+		}
+	}
+
+	for _, conf := range confs {
+		_, err := os.Stat(conf)
+		if err != nil {
+			if os.IsNotExist(err) {
+				printlnWarn(fmt.Sprintf("Missing kubernetes config file: %s", conf))
+			} else {
+				exitWithError(fmt.Errorf("error looking for file %s: %v", conf, err))
+			}
+		}
 	}
 }
 

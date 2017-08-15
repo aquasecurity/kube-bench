@@ -16,6 +16,8 @@ package check
 
 import (
 	"io/ioutil"
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -30,79 +32,74 @@ func init() {
 	if err != nil {
 		panic("Failed reading test data: " + err.Error())
 	}
-	controls, err = NewControls(MASTER, in)
+
+	// substitute variables in data file
+	user := os.Getenv("USER")
+	s := strings.Replace(string(in), "$user", user, -1)
+
+	controls, err = NewControls(MASTER, []byte(s))
+	// controls, err = NewControls(MASTER, in)
 	if err != nil {
 		panic("Failed creating test controls: " + err.Error())
 	}
 }
 
 func TestTestExecute(t *testing.T) {
+
 	cases := []struct {
-		*tests
-		testfor string
-		str     string
+		*Check
+		str string
 	}{
 		{
-			controls.Groups[0].Checks[0].Tests,
-			"flag set",
+			controls.Groups[0].Checks[0],
 			"2:45 ../kubernetes/kube-apiserver --allow-privileged=false --option1=20,30,40",
 		},
 		{
-			controls.Groups[0].Checks[1].Tests,
-			"flag not set",
+			controls.Groups[0].Checks[1],
 			"2:45 ../kubernetes/kube-apiserver --allow-privileged=false",
 		},
 		{
-			controls.Groups[0].Checks[2].Tests,
-			"flag and value set",
+			controls.Groups[0].Checks[2],
 			"niinai   13617  2635 99 19:26 pts/20   00:03:08 ./kube-apiserver --insecure-port=0 --anonymous-auth",
 		},
 		{
-			controls.Groups[0].Checks[3].Tests,
-			"flag value greater than value",
+			controls.Groups[0].Checks[3],
 			"2:45 ../kubernetes/kube-apiserver --secure-port=0 --audit-log-maxage=40 --option",
 		},
 		{
-			controls.Groups[0].Checks[4].Tests,
-			"flag value less than value",
+			controls.Groups[0].Checks[4],
 			"2:45 ../kubernetes/kube-apiserver --max-backlog=20 --secure-port=0 --audit-log-maxage=40 --option",
 		},
 		{
-			controls.Groups[0].Checks[5].Tests,
-			"flag value does not have",
+			controls.Groups[0].Checks[5],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
 		},
 		{
-			controls.Groups[0].Checks[6].Tests,
-			"AND multiple tests, all testitems pass",
+			controls.Groups[0].Checks[6],
 			"2:45 .. --kubelet-clientkey=foo --kubelet-client-certificate=bar --admission-control=Webhook,RBAC",
 		},
 		{
-			controls.Groups[0].Checks[7].Tests,
-			"OR multiple tests",
+			controls.Groups[0].Checks[7],
 			"2:45 ..  --secure-port=0 --kubelet-client-certificate=bar --admission-control=Webhook,RBAC",
 		},
 		{
-			controls.Groups[0].Checks[8].Tests,
-			"text",
+			controls.Groups[0].Checks[8],
 			"644",
 		},
 		{
-			controls.Groups[0].Checks[9].Tests,
-			"flag value is comma-separated",
-			"2:35 ../kubelet --features-gates=KubeletClient=true,KubeletServer=true",
+			controls.Groups[0].Checks[9],
+			"640",
 		},
 		{
-			controls.Groups[0].Checks[9].Tests,
-			"flag value is comma-separated",
-			"2:35 ../kubelet --features-gates=KubeletServer=true,KubeletClient=true",
+			controls.Groups[0].Checks[9],
+			"600",
 		},
 	}
 
 	for _, c := range cases {
-		res := c.tests.execute(c.str)
+		res := c.Tests.execute(c.str)
 		if !res {
-			t.Errorf("%s, expected:%v, got:%v\n", c.testfor, true, res)
+			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
 		}
 	}
 }
