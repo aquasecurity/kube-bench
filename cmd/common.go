@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -150,15 +151,35 @@ func runChecks(t check.NodeType) {
 // verifyNodeType checks the executables and config files are as expected
 // for the specified tests (master, node or federated).
 func verifyNodeType(t check.NodeType) {
+	var bins []string
+	var confs []string
+
 	switch t {
 	case check.MASTER:
-		verifyBin(apiserverBin, schedulerBin, controllerManagerBin)
-		verifyConf(apiserverConf, schedulerConf, controllerManagerConf)
+		bins = []string{apiserverBin, schedulerBin, controllerManagerBin}
+		confs = []string{apiserverConf, schedulerConf, controllerManagerConf}
 	case check.NODE:
-		verifyBin(kubeletBin, proxyBin)
-		verifyConf(kubeletConf, proxyConf)
+		bins = []string{kubeletBin, proxyBin}
+		confs = []string{kubeletConf, proxyConf}
 	case check.FEDERATED:
-		verifyBin(fedApiserverBin, fedControllerManagerBin)
+		bins = []string{fedApiserverBin, fedControllerManagerBin}
+	}
+
+	for _, bin := range bins {
+		if !verifyBin(bin, ps) {
+			printlnWarn(fmt.Sprintf("%s is not running", bin))
+		}
+	}
+
+	for _, conf := range confs {
+		_, err := os.Stat(conf)
+		if err != nil {
+			if os.IsNotExist(err) {
+				printlnWarn(fmt.Sprintf("Missing kubernetes config file: %s", conf))
+			} else {
+				exitWithError(fmt.Errorf("error looking for file %s: %v", conf, err))
+			}
+		}
 	}
 }
 
