@@ -150,3 +150,12 @@ func versionMatch(r *regexp.Regexp, s string) string {
 	}
 	return match[1]
 }
+
+func multiWordReplace(s string, subname string, sub string) string {
+	f := strings.Fields(sub)
+	if len(f) > 1 {
+		sub = "'" + sub + "'"
+	}
+
+	return strings.Replace(s, subname, sub, -1)
+}

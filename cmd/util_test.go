@@ -107,3 +107,25 @@ func TestVerifyBin(t *testing.T) {
 		})
 	}
 }
+
+func TestMultiWordReplace(t *testing.T) {
+	cases := []struct {
+		input   string
+		sub     string
+		subname string
+		output  string
+	}{
+		{input: "Here's a file with no substitutions", sub: "blah", subname: "blah", output: "Here's a file with no substitutions"},
+		{input: "Here's a file with a substitution", sub: "blah", subname: "substitution", output: "Here's a file with a blah"},
+		{input: "Here's a file with multi-word substitutions", sub: "multi word", subname: "multi-word", output: "Here's a file with 'multi word' substitutions"},
+		{input: "Here's a file with several several substitutions several", sub: "blah", subname: "several", output: "Here's a file with blah blah substitutions blah"},
+	}
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			s := multiWordReplace(c.input, c.subname, c.sub)
+			if s != c.output {
+				t.Fatalf("Expected %s got %s", c.output, s)
+			}
+		})
+	}
+}
