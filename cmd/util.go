@@ -69,7 +69,8 @@ func verifyConf(confPath ...string) {
 
 	for _, c := range confPath {
 		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
-			continueWithError(err, "")
+			e := fmt.Errorf("configuration file %s not found", c)
+			continueWithError(e, "")
 			missing += c + ", "
 		}
 	}
@@ -93,8 +94,9 @@ func verifyBin(binPath ...string) {
 		bin = bin + "," + b
 		binSlice = append(binSlice, b)
 		if err != nil {
+			e := fmt.Errorf("executable file %s not found", b)
+			continueWithError(e, "")
 			missing += b + ", "
-			continueWithError(err, "")
 		}
 	}
 	bin = strings.Trim(bin, ",")
