@@ -64,66 +64,30 @@ func cleanIDs(list string) []string {
 	return ids
 }
 
-func verifyConf(confPath ...string) {
-	var missing string
-
-	for _, c := range confPath {
-		if _, err := os.Stat(c); err != nil && os.IsNotExist(err) {
-			e := fmt.Errorf("configuration file %s not found", c)
-			continueWithError(e, "")
-			missing += c + ", "
-		}
-	}
-
-	if len(missing) > 0 {
-		missing = strings.Trim(missing, ", ")
-		printlnWarn(fmt.Sprintf("Missing kubernetes config files: %s", missing))
-	}
-
-}
-
-func verifyBin(binPath ...string) {
-	var binSlice []string
-	var bin string
-	var missing string
-	var notRunning string
-
-	// Construct proc name for ps(1)
-	for _, b := range binPath {
-		_, err := exec.LookPath(b)
-		bin = bin + "," + b
-		binSlice = append(binSlice, b)
-		if err != nil {
-			e := fmt.Errorf("executable file %s not found", b)
-			continueWithError(e, "")
-			missing += b + ", "
-		}
-	}
-	bin = strings.Trim(bin, ",")
-
-	cmd := exec.Command("ps", "-C", bin, "-o", "cmd", "--no-headers")
+// ps execs out to the ps command; it's separated into a function so we can write tests
+func ps(proc string) string {
+	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
 	}
 
-	for _, b := range binSlice {
-		matched := strings.Contains(string(out), b)
+	return string(out)
+}
 
-		if !matched {
-			notRunning += b + ", "
-		}
-	}
+// verifyBin checks that the binary specified is running
+func verifyBin(bin string, psFunc func(string) string) bool {
 
-	if len(missing) > 0 {
-		missing = strings.Trim(missing, ", ")
-		printlnWarn(fmt.Sprintf("Missing kubernetes binaries: %s", missing))
-	}
+	// Strip any quotes
+	bin = strings.Trim(bin, "'\"")
 
-	if len(notRunning) > 0 {
-		notRunning = strings.Trim(notRunning, ", ")
-		printlnWarn(fmt.Sprintf("Kubernetes binaries not running: %s", notRunning))
-	}
+	// bin could consist of more than one word
+	// We'll search for running processes with the first word, and then check the whole
+	// proc as supplied is included in the results
+	proc := strings.Fields(bin)[0]
+	out := psFunc(proc)
+
+	return strings.Contains(out, bin)
 }
 
 func verifyKubeVersion(major string, minor string) {
@@ -140,7 +104,9 @@ func verifyKubeVersion(major string, minor string) {
 	if err != nil {
 		s := fmt.Sprintf("Kubernetes version check skipped with error %v", err)
 		continueWithError(err, sprintlnWarn(s))
-		return
+		if len(out) == 0 {
+			return
+		}
 	}
 
 	msg := checkVersion("Client", string(out), major, minor)
@@ -183,4 +149,13 @@ func versionMatch(r *regexp.Regexp, s string) string {
 		return ""
 	}
 	return match[1]
+}
+
+func multiWordReplace(s string, subname string, sub string) string {
+	f := strings.Fields(sub)
+	if len(f) > 1 {
+		sub = "'" + sub + "'"
+	}
+
+	return strings.Replace(s, subname, sub, -1)
 }

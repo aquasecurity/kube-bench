@@ -94,3 +94,25 @@ groups:
             op: eq
             value: "644"
           set: true
+
+    - id: 9
+      text: "test permissions"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
+      tests:
+        bin_op: or
+        test_items:
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
