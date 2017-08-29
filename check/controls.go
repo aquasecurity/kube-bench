@@ -23,10 +23,11 @@ import (
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
-	ID     string `yaml:"id"`
-	Text   string
-	Type   NodeType
-	Groups []*Group
+	ID      string `yaml:"id"`
+	Version string
+	Text    string
+	Type    NodeType
+	Groups  []*Group
 	Summary
 }
 

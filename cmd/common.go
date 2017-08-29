@@ -78,7 +78,7 @@ func runChecks(t check.NodeType) {
 	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
 
 	// Run kubernetes installation validation checks.
-	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
+	// verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
 	verifyNodeType(t)
 
 	switch t {
@@ -90,7 +90,9 @@ func runChecks(t check.NodeType) {
 		file = federatedFile
 	}
 
-	in, err := ioutil.ReadFile(file)
+	ver := getKubeVersion()
+	path := fmt.Sprintf("%s/%s/%s", cfgDir, ver.Server, file)
+	in, err := ioutil.ReadFile(path)
 	if err != nil {
 		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
 	}
