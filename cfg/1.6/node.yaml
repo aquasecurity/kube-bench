@@ -1,5 +1,6 @@
 ---
 controls:
+version: 1.6
 id: 2
 text: "Worker Node Security Configuration"
 type: "node"
@@ -79,11 +80,10 @@ groups:
       text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
-        bin_op: or
         test_items:
           - flag: "--streaming-connection-idle-timeout"
             compare:
-              op: noteq
+              op: gt
               value: 0
             set: true
       remediation: "Edit the $kubeletconf file on each node and set the KUBELET_ARGS 
@@ -187,34 +187,6 @@ groups:
             set: true
       remediation: "Edit the $kubeletconf file on each node and set the KUBELET_ARGS parameter 
               to \"--cadvisor-port=0\""
-      scored: true
-
-    - id: 2.1.14
-      text: "Ensure that the RotateKubeletClientCertificate argument is set to true"
-      audit: "ps -ef | grep $kubeletbin | grep -v grep"
-      tests:
-        test_items:
-          - flag: "RotateKubeletClientCertificate"
-            compare:
-              op: eq
-              value: true
-            set: true
-      remediation: "Edit the /etc/kubernetes/kubelet file on each node and set the KUBELET_ARGS parameter
-              to a value to include \"--feature-gates=RotateKubeletClientCertificate=true\"."
-      scored: true
-
-    - id: 2.1.15
-      text: "Ensure that the RotateKubeletServerCertificate argument is set to true"
-      audit: "ps -ef | grep $kubeletbin | grep -v grep"
-      tests:
-        test_items:
-          - flag: "RotateKubeletServerCertificate"
-            compare:
-              op: eq
-              value: true
-            set: true
-      remediation: "Edit the /etc/kubernetes/kubelet file on each node and set the KUBELET_ARGS parameter
-              to a value to include \"--feature-gates=RotateKubeletServerCertificate=true\"."
       scored: true
 
 - id: 2.2
@@ -329,41 +301,4 @@ groups:
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
               \nFor example, chown root:root $proxyconf"
-      scored: true
-
-    - id: 2.2.7
-      text: "Ensure that the certificate authorities file permissions are set to
-              644 or more restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %a $ca-file; fi'"
-      tests:
-        bin_op: or
-        test_items:
-          - flag: "644"
-            compare:
-              op: eq
-              value: "644"
-            set: true
-          - flag: "640"
-            compare:
-              op: eq
-              value: "640"
-            set: true
-          - flag: "600"
-            compare:
-              op: eq
-              value: "600"
-            set: true
-      remediation: "Run the following command to modify the file permissions of the --client-ca-file
-              \nchmod 644 <filename>"
-      scored: true
-
-    - id: 2.2.8
-      text: "Ensure that the client certificate authorities file ownership is set to root:root"
-      audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %U:%G $ca-file; fi'"
-      tests:
-        test_items:
-          - flag: "notexist:notexist"
-            set: true
-      remediation: "Run the following command to modify the ownership of the --client-ca-file.
-              \nchown root:root <filename>"
       scored: true
