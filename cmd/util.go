@@ -10,6 +10,7 @@ import (
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
 	"github.com/golang/glog"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -83,6 +84,37 @@ func ps(proc string) string {
 	return string(out)
 }
 
+// getBinaries finds which of the set of candidate executables are running
+func getBinaries(v *viper.Viper) map[string]string {
+	binmap := make(map[string]string)
+
+	for _, exeType := range v.AllKeys() {
+		bin, err := findExecutable(v.GetStringSlice(exeType))
+		if err != nil {
+			exitWithError(fmt.Errorf("looking for %s executable but none of the candidates are running", exeType))
+		}
+
+		binmap[exeType] = bin
+	}
+	return binmap
+}
+
+// getConfigFiles finds which of the set of candidate config files exist
+func getConfigFiles(v *viper.Viper) map[string]string {
+	confmap := make(map[string]string)
+
+	for _, confType := range v.AllKeys() {
+		conf := findConfigFile(v.GetStringSlice(confType))
+		if conf == "" {
+			printlnWarn(fmt.Sprintf("Missing kubernetes config file for %s", confType))
+		} else {
+			confmap[confType] = conf
+		}
+	}
+
+	return confmap
+}
+
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
 
@@ -108,6 +140,21 @@ func verifyBin(bin string) bool {
 	}
 
 	return false
+}
+
+// fundConfigFile looks through a list of possible config files and finds the first one that exists
+func findConfigFile(candidates []string) string {
+	for _, c := range candidates {
+		_, err := statFunc(c)
+		if err == nil {
+			return c
+		}
+		if !os.IsNotExist(err) {
+			exitWithError(fmt.Errorf("error looking for file %s: %v", c, err))
+		}
+	}
+
+	return ""
 }
 
 // findExecutable looks through a list of possible executable names and finds the first one that's running

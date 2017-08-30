@@ -15,9 +15,13 @@
 package cmd
 
 import (
+	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
 func TestCheckVersion(t *testing.T) {
@@ -78,10 +82,19 @@ func TestVersionMatch(t *testing.T) {
 }
 
 var g string
+var e []error
+var eIndex int
 
 func fakeps(proc string) string {
 	return g
 }
+
+func fakestat(file string) (os.FileInfo, error) {
+	err := e[eIndex]
+	eIndex++
+	return nil, err
+}
+
 func TestVerifyBin(t *testing.T) {
 	cases := []struct {
 		proc  string
@@ -145,6 +158,41 @@ func TestFindExecutable(t *testing.T) {
 	}
 }
 
+func TestGetBinaries(t *testing.T) {
+	cases := []struct {
+		config map[string]interface{}
+		psOut  string
+		exp    map[string]string
+	}{
+		{
+			config: map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}},
+			psOut:  "kube-apiserver",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			config: map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}, "thing": []string{"something else", "thing"}},
+			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+		},
+	}
+
+	v := viper.New()
+	psFunc = fakeps
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			g = c.psOut
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			m := getBinaries(v)
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
+			}
+		})
+	}
+}
+
 func TestMultiWordReplace(t *testing.T) {
 	cases := []struct {
 		input   string
@@ -162,6 +210,67 @@ func TestMultiWordReplace(t *testing.T) {
 			s := multiWordReplace(c.input, c.subname, c.sub)
 			if s != c.output {
 				t.Fatalf("Expected %s got %s", c.output, s)
+			}
+		})
+	}
+}
+
+func TestFindConfigFile(t *testing.T) {
+	cases := []struct {
+		input       []string
+		statResults []error
+		exp         string
+	}{
+		{input: []string{"myfile"}, statResults: []error{nil}, exp: "myfile"},
+		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, nil}, exp: "thatfile"},
+		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, os.ErrNotExist}, exp: ""},
+	}
+
+	statFunc = fakestat
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			e = c.statResults
+			eIndex = 0
+			conf := findConfigFile(c.input)
+			if conf != c.exp {
+				t.Fatalf("Got %s expected %s", conf, c.exp)
+			}
+		})
+	}
+}
+
+func TestGetConfigFiles(t *testing.T) {
+	cases := []struct {
+		config      map[string]interface{}
+		exp         map[string]string
+		statResults []error
+	}{
+		{
+			config:      map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			config:      map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}, "thing": []string{"/my/file/thing"}},
+			statResults: []error{os.ErrNotExist, nil, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "/my/file/thing"},
+		},
+	}
+
+	v := viper.New()
+	statFunc = fakestat
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			e = c.statResults
+			eIndex = 0
+
+			m := getConfigFiles(v)
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
 		})
 	}
