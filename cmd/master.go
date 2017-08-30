@@ -33,7 +33,7 @@ func init() {
 	masterCmd.PersistentFlags().StringVarP(&masterFile,
 		"file",
 		"f",
-		cfgDir+"/master.yaml",
+		"/master.yaml",
 		"Alternative YAML file for master checks",
 	)
 

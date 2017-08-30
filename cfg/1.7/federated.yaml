@@ -1,5 +1,6 @@
 ---
 controls:
+version: 1.7
 id: 3
 text: "Federated Deployments"
 type: "federated"
