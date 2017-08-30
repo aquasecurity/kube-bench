@@ -22,6 +22,14 @@ var (
 	}
 )
 
+var psFunc func(string) string
+var statFunc func(string) (os.FileInfo, error)
+
+func init() {
+	psFunc = ps
+	statFunc = os.Stat
+}
+
 func printlnWarn(msg string) {
 	fmt.Fprintf(os.Stderr, "[%s] %s\n",
 		colors[check.WARN].Sprintf("%s", check.WARN),
@@ -76,7 +84,7 @@ func ps(proc string) string {
 }
 
 // verifyBin checks that the binary specified is running
-func verifyBin(bin string, psFunc func(string) string) bool {
+func verifyBin(bin string) bool {
 
 	// Strip any quotes
 	bin = strings.Trim(bin, "'\"")
@@ -103,9 +111,9 @@ func verifyBin(bin string, psFunc func(string) string) bool {
 }
 
 // findExecutable looks through a list of possible executable names and finds the first one that's running
-func findExecutable(candidates []string, psFunc func(string) string) (string, error) {
+func findExecutable(candidates []string) (string, error) {
 	for _, c := range candidates {
-		if verifyBin(c, psFunc) {
+		if verifyBin(c) {
 			return c, nil
 		}
 	}

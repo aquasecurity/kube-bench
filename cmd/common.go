@@ -165,7 +165,7 @@ func verifyNodeType(t check.NodeType) {
 	}
 
 	for _, bin := range bins {
-		if !verifyBin(bin, ps) {
+		if !verifyBin(bin) {
 			printlnWarn(fmt.Sprintf("%s is not running", bin))
 		}
 	}

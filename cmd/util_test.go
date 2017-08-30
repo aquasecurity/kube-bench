@@ -97,10 +97,11 @@ func TestVerifyBin(t *testing.T) {
 		{proc: "cmd param", psOut: "cmd", exp: false},
 	}
 
+	psFunc = fakeps
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			g = c.psOut
-			v := verifyBin(c.proc, fakeps)
+			v := verifyBin(c.proc)
 			if v != c.exp {
 				t.Fatalf("Expected %v got %v", c.exp, v)
 			}
@@ -120,12 +121,15 @@ func TestFindExecutable(t *testing.T) {
 		{candidates: []string{"one double", "two double", "three double"}, psOut: "two double is running", exp: "two double"},
 		{candidates: []string{"one", "two", "three"}, psOut: "blah", expErr: true},
 		{candidates: []string{"one double", "two double", "three double"}, psOut: "two", expErr: true},
+		{candidates: []string{"apiserver", "kube-apiserver"}, psOut: "kube-apiserver", exp: "kube-apiserver"},
+		{candidates: []string{"apiserver", "kube-apiserver", "hyperkube-apiserver"}, psOut: "kube-apiserver", exp: "kube-apiserver"},
 	}
 
+	psFunc = fakeps
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			g = c.psOut
-			e, err := findExecutable(c.candidates, fakeps)
+			e, err := findExecutable(c.candidates)
 			if e != c.exp {
 				t.Fatalf("Expected %v got %v", c.exp, e)
 			}
