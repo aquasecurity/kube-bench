@@ -87,7 +87,19 @@ func verifyBin(bin string, psFunc func(string) string) bool {
 	proc := strings.Fields(bin)[0]
 	out := psFunc(proc)
 
-	return strings.Contains(out, bin)
+	if !strings.Contains(out, bin) {
+		return false
+	}
+
+	// Make sure we're not just matching on a partial word (e.g. if we're looking for apiserver, don't match on kube-apiserver)
+	// This will give a false positive for matching "one two" against "zero one two-x" but it will do for now
+	for _, f := range strings.Fields(out) {
+		if f == proc {
+			return true
+		}
+	}
+
+	return false
 }
 
 // findExecutable looks through a list of possible executable names and finds the first one that's running
