@@ -7,106 +7,70 @@
 # nodeControls: ./cfg/node.yaml
 # federatedControls: ./cfg/federated.yaml
 
-## Support components
-etcd:
-  bin: etcd
-  conf: /etc/etcd/etcd.conf
+master:
+  bins: 
+    apiserver:
+      - "kube-apiserver"
+      - "hyperkube apiserver"
+      - "apiserver"
+    scheduler:
+      - "kube-scheduler"
+      - "hyperkube scheduler"
+      - "scheduler"
+    controllermanager:
+      - "kube-controller-manager"
+      - "hyperkube controller-manager"
+      - "controller-manager"
+  confs:
+    apiserver: 
+      - /etc/kubernetes/admin.conf
+      - /etc/kubernetes/apiserver
+      - /etc/kubernetes/manifests/kube-apiserver.yaml
+    scheduler: 
+      - /etc/kubernetes/scheduler.conf
+      - /etc/kubernetes/scheduler
+      - /etc/kubernetes/manifests/kube-scheduler.yaml
+    controller-manager: 
+      - /etc/kubernetes/controller-manager.conf
+      - /etc/kubernetes/controller-manager
+      - /etc/kubernetes/manifests/kube-controller-manager.yaml
+    etcd:
+      - /etc/etcd/etcd.conf
+    flanneld:
+      - /etc/sysconfig/flanneld
 
-flanneld:
-  bin: flanneld
-  conf: /etc/sysconfig/flanneld
+node:
+  bins:
+    kubelet:
+      - "hyperkube kubelet"
+      - "kubelet"
+    proxy:
+      - "kube-proxy"
+      - "hyperkube proxy"
+      - "proxy"
+  confs:
+    kubelet: 
+      - /etc/kubernetes/kubelet.conf
+      - /etc/kubernetes/kubelet
+    proxy: 
+      - /etc/kubernetes/proxy.conf
+      - /etc/kubernetes/proxy
+      - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
 
-# Installation
-# Configure kubernetes component binaries and paths to their configuration files.
-installation:
-  default:
-    config: /etc/kubernetes/config
-    master:
-      bin:
-        apiserver: apiserver
-        scheduler: scheduler
-        controller-manager: controller-manager
-      conf:
-        apiserver: /etc/kubernetes/apiserver
-        scheduler: /etc/kubernetes/scheduler
-        controller-manager: /etc/kubernetes/controller-manager
-    node:
-      bin:
-        kubelet: kubelet
-        proxy: proxy
-      conf:
-        kubelet: /etc/kubernetes/kubelet
-        proxy: /etc/kubernetes/proxy
-    federated:
-      bin:
-        apiserver: federation-apiserver
-        controller-manager: federation-controller-manager
+federated:
+  bins:
+    fedapiserver:
+      - "hyperkube federation-apiserver"
+      - "kube-federation-apiserver"
+      - "federation-apiserver"
+    fedcontrollermanager:
+      - "hyperkube federation-controller-manager"
+      - "kube-federation-controller-manager"
+      - "federation-controller-manager"
 
-  kops:
-    config: /etc/kubernetes/config
-    master:
-      bin:
-        apiserver: apiserver
-        scheduler: scheduler
-        controller-manager: controller-manager
-      conf:
-        apiserver: /etc/kubernetes/apiserver
-        scheduler: /etc/kubernetes/scheduler
-        controller-manager: /etc/kubernetes/apiserver
-    node:
-      bin:
-        kubelet: kubelet
-        proxy: proxy
-      conf:
-        kubelet: /etc/kubernetes/kubelet
-        proxy: /etc/kubernetes/proxy
-    federated:
-      bin:
-        apiserver: federation-apiserver
-        controller-manager: federation-controller-manager
-
-  hyperkube:
-    config: /etc/kubernetes/config
-    master:
-      bin:
-        apiserver: hyperkube apiserver
-        scheduler: hyperkube scheduler
-        controller-manager: hyperkube controller-manager
-      conf:
-        apiserver: /etc/kubernetes/manifests/kube-apiserver.yaml
-        scheduler: /etc/kubernetes/manifests/kube-scheduler.yaml
-        controller-manager: /etc/kubernetes/manifests/kube-controller-manager.yaml
-    node:
-      bin:
-        kubelet: hyperkube kubelet
-        proxy: hyperkube proxy
-      conf:
-        kubelet: /etc/kubernetes/kubelet
-        proxy: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
-    federated:
-      bin:
-        apiserver: hyperkube federation-apiserver
-        controller-manager: hyperkube federation-controller-manager
-
-  kubeadm:
-    config: /etc/kubernetes/config
-    master:
-      bin:
-        apiserver: kube-apiserver
-        scheduler: kube-scheduler
-        controller-manager: kube-controller-manager
-      conf:
-        apiserver: /etc/kubernetes/admin.conf
-        scheduler: /etc/kubernetes/scheduler.conf
-        controller-manager: /etc/kubernetes/controller-manager.conf
-    node:
-      bin:
-        kubelet: kubelet
-        proxy: kube-proxy
-      conf:
-        kubelet: /etc/kubernetes/kubelet.conf
-        proxy: /etc/kubernetes/proxy.conf
-    federated:
-      bin:
-        apiserver: kube-federation-apiserver
-        controller-manager: kube-federation-controller-manager
+optional:
+  bins:
+    etcd:
+      - "etcd"
+    flanneld:
+      - "flanneld"
