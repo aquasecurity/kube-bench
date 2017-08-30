@@ -52,7 +52,7 @@ func exitWithError(err error) {
 
 func continueWithError(err error, msg string) string {
 	if err != nil {
-		glog.V(1).Info(err)
+		glog.V(2).Info(err)
 	}
 
 	if msg != "" {
@@ -85,12 +85,12 @@ func ps(proc string) string {
 }
 
 // getBinaries finds which of the set of candidate executables are running
-func getBinaries(v *viper.Viper) map[string]string {
+func getBinaries(v *viper.Viper, optional bool) map[string]string {
 	binmap := make(map[string]string)
 
 	for _, exeType := range v.AllKeys() {
 		bin, err := findExecutable(v.GetStringSlice(exeType))
-		if err != nil {
+		if err != nil && !optional {
 			exitWithError(fmt.Errorf("looking for %s executable but none of the candidates are running", exeType))
 		}
 
@@ -162,6 +162,8 @@ func findExecutable(candidates []string) (string, error) {
 	for _, c := range candidates {
 		if verifyBin(c) {
 			return c, nil
+		} else {
+			glog.V(1).Info(fmt.Sprintf("executable '%s' not running", c))
 		}
 	}
 
@@ -236,4 +238,14 @@ func multiWordReplace(s string, subname string, sub string) string {
 	}
 
 	return strings.Replace(s, subname, sub, -1)
+}
+
+func makeSubstitutions(s string, ext string, m map[string]string) string {
+	for k, v := range m {
+		subst := "$" + k + ext
+		glog.V(1).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		s = multiWordReplace(s, subst, v)
+	}
+
+	return s
 }

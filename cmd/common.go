@@ -52,30 +52,25 @@ var (
 func runChecks(t check.NodeType) {
 	var summary check.Summary
 	var file string
+	var err error
+	var typeConf *viper.Viper
 
-	// Master variables
-	apiserverBin = viper.GetString("installation." + installation + ".master.bin.apiserver")
-	apiserverConf = viper.GetString("installation." + installation + ".master.conf.apiserver")
-	schedulerBin = viper.GetString("installation." + installation + ".master.bin.scheduler")
-	schedulerConf = viper.GetString("installation." + installation + ".master.conf.scheduler")
-	controllerManagerBin = viper.GetString("installation." + installation + ".master.bin.controller-manager")
-	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controller-manager")
-	config = viper.GetString("installation." + installation + ".config")
+	switch t {
+	case check.MASTER:
+		file = masterFile
+		typeConf = viper.Sub("master")
+	case check.NODE:
+		file = nodeFile
+		typeConf = viper.Sub("node")
+	case check.FEDERATED:
+		file = federatedFile
+		typeConf = viper.Sub("federated")
+	}
 
-	etcdBin = viper.GetString("etcd.bin")
-	etcdConf = viper.GetString("etcd.conf")
-	flanneldBin = viper.GetString("flanneld.bin")
-	flanneldConf = viper.GetString("flanneld.conf")
-
-	// Node variables
-	kubeletBin = viper.GetString("installation." + installation + ".node.bin.kubelet")
-	kubeletConf = viper.GetString("installation." + installation + ".node.conf.kubelet")
-	proxyBin = viper.GetString("installation." + installation + ".node.bin.proxy")
-	proxyConf = viper.GetString("installation." + installation + ".node.conf.proxy")
-
-	// Federated
-	fedApiserverBin = viper.GetString("installation." + installation + ".federated.bin.apiserver")
-	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
+	// Get the set of exectuables we care about on this type of node
+	binmap := getBinaries(typeConf.Sub("bins"), false)
+	extrasmap := getBinaries(viper.Sub("optional"), true)
+	confmap := getConfigFiles(typeConf.Sub("confs"))
 
 	// Run kubernetes installation validation checks.
 	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
@@ -96,26 +91,10 @@ func runChecks(t check.NodeType) {
 	}
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
-	s := multiWordReplace(string(in), "$apiserverbin", apiserverBin)
-	s = multiWordReplace(s, "$apiserverconf", apiserverConf)
-	s = multiWordReplace(s, "$schedulerbin", schedulerBin)
-	s = multiWordReplace(s, "$schedulerconf", schedulerConf)
-	s = multiWordReplace(s, "$controllermanagerbin", controllerManagerBin)
-	s = multiWordReplace(s, "$controllermanagerconf", controllerManagerConf)
-	s = multiWordReplace(s, "$config", config)
-
-	s = multiWordReplace(s, "$etcdbin", etcdBin)
-	s = multiWordReplace(s, "$etcdconf", etcdConf)
-	s = multiWordReplace(s, "$flanneldbin", flanneldBin)
-	s = multiWordReplace(s, "$flanneldconf", flanneldConf)
-
-	s = multiWordReplace(s, "$kubeletbin", kubeletBin)
-	s = multiWordReplace(s, "$kubeletconf", kubeletConf)
-	s = multiWordReplace(s, "$proxybin", proxyBin)
-	s = multiWordReplace(s, "$proxyconf", proxyConf)
-
-	s = multiWordReplace(s, "$fedapiserverbin", fedApiserverBin)
-	s = multiWordReplace(s, "$fedcontrollermanagerbin", fedControllerManagerBin)
+	s := string(in)
+	s = makeSubstitutions(s, "bin", binmap)
+	s = makeSubstitutions(s, "bin", extrasmap)
+	s = makeSubstitutions(s, "conf", confmap)
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {

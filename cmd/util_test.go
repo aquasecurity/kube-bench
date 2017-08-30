@@ -185,7 +185,7 @@ func TestGetBinaries(t *testing.T) {
 			for k, val := range c.config {
 				v.Set(k, val)
 			}
-			m := getBinaries(v)
+			m := getBinaries(v, false)
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
@@ -271,6 +271,26 @@ func TestGetConfigFiles(t *testing.T) {
 			m := getConfigFiles(v)
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
+			}
+		})
+	}
+}
+
+func TestMakeSubsitutions(t *testing.T) {
+	cases := []struct {
+		input string
+		subst map[string]string
+		exp   string
+	}{
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that"},
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that"},
+		{input: "Replace $thisbin and $herebin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that and there"},
+	}
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			s := makeSubstitutions(c.input, "bin", c.subst)
+			if s != c.exp {
+				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
 		})
 	}
