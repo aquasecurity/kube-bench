@@ -90,6 +90,17 @@ func verifyBin(bin string, psFunc func(string) string) bool {
 	return strings.Contains(out, bin)
 }
 
+// findExecutable looks through a list of possible executable names and finds the first one that's running
+func findExecutable(candidates []string, psFunc func(string) string) (string, error) {
+	for _, c := range candidates {
+		if verifyBin(c, psFunc) {
+			return c, nil
+		}
+	}
+
+	return "", fmt.Errorf("no candidates running")
+}
+
 func verifyKubeVersion(major string, minor string) {
 	// These executables might not be on the user's path.
 

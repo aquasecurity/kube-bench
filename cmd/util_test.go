@@ -108,6 +108,39 @@ func TestVerifyBin(t *testing.T) {
 	}
 }
 
+func TestFindExecutable(t *testing.T) {
+	cases := []struct {
+		candidates []string // list of executables we'd consider
+		psOut      string   // fake output from ps
+		exp        string   // the one we expect to find in the (fake) ps output
+		expErr     bool
+	}{
+		{candidates: []string{"one", "two", "three"}, psOut: "two", exp: "two"},
+		{candidates: []string{"one", "two", "three"}, psOut: "two three", exp: "two"},
+		{candidates: []string{"one double", "two double", "three double"}, psOut: "two double is running", exp: "two double"},
+		{candidates: []string{"one", "two", "three"}, psOut: "blah", expErr: true},
+		{candidates: []string{"one double", "two double", "three double"}, psOut: "two", expErr: true},
+	}
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			g = c.psOut
+			e, err := findExecutable(c.candidates, fakeps)
+			if e != c.exp {
+				t.Fatalf("Expected %v got %v", c.exp, e)
+			}
+
+			if err == nil && c.expErr {
+				t.Fatalf("Expected error")
+			}
+
+			if err != nil && !c.expErr {
+				t.Fatalf("Didn't expect error: %v", err)
+			}
+		})
+	}
+}
+
 func TestMultiWordReplace(t *testing.T) {
 	cases := []struct {
 		input   string
