@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 
 	"github.com/aquasecurity/kube-bench/check"
+	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
 
@@ -53,6 +54,8 @@ func runChecks(t check.NodeType) {
 	var file string
 	var err error
 	var typeConf *viper.Viper
+
+	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 
 	switch t {
 	case check.MASTER:
@@ -131,8 +134,6 @@ func colorPrint(state check.State, s string) {
 
 // prettyPrint outputs the results to stdout in human-readable format
 func prettyPrint(r *check.Controls, summary check.Summary) {
-	colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-
 	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
 		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
