@@ -14,8 +14,7 @@ master:
     - controllermanager
     - etcd 
     - flanneld
-    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the 
-    # benchmark but is believed to now be obselete
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
     - kubernetes
 
   kubernetes:
@@ -74,6 +73,11 @@ node:
   components:
     - kubelet
     - proxy
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    - kubernetes
+
+  kubernetes:
+    defaultconf: /etc/kubernetes/config    
 
   kubelet:
     bins:
@@ -81,7 +85,8 @@ node:
       - "kubelet"
     confs:
       - /etc/kubernetes/kubelet.conf
-      - /etc/kubernetes/kubelet
+      - /etc/kubernetes/kubelet 
+    defaultconf: "/etc/kubernetes/kubelet.conf"
   
   proxy:
     bins:

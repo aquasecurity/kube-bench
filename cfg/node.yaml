@@ -17,7 +17,7 @@ groups:
               op: eq
               value: false
             set: true
-      remediation: "Edit the $config file on each node and set the KUBE_ALLOW_PRIV 
+      remediation: "Edit the $kubeletconf file on each node and set the KUBE_ALLOW_PRIV 
               parameter to \"--allow-privileged=false\""
       scored: true
 
@@ -199,7 +199,7 @@ groups:
               op: eq
               value: true
             set: true
-      remediation: "Edit the /etc/kubernetes/kubelet file on each node and set the KUBELET_ARGS parameter
+      remediation: "Edit the $kubeletconf file on each node and set the KUBELET_ARGS parameter
               to a value to include \"--feature-gates=RotateKubeletClientCertificate=true\"."
       scored: true
 
@@ -213,7 +213,7 @@ groups:
               op: eq
               value: true
             set: true
-      remediation: "Edit the /etc/kubernetes/kubelet file on each node and set the KUBELET_ARGS parameter
+      remediation: "Edit the $kubeletconf file on each node and set the KUBELET_ARGS parameter
               to a value to include \"--feature-gates=RotateKubeletServerCertificate=true\"."
       scored: true
 
@@ -222,7 +222,7 @@ groups:
   checks:
     - id: 2.2.1
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
+      audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %a $kubernetesconf; fi'"
       tests:
         bin_op: or
         test_items:
@@ -242,12 +242,12 @@ groups:
               value: "600"
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chmod 644 $config"
+              \nFor example, chmod 644 $kubernetesconf"
       scored: true
 
     - id: 2.2.2
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $config; then stat -c %U:%G $config; fi'"
+      audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %U:%G $kubernetesconf; fi'"
       tests:
         test_items:
           - flag: "root:root"
@@ -256,7 +256,7 @@ groups:
               value: root:root
             set: true
       remediation: "Run the below command (based on the file location on your system) on the each worker node. 
-              \nFor example, chown root:root $config"
+              \nFor example, chown root:root $kubernetesconf"
       scored: true
 
     - id: 2.2.3
