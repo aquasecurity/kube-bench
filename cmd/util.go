@@ -85,17 +85,34 @@ func ps(proc string) string {
 }
 
 // getBinaries finds which of the set of candidate executables are running
-func getBinaries(v *viper.Viper, optional bool) map[string]string {
+func getBinaries(v *viper.Viper) map[string]string {
 	binmap := make(map[string]string)
 
-	for _, exeType := range v.AllKeys() {
-		bin, err := findExecutable(v.GetStringSlice(exeType))
-		if err != nil && !optional {
-			exitWithError(fmt.Errorf("looking for %s executable but none of the candidates are running", exeType))
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
 		}
 
-		binmap[exeType] = bin
+		optional := s.GetBool("optional")
+		bins := s.GetStringSlice("bins")
+		if len(bins) > 0 {
+			bin, err := findExecutable(bins)
+			if err != nil && !optional {
+				exitWithError(fmt.Errorf("need %s executable but none of the candidates are running", component))
+			}
+
+			// Default the executable name that we'll substitute to the name of the component
+			if bin == "" {
+				bin = component
+				glog.V(2).Info(fmt.Sprintf("Component %s not running", component))
+			} else {
+				glog.V(2).Info(fmt.Sprintf("Component %s uses running binary %s", component, bin))
+			}
+			binmap[component] = bin
+		}
 	}
+
 	return binmap
 }
 
@@ -103,13 +120,28 @@ func getBinaries(v *viper.Viper, optional bool) map[string]string {
 func getConfigFiles(v *viper.Viper) map[string]string {
 	confmap := make(map[string]string)
 
-	for _, confType := range v.AllKeys() {
-		conf := findConfigFile(v.GetStringSlice(confType))
-		if conf == "" {
-			printlnWarn(fmt.Sprintf("Missing kubernetes config file for %s", confType))
-		} else {
-			confmap[confType] = conf
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
 		}
+
+		// See if any of the candidate config files exist
+		conf := findConfigFile(s.GetStringSlice("confs"))
+		if conf == "" {
+			if s.IsSet("defaultconf") {
+				conf = s.GetString("defaultconf")
+				glog.V(2).Info(fmt.Sprintf("Using default config file name '%s' for component %s", conf, component))
+			} else {
+				// Default the config file name that we'll substitute to the name of the component
+				printlnWarn(fmt.Sprintf("Missing config file for %s", component))
+				conf = component
+			}
+		} else {
+			glog.V(2).Info(fmt.Sprintf("Component %s uses config file '%s'", component, conf))
+		}
+
+		confmap[component] = conf
 	}
 
 	return confmap

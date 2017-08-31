@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -67,10 +66,10 @@ func runChecks(t check.NodeType) {
 		typeConf = viper.Sub("federated")
 	}
 
-	// Get the set of exectuables we care about on this type of node
-	binmap := getBinaries(typeConf.Sub("bins"), false)
-	extrasmap := getBinaries(viper.Sub("optional"), true)
-	confmap := getConfigFiles(typeConf.Sub("confs"))
+	// Get the set of exectuables and config files we care about on this type of node. This also
+	// checks that the executables we need for the node type are running.
+	binmap := getBinaries(typeConf)
+	confmap := getConfigFiles(typeConf)
 
 	// Run kubernetes installation validation checks.
 	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
@@ -92,7 +91,6 @@ func runChecks(t check.NodeType) {
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
-	s = makeSubstitutions(s, "bin", extrasmap)
 	s = makeSubstitutions(s, "conf", confmap)
 
 	controls, err := check.NewControls(t, []byte(s))
