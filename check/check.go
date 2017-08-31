@@ -156,7 +156,9 @@ func (c *Check) Run() {
 		i++
 	}
 
-	glog.V(2).Info("%s\n", errmsgs)
+	if errmsgs != "" {
+		glog.V(2).Info(errmsgs)
+	}
 
 	res := c.Tests.execute(out.String())
 	if res {
