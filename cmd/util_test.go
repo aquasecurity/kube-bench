@@ -189,13 +189,13 @@ func TestGetBinaries(t *testing.T) {
 		{
 			// more than one component
 			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
-			psOut:  "kube-apiserver thing",
+			psOut:  "kube-apiserver \nthing",
 			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
 		},
 		{
 			// default binary to component name
 			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
-			psOut:  "kube-apiserver otherthing",
+			psOut:  "kube-apiserver \notherthing some params",
 			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
 		},
 	}
