@@ -159,14 +159,14 @@ func verifyBin(bin string) bool {
 	proc := strings.Fields(bin)[0]
 	out := psFunc(proc)
 
-	if !strings.Contains(out, bin) {
-		return false
-	}
-
-	// Make sure we're not just matching on a partial word (e.g. if we're looking for apiserver, don't match on kube-apiserver)
-	// This will give a false positive for matching "one two" against "zero one two-x" but it will do for now
-	for _, f := range strings.Fields(out) {
-		if f == proc {
+	// There could be multiple lines in the ps output
+	// The binary needs to be the first word in the ps output, except that it could be preceded by a path
+	// e.g. /usr/bin/kubelet is a match for kubelet
+	// but apiserver is not a match for kube-apiserver
+	reFirstWord := regexp.MustCompile(`^(\S*\/)*` + bin)
+	lines := strings.Split(out, "\n")
+	for _, l := range lines {
+		if reFirstWord.Match([]byte(l)) {
 			return true
 		}
 	}

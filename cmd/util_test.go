@@ -108,6 +108,11 @@ func TestVerifyBin(t *testing.T) {
 		{proc: "cmd", psOut: "cmd param1 param2", exp: true},
 		{proc: "cmd param", psOut: "cmd param1 param2", exp: true},
 		{proc: "cmd param", psOut: "cmd", exp: false},
+		{proc: "cmd", psOut: "cmd x \ncmd y", exp: true},
+		{proc: "cmd y", psOut: "cmd x \ncmd y", exp: true},
+		{proc: "cmd", psOut: "/usr/bin/cmd", exp: true},
+		{proc: "cmd", psOut: "kube-cmd", exp: false},
+		{proc: "cmd", psOut: "/usr/bin/kube-cmd", exp: false},
 	}
 
 	psFunc = fakeps
