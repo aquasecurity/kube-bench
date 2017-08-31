@@ -74,7 +74,6 @@ func runChecks(t check.NodeType) {
 
 	// Run kubernetes installation validation checks.
 	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
-	verifyNodeType(t)
 
 	switch t {
 	case check.MASTER:
@@ -123,41 +122,6 @@ func runChecks(t check.NodeType) {
 		fmt.Println(string(out))
 	} else {
 		prettyPrint(controls, summary)
-	}
-}
-
-// verifyNodeType checks the executables and config files are as expected
-// for the specified tests (master, node or federated).
-func verifyNodeType(t check.NodeType) {
-	var bins []string
-	var confs []string
-
-	switch t {
-	case check.MASTER:
-		bins = []string{apiserverBin, schedulerBin, controllerManagerBin}
-		confs = []string{apiserverConf, schedulerConf, controllerManagerConf}
-	case check.NODE:
-		bins = []string{kubeletBin, proxyBin}
-		confs = []string{kubeletConf, proxyConf}
-	case check.FEDERATED:
-		bins = []string{fedApiserverBin, fedControllerManagerBin}
-	}
-
-	for _, bin := range bins {
-		if !verifyBin(bin) {
-			printlnWarn(fmt.Sprintf("%s is not running", bin))
-		}
-	}
-
-	for _, conf := range confs {
-		_, err := os.Stat(conf)
-		if err != nil {
-			if os.IsNotExist(err) {
-				printlnWarn(fmt.Sprintf("Missing kubernetes config file: %s", conf))
-			} else {
-				exitWithError(fmt.Errorf("error looking for file %s: %v", conf, err))
-			}
-		}
 	}
 }
 
