@@ -165,13 +165,32 @@ func TestGetBinaries(t *testing.T) {
 		exp    map[string]string
 	}{
 		{
-			config: map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}},
+			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}},
 			psOut:  "kube-apiserver",
 			exp:    map[string]string{"apiserver": "kube-apiserver"},
 		},
 		{
-			config: map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}, "thing": []string{"something else", "thing"}},
+			// "thing" is not in the list of components
+			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
 			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// "anotherthing" in list of components but doesn't have a defintion
+			config: map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// more than one component
+			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+		},
+		{
+			// default binary to component name
+			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
+			psOut:  "kube-apiserver otherthing",
 			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
 		},
 	}
@@ -185,7 +204,7 @@ func TestGetBinaries(t *testing.T) {
 			for k, val := range c.config {
 				v.Set(k, val)
 			}
-			m := getBinaries(v, false)
+			m := getBinaries(v)
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
@@ -246,14 +265,45 @@ func TestGetConfigFiles(t *testing.T) {
 		statResults []error
 	}{
 		{
-			config:      map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}},
+			config:      map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}}},
 			statResults: []error{os.ErrNotExist, nil},
 			exp:         map[string]string{"apiserver": "kube-apiserver"},
 		},
 		{
-			config:      map[string]interface{}{"apiserver": []string{"apiserver", "kube-apiserver"}, "thing": []string{"/my/file/thing"}},
+			// Component "thing" isn't included in the list of components
+			config: map[string]interface{}{
+				"components": []string{"apiserver"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// More than one component
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
 			statResults: []error{os.ErrNotExist, nil, nil},
 			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "/my/file/thing"},
+		},
+		{
+			// Default thing to specified default config
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}, "defaultconf": "another/thing"}},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "another/thing"},
+		},
+		{
+			// Default thing to component name
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
 		},
 	}
 
