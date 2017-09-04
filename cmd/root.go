@@ -34,14 +34,6 @@ var (
 	masterFile    string
 	nodeFile      string
 	federatedFile string
-
-	loud bool
-
-	kubeConfDir     string
-	etcdConfDir     string
-	flanneldConfDir string
-
-	installation string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -67,12 +59,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
-	RootCmd.PersistentFlags().StringVar(
-		&installation,
-		"installation",
-		"default",
-		"Specify how kubernetes cluster was installed. Possible values are default,hyperkube,kops,kubeadm",
-	)
 	RootCmd.PersistentFlags().StringVarP(
 		&checkList,
 		"check",

@@ -17,9 +17,9 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"github.com/aquasecurity/kube-bench/check"
+	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
 
@@ -52,34 +52,30 @@ var (
 func runChecks(t check.NodeType) {
 	var summary check.Summary
 	var file string
+	var err error
+	var typeConf *viper.Viper
 
-	// Master variables
-	apiserverBin = viper.GetString("installation." + installation + ".master.bin.apiserver")
-	apiserverConf = viper.GetString("installation." + installation + ".master.conf.apiserver")
-	schedulerBin = viper.GetString("installation." + installation + ".master.bin.scheduler")
-	schedulerConf = viper.GetString("installation." + installation + ".master.conf.scheduler")
-	controllerManagerBin = viper.GetString("installation." + installation + ".master.bin.controller-manager")
-	controllerManagerConf = viper.GetString("installation." + installation + ".master.conf.controller-manager")
-	config = viper.GetString("installation." + installation + ".config")
+	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 
-	etcdBin = viper.GetString("etcd.bin")
-	etcdConf = viper.GetString("etcd.conf")
-	flanneldBin = viper.GetString("flanneld.bin")
-	flanneldConf = viper.GetString("flanneld.conf")
+	switch t {
+	case check.MASTER:
+		file = masterFile
+		typeConf = viper.Sub("master")
+	case check.NODE:
+		file = nodeFile
+		typeConf = viper.Sub("node")
+	case check.FEDERATED:
+		file = federatedFile
+		typeConf = viper.Sub("federated")
+	}
 
-	// Node variables
-	kubeletBin = viper.GetString("installation." + installation + ".node.bin.kubelet")
-	kubeletConf = viper.GetString("installation." + installation + ".node.conf.kubelet")
-	proxyBin = viper.GetString("installation." + installation + ".node.bin.proxy")
-	proxyConf = viper.GetString("installation." + installation + ".node.conf.proxy")
-
-	// Federated
-	fedApiserverBin = viper.GetString("installation." + installation + ".federated.bin.apiserver")
-	fedControllerManagerBin = viper.GetString("installation." + installation + ".federated.bin.controller-manager")
+	// Get the set of exectuables and config files we care about on this type of node. This also
+	// checks that the executables we need for the node type are running.
+	binmap := getBinaries(typeConf)
+	confmap := getConfigFiles(typeConf)
 
 	// Run kubernetes installation validation checks.
 	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
-	verifyNodeType(t)
 
 	switch t {
 	case check.MASTER:
@@ -96,26 +92,9 @@ func runChecks(t check.NodeType) {
 	}
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
-	s := multiWordReplace(string(in), "$apiserverbin", apiserverBin)
-	s = multiWordReplace(s, "$apiserverconf", apiserverConf)
-	s = multiWordReplace(s, "$schedulerbin", schedulerBin)
-	s = multiWordReplace(s, "$schedulerconf", schedulerConf)
-	s = multiWordReplace(s, "$controllermanagerbin", controllerManagerBin)
-	s = multiWordReplace(s, "$controllermanagerconf", controllerManagerConf)
-	s = multiWordReplace(s, "$config", config)
-
-	s = multiWordReplace(s, "$etcdbin", etcdBin)
-	s = multiWordReplace(s, "$etcdconf", etcdConf)
-	s = multiWordReplace(s, "$flanneldbin", flanneldBin)
-	s = multiWordReplace(s, "$flanneldconf", flanneldConf)
-
-	s = multiWordReplace(s, "$kubeletbin", kubeletBin)
-	s = multiWordReplace(s, "$kubeletconf", kubeletConf)
-	s = multiWordReplace(s, "$proxybin", proxyBin)
-	s = multiWordReplace(s, "$proxyconf", proxyConf)
-
-	s = multiWordReplace(s, "$fedapiserverbin", fedApiserverBin)
-	s = multiWordReplace(s, "$fedcontrollermanagerbin", fedControllerManagerBin)
+	s := string(in)
+	s = makeSubstitutions(s, "bin", binmap)
+	s = makeSubstitutions(s, "conf", confmap)
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
@@ -147,41 +126,6 @@ func runChecks(t check.NodeType) {
 	}
 }
 
-// verifyNodeType checks the executables and config files are as expected
-// for the specified tests (master, node or federated).
-func verifyNodeType(t check.NodeType) {
-	var bins []string
-	var confs []string
-
-	switch t {
-	case check.MASTER:
-		bins = []string{apiserverBin, schedulerBin, controllerManagerBin}
-		confs = []string{apiserverConf, schedulerConf, controllerManagerConf}
-	case check.NODE:
-		bins = []string{kubeletBin, proxyBin}
-		confs = []string{kubeletConf, proxyConf}
-	case check.FEDERATED:
-		bins = []string{fedApiserverBin, fedControllerManagerBin}
-	}
-
-	for _, bin := range bins {
-		if !verifyBin(bin, ps) {
-			printlnWarn(fmt.Sprintf("%s is not running", bin))
-		}
-	}
-
-	for _, conf := range confs {
-		_, err := os.Stat(conf)
-		if err != nil {
-			if os.IsNotExist(err) {
-				printlnWarn(fmt.Sprintf("Missing kubernetes config file: %s", conf))
-			} else {
-				exitWithError(fmt.Errorf("error looking for file %s: %v", conf, err))
-			}
-		}
-	}
-}
-
 // colorPrint outputs the state in a specific colour, along with a message string
 func colorPrint(state check.State, s string) {
 	colors[state].Printf("[%s] ", state)
@@ -190,8 +134,6 @@ func colorPrint(state check.State, s string) {
 
 // prettyPrint outputs the results to stdout in human-readable format
 func prettyPrint(r *check.Controls, summary check.Summary) {
-	colorPrint(check.INFO, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-
 	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 	for _, g := range r.Groups {
 		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))

@@ -15,9 +15,13 @@
 package cmd
 
 import (
+	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
 func TestCheckVersion(t *testing.T) {
@@ -78,10 +82,19 @@ func TestVersionMatch(t *testing.T) {
 }
 
 var g string
+var e []error
+var eIndex int
 
 func fakeps(proc string) string {
 	return g
 }
+
+func fakestat(file string) (os.FileInfo, error) {
+	err := e[eIndex]
+	eIndex++
+	return nil, err
+}
+
 func TestVerifyBin(t *testing.T) {
 	cases := []struct {
 		proc  string
@@ -95,14 +108,110 @@ func TestVerifyBin(t *testing.T) {
 		{proc: "cmd", psOut: "cmd param1 param2", exp: true},
 		{proc: "cmd param", psOut: "cmd param1 param2", exp: true},
 		{proc: "cmd param", psOut: "cmd", exp: false},
+		{proc: "cmd", psOut: "cmd x \ncmd y", exp: true},
+		{proc: "cmd y", psOut: "cmd x \ncmd y", exp: true},
+		{proc: "cmd", psOut: "/usr/bin/cmd", exp: true},
+		{proc: "cmd", psOut: "kube-cmd", exp: false},
+		{proc: "cmd", psOut: "/usr/bin/kube-cmd", exp: false},
 	}
+
+	psFunc = fakeps
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			g = c.psOut
+			v := verifyBin(c.proc)
+			if v != c.exp {
+				t.Fatalf("Expected %v got %v", c.exp, v)
+			}
+		})
+	}
+}
+
+func TestFindExecutable(t *testing.T) {
+	cases := []struct {
+		candidates []string // list of executables we'd consider
+		psOut      string   // fake output from ps
+		exp        string   // the one we expect to find in the (fake) ps output
+		expErr     bool
+	}{
+		{candidates: []string{"one", "two", "three"}, psOut: "two", exp: "two"},
+		{candidates: []string{"one", "two", "three"}, psOut: "two three", exp: "two"},
+		{candidates: []string{"one double", "two double", "three double"}, psOut: "two double is running", exp: "two double"},
+		{candidates: []string{"one", "two", "three"}, psOut: "blah", expErr: true},
+		{candidates: []string{"one double", "two double", "three double"}, psOut: "two", expErr: true},
+		{candidates: []string{"apiserver", "kube-apiserver"}, psOut: "kube-apiserver", exp: "kube-apiserver"},
+		{candidates: []string{"apiserver", "kube-apiserver", "hyperkube-apiserver"}, psOut: "kube-apiserver", exp: "kube-apiserver"},
+	}
+
+	psFunc = fakeps
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			g = c.psOut
+			e, err := findExecutable(c.candidates)
+			if e != c.exp {
+				t.Fatalf("Expected %v got %v", c.exp, e)
+			}
+
+			if err == nil && c.expErr {
+				t.Fatalf("Expected error")
+			}
+
+			if err != nil && !c.expErr {
+				t.Fatalf("Didn't expect error: %v", err)
+			}
+		})
+	}
+}
+
+func TestGetBinaries(t *testing.T) {
+	cases := []struct {
+		config map[string]interface{}
+		psOut  string
+		exp    map[string]string
+	}{
+		{
+			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}},
+			psOut:  "kube-apiserver",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// "thing" is not in the list of components
+			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// "anotherthing" in list of components but doesn't have a defintion
+			config: map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:  "kube-apiserver thing",
+			exp:    map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// more than one component
+			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:  "kube-apiserver \nthing",
+			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+		},
+		{
+			// default binary to component name
+			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
+			psOut:  "kube-apiserver \notherthing some params",
+			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+		},
+	}
+
+	v := viper.New()
+	psFunc = fakeps
 
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			g = c.psOut
-			v := verifyBin(c.proc, fakeps)
-			if v != c.exp {
-				t.Fatalf("Expected %v got %v", c.exp, v)
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			m := getBinaries(v)
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
 		})
 	}
@@ -125,6 +234,118 @@ func TestMultiWordReplace(t *testing.T) {
 			s := multiWordReplace(c.input, c.subname, c.sub)
 			if s != c.output {
 				t.Fatalf("Expected %s got %s", c.output, s)
+			}
+		})
+	}
+}
+
+func TestFindConfigFile(t *testing.T) {
+	cases := []struct {
+		input       []string
+		statResults []error
+		exp         string
+	}{
+		{input: []string{"myfile"}, statResults: []error{nil}, exp: "myfile"},
+		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, nil}, exp: "thatfile"},
+		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, os.ErrNotExist}, exp: ""},
+	}
+
+	statFunc = fakestat
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			e = c.statResults
+			eIndex = 0
+			conf := findConfigFile(c.input)
+			if conf != c.exp {
+				t.Fatalf("Got %s expected %s", conf, c.exp)
+			}
+		})
+	}
+}
+
+func TestGetConfigFiles(t *testing.T) {
+	cases := []struct {
+		config      map[string]interface{}
+		exp         map[string]string
+		statResults []error
+	}{
+		{
+			config:      map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}}},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// Component "thing" isn't included in the list of components
+			config: map[string]interface{}{
+				"components": []string{"apiserver"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver"},
+		},
+		{
+			// More than one component
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+			statResults: []error{os.ErrNotExist, nil, nil},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "/my/file/thing"},
+		},
+		{
+			// Default thing to specified default config
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}, "defaultconf": "another/thing"}},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "another/thing"},
+		},
+		{
+			// Default thing to component name
+			config: map[string]interface{}{
+				"components": []string{"apiserver", "thing"},
+				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+		},
+	}
+
+	v := viper.New()
+	statFunc = fakestat
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			e = c.statResults
+			eIndex = 0
+
+			m := getConfigFiles(v)
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
+			}
+		})
+	}
+}
+
+func TestMakeSubsitutions(t *testing.T) {
+	cases := []struct {
+		input string
+		subst map[string]string
+		exp   string
+	}{
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that"},
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that"},
+		{input: "Replace $thisbin and $herebin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that and there"},
+	}
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			s := makeSubstitutions(c.input, "bin", c.subst)
+			if s != c.exp {
+				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
 		})
 	}
