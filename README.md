@@ -47,7 +47,10 @@ Flags:
 ## Configuration
 Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file. 
 
-They also tend to vary according to which tool was used to install Kubernetes. You can use the `--installation` flag to pick up a different default set of file names and locations. Again these defaults are configurable through `cfg/config.yaml` (and pull requests to correct or add default file locations are especially welcome). 
+For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.  
+
+* **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running. 
+* **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location. 
 
 ## Test config YAML representation
 The tests are represented as YAML documents (installed by default into ./cfg).
