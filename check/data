@@ -116,3 +116,45 @@ groups:
             op: eq
             value: "600"
           set: true
+
+    - id: 10
+      text: "flag value includes some value in a comma-separated list, value is last in list"
+      tests:
+        test_items:
+          - flag: "--admission-control"
+            compare:
+              op: has
+              value: RBAC
+            set: true
+
+    - id: 11
+      text: "flag value includes some value in a comma-separated list, value is first in list"
+      tests:
+        test_items:
+          - flag: "--admission-control"
+            compare:
+              op: has
+              value: WebHook
+            set: true
+
+    - id: 12
+      text: "flag value includes some value in a comma-separated list, value middle of list"
+      tests:
+        test_items:
+          - flag: "--admission-control"
+            compare:
+              op: has
+              value: Something
+            set: true
+
+    - id: 13
+      text: "flag value includes some value in a comma-separated list, value only one in list"
+      tests:
+        test_items:
+          - flag: "--admission-control"
+            compare:
+              op: has
+              value: Something
+            set: true
+
+
