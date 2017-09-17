@@ -90,7 +90,9 @@ func runChecks(t check.NodeType) {
 		file = federatedFile
 	}
 
-	in, err := ioutil.ReadFile(file)
+	ver := getKubeVersion()
+	path := fmt.Sprintf("%s/%s/%s", cfgDir, ver.Server, file)
+	in, err := ioutil.ReadFile(path)
 	if err != nil {
 		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
 	}

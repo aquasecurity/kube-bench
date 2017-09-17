@@ -33,7 +33,7 @@ func init() {
 	federatedCmd.PersistentFlags().StringVarP(&federatedFile,
 		"file",
 		"f",
-		cfgDir+"/federated.yaml",
+		"/federated.yaml",
 		"Alternative YAML file for federated checks",
 	)
 
