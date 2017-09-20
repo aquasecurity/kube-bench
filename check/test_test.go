@@ -94,6 +94,22 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[9],
 			"600",
 		},
+		{
+			controls.Groups[0].Checks[10],
+			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
+		},
+		{
+			controls.Groups[0].Checks[11],
+			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
+		},
+		{
+			controls.Groups[0].Checks[12],
+			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,Something,RBAC ---audit-log-maxage=40",
+		},
+		{
+			controls.Groups[0].Checks[13],
+			"2:45 ../kubernetes/kube-apiserver --option --admission-control=Something ---audit-log-maxage=40",
+		},
 	}
 
 	for _, c := range cases {
