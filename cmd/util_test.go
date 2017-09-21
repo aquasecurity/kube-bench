@@ -239,6 +239,22 @@ func TestMultiWordReplace(t *testing.T) {
 	}
 }
 
+func TestGetKubeVersion(t *testing.T) {
+	ver := getKubeVersion()
+	if ver == nil {
+		t.Log("Expected non nil version info.")
+	} else {
+		if ok, err := regexp.MatchString(`\d+.\d+`, ver.Client); !ok && err != nil {
+			t.Logf("Expected:%v got %v\n", "n.m", ver.Client)
+		}
+
+		if ok, err := regexp.MatchString(`\d+.\d+`, ver.Server); !ok && err != nil {
+			t.Logf("Expected:%v got %v\n", "n.m", ver.Server)
+		}
+
+	}
+}
+
 func TestFindConfigFile(t *testing.T) {
 	cases := []struct {
 		input       []string

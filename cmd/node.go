@@ -33,7 +33,7 @@ func init() {
 	nodeCmd.PersistentFlags().StringVarP(&nodeFile,
 		"file",
 		"f",
-		cfgDir+"/node.yaml",
+		"/node.yaml",
 		"Alternative YAML file for node checks",
 	)
 

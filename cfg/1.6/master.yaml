@@ -1,5 +1,6 @@
 ---
 controls:
+version: 1.6
 id: 1
 text: "Master Node Security Configuration"
 type: "master"
@@ -310,7 +311,7 @@ groups:
       scored: true
 
     - id: 1.1.23
-      text: "Ensure that the --kubelet-client-certificate and --kubelet-clientkey arguments are set as appropriate (Scored)"
+      text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)"
       audit: "ps -ef | grep $apiserverbin | grep -v grep"
       tests:
         bin_op: and
@@ -436,57 +437,6 @@ groups:
               KUBE_API_ARGS parameter to include \"--etcd-cafile=<path/to/ca-file>\""
       scored: true
 
-    - id: 1.1.32
-      text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
-      audit: "ps -ef | grep $apiserverbin | grep -v grep"
-      tests:
-        test_items:
-        - flag: "--authorization-mode"
-          compare:
-            op: has
-            value: "Node"
-          set: true
-      remediation: "Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
-              parameter to a value to include --authorization-mode=Node. One such example could be
-              as below:\n
-              KUBE_API_ARGS=\"--authorization-mode=Node,RBAC\""
-      scored: true
-
-    - id: 1.1.33
-      text: "Ensure that the admission control policy is set to NodeRestriction (Scored)"
-      audit: "ps -ef | grep $apiserverbin | grep -v grep"
-      tests:
-        test_items:
-        - flag: "--admission-control"
-          compare:
-            op: has
-            value: "NodeRestriction"
-          set: true
-      remediation: "Follow the Kubernetes documentation and configure NodeRestriction plug-in on kubelets.
-              Then, edit the /etc/kubernetes/apiserver file on the master node and set the
-              KUBE_ADMISSION_CONTROL parameter to \"--admissioncontrol=...,NodeRestriction,...\""
-      scored: true
-
-    - id: 1.1.34
-      text: "1.1.34 Ensure that the --experimental-encryption-provider-config argument is set as appropriate (Scored)"
-      audit: "ps -ef | grep $apiserverbin | grep -v grep"
-      tests:
-        test_items:
-        - flag: "--experimental-encryption-provider-config"
-          set: true
-      remediation: "Follow the Kubernetes documentation and configure a EncryptionConfig file. Then, edit
-              the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
-              parameter to \"--experimental-encryption-provider-config=</path/to/EncryptionConfig/File>\""
-      scored: true
-
-    - id: 1.1.35
-      text: "Ensure that the encryption provider is set to aescbc (Scored)"
-      audit: "ps -ef | grep $apiserverbin | grep -v grep"
-      type: "manual"
-      remediation: "Follow the Kubernetes documentation and configure a EncryptionConfig file. In this file,
-              choose aescbc as the encryption provider"
-      scored: true
-
 - id: 1.2
   text: "Scheduler"
   checks:
@@ -531,8 +481,20 @@ groups:
       remediation: "Edit the $controllermanagerconf file on the master node and set the 
               KUBE_CONTROLLER_MANAGER_ARGS parameter to \"--profiling=false\""
       scored: true
- 
+
     - id: 1.3.3
+      text: "Ensure that the --insecure-experimental-approve-all-kubelet-csrs-for-group argument is not set (Scored)"
+      audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+      tests:
+        test_items:
+        - flag: "--insecure-experimental-approve-all-kubelet-csrs-for-group"
+          set: false
+      remediation: "Edit the /etc/kubernetes/controller-manager file on the master node and remove the 
+              --insecure-experimental-approve-all-kubelet-csrs-for-group argument from the
+              KUBE_CONTROLLER_MANAGER_ARGS parameter."
+      scored: true
+ 
+    - id: 1.3.4
       text: "Ensure that the --use-service-account-credentials argument is set"
       audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
       tests:
@@ -546,7 +508,7 @@ groups:
               KUBE_CONTROLLER_MANAGER_ARGS parameter to --use-service-account-credentials=true"
       scored: true
 
-    - id: 1.3.4
+    - id: 1.3.5
       text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
       audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
       tests:
@@ -557,7 +519,7 @@ groups:
               KUBE_CONTROLLER_MANAGER_ARGS parameter to --service-account-private-keyfile=<filename>"
       scored: true
 
-    - id: 1.3.5
+    - id: 1.3.6
       text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
       audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
       tests:
@@ -566,29 +528,6 @@ groups:
           set: true
       remediation: "Edit the $controllermanagerconf file on the master node and set the 
               KUBE_CONTROLLER_MANAGER_ARGS parameter to include --root-ca-file=<file>"
-      scored: true
-
-    - id: 1.3.6
-      text: "Apply Security Context to Your Pods and Containers (Not Scored)"
-      type: "manual"
-      remediation: "Edit the /etc/kubernetes/controller-manager file on the master node and set the
-              KUBE_CONTROLLER_MANAGER_ARGS parameter to a value to include 
-              \"--feature-gates=RotateKubeletServerCertificate=true\""
-      scored: false
-
-    - id: 1.3.7
-      text: " Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
-      audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
-      tests:
-        test_items:
-        - flag: "RotateKubeletServerCertificate"
-          compare:
-            op: eq
-            value: true
-          set: true
-      remediation: "Edit the /etc/kubernetes/controller-manager file on the master node and set the
-              KUBE_CONTROLLER_MANAGER_ARGS parameter to a value to include 
-              \"--feature-gates=RotateKubeletServerCertificate=true\""
       scored: true
  
 - id: 1.4
@@ -636,7 +575,7 @@ groups:
 
     - id: 1.4.3
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %a $kubernetesconf; fi'"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
       tests:
         bin_op: or
         test_items:
@@ -656,12 +595,12 @@ groups:
             value: "600"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
-              \nFor example, chmod 644 $kubernetesconf"
+              \nFor example, chmod 644 $config"
       scored: true
 
     - id: 1.4.4
       text: "Ensure that the config file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %U:%G $kubernetesconf; fi'"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %U:%G $config; fi'"
       tests:
         test_items:
         - flag: "root:root"
@@ -670,7 +609,7 @@ groups:
             value: "root:root"
           set: true
       remediation: "Run the below command (based on the file location on your system) on the master node. 
-              \nFor example, chown root:root $kubernetesconf"
+              \nFor example, chown root:root $config"
       scored: true
 
     - id: 1.4.5
@@ -995,6 +934,13 @@ groups:
       scored: false
 
     - id: 1.6.5
+      text: "Avoid using Kubernetes Secrets (Not Scored)"
+      type: "manual"
+      remediation: "Use other mechanisms such as vaults to manage your cluster secrets."
+      scored: false
+
+
+    - id: 1.6.6
       text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
       type: "manual"
       remediation: "Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
@@ -1005,7 +951,7 @@ groups:
               KUBE_API_ARGS=\"--feature-gates=AllAlpha=true\""
       scored: false
 
-    - id: 1.6.6
+    - id: 1.6.7
       text: "Apply Security Context to Your Pods and Containers (Not Scored)"
       type: "manual"
       remediation: "Follow the Kubernetes documentation and apply security contexts to your pods. For a
@@ -1013,15 +959,8 @@ groups:
               Containers."
       scored: false
 
-    - id: 1.6.7
+    - id: 1.6.8
       text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
       type: "manual"
       remediation: "Follow the Kubernetes documentation and setup image provenance."
       scored: false
-
-    - id: 1.6.8
-      text: "Configure Network policies as appropriate (Not Scored)"
-      type: "manual"
-      remediation: "Follow the Kubernetes documentation and setup network policies as appropriate."
-      scored: false
-
