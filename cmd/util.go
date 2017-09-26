@@ -202,67 +202,6 @@ func findExecutable(candidates []string) (string, error) {
 	return "", fmt.Errorf("no candidates running")
 }
 
-func verifyKubeVersion(major string, minor string) {
-	// These executables might not be on the user's path.
-
-	_, err := exec.LookPath("kubectl")
-	if err != nil {
-		continueWithError(err, sprintlnWarn("Kubernetes version check skipped"))
-		return
-	}
-
-	cmd := exec.Command("kubectl", "version")
-	out, err := cmd.Output()
-	if err != nil {
-		s := fmt.Sprintf("Kubernetes version check skipped with error %v", err)
-		continueWithError(err, sprintlnWarn(s))
-		if len(out) == 0 {
-			return
-		}
-	}
-
-	msg := checkVersion("Client", string(out), major, minor)
-	if msg != "" {
-		continueWithError(fmt.Errorf(msg), msg)
-	}
-
-	msg = checkVersion("Server", string(out), major, minor)
-	if msg != "" {
-		continueWithError(fmt.Errorf(msg), msg)
-	}
-}
-
-var regexVersionMajor = regexp.MustCompile("Major:\"([0-9]+)\"")
-var regexVersionMinor = regexp.MustCompile("Minor:\"([0-9]+)\"")
-
-func checkVersion(x string, s string, expMajor string, expMinor string) string {
-	regexVersion, err := regexp.Compile(x + " Version: version.Info{(.*)}")
-	if err != nil {
-		return fmt.Sprintf("Error checking Kubernetes version: %v", err)
-	}
-
-	ss := regexVersion.FindString(s)
-	major := versionMatch(regexVersionMajor, ss)
-	minor := versionMatch(regexVersionMinor, ss)
-	if major == "" || minor == "" {
-		return fmt.Sprintf("Couldn't find %s version from kubectl output '%s'", x, s)
-	}
-
-	if major != expMajor || minor != expMinor {
-		return fmt.Sprintf("Unexpected %s version %s.%s", x, major, minor)
-	}
-
-	return ""
-}
-
-func versionMatch(r *regexp.Regexp, s string) string {
-	match := r.FindStringSubmatch(s)
-	if len(match) < 2 {
-		return ""
-	}
-	return match[1]
-}
-
 func multiWordReplace(s string, subname string, sub string) string {
 	f := strings.Fields(sub)
 	if len(f) > 1 {
