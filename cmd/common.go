@@ -43,10 +43,6 @@ var (
 	fedControllerManagerBin string
 
 	errmsgs string
-
-	// TODO: Consider specifying this in config file.
-	kubeMajorVersion = "1"
-	kubeMinorVersion = "7"
 )
 
 func runChecks(t check.NodeType) {
@@ -73,9 +69,6 @@ func runChecks(t check.NodeType) {
 	// checks that the executables we need for the node type are running.
 	binmap := getBinaries(typeConf)
 	confmap := getConfigFiles(typeConf)
-
-	// Run kubernetes installation validation checks.
-	verifyKubeVersion(kubeMajorVersion, kubeMinorVersion)
 
 	switch t {
 	case check.MASTER:
