@@ -51,8 +51,6 @@ func runChecks(t check.NodeType) {
 	var err error
 	var typeConf *viper.Viper
 
-	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-
 	switch t {
 	case check.MASTER:
 		file = masterFile
@@ -90,6 +88,9 @@ func runChecks(t check.NodeType) {
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
+
+	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", path))
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
