@@ -68,6 +68,7 @@ func runChecks(t check.NodeType) {
 	binmap := getBinaries(typeConf)
 	confmap := getConfigFiles(typeConf)
 	podspecmap := getPodSpecFiles(typeConf)
+	unitfilemap := getUnitFiles(typeConf)
 
 	switch t {
 	case check.MASTER:
@@ -90,6 +91,7 @@ func runChecks(t check.NodeType) {
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
 	s = makeSubstitutions(s, "podspec", podspecmap)
+	s = makeSubstitutions(s, "unitfile", unitfilemap)
 
 	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", path))

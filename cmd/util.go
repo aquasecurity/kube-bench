@@ -178,6 +178,37 @@ func getPodSpecFiles(v *viper.Viper) map[string]string {
 	return podspecmap
 }
 
+// getUnitFiles finds which of the set of candidate unit files exist
+func getUnitFiles(v *viper.Viper) map[string]string {
+	unitfilemap := make(map[string]string)
+
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
+		}
+
+		// See if any of the candidate podspec files exist
+		unitfile := findConfigFile(s.GetStringSlice("unitfiles"))
+		if unitfile == "" {
+			if s.IsSet("defaultunitfile") {
+				unitfile = s.GetString("defaultunitfile")
+				glog.V(2).Info(fmt.Sprintf("Using default unit file name '%s' for component %s", unitfile, component))
+			} else {
+				// Default the config file name that we'll substitute to the name of the component
+				printlnWarn(fmt.Sprintf("Missing unit file for %s", component))
+				unitfile = component
+			}
+		} else {
+			glog.V(2).Info(fmt.Sprintf("Component %s uses unit file '%s'", component, unitfile))
+		}
+
+		unitfilemap[component] = unitfile
+	}
+
+	return unitfilemap
+}
+
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
 

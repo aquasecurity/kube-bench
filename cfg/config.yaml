@@ -99,6 +99,10 @@ node:
       - /etc/kubernetes/kubelet.conf
       - /etc/kubernetes/kubelet 
     defaultconf: "/etc/kubernetes/kubelet.conf"
+
+    unitfiles:
+     - /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    defaultunitfile: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
   
   proxy:
     bins:
