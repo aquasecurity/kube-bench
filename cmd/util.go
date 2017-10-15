@@ -147,6 +147,37 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 	return confmap
 }
 
+// getPodSpecFiles finds which of the set of candidate podspec files exist
+func getPodSpecFiles(v *viper.Viper) map[string]string {
+	podspecmap := make(map[string]string)
+
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
+		}
+
+		// See if any of the candidate podspec files exist
+		podspec := findConfigFile(s.GetStringSlice("podspecs"))
+		if podspec == "" {
+			if s.IsSet("defaultpodspec") {
+				podspec = s.GetString("defaultpodspec")
+				glog.V(2).Info(fmt.Sprintf("Using default podspec file name '%s' for component %s", podspec, component))
+			} else {
+				// Default the config file name that we'll substitute to the name of the component
+				printlnWarn(fmt.Sprintf("Missing podspec file for %s", component))
+				podspec = component
+			}
+		} else {
+			glog.V(2).Info(fmt.Sprintf("Component %s uses podspec file '%s'", component, podspec))
+		}
+
+		podspecmap[component] = podspec
+	}
+
+	return podspecmap
+}
+
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
 

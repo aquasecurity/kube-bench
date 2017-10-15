@@ -26,10 +26,13 @@ master:
       - "hyperkube apiserver"
       - "apiserver"
     confs:
-      - /etc/kubernetes/manifests/kube-apiserver.yaml
       - /etc/kubernetes/apiserver.conf
       - /etc/kubernetes/apiserver
     defaultconf: /etc/kubernetes/apiserver
+
+    podspecs:
+      - /etc/kubernetes/manifests/kube-apiserver.yaml
+    defaultpodspec: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
     bins:
@@ -37,10 +40,13 @@ master:
       - "hyperkube scheduler"
       - "scheduler"
     confs: 
-      - /etc/kubernetes/manifests/kube-scheduler.yaml
       - /etc/kubernetes/scheduler.conf
       - /etc/kubernetes/scheduler
     defaultconf: /etc/kubernetes/scheduler
+
+    podspecs:
+      - /etc/kubernetes/manifests/kube-scheduler.yaml
+    defaultpodspec: /etc/kubernetes/manifests/kube-scheduler.yaml
 
   controllermanager:
     bins:
@@ -48,19 +54,25 @@ master:
       - "hyperkube controller-manager"
       - "controller-manager"
     confs:
-      - /etc/kubernetes/manifests/kube-controller-manager.yaml
       - /etc/kubernetes/controller-manager.conf
       - /etc/kubernetes/controller-manager
     defaultconf: /etc/kubernetes/controller-manager
+
+    podspecs:
+      - /etc/kubernetes/manifests/kube-controller-manager.yaml
+    defaultpodspec: /etc/kubernetes/manifests/kube-controller-manager.yaml
 
   etcd:
     optional: true
     bins:
       - "etcd"
     confs:
-      - /etc/kubernetes/manifests/etcd.yaml
       - /etc/etcd/etcd.conf
     defaultconf: /etc/etcd/etcd.conf
+
+    podspecs:
+      - /etc/kubernetes/manifests/etcd.yaml
+    defaultpodspec: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
     optional: true
