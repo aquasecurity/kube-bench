@@ -24,24 +24,6 @@ import (
 )
 
 var (
-	apiserverBin            string
-	apiserverConf           string
-	schedulerBin            string
-	schedulerConf           string
-	controllerManagerBin    string
-	controllerManagerConf   string
-	config                  string
-	etcdBin                 string
-	etcdConf                string
-	flanneldBin             string
-	flanneldConf            string
-	kubeletBin              string
-	kubeletConf             string
-	proxyBin                string
-	proxyConf               string
-	fedApiserverBin         string
-	fedControllerManagerBin string
-
 	errmsgs string
 )
 
@@ -66,7 +48,9 @@ func runChecks(t check.NodeType) {
 	// Get the set of exectuables and config files we care about on this type of node. This also
 	// checks that the executables we need for the node type are running.
 	binmap := getBinaries(typeConf)
-	confmap := getConfigFiles(typeConf)
+	confmap := getConfigFiles(typeConf, "conf")
+	podspecmap := getConfigFiles(typeConf, "podspec")
+	unitfilemap := getConfigFiles(typeConf, "unitfile")
 
 	switch t {
 	case check.MASTER:
@@ -88,6 +72,8 @@ func runChecks(t check.NodeType) {
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
+	s = makeSubstitutions(s, "podspec", podspecmap)
+	s = makeSubstitutions(s, "unitfile", unitfilemap)
 
 	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", path))

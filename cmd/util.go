@@ -117,7 +117,9 @@ func getBinaries(v *viper.Viper) map[string]string {
 }
 
 // getConfigFiles finds which of the set of candidate config files exist
-func getConfigFiles(v *viper.Viper) map[string]string {
+// accepts a string 't' which indicates the type of config file, conf,
+// podspec or untifile.
+func getConfigFiles(v *viper.Viper, t string) map[string]string {
 	confmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -127,10 +129,10 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 		}
 
 		// See if any of the candidate config files exist
-		conf := findConfigFile(s.GetStringSlice("confs"))
+		conf := findConfigFile(s.GetStringSlice(t + "s"))
 		if conf == "" {
-			if s.IsSet("defaultconf") {
-				conf = s.GetString("defaultconf")
+			if s.IsSet("default" + t) {
+				conf = s.GetString("default" + t)
 				glog.V(2).Info(fmt.Sprintf("Using default config file name '%s' for component %s", conf, component))
 			} else {
 				// Default the config file name that we'll substitute to the name of the component
