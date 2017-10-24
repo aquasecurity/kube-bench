@@ -129,7 +129,7 @@ func getConfigFiles(v *viper.Viper, t string) map[string]string {
 		}
 
 		// See if any of the candidate config files exist
-		conf := findConfigFile(s.GetStringSlice(t))
+		conf := findConfigFile(s.GetStringSlice(t + "s"))
 		if conf == "" {
 			if s.IsSet("default" + t) {
 				conf = s.GetString("default" + t)
