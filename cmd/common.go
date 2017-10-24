@@ -66,9 +66,9 @@ func runChecks(t check.NodeType) {
 	// Get the set of exectuables and config files we care about on this type of node. This also
 	// checks that the executables we need for the node type are running.
 	binmap := getBinaries(typeConf)
-	confmap := getConfigFiles(typeConf)
-	podspecmap := getPodSpecFiles(typeConf)
-	unitfilemap := getUnitFiles(typeConf)
+	confmap := getConfigFiles(typeConf, "conf")
+	podspecmap := getConfigFiles(typeConf, "podspec")
+	unitfilemap := getConfigFiles(typeConf, "unitfile")
 
 	switch t {
 	case check.MASTER:

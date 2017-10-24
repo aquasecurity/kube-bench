@@ -117,7 +117,9 @@ func getBinaries(v *viper.Viper) map[string]string {
 }
 
 // getConfigFiles finds which of the set of candidate config files exist
-func getConfigFiles(v *viper.Viper) map[string]string {
+// accepts a string 't' which indicates the type of config file, conf,
+// podspec or untifile.
+func getConfigFiles(v *viper.Viper, t string) map[string]string {
 	confmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -127,10 +129,10 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 		}
 
 		// See if any of the candidate config files exist
-		conf := findConfigFile(s.GetStringSlice("confs"))
+		conf := findConfigFile(s.GetStringSlice(t))
 		if conf == "" {
-			if s.IsSet("defaultconf") {
-				conf = s.GetString("defaultconf")
+			if s.IsSet("default" + t) {
+				conf = s.GetString("default" + t)
 				glog.V(2).Info(fmt.Sprintf("Using default config file name '%s' for component %s", conf, component))
 			} else {
 				// Default the config file name that we'll substitute to the name of the component
@@ -145,68 +147,6 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 	}
 
 	return confmap
-}
-
-// getPodSpecFiles finds which of the set of candidate podspec files exist
-func getPodSpecFiles(v *viper.Viper) map[string]string {
-	podspecmap := make(map[string]string)
-
-	for _, component := range v.GetStringSlice("components") {
-		s := v.Sub(component)
-		if s == nil {
-			continue
-		}
-
-		// See if any of the candidate podspec files exist
-		podspec := findConfigFile(s.GetStringSlice("podspecs"))
-		if podspec == "" {
-			if s.IsSet("defaultpodspec") {
-				podspec = s.GetString("defaultpodspec")
-				glog.V(2).Info(fmt.Sprintf("Using default podspec file name '%s' for component %s", podspec, component))
-			} else {
-				// Default the config file name that we'll substitute to the name of the component
-				printlnWarn(fmt.Sprintf("Missing podspec file for %s", component))
-				podspec = component
-			}
-		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses podspec file '%s'", component, podspec))
-		}
-
-		podspecmap[component] = podspec
-	}
-
-	return podspecmap
-}
-
-// getUnitFiles finds which of the set of candidate unit files exist
-func getUnitFiles(v *viper.Viper) map[string]string {
-	unitfilemap := make(map[string]string)
-
-	for _, component := range v.GetStringSlice("components") {
-		s := v.Sub(component)
-		if s == nil {
-			continue
-		}
-
-		// See if any of the candidate podspec files exist
-		unitfile := findConfigFile(s.GetStringSlice("unitfiles"))
-		if unitfile == "" {
-			if s.IsSet("defaultunitfile") {
-				unitfile = s.GetString("defaultunitfile")
-				glog.V(2).Info(fmt.Sprintf("Using default unit file name '%s' for component %s", unitfile, component))
-			} else {
-				// Default the config file name that we'll substitute to the name of the component
-				printlnWarn(fmt.Sprintf("Missing unit file for %s", component))
-				unitfile = component
-			}
-		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses unit file '%s'", component, unitfile))
-		}
-
-		unitfilemap[component] = unitfile
-	}
-
-	return unitfilemap
 }
 
 // verifyBin checks that the binary specified is running
