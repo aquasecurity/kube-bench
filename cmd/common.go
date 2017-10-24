@@ -24,24 +24,6 @@ import (
 )
 
 var (
-	apiserverBin            string
-	apiserverConf           string
-	schedulerBin            string
-	schedulerConf           string
-	controllerManagerBin    string
-	controllerManagerConf   string
-	config                  string
-	etcdBin                 string
-	etcdConf                string
-	flanneldBin             string
-	flanneldConf            string
-	kubeletBin              string
-	kubeletConf             string
-	proxyBin                string
-	proxyConf               string
-	fedApiserverBin         string
-	fedControllerManagerBin string
-
 	errmsgs string
 )
 
