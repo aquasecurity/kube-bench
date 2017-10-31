@@ -25,10 +25,11 @@ import (
 )
 
 var (
-	cfgDir  = "./cfg"
-	cfgFile string
-
+	envVarsPrefix = "KUBE_BENCH"
+	cfgDir        = "./cfg"
+	cfgFile       string
 	jsonFmt       bool
+	pgSql         bool
 	checkList     string
 	groupList     string
 	masterFile    string
@@ -59,6 +60,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
+	RootCmd.PersistentFlags().BoolVar(&pgSql, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().StringVarP(
 		&checkList,
 		"check",
@@ -90,7 +92,7 @@ func initConfig() {
 		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
 
-	viper.SetEnvPrefix("KUBE_BENCH")
+	viper.SetEnvPrefix(envVarsPrefix)
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

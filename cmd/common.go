@@ -18,8 +18,13 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"os"
+	"time"
+
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/spf13/viper"
 )
 
@@ -118,7 +123,17 @@ func runChecks(t check.NodeType) {
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(controls, summary)
+		// if we want to store in PostgreSQL, convert to JSON and save it
+		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && pgSql {
+			out, err := controls.JSON()
+			if err != nil {
+				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+			}
+
+			savePgsql(string(out))
+		} else {
+			prettyPrint(controls, summary)
+		}
 	}
 }
 
@@ -167,4 +182,52 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
 		summary.Pass, summary.Fail, summary.Warn,
 	)
+}
+
+func savePgsql(jsonInfo	 string) {
+	envVars := map[string]string{
+		"PGSQL_HOST":     viper.GetString("PGSQL_HOST"),
+		"PGSQL_USER":     viper.GetString("PGSQL_USER"),
+		"PGSQL_DBNAME":   viper.GetString("PGSQL_DBNAME"),
+		"PGSQL_SSLMODE":  viper.GetString("PGSQL_SSLMODE"),
+		"PGSQL_PASSWORD": viper.GetString("PGSQL_PASSWORD"),
+	}
+
+	for k, v := range envVars {
+		if v == "" {
+			err := fmt.Errorf("Environment variable %s missing", envVarsPrefix+"_"+k)
+			panic(err)
+		}
+	}
+
+	connInfo := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=%s password=%s",
+		envVars["PGSQL_HOST"],
+		envVars["PGSQL_USER"],
+		envVars["PGSQL_DBNAME"],
+		envVars["PGSQL_SSLMODE"],
+		envVars["PGSQL_PASSWORD"],
+	)
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+
+	timestamp := time.Now()
+
+	type ScanResult struct {
+		gorm.Model
+		ScanHost string    `gorm:"type:varchar(63) not null"` // https://www.ietf.org/rfc/rfc1035.txt
+		ScanTime time.Time `gorm:"not null"`
+		ScanInfo string    `gorm:"type:jsonb not null"`
+	}
+
+	db, err := gorm.Open("postgres", connInfo)
+	defer db.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	db.Debug().AutoMigrate(&ScanResult{})
+	db.Save(&ScanResult{ScanHost: hostname, ScanTime: timestamp, ScanInfo: jsonInfo})
 }
