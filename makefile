@@ -1,4 +1,4 @@
-OURCES := $(shell find . -name '*.go')
+SOURCES := $(shell find . -name '*.go')
 TARGET_OS := linux
 BINARY := kube-bench
 
