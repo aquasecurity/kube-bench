@@ -5,7 +5,7 @@
 
 # kube-bench
 
-The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes 1.6 Benchmark v1.0.0.
+The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes Benchmark.
 
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve. 
 
