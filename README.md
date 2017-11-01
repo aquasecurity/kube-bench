@@ -11,6 +11,9 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
 
+## CIS Kubernetes Benchmark support
+
+kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7 and 1.8) as defined in the CIS Benchmarks 1.0.0, 1.1.0 and 1.2.0 respectively. It will determine the test set to run based on the Kubernetes version running on the machine. 
 
 ## Installation
 
@@ -50,7 +53,9 @@ Kubernetes config and binary file locations and names can vary from installation
 For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.  
 
 * **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running. 
+* **podspecs** - From version 1.2.0 of the benchmark (tests for Kubernetes 1.8), the remediation instructions were updated to assume that the configuration for several kubernetes components is defined in a pod YAML file, and podspec settings define where to look for that configuration. 
 * **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location. 
+* **unitfiles** - From version 1.2.0 of the benchmark  (tests for Kubernetes 1.8), the remediation instructions were updated to assume that kubelet configuration is defined in a service file, and this setting defines where to look for that configuration.
 
 ## Test config YAML representation
 The tests are represented as YAML documents (installed by default into ./cfg).
@@ -110,4 +115,6 @@ These operations are:
 - `nothave`: tests if the flag value does not contain the compared value.
 
 # Roadmap 
-The tests are up-to-date with the CIS Benchmark 1.1.0, which refers to Kubernetes 1.7. Going forward we should release updates to kube-bench to reflect new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release. 
+Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release. 
+
+We welcome PRs and issue reports. 
