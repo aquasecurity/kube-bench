@@ -104,7 +104,17 @@ func runChecks(t check.NodeType) {
 
 		fmt.Println(string(out))
 	} else {
-		prettyPrint(controls, summary)
+		// if we want to store in PostgreSQL, convert to JSON and save it
+		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && pgSql {
+			out, err := controls.JSON()
+			if err != nil {
+				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+			}
+
+			savePgsql(string(out))
+		} else {
+			prettyPrint(controls, summary)
+		}
 	}
 }
 
