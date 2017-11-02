@@ -19,9 +19,8 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the deployment specs and set --anonymous-auth=false .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      Edit the deployment specs and set --anonymous-auth=false.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.2
@@ -33,9 +32,8 @@ groups:
         set: false
     remediation: |
       Follow the documentation and configure alternate mechanisms for authentication. Then,
-      edit the deployment specs and remove "--basic-auth-file=<filename>" .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      edit the deployment specs and remove "--basic-auth-file=<filename>".
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.3
@@ -46,9 +44,8 @@ groups:
       - flag: "--insecure-allow-any-token"
         set: false
     remediation: |
-      Edit the deployment specs and remove --insecure-allow-any-token .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      Edit the deployment specs and remove --insecure-allow-any-token.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.4
@@ -59,9 +56,8 @@ groups:
       - flag: "--insecure-bind-address"
         set: false
     remediation: |
-      Edit the deployment specs and remove --insecure-bind-address .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      Edit the deployment specs and remove --insecure-bind-address.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.5
@@ -75,9 +71,8 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the deployment specs and set --insecure-port=0 .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      Edit the deployment specs and set --insecure-port=0.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.6
@@ -95,8 +90,7 @@ groups:
         set: false
     remediation: |
       Edit the deployment specs and set the --secure-port argument to the desired port.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.7
@@ -110,9 +104,8 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the deployment specs and set "--profiling=false" :
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      Edit the deployment specs and set "--profiling=false":
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     score: true
 
   - id: 3.1.8
@@ -128,8 +121,7 @@ groups:
     remediation: |
       Edit the deployment specs and set --admission-control argument to a value that does not
       include AlwaysAdmit .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.9
@@ -144,9 +136,8 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set --admission-control argument to a value that includes
-      NamespaceLifecycle .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      NamespaceLifecycle.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.10
@@ -172,8 +163,7 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set --audit-log-maxage to 30 or as appropriate.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
             
   - id: 3.1.12
@@ -188,8 +178,7 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set --audit-log-maxbackup to 10 or as appropriate.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.13
@@ -204,8 +193,7 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set --audit-log-maxsize=100 to 100 or as appropriate.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.14
@@ -221,8 +209,7 @@ groups:
     remediation: |
       Edit the deployment specs and set --authorization-mode argument to a value other than
       AlwaysAllow
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.15
@@ -235,8 +222,7 @@ groups:
     remediation: |
       Follow the documentation and configure alternate mechanisms for authentication. Then,
       edit the deployment specs and remove the --token-auth-file=<filename> argument.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.16
@@ -251,8 +237,7 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set "--service-account-lookup=true" .
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.17
@@ -264,8 +249,7 @@ groups:
         set: true
     remediation: |
       Edit the deployment specs and set --service-account-key-file argument as appropriate.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.18
@@ -281,11 +265,10 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection between the
-      federation apiserver and etcd. Then, edit the deployment specs and set "--etcd-
-      certfile=<path/to/client-certificate-file>" and "--etcd-
-      keyfile=<path/to/client-key-file>" arguments.
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      federation apiserver and etcd. Then, edit the deployment specs and set 
+      "--etcd-certfile=<path/to/client-certificate-file>" and 
+      "--etcd-keyfile=<path/to/client-key-file>" arguments.
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
   - id: 3.1.19
@@ -301,10 +284,10 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection on the federation
-      apiserver. Then, edit the deployment specs and set "--tls-cert-file=<path/to/tls-
-      certificate-file>" and "--tls-private-key-file=<path/to/tls-key-file>" :
-      kubectl edit deployments federation-apiserver-deployment --
-      namespace=federation-system
+      apiserver. Then, edit the deployment specs and set 
+      "--tls-cert-file=<path/to/tls-certificate-file>" and 
+      "--tls-private-key-file=<path/to/tls-key-file>":
+      kubectl edit deployments federation-apiserver-deployment --namespace=federation-system
     scored: true
 
 - id: 3.2
@@ -321,7 +304,6 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the deployment specs and set "--profiling=false" :
-      kubectl edit deployments federation-controller-manager-deployment --
-      namespace=federation-system
+      Edit the deployment specs and set "--profiling=false":
+      kubectl edit deployments federation-controller-manager-deployment --namespace=federation-system
     scored: true
