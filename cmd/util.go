@@ -213,37 +213,27 @@ func multiWordReplace(s string, subname string, sub string) string {
 	return strings.Replace(s, subname, sub, -1)
 }
 
-type version struct {
-	Server string
-	Client string
-}
-
-func getKubeVersion() *version {
-	ver := new(version)
+func getKubeVersion() string {
+	failmsg := "kubernetes version check failed"
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 	if err != nil {
-		s := fmt.Sprintf("Kubernetes version check skipped with error %v", err)
-		continueWithError(err, sprintlnWarn(s))
-		return nil
+		exitWithError(fmt.Errorf("%s: %s", failmsg, err))
 	}
 
-	cmd := exec.Command("kubectl", "version")
-	out, err := cmd.Output()
+	cmd := exec.Command("kubectl", "version", "--short")
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		s := fmt.Sprintf("Kubernetes version check skipped, with error getting kubectl version")
-		continueWithError(err, sprintlnWarn(s))
-		return nil
+		exitWithError(fmt.Errorf("%s, %s", failmsg, out))
 	}
 
-	clientVerRe := regexp.MustCompile(`Client.*Major:"(\d+)".*Minor:"(\d+)"`)
-	svrVerRe := regexp.MustCompile(`Server.*Major:"(\d+)".*Minor:"(\d+)"`)
+	validVersionPttn := `\d.\d`
+	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
+	ver := serverVersionRe.FindStringSubmatch(string(out))[1]
 
-	sub := clientVerRe.FindStringSubmatch(string(out))
-	ver.Client = sub[1] + "." + sub[2]
-
-	sub = svrVerRe.FindStringSubmatch(string(out))
-	ver.Server = sub[1] + "." + sub[2]
+	if matched, _ := regexp.MatchString(validVersionPttn, ver); !matched {
+		exitWithError(fmt.Errorf("%s: invalid server version ", failmsg, ver))
+	}
 
 	return ver
 }
