@@ -136,7 +136,7 @@ func getConfigFiles(v *viper.Viper, t string) map[string]string {
 				glog.V(2).Info(fmt.Sprintf("Using default config file name '%s' for component %s", conf, component))
 			} else {
 				// Default the config file name that we'll substitute to the name of the component
-				printlnWarn(fmt.Sprintf("Missing config file for %s", component))
+				glog.V(2).Info(fmt.Sprintf("Missing config file for %s", component))
 				conf = component
 			}
 		} else {
