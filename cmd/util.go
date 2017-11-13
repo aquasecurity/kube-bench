@@ -214,25 +214,35 @@ func multiWordReplace(s string, subname string, sub string) string {
 }
 
 func getKubeVersion() string {
+	var ver string
+	var matched bool
+
 	failmsg := "kubernetes version check failed"
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 	if err != nil {
-		exitWithError(fmt.Errorf("%s: %s", failmsg, err))
+		continueWithError(err, failmsg)
 	}
 
 	cmd := exec.Command("kubectl", "version", "--short")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		exitWithError(fmt.Errorf("%s, %s", failmsg, out))
+		continueWithError(fmt.Errorf("%s", out), "")
 	}
 
-	validVersionPttn := `\d.\d`
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
-	ver := serverVersionRe.FindStringSubmatch(string(out))[1]
+	subs := serverVersionRe.FindStringSubmatch(string(out))
+	if len(subs) > 2 {
+		ver = string(subs[1])
+		validVersionPttn := `\d.\d`
+		if matched, _ = regexp.MatchString(validVersionPttn, ver); !matched {
+			continueWithError(fmt.Errorf("%s: invalid server version ", ver), failmsg)
+		}
+	}
 
-	if matched, _ := regexp.MatchString(validVersionPttn, ver); !matched {
-		exitWithError(fmt.Errorf("%s: invalid server version ", failmsg, ver))
+	if ver == "" || !matched {
+		printlnWarn(fmt.Sprintf("Unable to get kubectl version, using default version: %s", defaultKubeVersion))
+		ver = defaultKubeVersion
 	}
 
 	return ver
