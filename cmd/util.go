@@ -232,7 +232,7 @@ func getKubeVersion() string {
 
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(string(out))
-	if len(subs) > 2 {
+	if len(subs) == 2 {
 		ver = string(subs[1])
 		validVersionPttn := `\d.\d`
 		if matched, _ = regexp.MatchString(validVersionPttn, ver); !matched {
