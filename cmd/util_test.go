@@ -191,6 +191,20 @@ func TestGetKubeVersion(t *testing.T) {
 
 }
 
+func TestKubeVersionRegex(t *testing.T) {
+	ver := getVersionFromKubectlOutput(`Client Version: v1.8.0
+		Server Version: v1.8.12
+		`)
+	if ver != "1.8" {
+		t.Fatalf("Expected 1.8 got %s", ver)
+	}
+
+	ver = getVersionFromKubectlOutput("Something completely different")
+	if ver != "1.6" {
+		t.Fatalf("Expected 1.6 got %s", ver)
+	}
+}
+
 func TestFindConfigFile(t *testing.T) {
 	cases := []struct {
 		input       []string

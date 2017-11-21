@@ -62,6 +62,8 @@ func runChecks(t check.NodeType) {
 	}
 
 	ver := getKubeVersion()
+	glog.V(1).Info(fmt.Sprintf("Running tests for Kubernetes version: %s", ver))
+
 	path := fmt.Sprintf("%s/%s/%s", cfgDir, ver, file)
 	in, err := ioutil.ReadFile(path)
 	if err != nil {
