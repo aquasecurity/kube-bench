@@ -17,7 +17,6 @@ package cmd
 import (
 	"os"
 	"reflect"
-	"regexp"
 	"strconv"
 	"testing"
 
@@ -182,19 +181,17 @@ func TestMultiWordReplace(t *testing.T) {
 	}
 }
 
-func TestGetKubeVersion(t *testing.T) {
-	ver := getKubeVersion()
-	if ver == nil {
-		t.Log("Expected non nil version info.")
-	} else {
-		if ok, err := regexp.MatchString(`\d+.\d+`, ver.Client); !ok && err != nil {
-			t.Logf("Expected:%v got %v\n", "n.m", ver.Client)
-		}
+func TestKubeVersionRegex(t *testing.T) {
+	ver := getVersionFromKubectlOutput(`Client Version: v1.8.0
+		Server Version: v1.8.12
+		`)
+	if ver != "1.8" {
+		t.Fatalf("Expected 1.8 got %s", ver)
+	}
 
-		if ok, err := regexp.MatchString(`\d+.\d+`, ver.Server); !ok && err != nil {
-			t.Logf("Expected:%v got %v\n", "n.m", ver.Server)
-		}
-
+	ver = getVersionFromKubectlOutput("Something completely different")
+	if ver != "1.6" {
+		t.Fatalf("Expected 1.6 got %s", ver)
 	}
 }
 
