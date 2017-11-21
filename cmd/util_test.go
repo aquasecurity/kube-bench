@@ -17,7 +17,6 @@ package cmd
 import (
 	"os"
 	"reflect"
-	"regexp"
 	"strconv"
 	"testing"
 
@@ -180,15 +179,6 @@ func TestMultiWordReplace(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestGetKubeVersion(t *testing.T) {
-	ver := getKubeVersion()
-
-	if ok, err := regexp.MatchString(`\d+.\d+`, ver); !ok && err != nil {
-		t.Logf("Expected:%v got %v\n", "n.m", ver)
-	}
-
 }
 
 func TestKubeVersionRegex(t *testing.T) {
