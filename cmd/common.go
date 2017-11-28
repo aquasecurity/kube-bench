@@ -47,7 +47,7 @@ func runChecks(t check.NodeType) {
 	}
 
 	ver := getKubeVersion()
-	path := fmt.Sprintf("%s/%s", cfgDir, ver.Server)
+	path := fmt.Sprintf("%s/%s", cfgDir, ver)
 
 	def := fmt.Sprintf("%s/%s", path, file)
 	in, err := ioutil.ReadFile(def)
@@ -59,7 +59,7 @@ func runChecks(t check.NodeType) {
 	viper.SetConfigFile(path + "/config.yaml")
 	err = viper.MergeInConfig()
 	if err != nil {
-		continueWithError(err, fmt.Sprintf("Reading %s specific configuration file", ver.Server))
+		continueWithError(err, fmt.Sprintf("Reading %s specific configuration file", ver))
 	}
 	typeConf = viper.Sub(nodetype)
 
