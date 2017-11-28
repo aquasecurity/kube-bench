@@ -539,7 +539,7 @@ groups:
     scored: true
 
   - id: 1.1.33
-    text: "1.1.34 Ensure that the --experimental-encryption-provider-config argument is
+    text: "Ensure that the --experimental-encryption-provider-config argument is
     set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:

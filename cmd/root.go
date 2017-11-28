@@ -25,16 +25,17 @@ import (
 )
 
 var (
-	envVarsPrefix = "KUBE_BENCH"
-	cfgDir        = "./cfg"
-	cfgFile       string
-	jsonFmt       bool
-	pgSql         bool
-	checkList     string
-	groupList     string
-	masterFile    string
-	nodeFile      string
-	federatedFile string
+	envVarsPrefix      = "KUBE_BENCH"
+	cfgDir             = "./cfg"
+	defaultKubeVersion = "1.6"
+	cfgFile            string
+	jsonFmt            bool
+	pgSql              bool
+	checkList          string
+	groupList          string
+	masterFile         string
+	nodeFile           string
+	federatedFile      string
 )
 
 // RootCmd represents the base command when called without any subcommands
