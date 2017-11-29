@@ -23,26 +23,29 @@ import (
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
-	ID      string `yaml:"id"`
-	Version string
-	Text    string
-	Type    NodeType
-	Groups  []*Group
+	ID      string `yaml:"id" json:"id"`
+	Version string	`json:"version"`
+	Text    string 	`json:"text"`
+	Type    NodeType `json:"node_type"`
+	Groups  []*Group `json:"tests"`
 	Summary
 }
 
 // Group is a collection of similar checks.
 type Group struct {
-	ID     string `yaml:"id"`
-	Text   string
-	Checks []*Check
+	ID     string   `yaml:"id" json:"section"`
+	Pass   int      `json:"pass"`
+	Fail   int      `json:"fail"`
+	Warn   int      `json:"warn"`
+	Text   string   `json:"desc"`
+	Checks []*Check `json:"results"`
 }
 
 // Summary is a summary of the results of control checks run.
 type Summary struct {
-	Pass int
-	Fail int
-	Warn int
+	Pass int   `json:"total_pass"`
+	Fail int   `json:"total_fail"`
+	Warn int   `json:"total_warn"`
 }
 
 // NewControls instantiates a new master Controls object.
@@ -84,7 +87,9 @@ func (controls *Controls) RunGroup(gids ...string) Summary {
 			if gid == group.ID {
 				for _, check := range group.Checks {
 					check.Run()
+					check.TestInfo = append(check.TestInfo, check.Remediation)
 					summarize(controls, check)
+					summarizeGroup(group, check)
 				}
 
 				g = append(g, group)
@@ -112,6 +117,7 @@ func (controls *Controls) RunChecks(ids ...string) Summary {
 			for _, id := range ids {
 				if id == check.ID {
 					check.Run()
+					check.TestInfo = append(check.TestInfo, check.Remediation)
 					summarize(controls, check)
 
 					// Check if we have already added this checks group.
@@ -176,5 +182,16 @@ func summarize(controls *Controls, check *Check) {
 		controls.Summary.Fail++
 	case WARN:
 		controls.Summary.Warn++
+	}
+}
+
+func summarizeGroup(group *Group, check *Check) {
+	switch check.State {
+	case PASS:
+		group.Pass++
+	case FAIL:
+		group.Fail++
+	case WARN:
+		group.Warn++
 	}
 }
