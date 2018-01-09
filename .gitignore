@@ -1,2 +1,4 @@
 kube-bench
 *.swp
+vendor
+dist
