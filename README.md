@@ -24,12 +24,14 @@ Run ```docker run --rm -v `pwd`:/host aquasec/kube-bench:latest```. This will co
 
 2. Install from sources:
 If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [$GOPATH is set](https://github.com/golang/go/wiki/GOPATH)):
-```go get github.com/aquasecurity/kube-bench```
-```go get github.com/Masterminds/glide```
-```cd $GOPATH/src/github.com/aquasecurity/kube-bench```
-```$GOPATH/bin/glide install```
-```go build -o kube-bench . ```
-```./kube-bench <master|node>```
+
+```go get github.com/aquasecurity/kube-bench
+go get github.com/Masterminds/glide
+cd $GOPATH/src/github.com/aquasecurity/kube-bench
+$GOPATH/bin/glide install
+go build -o kube-bench . 
+./kube-bench <master|node>
+```
 
 ## Usage
 ```./kube-bench [command]```
