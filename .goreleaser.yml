@@ -1,0 +1,23 @@
+builds:
+  - main: main.go
+    binary: kube-bench
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+# Archive customization
+archive:
+  format: tar.gz
+dockers:
+  -
+    binary: kube-bench
+    image: aquasecurity/kube-bench
+    latest: true
+fpm:
+  vendor: Aqua Security
+  description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
+  license: Apache-2.0
+  formats:
+    - deb
+    - rpm

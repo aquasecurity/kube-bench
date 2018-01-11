@@ -1,6 +1,21 @@
+---
 language: go
-install: 
-  - go get github.com/aquasecurity/kube-bench
+
+notifications:
+  email: false
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y rpm
+  - gem install --no-ri --no-rdoc fpm
+
+install:
+  - go get -v github.com/Masterminds/glide
+  - cd $GOPATH/src/github.com/Masterminds/glide && git checkout tags/v0.12.3 && go install && cd - # use a known good glide version
+  - glide install
+
 script:
   - go test ./...
-  - go build -o kube-bench .
+
+after_success:
+  - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
