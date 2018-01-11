@@ -1,12 +1,12 @@
-FROM golang:1.8
+FROM golang:1.9
 WORKDIR /kube-bench
 RUN go get github.com/aquasecurity/kube-bench
-RUN cp /go/bin/kube-bench /kube-bench/ && chmod +x /kube-bench/kube-bench
-RUN cp -r /go/src/github.com/aquasecurity/kube-bench/cfg cfg
 
-# When Docker Hub supports it, we would split this into a multi-stage build with the second part based on, say, alpine for size
+FROM alpine:latest
 WORKDIR /
-ADD entrypoint.sh /entrypoint.sh
+COPY --from=0 /go/bin/kube-bench /kube-bench 
+COPY cfg cfg
+COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 
 # Build-time metadata as defined at http://label-schema.org
