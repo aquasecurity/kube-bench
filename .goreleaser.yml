@@ -12,7 +12,7 @@ archive:
 dockers:
   -
     binary: kube-bench
-    image: aquasecurity/kube-bench
+    image: aquasec/kube-bench
     latest: true
 fpm:
   vendor: Aqua Security
