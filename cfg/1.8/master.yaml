@@ -942,7 +942,7 @@ groups:
 
   - id: 1.4.11
     text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %a"
+    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\(\S*\)%\1%' | xargs stat -c %a
     tests:
       test_items:
       - flag: "700"
@@ -960,7 +960,7 @@ groups:
 
   - id: 1.4.12
     text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %U:%G"
+    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\(\S*\)%\1%' | xargs stat -c %U:%G
     tests:
       test_items:
       - flag: "etcd:etcd"
