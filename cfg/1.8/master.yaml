@@ -942,7 +942,7 @@ groups:
 
   - id: 1.4.11
     text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\(\S*\)%\1%' | awk '{print $1}' | xargs stat -c %a
+    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
     tests:
       test_items:
       - flag: "700"
