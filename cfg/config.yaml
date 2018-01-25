@@ -30,10 +30,6 @@ master:
       - /etc/kubernetes/apiserver
     defaultconf: /etc/kubernetes/apiserver
 
-    podspecs:
-      - /etc/kubernetes/manifests/kube-apiserver.yaml
-    defaultpodspec: /etc/kubernetes/manifests/kube-apiserver.yaml
-
   scheduler:
     bins:
       - "kube-scheduler"
@@ -43,10 +39,6 @@ master:
       - /etc/kubernetes/scheduler.conf
       - /etc/kubernetes/scheduler
     defaultconf: /etc/kubernetes/scheduler
-
-    podspecs:
-      - /etc/kubernetes/manifests/kube-scheduler.yaml
-    defaultpodspec: /etc/kubernetes/manifests/kube-scheduler.yaml
 
   controllermanager:
     bins:
@@ -58,10 +50,6 @@ master:
       - /etc/kubernetes/controller-manager
     defaultconf: /etc/kubernetes/controller-manager
 
-    podspecs:
-      - /etc/kubernetes/manifests/kube-controller-manager.yaml
-    defaultpodspec: /etc/kubernetes/manifests/kube-controller-manager.yaml
-
   etcd:
     optional: true
     bins:
@@ -70,16 +58,11 @@ master:
       - /etc/etcd/etcd.conf
     defaultconf: /etc/etcd/etcd.conf
 
-    podspecs:
-      - /etc/kubernetes/manifests/etcd.yaml
-    defaultpodspec: /etc/kubernetes/manifests/etcd.yaml
-
   flanneld:
     optional: true
     bins:
       - flanneld
     defaultconf: /etc/sysconfig/flanneld
-
 
 node:
   components:
@@ -100,10 +83,6 @@ node:
       - /etc/kubernetes/kubelet 
     defaultconf: "/etc/kubernetes/kubelet.conf"
 
-    unitfiles:
-     - /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    defaultunitfile: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-  
   proxy:
     bins:
       - "kube-proxy"
@@ -130,5 +109,3 @@ federated:
       - "hyperkube federation-controller-manager"
       - "kube-federation-controller-manager"
       - "federation-controller-manager"
-
-
