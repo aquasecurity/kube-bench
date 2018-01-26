@@ -279,7 +279,7 @@ func TestGetConfigFiles(t *testing.T) {
 			e = c.statResults
 			eIndex = 0
 
-			m := getConfigFiles(v, "conf")
+			m := getConfigFiles(v)
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}

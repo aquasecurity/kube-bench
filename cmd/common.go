@@ -29,6 +29,7 @@ var (
 
 func runChecks(t check.NodeType) {
 	var summary check.Summary
+	var nodetype string
 	var file string
 	var err error
 	var typeConf *viper.Viper
@@ -36,49 +37,44 @@ func runChecks(t check.NodeType) {
 	switch t {
 	case check.MASTER:
 		file = masterFile
-		typeConf = viper.Sub("master")
+		nodetype = "master"
 	case check.NODE:
 		file = nodeFile
-		typeConf = viper.Sub("node")
+		nodetype = "node"
 	case check.FEDERATED:
 		file = federatedFile
-		typeConf = viper.Sub("federated")
+		nodetype = "federated"
 	}
+
+	ver := getKubeVersion()
+	path := fmt.Sprintf("%s/%s", cfgDir, ver)
+
+	def := fmt.Sprintf("%s/%s", path, file)
+	in, err := ioutil.ReadFile(def)
+	if err != nil {
+		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
+	}
+
+	// Merge kubernetes version specific config if any.
+	viper.SetConfigFile(path + "/config.yaml")
+	err = viper.MergeInConfig()
+	if err != nil {
+		continueWithError(err, fmt.Sprintf("Reading %s specific configuration file", ver))
+	}
+	typeConf = viper.Sub(nodetype)
 
 	// Get the set of exectuables and config files we care about on this type of node. This also
 	// checks that the executables we need for the node type are running.
 	binmap := getBinaries(typeConf)
-	confmap := getConfigFiles(typeConf, "conf")
-	podspecmap := getConfigFiles(typeConf, "podspec")
-	unitfilemap := getConfigFiles(typeConf, "unitfile")
-
-	switch t {
-	case check.MASTER:
-		file = masterFile
-	case check.NODE:
-		file = nodeFile
-	case check.FEDERATED:
-		file = federatedFile
-	}
-
-	ver := getKubeVersion()
-	glog.V(1).Info(fmt.Sprintf("Running tests for Kubernetes version: %s", ver))
-
-	path := fmt.Sprintf("%s/%s/%s", cfgDir, ver, file)
-	in, err := ioutil.ReadFile(path)
-	if err != nil {
-		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
-	}
+	confmap := getConfigFiles(typeConf)
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
-	s = makeSubstitutions(s, "podspec", podspecmap)
-	s = makeSubstitutions(s, "unitfile", unitfilemap)
 
 	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", path))
+	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
 
 	controls, err := check.NewControls(t, []byte(s))
 	if err != nil {
