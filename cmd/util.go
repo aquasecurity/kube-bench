@@ -196,9 +196,8 @@ func findExecutable(candidates []string) (string, error) {
 	for _, c := range candidates {
 		if verifyBin(c) {
 			return c, nil
-		} else {
-			glog.V(1).Info(fmt.Sprintf("executable '%s' not running", c))
 		}
+		glog.V(1).Info(fmt.Sprintf("executable '%s' not running", c))
 	}
 
 	return "", fmt.Errorf("no candidates running")

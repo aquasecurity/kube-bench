@@ -30,7 +30,7 @@ var (
 	defaultKubeVersion = "1.6"
 	cfgFile            string
 	jsonFmt            bool
-	pgSql              bool
+	pgSQL              bool
 	checkList          string
 	groupList          string
 	masterFile         string
@@ -61,7 +61,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
-	RootCmd.PersistentFlags().BoolVar(&pgSql, "pgsql", false, "Save the results to PostgreSQL")
+	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().StringVarP(
 		&checkList,
 		"check",

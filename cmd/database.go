@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/postgres" // database packages get blank imports
 	"github.com/spf13/viper"
 )
 
