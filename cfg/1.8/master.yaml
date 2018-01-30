@@ -628,7 +628,7 @@ groups:
         set: true
     remediation: |
       Remediation:
-        Edit the Scheduler pod specification file $apiserverconf
+        Edit the Scheduler pod specification file $schedulerconf
         file on the master node and set the below parameter.
         --profiling=false
     scored: true
@@ -644,7 +644,7 @@ groups:
         - flag: "--terminated-pod-gc-threshold"
           set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold, for example:
       --terminated-pod-gc-threshold=10
     scored: true
@@ -978,12 +978,23 @@ groups:
     more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %a /etc/kubernetes/admin.conf; fi'"
     tests:
+      bin_op: or
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true 
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
@@ -1009,14 +1020,25 @@ groups:
   - id: 1.4.15
     text: "Ensure that the scheduler.conf file permissions are set to 644 or
     more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $schedulerconf then stat -c %a $schedulerconf; fi'"
+    audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
     tests:
+      bin_op: or
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
@@ -1042,14 +1064,25 @@ groups:
   - id: 1.4.17
     text: "Ensure that the controller-manager.conf file permissions are set
     to 644 or more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $controllermanagerconf then stat -c %a $controllermanagerconf; fi'"
+    audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %a $controllermanagerconf; fi'"
     tests:
+      bin_op: or
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true   
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
