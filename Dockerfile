@@ -5,8 +5,8 @@ RUN go get github.com/aquasecurity/kube-bench
 FROM alpine:latest
 WORKDIR /
 COPY --from=0 /go/bin/kube-bench /kube-bench 
-COPY cfg cfg
-COPY entrypoint.sh /entrypoint.sh
+COPY --from=0 /go/src/github.com/aquasecurity/kube-bench/cfg /cfg
+COPY --from=0 /go/src/github.com/aquasecurity/kube-bench/entrypoint.sh /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 
 # Build-time metadata as defined at http://label-schema.org

@@ -19,7 +19,7 @@ groups:
           value: false
         set: true
     remediation: | 
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
       --anonymous-auth=false
 
@@ -34,7 +34,7 @@ groups:
         set: false
     remediation: |
       Follow the documentation and configure alternate mechanisms for authentication. Then,
-      edit the API server pod specification file $apiserverpodspec
+      edit the API server pod specification file $apiserverconf
       on the master node and remove the --basic-auth-file=<filename>
       parameter.
     scored: true
@@ -47,7 +47,7 @@ groups:
       - flag:  "--insecure-allow-any-token"
         set: false
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and remove the --insecure-allow-any-token
       parameter.
     scored: true
@@ -66,7 +66,7 @@ groups:
       - flag: "--kubelet-https"
         set: false
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and remove the --kubelet-https parameter.
     scored: true
 
@@ -78,7 +78,7 @@ groups:
       - flag: "--insecure-bind-address"
         set: false
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and remove the --insecure-bind-address
       parameter.
     scored: true
@@ -94,7 +94,7 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       apiserver.yaml on the master node and set the below parameter.
       --insecure-port=0
     scored: true
@@ -113,7 +113,7 @@ groups:
         - flag: "--secure-port"
           set: false
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and either remove the --secure-port parameter or
       set it to a different (non-zero) desired port.
     scored: true
@@ -129,7 +129,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
       --profiling=false
     scored: true
@@ -145,7 +145,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
       --repair-malformed-updates=false
     scored: true
@@ -161,7 +161,7 @@ groups:
           value: AlwaysAdmit 
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to a
       value that does not include AlwaysAdmit.
     scored: true
@@ -177,7 +177,7 @@ groups:
           value: "AlwaysPullImages"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to
       include AlwaysPullImages.
       --admission-control=...,AlwaysPullImages,...
@@ -194,7 +194,7 @@ groups:
           value: "DenyEscalatingExec"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to a
       value that includes DenyEscalatingExec.
       --admission-control=...,DenyEscalatingExec,...
@@ -211,7 +211,7 @@ groups:
           value: "SecurityContextDeny"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to
       include SecurityContextDeny.
       --admission-control=...,SecurityContextDeny,...
@@ -228,7 +228,7 @@ groups:
           value: "NamespaceLifecycle"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to
       include NamespaceLifecycle.
       --admission-control=...,NamespaceLifecycle,...
@@ -242,7 +242,7 @@ groups:
       - flag: "--audit-log-path"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --audit-log-path parameter to a suitable
     path and file where you would like audit logs to be written, for example:
             --audit-log-path=/var/log/apiserver/audit.log
@@ -259,7 +259,7 @@ groups:
           value: 30
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --audit-log-maxage parameter to 30 or
     as an appropriate number of days:
             --audit-log-maxage=30
@@ -276,7 +276,7 @@ groups:
           value: 10
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --audit-log-maxbackup parameter to 10
       or to an appropriate value.
       --audit-log-maxbackup=10
@@ -293,7 +293,7 @@ groups:
           value: 100
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --audit-log-maxsize parameter to an
       appropriate size in MB. For example, to set it as 100 MB:
       --audit-log-maxsize=100
@@ -310,7 +310,7 @@ groups:
           value: "AlwaysAllow"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --authorization-mode parameter to
       values other than AlwaysAllow. One such example could be as below.
       --authorization-mode=RBAC
@@ -325,7 +325,7 @@ groups:
         set: false
     remediation: |
       Follow the documentation and configure alternate mechanisms for authentication. Then,
-      edit the API server pod specification file $apiserverpodspec
+      edit the API server pod specification file $apiserverconf
       on the master node and remove the --token-auth-file=<filename>
       parameter.
     scored: true
@@ -340,7 +340,7 @@ groups:
     remediation: |
       Follow the Kubernetes documentation and setup the TLS connection between the apiserver
       and kubelets. Then, edit the API server pod specification file
-      $apiserverpodspec on the master node and set the --
+      $apiserverconf on the master node and set the --
       kubelet-certificate-authority parameter to the path to the cert file for the certificate
       authority.
       --kubelet-certificate-authority=<ca-string>
@@ -360,7 +360,7 @@ groups:
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection between the
       apiserver and kubelets. Then, edit API server pod specification file
-      $apiserverpodspec on the master node and set the
+      $apiserverconf on the master node and set the
       kubelet client certificate and key parameters as below.
       --kubelet-client-certificate=<path/to/client-certificate-file>
       --kubelet-client-key=<path/to/client-key-file>
@@ -377,7 +377,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
       --service-account-lookup=true
     scored: true
@@ -394,7 +394,7 @@ groups:
         set: true
     remediation: |
       Follow the documentation and create Pod Security Policy objects as per your environment.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to a
       value that includes PodSecurityPolicy :
       --admission-control=...,PodSecurityPolicy,...
@@ -410,7 +410,7 @@ groups:
       - flag: "--service-account-key-file"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --service-account-key-file parameter
       to the public key file for service accounts:
       --service-account-key-file=<filename>
@@ -430,7 +430,7 @@ groups:
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection between the
       apiserver and etcd. Then, edit the API server pod specification file
-      $apiserverpodspec on the master node and set the etcd
+      $apiserverconf on the master node and set the etcd
       certificate and key file parameters.
       --etcd-certfile=<path/to/client-certificate-file>
       --etcd-keyfile=<path/to/client-key-file>
@@ -448,7 +448,7 @@ groups:
         set: true
     remediation: |
       Follow the documentation and create ServiceAccount objects as per your environment.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to a
       value that includes ServiceAccount.
       --admission-control=...,ServiceAccount,...
@@ -467,7 +467,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       on the master node and set the TLS certificate and private key file
       parameters.
       --tls-cert-file=<path/to/tls-certificate-file>
@@ -483,7 +483,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       on the master node and set the client certificate authority file.
       --client-ca-file=<path/to/client-ca-file>
     scored: true
@@ -498,7 +498,7 @@ groups:
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection between the
       apiserver and etcd. Then, edit the API server pod specification file
-      $apiserverpodspec on the master node and set the etcd
+      $apiserverconf on the master node and set the etcd
       certificate authority file parameter.
       --etcd-cafile=<path/to/ca-file>
     scored: true
@@ -514,7 +514,7 @@ groups:
           value: "Node"
         set: true
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       on the master node and set the --authorization-mode parameter to a
       value that includes Node.
       --authorization-mode=Node,RBAC
@@ -532,7 +532,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and configure NodeRestriction plug-in on kubelets.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       on the master node and set the --admission-control parameter to a
       value that includes NodeRestriction.
       --admission-control=...,NodeRestriction,...
@@ -548,7 +548,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and configure a EncryptionConfig file. Then, edit
-      the API server pod specification file $apiserverpodspec
+      the API server pod specification file $apiserverconf
       on the master node and set the --experimental-encryption-provider-config parameter
       to the path of that file:
       --experimental-encryption-provider-config=</path/to/EncryptionConfig/File>
@@ -586,7 +586,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set the desired limits in a configuration file.
-      Then, edit the API server pod specification file $apiserverpodspec
+      Then, edit the API server pod specification file $apiserverconf
       and set the below parameters.
       --admission-control=EventRateLimit
       --admission-control-config-file=<path/to/configuration/file>
@@ -598,7 +598,7 @@ groups:
     type: "manual"
     remediation: |
       Follow the Kubernetes documentation and set the desired audit policy in the
-      /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverpodspec
+      /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
       and set the below parameters.
       --audit-policy-file=/etc/kubernetes/audit-policy.yaml
     scored: true
@@ -608,7 +608,7 @@ groups:
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
-      Edit the API server pod specification file $apiserverpodspec
+      Edit the API server pod specification file $apiserverconf
       and set the below parameter as appropriate and if needed. For example,
       --request-timeout=300
     scored: true
@@ -628,7 +628,7 @@ groups:
         set: true
     remediation: |
       Remediation:
-        Edit the Scheduler pod specification file $apiserverpodspec
+        Edit the Scheduler pod specification file $apiserverconf
         file on the master node and set the below parameter.
         --profiling=false
     scored: true
@@ -644,7 +644,7 @@ groups:
         - flag: "--terminated-pod-gc-threshold"
           set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold, for example:
       --terminated-pod-gc-threshold=10
     scored: true
@@ -660,7 +660,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       on the master node and set the below parameter.
       --profiling=false
     scored: true
@@ -676,7 +676,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       on the master node to set the below parameter.
       --use-service-account-credentials=true
     scored: true
@@ -689,7 +689,7 @@ groups:
       - flag: "--service-account-private-key-file"
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       on the master node and set the --service-account-private-
       key-file parameter to the private key file for service accounts.
       --service-account-private-key-file=<filename>
@@ -703,7 +703,7 @@ groups:
       - flag: "--root-ca-file"
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       on the master node and set the --root-ca-file parameter to
       the certificate bundle file.
       --root-ca-file=<path/to/file>
@@ -729,7 +729,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverpodspec
+      Edit the Controller Manager pod specification file $apiserverconf
       controller-manager.yaml on the master node and set the --feature-gates parameter to
       include RotateKubeletServerCertificate=true.
       --feature-gates=RotateKubeletServerCertificate=true
@@ -741,7 +741,7 @@ groups:
   - id: 1.4.1
     text: "Ensure that the API server pod specification file permissions are
     set to 644 or more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $apiserverpodspec; then stat -c %a $apiserverpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
     tests:
       bin_op: or
       test_items:
@@ -763,13 +763,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chmod 644 $apiserverpodspec
+      chmod 644 $apiserverconf
     scored: true
 
   - id: 1.4.2
     text: "Ensure that the API server pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $apiserverpodspec; then stat -c %U:%G $apiserverpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
     tests:
       test_items:
       - flag: "root:root"
@@ -780,13 +780,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chown root:root $apiserverpodspec
+      chown root:root $apiserverconf
     scored: true
 
   - id: 1.4.3
     text: "Ensure that the controller manager pod specification file
     permissions are set to 644 or more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $controllermanagerpodspec; then stat -c %a $controllermanagerpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %a $controllermanagerconf; fi'"
     tests:
       bin_op: or
       test_items:
@@ -808,13 +808,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chmod 644 $controllermanagerpodspec
+      chmod 644 $controllermanagerconf
     scored: true
 
   - id: 1.4.4
     text: "Ensure that the controller manager pod specification file
     ownership is set to root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $controllermanagerpodspec; then stat -c %U:%G $controllermanagerpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
     tests:
       test_items:
       - flag: "root:root"
@@ -825,13 +825,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chown root:root $controllermanagerpodspec
+      chown root:root $controllermanagerconf
     scored: true
 
   - id: 1.4.5
     text: "Ensure that the scheduler pod specification file permissions are set
     to 644 or more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $schedulerpodspec; then stat -c %a $schedulerpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
     tests:
       bin_op: or
       test_items:
@@ -853,13 +853,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chmod 644 $schedulerpodspec
+      chmod 644 $schedulerconf
     scored: true
 
   - id: 1.4.6
     text: "Ensure that the scheduler pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $schedulerpodspec; then stat -c %U:%G $schedulerpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
     tests:
       test_items:
         - flag: "root:root"
@@ -870,13 +870,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chown root:root $schedulerpodspec
+      chown root:root $schedulerconf
     scored: true
 
   - id: 1.4.7
     text: "Ensure that the etcd pod specification file permissions are set to
     644 or more restrictive (Scored)"
-    audit: "/bin/sh -c 'if test -e $etcdpodspec; then stat -c %a $etcdpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %a $etcdconf; fi'"
     tests:
       bin_op: or
       test_items:
@@ -898,13 +898,13 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chmod 644 $etcdpodspec
+      chmod 644 $etcdconf
     scored: true
 
   - id: 1.4.8
     text: "Ensure that the etcd pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $etcdpodspec; then stat -c %U:%G $etcdpodspec; fi'"
+    audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
     tests:
       test_items:
       - flag: "root:root"
@@ -915,7 +915,7 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
       For example,
-      chown root:root $etcdpodspec
+      chown root:root $etcdconf
     scored: true
 
   - id: 1.4.9
@@ -942,7 +942,7 @@ groups:
 
   - id: 1.4.11
     text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %a"
+    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
     tests:
       test_items:
       - flag: "700"
@@ -960,7 +960,7 @@ groups:
 
   - id: 1.4.12
     text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep | grep -o data-dir=.* | cut -d= -f2 | xargs stat -c %U:%G"
+    audit: ps -ef | grep $etcdbin | grep -v grep | sed 's%.*data-dir[= ]\(\S*\)%\1%' | xargs stat -c %U:%G
     tests:
       test_items:
       - flag: "etcd:etcd"
@@ -1086,7 +1086,7 @@ groups:
         set: true
     remediation: |
       Follow the etcd service documentation and configure TLS encryption.
-      Then, edit the etcd pod specification file $etcdpodspec on the
+      Then, edit the etcd pod specification file $etcdconf on the
       master node and set the below parameters.
       --ca-file=</path/to/ca-file>
       --key-file=</path/to/key-file>
@@ -1103,7 +1103,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and set the below parameter.
       --client-cert-auth="true"
     scored: true
@@ -1121,7 +1121,7 @@ groups:
           op: neq
           value: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and either remove the --auto-tls parameter or set it to false.
         --auto-tls=false
     scored: true
@@ -1138,7 +1138,7 @@ groups:
         set: true
     remediation: |
       Follow the etcd service documentation and configure peer TLS encryption as appropriate
-      for your etcd cluster. Then, edit the etcd pod specification file $etcdpodspec on the
+      for your etcd cluster. Then, edit the etcd pod specification file $etcdconf on the
       master node and set the below parameters.
       --peer-client-file=</path/to/peer-cert-file>
       --peer-key-file=</path/to/peer-key-file>
@@ -1155,7 +1155,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and set the below parameter.
       --peer-client-cert-auth=true
     scored: true
@@ -1174,7 +1174,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and either remove the --peer-auto-tls parameter or set it to false.
       --peer-auto-tls=false
     scored: true
@@ -1187,7 +1187,7 @@ groups:
       - flag: "--wal-dir"
         set: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and set the below parameter.
       --wal-dir=</path/to/log/dir>
     scored: true
@@ -1203,7 +1203,7 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the etcd pod specification file $etcdpodspec on the master
+      Edit the etcd pod specification file $etcdconf on the master
       node and set the below parameter.
       --max-wals=0
     scored: true
@@ -1218,7 +1218,7 @@ groups:
     remediation: |
       Follow the etcd documentation and create a dedicated certificate authority setup for the
       etcd service.
-      Then, edit the etcd pod specification file $etcdpodspec on the
+      Then, edit the etcd pod specification file $etcdconf on the
       master node and set the below parameter.
       --trusted-ca-file=</path/to/ca-file>
     scored: false 
