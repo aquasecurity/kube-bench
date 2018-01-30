@@ -9,11 +9,6 @@ builds:
 # Archive customization
 archive:
   format: tar.gz
-dockers:
-  -
-    binary: kube-bench
-    image: aquasec/kube-bench
-    latest: true
 fpm:
   vendor: Aqua Security
   description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
