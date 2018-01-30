@@ -628,7 +628,7 @@ groups:
         set: true
     remediation: |
       Remediation:
-        Edit the Scheduler pod specification file $apiserverconf
+        Edit the Scheduler pod specification file $schedulerconf
         file on the master node and set the below parameter.
         --profiling=false
     scored: true
@@ -644,7 +644,7 @@ groups:
         - flag: "--terminated-pod-gc-threshold"
           set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold, for example:
       --terminated-pod-gc-threshold=10
     scored: true
