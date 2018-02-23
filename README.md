@@ -47,7 +47,6 @@ Flags:
   -c, --check string          A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
       --config string         config file (default is ./cfg/config.yaml)
   -g, --group string          Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-      --installation string   Specify how kubernetes cluster was installed. Possible values are default,hyperkube,kops,kubeadm (default "default")
       --json                  Prints the results as JSON
   -v, --verbose               verbose output (default false)
 ```
