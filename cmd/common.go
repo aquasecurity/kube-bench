@@ -17,7 +17,8 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
-
+	"path/filepath"
+	
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
@@ -47,9 +48,12 @@ func runChecks(t check.NodeType) {
 	}
 
 	ver := getKubeVersion()
-	path := fmt.Sprintf("%s/%s", cfgDir, ver)
-
-	def := fmt.Sprintf("%s/%s", path, file)
+	// path := fmt.Sprintf("%s/%s", cfgDir, ver)
+	path := filepath.Join(cfgDir, ver)
+	
+	// def := fmt.Sprintf("%s/%s", path, file)
+	def := filepath.Join(path, file)
+	
 	in, err := ioutil.ReadFile(def)
 	if err != nil {
 		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
