@@ -26,9 +26,10 @@ import (
 
 var (
 	envVarsPrefix      = "KUBE_BENCH"
-	cfgDir             = "./cfg"
 	defaultKubeVersion = "1.6"
+	kubeVersion        string
 	cfgFile            string
+	cfgDir             string
 	jsonFmt            bool
 	pgSQL              bool
 	checkList          string
@@ -77,6 +78,8 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
+	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
