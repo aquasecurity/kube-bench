@@ -37,6 +37,9 @@ var (
 	masterFile         string
 	nodeFile           string
 	federatedFile      string
+	noResults          bool
+	noSummary          bool
+	noRemediations     bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -61,8 +64,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// Output control
+	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable prints of results section")
+	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
+	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
+
 	RootCmd.PersistentFlags().StringVarP(
 		&checkList,
 		"check",
