@@ -40,7 +40,7 @@ If you want to install a pre-built kube-bench, you can copy the kube-bench binar
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
-You can then run `./kube-bench <master|node>`.
+You can then run `./kube-bench <master|node>`. This should work for any Linux distribution, including Alpine.
 
 ### Installing from sources
 
