@@ -16,6 +16,7 @@ COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 ADD entrypoint.sh .
 ADD cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
+CMD ["install"]
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
