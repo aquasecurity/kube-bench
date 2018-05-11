@@ -17,7 +17,7 @@ kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7 and 
 
 ## Installation
 
-You can either install kube-bench through a dedicated container, or compile it from source:
+You can either install kube-bench through a dedicated container, install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), or compile it from source.
 
 ### Running inside a container
 
