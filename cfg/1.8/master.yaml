@@ -610,7 +610,7 @@ groups:
     remediation: |
       Edit the API server pod specification file $apiserverconf
       and set the below parameter as appropriate and if needed. For example,
-      --request-timeout=300
+      --request-timeout=300s
     scored: true
 
 - id: 1.2
