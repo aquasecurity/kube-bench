@@ -17,11 +17,15 @@ kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7 and 
 
 ## Installation
 
-You can either install kube-bench through a dedicated container, install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), or compile it from source.
+You can choose to 
+* run kube-bench from inside a container (sharing PID namespace with the host)
+* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), 
+* compile it from source.
 
 ### Running inside a container
 
-You can avoid installing kube-bench entirely by running it inside a container using the host PID namespace.
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace.
 
 ```
 docker run --pid=host aquasec/kube-bench:latest <master|node>
@@ -35,12 +39,12 @@ docker run --pid=host -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml 
 
 ### Installing from a container
 
-If you want to install a pre-built kube-bench, you can copy the kube-bench binary and configuration files to your host from the Docker container:
+This command copies the kube-bench binary and configuration files to your host from the Docker container:
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
-You can then run `./kube-bench <master|node>`. This should work for any Linux distribution, including Alpine.
+You can then run `./kube-bench <master|node>`. 
 
 ### Installing from sources
 
