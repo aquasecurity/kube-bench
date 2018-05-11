@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 if [ "$1" == "install" ]; then
   if [ -d /host ]; then
     mkdir -p /host/cfg/
