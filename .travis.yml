@@ -1,6 +1,11 @@
 ---
 language: go
 
+sudo: required
+
+services:
+  - docker 
+
 notifications:
   email: false
 
@@ -16,6 +21,10 @@ install:
 
 script:
   - go test ./...
+  - docker build --tag kube-bench .
+  - docker run -v `pwd`:/host kube-bench install 
+  - test -d cfg
+  - test -f kube-bench
 
 after_success:
   - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
