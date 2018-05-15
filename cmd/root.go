@@ -26,9 +26,10 @@ import (
 
 var (
 	envVarsPrefix      = "KUBE_BENCH"
-	cfgDir             = "./cfg"
 	defaultKubeVersion = "1.6"
+	kubeVersion        string
 	cfgFile            string
+	cfgDir             string
 	jsonFmt            bool
 	pgSQL              bool
 	checkList          string
@@ -36,6 +37,9 @@ var (
 	masterFile         string
 	nodeFile           string
 	federatedFile      string
+	noResults          bool
+	noSummary          bool
+	noRemediations     bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -60,8 +64,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// Output control
+	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable prints of results section")
+	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
+	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
+
 	RootCmd.PersistentFlags().StringVarP(
 		&checkList,
 		"check",
@@ -77,6 +86,8 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
+	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)

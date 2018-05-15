@@ -47,7 +47,13 @@ func runChecks(t check.NodeType) {
 		nodetype = "federated"
 	}
 
-	ver := getKubeVersion()
+	var ver string
+	if kubeVersion != "" {
+		ver = kubeVersion
+	} else {
+		ver = getKubeVersion()
+	}
+
 	switch ver {
 	case "1.9", "1.10":
 		continueWithError(nil, fmt.Sprintf("No CIS spec for %s - using tests from CIS 1.2.0 spec for Kubernetes 1.8\n", ver))
@@ -131,41 +137,48 @@ func colorPrint(state check.State, s string) {
 
 // prettyPrint outputs the results to stdout in human-readable format
 func prettyPrint(r *check.Controls, summary check.Summary) {
-	colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
-	for _, g := range r.Groups {
-		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
-		for _, c := range g.Checks {
-			colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
-		}
-	}
-
-	fmt.Println()
-
-	// Print remediations.
-	if summary.Fail > 0 || summary.Warn > 0 {
-		colors[check.WARN].Printf("== Remediations ==\n")
+	// Print check results.
+	if !noResults {
+		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
 		for _, g := range r.Groups {
+			colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
 			for _, c := range g.Checks {
-				if c.State != check.PASS {
-					fmt.Printf("%s %s\n", c.ID, c.Remediation)
-				}
+				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
 			}
 		}
+
 		fmt.Println()
 	}
 
-	// Print summary setting output color to highest severity.
-	var res check.State
-	if summary.Fail > 0 {
-		res = check.FAIL
-	} else if summary.Warn > 0 {
-		res = check.WARN
-	} else {
-		res = check.PASS
+	// Print remediations.
+	if !noRemediations {
+		if summary.Fail > 0 || summary.Warn > 0 {
+			colors[check.WARN].Printf("== Remediations ==\n")
+			for _, g := range r.Groups {
+				for _, c := range g.Checks {
+					if c.State != check.PASS {
+						fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					}
+				}
+			}
+			fmt.Println()
+		}
 	}
 
-	colors[res].Printf("== Summary ==\n")
-	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
-		summary.Pass, summary.Fail, summary.Warn,
-	)
+	// Print summary setting output color to highest severity.
+	if !noSummary {
+		var res check.State
+		if summary.Fail > 0 {
+			res = check.FAIL
+		} else if summary.Warn > 0 {
+			res = check.WARN
+		} else {
+			res = check.PASS
+		}
+
+		colors[res].Printf("== Summary ==\n")
+		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
+			summary.Pass, summary.Fail, summary.Warn,
+		)
+	}
 }

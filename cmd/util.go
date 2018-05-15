@@ -219,7 +219,7 @@ func getKubeVersion() string {
 	if err != nil {
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: need kubectl or kubelet binaries to get kubernetes version"))
+			exitWithError(fmt.Errorf("Version check failed: need kubectl or kubelet binaries to get kubernetes version.\nAlternately, you can specify the version with --version"))
 		}
 		return getKubeVersionFromKubelet()
 	}
@@ -240,7 +240,7 @@ func getKubeVersionFromKubectl() string {
 func getKubeVersionFromKubelet() string {
 	cmd := exec.Command("kubelet", "--version")
 	out, err := cmd.CombinedOutput()
-	
+
 	if err != nil {
 		continueWithError(fmt.Errorf("%s", out), "")
 	}
