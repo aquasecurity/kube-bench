@@ -55,25 +55,13 @@ go get github.com/Masterminds/glide
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
 $GOPATH/bin/glide install
 go build -o kube-bench . 
-./kube-bench <master|node>
-```
 
-## Usage
-```./kube-bench [command]```
+# See all supported options
+./kube-bench --help
 
-```
-Available Commands:
-  federated   Run benchmark checks for a Kubernetes federated deployment.
-  help        Help about any command
-  master      Run benchmark checks for a Kubernetes master node.
-  node        Run benchmark checks for a Kubernetes node.
+# Run the all checks on a master node
+./kube-bench master
 
-Flags:
-  -c, --check string          A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
-      --config string         config file (default is ./cfg/config.yaml)
-  -g, --group string          Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-      --json                  Prints the results as JSON
-  -v, --verbose               verbose output (default false)
 ```
 
 ## Configuration
