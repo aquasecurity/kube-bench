@@ -80,10 +80,20 @@ func (t *testItem) execute(s string) (result bool) {
 
 			switch t.Compare.Op {
 			case "eq":
-				result = flagVal == t.Compare.Value
+				// Do case insensitive comparaison for booleans ...
+				if value == "false" || value == "true" {
+					result = value == t.Compare.Value
+				} else {
+					result = flagVal == t.Compare.Value
+				}
 
 			case "noteq":
-				result = !(flagVal == t.Compare.Value)
+				// Do case insensitive comparaison for booleans ...
+				if value == "false" || value == "true" {
+					result = !(value == t.Compare.Value)
+				} else {
+					result = !(flagVal == t.Compare.Value)
+				}
 
 			case "gt":
 				a, b := toNumeric(flagVal, t.Compare.Value)
