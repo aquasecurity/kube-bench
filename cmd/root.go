@@ -46,7 +46,7 @@ var (
 var RootCmd = &cobra.Command{
 	Use:   os.Args[0],
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
-	Long:  `This tool runs the CIS Kubernetes 1.6 Benchmark v1.0.0 checks.`,
+	Long:  `This tool runs the CIS Kubernetes Benchmark (http://www.cisecurity.org/benchmark/kubernetes/)`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -65,7 +65,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Output control
-	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable prints of results section")
+	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable printing of results section")
 	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
