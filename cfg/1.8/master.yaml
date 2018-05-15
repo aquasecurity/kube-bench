@@ -418,7 +418,7 @@ groups:
 
   - id: 1.1.26
     text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as 
-      appropriate (Scored"
+      appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: and
@@ -666,7 +666,7 @@ groups:
     scored: true
 
   - id: 1.3.3
-    text: "Ensure that the --use-service-account-credentials argument is set"
+    text: "Ensure that the --use-service-account-credentials argument is set (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
