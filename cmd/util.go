@@ -215,10 +215,19 @@ func multiWordReplace(s string, subname string, sub string) string {
 func getKubeVersion() string {
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
+
 	if err != nil {
-		exitWithError(fmt.Errorf("kubernetes version check failed: %v", err))
+		_, err = exec.LookPath("kubelet")
+		if err != nil {
+			exitWithError(fmt.Errorf("Version check failed: need kubectl or kubelet binaries to get kubernetes version.\nAlternately, you can specify the version with --version"))
+		}
+		return getKubeVersionFromKubelet()
 	}
 
+	return getKubeVersionFromKubectl()
+}
+
+func getKubeVersionFromKubectl() string {
 	cmd := exec.Command("kubectl", "version", "--short")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -228,11 +237,32 @@ func getKubeVersion() string {
 	return getVersionFromKubectlOutput(string(out))
 }
 
+func getKubeVersionFromKubelet() string {
+	cmd := exec.Command("kubelet", "--version")
+	out, err := cmd.CombinedOutput()
+
+	if err != nil {
+		continueWithError(fmt.Errorf("%s", out), "")
+	}
+
+	return getVersionFromKubeletOutput(string(out))
+}
+
 func getVersionFromKubectlOutput(s string) string {
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
 		printlnWarn(fmt.Sprintf("Unable to get kubectl version, using default version: %s", defaultKubeVersion))
+		return defaultKubeVersion
+	}
+	return subs[1]
+}
+
+func getVersionFromKubeletOutput(s string) string {
+	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
+	subs := serverVersionRe.FindStringSubmatch(s)
+	if len(subs) < 2 {
+		printlnWarn(fmt.Sprintf("Unable to get kubelet version, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
 	}
 	return subs[1]

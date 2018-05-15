@@ -3,9 +3,9 @@
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 
-# kube-bench
+<img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
-The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes Benchmark.
+kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the CIS Kubernetes Benchmark.
 
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve. 
 
@@ -17,12 +17,50 @@ kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7 and 
 
 ## Installation
 
-You can either install kube-bench through a dedicated container, or compile it from source:
+You can choose to 
+* run kube-bench from inside a container (sharing PID namespace with the host)
+* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), 
+* compile it from source.
 
-1. Container installation:
-Run ```docker run --rm -v `pwd`:/host aquasec/kube-bench:latest```. This will copy the kube-bench binary and configuration to you host. You can then run ```./kube-bench <master|node>```.
+### Running inside a container
 
-2. Install from sources:
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace.
+
+```
+docker run --pid=host aquasec/kube-bench:latest <master|node>
+```
+
+You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
+
+```
+docker run --pid=host -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
+```
+
+### Running in a kubernetes cluster
+Run the master check
+
+```
+kubectl run --rm -i -t kube-bench-master --image=aquasec/kube-bench:latest --restart=Never --overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"hostPID\": true, \"nodeSelector\": { \"kubernetes.io/role\": \"master\" }, \"tolerations\": [ { \"key\": \"node-role.kubernetes.io/master\", \"operator\": \"Exists\", \"effect\": \"NoSchedule\" } ] } }" -- master --version 1.8
+```
+
+Run the node check
+
+```
+kubectl run --rm -i -t kube-bench-node --image=aquasec/kube-bench:latest --restart=Never --overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"hostPID\": true } }" -- node --version 1.8
+```
+
+### Installing from a container
+
+This command copies the kube-bench binary and configuration files to your host from the Docker container:
+```
+docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+```
+
+You can then run `./kube-bench <master|node>`. 
+
+### Installing from sources
+
 If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [$GOPATH is set](https://github.com/golang/go/wiki/GOPATH)):
 
 ```go get github.com/aquasecurity/kube-bench
@@ -30,25 +68,13 @@ go get github.com/Masterminds/glide
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
 $GOPATH/bin/glide install
 go build -o kube-bench . 
-./kube-bench <master|node>
-```
 
-## Usage
-```./kube-bench [command]```
+# See all supported options
+./kube-bench --help
 
-```
-Available Commands:
-  federated   Run benchmark checks for a Kubernetes federated deployment.
-  help        Help about any command
-  master      Run benchmark checks for a Kubernetes master node.
-  node        Run benchmark checks for a Kubernetes node.
+# Run the all checks on a master node
+./kube-bench master
 
-Flags:
-  -c, --check string          A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"
-      --config string         config file (default is ./cfg/config.yaml)
-  -g, --group string          Run all the checks under this comma-delimited list of groups. Example --group="1.1"
-      --json                  Prints the results as JSON
-  -v, --verbose               verbose output (default false)
 ```
 
 ## Configuration
