@@ -80,6 +80,7 @@ func (t *testItem) execute(s string) (result bool) {
 
 			switch t.Compare.Op {
 			case "eq":
+				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
 					result = value == t.Compare.Value
@@ -88,6 +89,7 @@ func (t *testItem) execute(s string) (result bool) {
 				}
 
 			case "noteq":
+				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
 					result = !(value == t.Compare.Value)
