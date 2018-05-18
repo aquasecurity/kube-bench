@@ -63,11 +63,12 @@ You can then run `./kube-bench <master|node>`.
 
 If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [$GOPATH is set](https://github.com/golang/go/wiki/GOPATH)):
 
-```go get github.com/aquasecurity/kube-bench
-go get github.com/Masterminds/glide
+```shell
+go get github.com/aquasecurity/kube-bench
+go get github.com/golang/dep/cmd/dep
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
-$GOPATH/bin/glide install
-go build -o kube-bench . 
+$GOPATH/bin/dep ensure -vendor-only
+go build -o kube-bench .
 
 # See all supported options
 ./kube-bench --help

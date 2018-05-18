@@ -1,7 +1,7 @@
 FROM golang:1.9 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
-ADD glide.lock glide.yaml ./
-RUN go get github.com/Masterminds/glide && glide install
+ADD Gopkg.toml Gopkg.lock ./
+RUN go get -v github.com/golang/dep/cmd/dep && dep ensure -v -vendor-only
 ADD main.go .
 ADD check/ check/
 ADD cmd/ cmd/
