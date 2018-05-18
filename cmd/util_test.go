@@ -189,6 +189,16 @@ func TestKubeVersionRegex(t *testing.T) {
 		t.Fatalf("Expected 1.8 got %s", ver)
 	}
 
+	ver = getVersionFromKubectlOutput(`Client Version: v1.8.0`)
+	if ver != "1.8" {
+		t.Fatalf("Expected 1.8 got %s", ver)
+	}
+
+	ver = getVersionFromKubectlOutput(`Server Version: v1.8.12`)
+	if ver != "1.8" {
+		t.Fatalf("Expected 1.8 got %s", ver)
+	}
+
 	ver = getVersionFromKubectlOutput("Something completely different")
 	if ver != "1.6" {
 		t.Fatalf("Expected 1.6 got %s", ver)

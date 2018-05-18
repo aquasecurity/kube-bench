@@ -249,7 +249,7 @@ func getKubeVersionFromKubelet() string {
 }
 
 func getVersionFromKubectlOutput(s string) string {
-	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
+	serverVersionRe := regexp.MustCompile(`v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
 		printlnWarn(fmt.Sprintf("Unable to get kubectl version, using default version: %s", defaultKubeVersion))
