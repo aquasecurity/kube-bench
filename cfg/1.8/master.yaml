@@ -960,7 +960,7 @@ groups:
 
   - id: 1.4.12
     text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-    audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\(\S*\)%\1%' | xargs stat -c %U:%G
+    audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
     tests:
       test_items:
       - flag: "etcd:etcd"
