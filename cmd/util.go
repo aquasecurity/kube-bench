@@ -275,7 +275,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 			glog.V(2).Info(fmt.Sprintf("No subsitution for '%s'\n", subst))
 			continue
 		}
-		glog.V(1).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
 		s = multiWordReplace(s, subst, v)
 	}
 
