@@ -52,12 +52,11 @@ func runChecks(t check.NodeType) {
 		ver = kubeVersion
 	} else {
 		ver = getKubeVersion()
-	}
-
-	switch ver {
-	case "1.9", "1.10":
-		continueWithError(nil, fmt.Sprintf("No CIS spec for %s - using tests from CIS 1.2.0 spec for Kubernetes 1.8\n", ver))
-		ver = "1.8"
+		switch ver {
+		case "1.9", "1.10":
+			continueWithError(nil, fmt.Sprintf("No CIS spec for %s - using tests from CIS 1.2.0 spec for Kubernetes 1.8\n", ver))
+			ver = "1.8"
+		}
 	}
 
 	path := filepath.Join(cfgDir, ver)
