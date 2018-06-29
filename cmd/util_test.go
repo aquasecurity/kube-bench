@@ -15,7 +15,9 @@
 package cmd
 
 import (
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
@@ -302,6 +304,48 @@ func TestMakeSubsitutions(t *testing.T) {
 			s := makeSubstitutions(c.input, "bin", c.subst)
 			if s != c.exp {
 				t.Fatalf("Got %s expected %s", s, c.exp)
+			}
+		})
+	}
+}
+
+func TestGetConfigFilePath(t *testing.T) {
+	var err error
+	cfgDir, err = ioutil.TempDir("", "kube-bench-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory")
+	}
+	defer os.RemoveAll(cfgDir)
+	d := filepath.Join(cfgDir, "1.8")
+	err = os.Mkdir(d, 0666)
+	if err != nil {
+		t.Fatalf("Failed to create temp file")
+	}
+	ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
+
+	cases := []struct {
+		specifiedVersion string
+		runningVersion   string
+		succeed          bool
+		exp              string
+	}{
+		{runningVersion: "1.8", succeed: true, exp: d},
+		{runningVersion: "1.9", succeed: true, exp: d},
+		{runningVersion: "1.10", succeed: true, exp: d},
+		{runningVersion: "1.1", succeed: false},
+		{specifiedVersion: "1.8", succeed: true, exp: d},
+		{specifiedVersion: "1.9", succeed: false},
+		{specifiedVersion: "1.10", succeed: false},
+	}
+
+	for _, c := range cases {
+		t.Run(c.specifiedVersion+"-"+c.runningVersion, func(t *testing.T) {
+			path, err := getConfigFilePath(c.specifiedVersion, c.runningVersion, "/master.yaml")
+			if err != nil && c.succeed {
+				t.Fatalf("Error %v", err)
+			}
+			if path != c.exp {
+				t.Fatalf("Got %s expected %s", path, c.exp)
 			}
 		})
 	}
