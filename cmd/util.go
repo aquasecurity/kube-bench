@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -114,6 +116,57 @@ func getBinaries(v *viper.Viper) map[string]string {
 	}
 
 	return binmap
+}
+
+// getConfigFilePath locates the config files we should be using based on either the specified
+// version, or the running version of kubernetes if not specified
+func getConfigFilePath(specifiedVersion string, runningVersion string, filename string) (path string, err error) {
+	var fileVersion string
+
+	if specifiedVersion != "" {
+		fileVersion = specifiedVersion
+	} else {
+		fileVersion = runningVersion
+	}
+
+	for {
+		path = filepath.Join(cfgDir, fileVersion)
+		file := filepath.Join(path, string(filename))
+		glog.V(2).Info(fmt.Sprintf("Looking for config file: %s\n", file))
+
+		if _, err = os.Stat(file); !os.IsNotExist(err) {
+			if specifiedVersion == "" && fileVersion != runningVersion {
+				glog.V(1).Info(fmt.Sprintf("No test file found for %s - using tests for Kubernetes %s\n", runningVersion, fileVersion))
+			}
+			return path, nil
+		}
+
+		// If we were given an explicit version to look for, don't look for any others
+		if specifiedVersion != "" {
+			return "", err
+		}
+
+		fileVersion = decrementVersion(fileVersion)
+		if fileVersion == "" {
+			return "", fmt.Errorf("no test files found <= runningVersion")
+		}
+	}
+}
+
+// decrementVersion decrements the version number
+// We want to decrement individually even through versions where we don't supply test files
+// just in case someone wants to specify their own test files for that version
+func decrementVersion(version string) string {
+	split := strings.Split(version, ".")
+	minor, err := strconv.Atoi(split[1])
+	if err != nil {
+		return ""
+	}
+	if minor <= 1 {
+		return ""
+	}
+	split[1] = strconv.Itoa(minor - 1)
+	return strings.Join(split, ".")
 }
 
 // getConfigFiles finds which of the set of candidate config files exist
@@ -275,7 +328,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 			glog.V(2).Info(fmt.Sprintf("No subsitution for '%s'\n", subst))
 			continue
 		}
-		glog.V(1).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
 		s = multiWordReplace(s, subst, v)
 	}
 

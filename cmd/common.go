@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -28,56 +29,50 @@ var (
 	errmsgs string
 )
 
-func runChecks(t check.NodeType) {
+func runChecks(nodetype check.NodeType) {
 	var summary check.Summary
-	var nodetype string
 	var file string
 	var err error
 	var typeConf *viper.Viper
 
-	switch t {
+	switch nodetype {
 	case check.MASTER:
 		file = masterFile
-		nodetype = "master"
 	case check.NODE:
 		file = nodeFile
-		nodetype = "node"
 	case check.FEDERATED:
 		file = federatedFile
-		nodetype = "federated"
 	}
 
-	var ver string
-	if kubeVersion != "" {
-		ver = kubeVersion
-	} else {
-		ver = getKubeVersion()
+	path, err := getConfigFilePath(kubeVersion, getKubeVersion(), file)
+	if err != nil {
+		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
 
-	switch ver {
-	case "1.9", "1.10":
-		continueWithError(nil, fmt.Sprintf("No CIS spec for %s - using tests from CIS 1.2.0 spec for Kubernetes 1.8\n", ver))
-		ver = "1.8"
-	}
-
-	path := filepath.Join(cfgDir, ver)
 	def := filepath.Join(path, file)
-
 	in, err := ioutil.ReadFile(def)
 	if err != nil {
-		exitWithError(fmt.Errorf("error opening %s controls file: %v", t, err))
+		exitWithError(fmt.Errorf("error opening %s controls file: %v", nodetype, err))
 	}
+
+	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
 
 	// Merge kubernetes version specific config if any.
 	viper.SetConfigFile(path + "/config.yaml")
 	err = viper.MergeInConfig()
 	if err != nil {
-		continueWithError(err, fmt.Sprintf("Reading %s specific configuration file", ver))
+		if os.IsNotExist(err) {
+			glog.V(2).Info(fmt.Sprintf("No version-specific config.yaml file in %s", path))
+		} else {
+			exitWithError(fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err))
+		}
+	} else {
+		glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	}
-	typeConf = viper.Sub(nodetype)
 
 	// Get the set of exectuables and config files we care about on this type of node. This also
 	// checks that the executables we need for the node type are running.
+	typeConf = viper.Sub(string(nodetype))
 	binmap := getBinaries(typeConf)
 	confmap := getConfigFiles(typeConf)
 
@@ -86,12 +81,9 @@ func runChecks(t check.NodeType) {
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
 
-	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
-
-	controls, err := check.NewControls(t, []byte(s))
+	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
-		exitWithError(fmt.Errorf("error setting up %s controls: %v", t, err))
+		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
 
 	if groupList != "" && checkList == "" {
