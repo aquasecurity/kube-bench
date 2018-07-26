@@ -129,6 +129,8 @@ func getConfigFilePath(specifiedVersion string, runningVersion string, filename 
 		fileVersion = runningVersion
 	}
 
+	glog.V(2).Info(fmt.Sprintf("Looking for config for version %s", fileVersion))
+
 	for {
 		path = filepath.Join(cfgDir, fileVersion)
 		file := filepath.Join(path, string(filename))
@@ -265,19 +267,19 @@ func multiWordReplace(s string, subname string, sub string) string {
 	return strings.Replace(s, subname, sub, -1)
 }
 
-func getKubeVersion() string {
+func getKubeVersion() (string, error) {
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 
 	if err != nil {
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: need kubectl or kubelet binaries to get kubernetes version.\nAlternately, you can specify the version with --version"))
+			return "", fmt.Errorf("need kubectl or kubelet binaries to get kubernetes version")
 		}
-		return getKubeVersionFromKubelet()
+		return getKubeVersionFromKubelet(), nil
 	}
 
-	return getKubeVersionFromKubectl()
+	return getKubeVersionFromKubectl(), nil
 }
 
 func getKubeVersionFromKubectl() string {
