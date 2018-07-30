@@ -60,16 +60,17 @@ func handleError(err error, context string) (errmsg string) {
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
-	ID          string 		`yaml:"id" json:"test_number"`
-	Text        string		`json:"test_desc"`
+	ID          string      `yaml:"id" json:"test_number"`
+	Text        string      `json:"test_desc"`
 	Audit       string      `json:"omit"`
 	Type        string      `json:"type"`
 	Commands    []*exec.Cmd `json:"omit"`
 	Tests       *tests      `json:"omit"`
 	Set         bool        `json:"omit"`
-	Remediation string 		`json:"-"`
-	TestInfo    []string 	`json:"test_info"`
-	State 					`json:"status"`
+	Remediation string      `json:"-"`
+	TestInfo    []string    `json:"test_info"`
+	State       `json:"status"`
+	ActualValue string `json:"actual_value"`
 }
 
 // Run executes the audit commands specified in a check and outputs
@@ -157,15 +158,25 @@ func (c *Check) Run() {
 		i++
 	}
 
-	if errmsgs != "" {
-		glog.V(2).Info(errmsgs)
+	finalOutput := c.Tests.execute(out.String())
+	if finalOutput != nil {
+		c.ActualValue = finalOutput.actualResult
+		if finalOutput.testResult {
+			c.State = PASS
+		} else {
+			c.State = FAIL
+		}
+	} else {
+		errmsgs += handleError(
+			fmt.Errorf("final output is nil"),
+			fmt.Sprintf("failed to run: %s\n",
+				c.Audit,
+			),
+		)
 	}
 
-	res := c.Tests.execute(out.String())
-	if res {
-		c.State = PASS
-	} else {
-		c.State = FAIL
+	if errmsgs != "" {
+		glog.V(2).Info(errmsgs)
 	}
 }
 
