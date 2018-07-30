@@ -17,7 +17,7 @@ groups:
     - id: 1
       text: "flag is not set"
       tests:
-        test_item:
+        test_items:
           - flag: "--basic-auth"
             set: false
 

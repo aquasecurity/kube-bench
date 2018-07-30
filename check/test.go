@@ -49,8 +49,13 @@ type compare struct {
 	Value string
 }
 
-func (t *testItem) execute(s string) (result bool) {
-	result = false
+type testOutput struct {
+	testResult   bool
+	actualResult string
+}
+
+func (t *testItem) execute(s string) *testOutput {
+	result := &testOutput{}
 	match := strings.Contains(s, t.Flag)
 
 	if t.Set {
@@ -78,57 +83,57 @@ func (t *testItem) execute(s string) (result bool) {
 				os.Exit(1)
 			}
 
+			result.actualResult = strings.ToLower(flagVal)
 			switch t.Compare.Op {
 			case "eq":
 				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
-					result = value == t.Compare.Value
+					result.testResult = value == t.Compare.Value
 				} else {
-					result = flagVal == t.Compare.Value
+					result.testResult = flagVal == t.Compare.Value
 				}
 
 			case "noteq":
 				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
-					result = !(value == t.Compare.Value)
+					result.testResult = !(value == t.Compare.Value)
 				} else {
-					result = !(flagVal == t.Compare.Value)
+					result.testResult = !(flagVal == t.Compare.Value)
 				}
 
 			case "gt":
 				a, b := toNumeric(flagVal, t.Compare.Value)
-				result = a > b
+				result.testResult = a > b
 
 			case "gte":
 				a, b := toNumeric(flagVal, t.Compare.Value)
-				result = a >= b
+				result.testResult = a >= b
 
 			case "lt":
 				a, b := toNumeric(flagVal, t.Compare.Value)
-				result = a < b
+				result.testResult = a < b
 
 			case "lte":
 				a, b := toNumeric(flagVal, t.Compare.Value)
-				result = a <= b
+				result.testResult = a <= b
 
 			case "has":
-				result = strings.Contains(flagVal, t.Compare.Value)
+				result.testResult = strings.Contains(flagVal, t.Compare.Value)
 
 			case "nothave":
-				result = !strings.Contains(flagVal, t.Compare.Value)
+				result.testResult = !strings.Contains(flagVal, t.Compare.Value)
 			}
 		} else {
-			result = isset
+			result.testResult = isset
 		}
 
 	} else {
 		notset := !match
-		result = notset
+		result.testResult = notset
 	}
-
-	return
+	return result
 }
 
 type tests struct {
@@ -136,13 +141,19 @@ type tests struct {
 	BinOp     binOp       `yaml:"bin_op"`
 }
 
-func (ts *tests) execute(s string) (result bool) {
-	res := make([]bool, len(ts.TestItems))
+func (ts *tests) execute(s string) *testOutput {
+	finalOutput := &testOutput{}
 
-	for i, t := range ts.TestItems {
-		res[i] = t.execute(s)
+	res := make([]testOutput, len(ts.TestItems))
+	if len(res) == 0 {
+		return finalOutput
 	}
 
+	for i, t := range ts.TestItems {
+		res[i] = *(t.execute(s))
+	}
+
+	var result bool
 	// If no binary operation is specified, default to AND
 	switch ts.BinOp {
 	default:
@@ -151,16 +162,19 @@ func (ts *tests) execute(s string) (result bool) {
 	case and, "":
 		result = true
 		for i := range res {
-			result = result && res[i]
+			result = result && res[i].testResult
 		}
 	case or:
 		result = false
 		for i := range res {
-			result = result || res[i]
+			result = result || res[i].testResult
 		}
 	}
 
-	return
+	finalOutput.testResult = result
+	finalOutput.actualResult = res[0].actualResult
+
+	return finalOutput
 }
 
 func toNumeric(a, b string) (c, d int) {

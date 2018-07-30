@@ -23,9 +23,9 @@ import (
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
-	ID      string `yaml:"id" json:"id"`
-	Version string	`json:"version"`
-	Text    string 	`json:"text"`
+	ID      string   `yaml:"id" json:"id"`
+	Version string   `json:"version"`
+	Text    string   `json:"text"`
 	Type    NodeType `json:"node_type"`
 	Groups  []*Group `json:"tests"`
 	Summary
@@ -43,9 +43,9 @@ type Group struct {
 
 // Summary is a summary of the results of control checks run.
 type Summary struct {
-	Pass int   `json:"total_pass"`
-	Fail int   `json:"total_fail"`
-	Warn int   `json:"total_warn"`
+	Pass int `json:"total_pass"`
+	Fail int `json:"total_fail"`
+	Warn int `json:"total_warn"`
 }
 
 // NewControls instantiates a new master Controls object.
