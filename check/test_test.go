@@ -113,7 +113,7 @@ func TestTestExecute(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		res := c.Tests.execute(c.str)
+		res := c.Tests.execute(c.str).testResult
 		if !res {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
 		}
