@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
-	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 )
 
 // nodeCmd represents the node command
-var nodeCmd = &cobra.Command{
-	Use:   "node",
-	Short: "Run benchmark checks for a Kubernetes node.",
-	Long:  `Run benchmark checks for a Kubernetes node.`,
+var federatedCmd = &cobra.Command{
+	Use:   "federated",
+	Short: "Run benchmark checks for a Kubernetes federated deployment.",
+	Long:  `Run benchmark checks for a Kubernetes federated deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.NODE)
+		runChecks(FEDERATED)
 	},
 }
 
 func init() {
-	nodeCmd.PersistentFlags().StringVarP(&nodeFile,
+	federatedCmd.PersistentFlags().StringVarP(&federatedFile,
 		"file",
 		"f",
-		"/node.yaml",
-		"Alternative YAML file for node checks",
+		"/federated.yaml",
+		"Alternative YAML file for federated checks",
 	)
 
-	RootCmd.AddCommand(nodeCmd)
+	RootCmd.AddCommand(federatedCmd)
 }
