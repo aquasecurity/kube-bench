@@ -2,14 +2,14 @@
 controls:
 version: 1.8
 id: 1
-text: "Master Node Security Configuration"
+description: "Master Node Security Configuration"
 type: "master"
 groups:
 - id: 1.1
-  text: "API Server"
+  description: "API Server"
   checks:
   - id: 1.1.1
-    text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+    description: "Ensure that the --anonymous-auth argument is set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -26,7 +26,7 @@ groups:
     scored: true
 
   - id: 1.1.2
-    text: "Ensure that the --basic-auth-file argument is not set (Scored)"
+    description: "Ensure that the --basic-auth-file argument is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -40,7 +40,7 @@ groups:
     scored: true
 
   - id: 1.1.3
-    text: "Ensure that the --insecure-allow-any-token argument is not set (Scored)"
+    description: "Ensure that the --insecure-allow-any-token argument is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -53,7 +53,7 @@ groups:
     scored: true
 
   - id: 1.1.4
-    text: "Ensure that the --kubelet-https argument is set to true (Scored)"
+    description: "Ensure that the --kubelet-https argument is set to true (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests: 
       bin_op: or
@@ -71,7 +71,7 @@ groups:
     scored: true
 
   - id: 1.1.5
-    text: "Ensure that the --insecure-bind-address argument is not set (Scored)"
+    description: "Ensure that the --insecure-bind-address argument is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -84,7 +84,7 @@ groups:
     scored: true
 
   - id: 1.1.6
-    text: "Ensure that the --insecure-port argument is set to 0 (Scored)"
+    description: "Ensure that the --insecure-port argument is set to 0 (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -100,7 +100,7 @@ groups:
     scored: true
 
   - id: 1.1.7
-    text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
+    description: "Ensure that the --secure-port argument is not set to 0 (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests: 
       bin_op: or
@@ -119,7 +119,7 @@ groups:
     scored: true
 
   - id: 1.1.8
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+    description: "Ensure that the --profiling argument is set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -135,7 +135,7 @@ groups:
     scored: true
 
   - id: 1.1.9
-    text: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
+    description: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -151,7 +151,7 @@ groups:
     scored: true
 
   - id: 1.1.10
-    text: "Ensure that the admission control policy is not set to AlwaysAdmit (Scored)"
+    description: "Ensure that the admission control policy is not set to AlwaysAdmit (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -167,7 +167,7 @@ groups:
     scored: true
 
   - id: 1.1.11
-    text: "Ensure that the admission control policy is set to AlwaysPullImages (Scored)"
+    description: "Ensure that the admission control policy is set to AlwaysPullImages (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -184,7 +184,7 @@ groups:
     scored: true
 
   - id: 1.1.12
-    text: "Ensure that the admission control policy is set to DenyEscalatingExec (Scored)"
+    description: "Ensure that the admission control policy is set to DenyEscalatingExec (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -201,7 +201,7 @@ groups:
     scored: true
 
   - id: 1.1.13
-    text: "Ensure that the admission control policy is set to SecurityContextDeny (Scored)"
+    description: "Ensure that the admission control policy is set to SecurityContextDeny (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -218,7 +218,7 @@ groups:
     scored: true
 
   - id: 1.1.14
-    text: "Ensure that the admission control policy is set to NamespaceLifecycle (Scored)"
+    description: "Ensure that the admission control policy is set to NamespaceLifecycle (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -235,7 +235,7 @@ groups:
     scored: true
 
   - id: 1.1.15
-    text: "Ensure that the --audit-log-path argument is set as appropriate (Scored)"
+    description: "Ensure that the --audit-log-path argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -249,7 +249,7 @@ groups:
     scored: true
 
   - id: 1.1.16
-    text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
+    description: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -266,7 +266,7 @@ groups:
     scored: true
 
   - id: 1.1.17
-    text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
+    description: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -283,7 +283,7 @@ groups:
     scored: true
 
   - id: 1.1.18
-    text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
+    description: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -300,7 +300,7 @@ groups:
     scored: true
 
   - id: 1.1.19
-    text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
+    description: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -317,7 +317,7 @@ groups:
     scored: true
 
   - id: 1.1.20
-    text: "Ensure that the --token-auth-file parameter is not set (Scored)"
+    description: "Ensure that the --token-auth-file parameter is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -331,7 +331,7 @@ groups:
     scored: true
 
   - id: 1.1.21
-    text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
+    description: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -347,7 +347,7 @@ groups:
     scored: true
 
   - id: 1.1.22
-    text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are
+    description: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are
       set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -367,7 +367,7 @@ groups:
     scored: true
 
   - id: 1.1.23
-    text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
+    description: "Ensure that the --service-account-lookup argument is set to true (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -383,7 +383,7 @@ groups:
     scored: true
 
   - id: 1.1.24
-    text: "Ensure that the admission control policy is set to PodSecurityPolicy (Scored)"
+    description: "Ensure that the admission control policy is set to PodSecurityPolicy (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -403,7 +403,7 @@ groups:
     scored: true
 
   - id: 1.1.25
-    text: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
+    description: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -417,7 +417,7 @@ groups:
     scored: true
 
   - id: 1.1.26
-    text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as 
+    description: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as 
       appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -437,7 +437,7 @@ groups:
     scored: true
 
   - id: 1.1.27
-    text: "Ensure that the admission control policy is set to ServiceAccount (Scored)"
+    description: "Ensure that the admission control policy is set to ServiceAccount (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -455,7 +455,7 @@ groups:
     scored: true
 
   - id: 1.1.28
-    text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
+    description: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
     as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -475,7 +475,7 @@ groups:
     scored: true
 
   - id: 1.1.29
-    text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
+    description: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -489,7 +489,7 @@ groups:
     scored: true
 
   - id: 1.1.30
-    text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
+    description: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -504,7 +504,7 @@ groups:
     scored: true
 
   - id: 1.1.31
-    text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
+    description: "Ensure that the --authorization-mode argument is set to Node (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -521,7 +521,7 @@ groups:
     scored: true
 
   - id: 1.1.32
-    text: "Ensure that the admission control policy is set to NodeRestriction (Scored)"
+    description: "Ensure that the admission control policy is set to NodeRestriction (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -539,7 +539,7 @@ groups:
     scored: true
 
   - id: 1.1.33
-    text: "Ensure that the --experimental-encryption-provider-config argument is
+    description: "Ensure that the --experimental-encryption-provider-config argument is
     set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -555,7 +555,7 @@ groups:
     scored: true
 
   - id: 1.1.34
-    text: "Ensure that the encryption provider is set to aescbc (Scored)"
+    description: "Ensure that the encryption provider is set to aescbc (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
@@ -575,7 +575,7 @@ groups:
     scored: true
 
   - id: 1.1.35
-    text: "Ensure that the admission control policy is set to EventRateLimit (Scored)"
+    description: "Ensure that the admission control policy is set to EventRateLimit (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
@@ -593,7 +593,7 @@ groups:
     scored: true
 
   - id: 1.1.36
-    text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
+    description: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
@@ -604,7 +604,7 @@ groups:
     scored: true
 
   - id: 1.1.37
-    text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
+    description: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
@@ -614,10 +614,10 @@ groups:
     scored: true
 
 - id: 1.2
-  text: "Scheduler"
+  description: "Scheduler"
   checks:
   - id: 1.2.1
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+    description: "Ensure that the --profiling argument is set to false (Scored)"
     audit: "ps -ef | grep $schedulerbin | grep -v grep"
     tests:
       test_items:
@@ -634,10 +634,10 @@ groups:
     scored: true
 
 - id: 1.3
-  text: "Controller Manager"
+  description: "Controller Manager"
   checks:
   - id: 1.3.1
-    text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
+    description: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -650,7 +650,7 @@ groups:
     scored: true
 
   - id: 1.3.2
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+    description: "Ensure that the --profiling argument is set to false (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -666,7 +666,7 @@ groups:
     scored: true
 
   - id: 1.3.3
-    text: "Ensure that the --use-service-account-credentials argument is set (Scored)"
+    description: "Ensure that the --use-service-account-credentials argument is set (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -682,7 +682,7 @@ groups:
     scored: true
 
   - id: 1.3.4
-    text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
+    description: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -696,7 +696,7 @@ groups:
     scored: true
 
   - id: 1.3.5
-    text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
+    description: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -710,7 +710,7 @@ groups:
     scored: true
 
   - id: 1.3.6
-    text: "Apply Security Context to Your Pods and Containers (Not Scored)"
+    description: "Apply Security Context to Your Pods and Containers (Not Scored)"
     type: "manual"
     remediation: |
       Follow the Kubernetes documentation and apply security contexts to your pods. For a
@@ -719,7 +719,7 @@ groups:
     scored: false
 
   - id: 1.3.7
-    text: " Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
+    description: " Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
@@ -736,10 +736,10 @@ groups:
     scored: true
 
 - id: 1.4
-  text: "Configuration Files"
+  description: "Configuration Files"
   checks:
   - id: 1.4.1
-    text: "Ensure that the API server pod specification file permissions are
+    description: "Ensure that the API server pod specification file permissions are
     set to 644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
     tests:
@@ -767,7 +767,7 @@ groups:
     scored: true
 
   - id: 1.4.2
-    text: "Ensure that the API server pod specification file ownership is set to
+    description: "Ensure that the API server pod specification file ownership is set to
     root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
     tests:
@@ -784,7 +784,7 @@ groups:
     scored: true
 
   - id: 1.4.3
-    text: "Ensure that the controller manager pod specification file
+    description: "Ensure that the controller manager pod specification file
     permissions are set to 644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %a $controllermanagerconf; fi'"
     tests:
@@ -812,7 +812,7 @@ groups:
     scored: true
 
   - id: 1.4.4
-    text: "Ensure that the controller manager pod specification file
+    description: "Ensure that the controller manager pod specification file
     ownership is set to root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
     tests:
@@ -829,7 +829,7 @@ groups:
     scored: true
 
   - id: 1.4.5
-    text: "Ensure that the scheduler pod specification file permissions are set
+    description: "Ensure that the scheduler pod specification file permissions are set
     to 644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
     tests:
@@ -857,7 +857,7 @@ groups:
     scored: true
 
   - id: 1.4.6
-    text: "Ensure that the scheduler pod specification file ownership is set to
+    description: "Ensure that the scheduler pod specification file ownership is set to
     root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
     tests:
@@ -874,7 +874,7 @@ groups:
     scored: true
 
   - id: 1.4.7
-    text: "Ensure that the etcd pod specification file permissions are set to
+    description: "Ensure that the etcd pod specification file permissions are set to
     644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %a $etcdconf; fi'"
     tests:
@@ -902,7 +902,7 @@ groups:
     scored: true
 
   - id: 1.4.8
-    text: "Ensure that the etcd pod specification file ownership is set to
+    description: "Ensure that the etcd pod specification file ownership is set to
     root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
     tests:
@@ -919,7 +919,7 @@ groups:
     scored: true
 
   - id: 1.4.9
-    text: "Ensure that the Container Network Interface file permissions are
+    description: "Ensure that the Container Network Interface file permissions are
     set to 644 or more restrictive (Not Scored)"
     audit: "stat -c %a <path/to/cni/files>"
     type: manual
@@ -930,7 +930,7 @@ groups:
     scored: true
 
   - id: 1.4.10
-    text: "Ensure that the Container Network Interface file ownership is set
+    description: "Ensure that the Container Network Interface file ownership is set
     to root:root (Not Scored)"
     audit: "stat -c %U:%G <path/to/cni/files>"
     type: manual
@@ -941,7 +941,7 @@ groups:
     scored: true
 
   - id: 1.4.11
-    text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
+    description: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
     audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
     tests:
       test_items:
@@ -959,7 +959,7 @@ groups:
     scored: true
 
   - id: 1.4.12
-    text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
+    description: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
     audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
     tests:
       test_items:
@@ -974,7 +974,7 @@ groups:
     scored: true
 
   - id: 1.4.13
-    text: "Ensure that the admin.conf file permissions are set to 644 or
+    description: "Ensure that the admin.conf file permissions are set to 644 or
     more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %a /etc/kubernetes/admin.conf; fi'"
     tests:
@@ -1002,7 +1002,7 @@ groups:
     scored: true
 
   - id: 1.4.14
-    text: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
+    description: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
     audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %U:%G /etc/kubernetes/admin.conf; fi'"
     tests:
       test_items:
@@ -1018,7 +1018,7 @@ groups:
     scored: true
 
   - id: 1.4.15
-    text: "Ensure that the scheduler.conf file permissions are set to 644 or
+    description: "Ensure that the scheduler.conf file permissions are set to 644 or
     more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
     tests:
@@ -1046,7 +1046,7 @@ groups:
     scored: true
 
   - id: 1.4.16
-    text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
+    description: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
     tests:
       test_items:
@@ -1062,7 +1062,7 @@ groups:
     scored: true
 
   - id: 1.4.17
-    text: "Ensure that the controller-manager.conf file permissions are set
+    description: "Ensure that the controller-manager.conf file permissions are set
     to 644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %a $controllermanagerconf; fi'"
     tests:
@@ -1090,7 +1090,7 @@ groups:
     scored: true
 
   - id: 1.4.18
-    text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
+    description: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
     tests:
       test_items:
@@ -1106,10 +1106,10 @@ groups:
     scored: true
 
 - id: 1.5
-  text: "etcd"
+  description: "etcd"
   checks:
   - id: 1.5.1
-    text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
+    description: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1126,7 +1126,7 @@ groups:
     scored: true
 
   - id: 1.5.2
-    text: "Ensure that the --client-cert-auth argument is set to true (Scored)"
+    description: "Ensure that the --client-cert-auth argument is set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1142,7 +1142,7 @@ groups:
     scored: true
 
   - id: 1.5.3
-    text: "Ensure that the --auto-tls argument is not set to true (Scored)"
+    description: "Ensure that the --auto-tls argument is not set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       bin_op: or
@@ -1160,7 +1160,7 @@ groups:
     scored: true
 
   - id: 1.5.4
-    text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set
+    description: "Ensure that the --peer-cert-file and --peer-key-file arguments are set
     as appropriate (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
@@ -1178,7 +1178,7 @@ groups:
     scored: true
 
   - id: 1.5.5
-    text: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
+    description: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1194,7 +1194,7 @@ groups:
     scored: true
 
   - id: 1.5.6
-    text: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
+    description: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       bin_op: or
@@ -1213,7 +1213,7 @@ groups:
     scored: true
 
   - id: 1.5.7
-    text: "Ensure that the --wal-dir argument is set as appropriate (Scored)"
+    description: "Ensure that the --wal-dir argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1226,7 +1226,7 @@ groups:
     scored: true
 
   - id: 1.5.8
-    text: "Ensure that the --max-wals argument is set to 0 (Scored)"
+    description: "Ensure that the --max-wals argument is set to 0 (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1242,7 +1242,7 @@ groups:
     scored: true
 
   - id: 1.5.9
-    text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
+    description: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
@@ -1257,10 +1257,10 @@ groups:
     scored: false 
 
 - id: 1.6
-  text: "General Security Primitives"
+  description: "General Security Primitives"
   checks:
   - id: 1.6.1
-    text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
+    description: "Ensure that the cluster-admin role is only used where required (Not Scored)"
     type: "manual"
     remediation: |
       Remove any unneeded clusterrolebindings :
@@ -1268,7 +1268,7 @@ groups:
     scored: false
 
   - id: 1.6.2
-    text: "Create Pod Security Policies for your cluster (Not Scored)"
+    description: "Create Pod Security Policies for your cluster (Not Scored)"
     type: "manual"
     remediation: |
       Follow the documentation and create and enforce Pod Security Policies for your cluster.
@@ -1277,7 +1277,7 @@ groups:
     scored: false
 
   - id: 1.6.3
-    text: "Create administrative boundaries between resources using namespaces (Not Scored)"
+    description: "Create administrative boundaries between resources using namespaces (Not Scored)"
     type: "manual"
     remediation: |
       Follow the documentation and create namespaces for objects in your deployment as you
@@ -1285,14 +1285,14 @@ groups:
     scored: false
 
   - id: 1.6.4
-    text: "Create network segmentation using Network Policies (Not Scored)"
+    description: "Create network segmentation using Network Policies (Not Scored)"
     type: "manual"
     remediation: |
       Follow the documentation and create NetworkPolicy objects as you need them.
     scored: false
 
   - id: 1.6.5
-    text: "Ensure that the seccomp profile is set to docker/default in your pod 
+    description: "Ensure that the seccomp profile is set to docker/default in your pod 
     definitions (Not Scored)"
     type: "manual"
     remediation: |
@@ -1319,7 +1319,7 @@ groups:
     scored: false
 
   - id: 1.6.6
-    text: "Apply Security Context to Your Pods and Containers (Not Scored)"
+    description: "Apply Security Context to Your Pods and Containers (Not Scored)"
     type: "manual"
     remediation: |
       Follow the Kubernetes documentation and apply security contexts to your pods. For a
@@ -1328,14 +1328,14 @@ groups:
     scored: false
 
   - id: 1.6.7
-    text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
+    description: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
     type: "manual"
     remediation: |
       Follow the Kubernetes documentation and setup image provenance.
     scored: false
 
   - id: 1.6.8
-    text: "Configure Network policies as appropriate (Not Scored)"
+    description: "Configure Network policies as appropriate (Not Scored)"
     type: "manual"
     remediation: |
       Follow the Kubernetes documentation and setup network policies as appropriate.
@@ -1350,7 +1350,7 @@ groups:
     scored: false
 
   - id: 1.6.9
-    text: "Place compensating controls in the form of PSP and RBAC for
+    description: "Place compensating controls in the form of PSP and RBAC for
     privileged containers usage (Not Scored)"
     type: "manual"
     remediation: |
