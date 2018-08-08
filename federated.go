@@ -14,6 +14,27 @@
 
 package main
 
-func main() {
-	Execute()
+import (
+	"github.com/spf13/cobra"
+)
+
+// nodeCmd represents the node command
+var federatedCmd = &cobra.Command{
+	Use:   "federated",
+	Short: "Run benchmark checks for a Kubernetes federated deployment.",
+	Long:  `Run benchmark checks for a Kubernetes federated deployment.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		runChecks(FEDERATED)
+	},
+}
+
+func init() {
+	federatedCmd.PersistentFlags().StringVarP(&federatedFile,
+		"file",
+		"f",
+		"/federated.yaml",
+		"Alternative YAML file for federated checks",
+	)
+
+	RootCmd.AddCommand(federatedCmd)
 }

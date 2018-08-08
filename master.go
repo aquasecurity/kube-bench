@@ -14,6 +14,27 @@
 
 package main
 
-func main() {
-	Execute()
+import (
+	"github.com/spf13/cobra"
+)
+
+// masterCmd represents the master command
+var masterCmd = &cobra.Command{
+	Use:   "master",
+	Short: "Run benchmark checks for a Kubernetes master node.",
+	Long:  `Run benchmark checks for a Kubernetes master node.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		runChecks(MASTER)
+	},
+}
+
+func init() {
+	masterCmd.PersistentFlags().StringVarP(&masterFile,
+		"file",
+		"f",
+		"/master.yaml",
+		"Alternative YAML file for master checks",
+	)
+
+	RootCmd.AddCommand(masterCmd)
 }

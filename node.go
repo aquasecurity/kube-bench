@@ -14,6 +14,27 @@
 
 package main
 
-func main() {
-	Execute()
+import (
+	"github.com/spf13/cobra"
+)
+
+// nodeCmd represents the node command
+var nodeCmd = &cobra.Command{
+	Use:   "node",
+	Short: "Run benchmark checks for a Kubernetes node.",
+	Long:  `Run benchmark checks for a Kubernetes node.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		runChecks(NODE)
+	},
+}
+
+func init() {
+	nodeCmd.PersistentFlags().StringVarP(&nodeFile,
+		"file",
+		"f",
+		"/node.yaml",
+		"Alternative YAML file for node checks",
+	)
+
+	RootCmd.AddCommand(nodeCmd)
 }
