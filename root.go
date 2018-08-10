@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
 	goflag "flag"
 	"fmt"
 	"os"
 
-	"github.com/aquasecurity/kube-bench/check"
+	"github.com/aquasecurity/bench-common/check"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

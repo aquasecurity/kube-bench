@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
-	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +24,7 @@ var masterCmd = &cobra.Command{
 	Short: "Run benchmark checks for a Kubernetes master node.",
 	Long:  `Run benchmark checks for a Kubernetes master node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.MASTER)
+		runChecks(MASTER)
 	},
 }
 

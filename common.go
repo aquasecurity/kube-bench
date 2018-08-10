@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aquasecurity/kube-bench/check"
+	"github.com/aquasecurity/bench-common/check"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
@@ -29,18 +29,18 @@ var (
 	errmsgs string
 )
 
-func runChecks(nodetype check.NodeType) {
+func runChecks(nodetype nodeType) {
 	var summary check.Summary
 	var file string
 	var err error
 	var typeConf *viper.Viper
 
 	switch nodetype {
-	case check.MASTER:
+	case MASTER:
 		file = masterFile
-	case check.NODE:
+	case NODE:
 		file = nodeFile
-	case check.FEDERATED:
+	case FEDERATED:
 		file = federatedFile
 	}
 
@@ -85,7 +85,7 @@ func runChecks(nodetype check.NodeType) {
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
 
-	controls, err := check.NewControls(nodetype, []byte(s))
+	controls, err := check.NewControls([]byte(s))
 	if err != nil {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
@@ -135,11 +135,11 @@ func colorPrint(state check.State, s string) {
 func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print check results.
 	if !noResults {
-		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
+		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Description))
 		for _, g := range r.Groups {
-			colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
+			colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Description))
 			for _, c := range g.Checks {
-				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
+				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Description))
 			}
 		}
 
