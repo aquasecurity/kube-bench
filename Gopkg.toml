@@ -1,4 +1,8 @@
 [[constraint]]
+  name = "github.com/aquasecurity/bench-common"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/fatih/color"
   version = "1.5.0"
 
