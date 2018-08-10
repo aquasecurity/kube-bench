@@ -2,8 +2,8 @@ FROM golang:1.9 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 ADD Gopkg.toml Gopkg.lock ./
 RUN go get -v github.com/golang/dep/cmd/dep && dep ensure -v -vendor-only
-RUN go get -v -d github.com/aquasecurity/bench-common
-ADD main.go .
+RUN git clone https://github.com/aquasecurity/bench-common /go/src/github.com/aquasecurity
+COPY * /go/src/github.com/aquasecurity/kube-bench/
 RUN CGO_ENABLED=0 go install -a -ldflags '-w'
 
 FROM alpine:3.7 AS run
