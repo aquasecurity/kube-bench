@@ -46,7 +46,7 @@ var (
 var RootCmd = &cobra.Command{
 	Use:   os.Args[0],
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
-	Long:  `This tool runs the CIS Kubernetes Benchmark (http://www.cisecurity.org/benchmark/kubernetes/)`,
+	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
