@@ -28,14 +28,16 @@ You can choose to
 You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace.
 
 ```
-docker run --pid=host aquasec/kube-bench:latest <master|node>
+docker run --pid=host -t aquasec/kube-bench:latest <master|node>
 ```
 
 You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
-docker run --pid=host -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
+docker run --pid=host -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
 ```
+
+> Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
 Run the master check
