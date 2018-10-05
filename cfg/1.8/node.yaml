@@ -159,25 +159,6 @@ groups:
     scored: true
 
   - id: 2.1.9
-    text: "Ensure that the --keep-terminated-pod-volumes argument is set to false (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
-    tests:
-      test_items:
-      - flag: "--keep-terminated-pod-volumes"
-        compare:
-          op: eq
-          value: false
-        set: true
-    remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-      --keep-terminated-pod-volumes=false
-      Based on your system, restart the kubelet service. For example:
-      systemctl daemon-reload
-      systemctl restart kubelet.service
-    scored: true
-
-  - id: 2.1.10
     text: "Ensure that the --hostname-override argument is not set (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
@@ -193,7 +174,7 @@ groups:
       systemctl restart kubelet.service
     scored: true
 
-  - id: 2.1.11
+  - id: 2.1.10
     text: "Ensure that the --event-qps argument is set to 0 (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
@@ -212,7 +193,7 @@ groups:
       systemctl restart kubelet.service
     scored: true
 
-  - id: 2.1.12
+  - id: 2.1.11
     text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
@@ -234,7 +215,7 @@ groups:
       systemctl restart kubelet.service
     scored: true
 
-  - id: 2.1.13
+  - id: 2.1.12
     text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
@@ -253,7 +234,7 @@ groups:
       systemctl restart kubelet.service
     scored: true
 
-  - id: 2.1.14
+  - id: 2.1.13
     text: "Ensure that the RotateKubeletClientCertificate argument is set to true"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
@@ -273,7 +254,7 @@ groups:
       systemctl restart kubelet.service
     scored: true
 
-  - id: 2.1.15
+  - id: 2.1.14
     text: "Ensure that the RotateKubeletServerCertificate argument is set to true"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
