@@ -7,20 +7,20 @@
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/).
 
-Tests are configured with YAML files, making this tool easy to update as test specifications evolve. 
+Tests are configured with YAML files, making this tool easy to update as test specifications evolve.
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
 
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7 and 1.8) as defined in the CIS Benchmarks 1.0.0, 1.1.0 and 1.2.0 respectively. It will determine the test set to run based on the Kubernetes version running on the machine. 
+kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7, 1.8, and 1.11) as defined in the CIS Benchmarks 1.0.0, 1.1.0, 1.2.0, and 1.30 respectively. It will determine the test set to run based on the Kubernetes version running on the machine.
 
 ## Installation
 
-You can choose to 
+You can choose to
 * run kube-bench from inside a container (sharing PID namespace with the host)
 * run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), 
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
 * compile it from source.
 
 ### Running inside a container
@@ -59,7 +59,7 @@ This command copies the kube-bench binary and configuration files to your host f
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
-You can then run `./kube-bench <master|node>`. 
+You can then run `./kube-bench <master|node>`.
 
 ### Installing from sources
 
@@ -81,13 +81,13 @@ go build -o kube-bench .
 ```
 
 ## Configuration
-Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file. 
+Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
 
-For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.  
+For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.
 
-* **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running. 
-* **podspecs** - From version 1.2.0 of the benchmark (tests for Kubernetes 1.8), the remediation instructions were updated to assume that the configuration for several kubernetes components is defined in a pod YAML file, and podspec settings define where to look for that configuration. 
-* **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location. 
+* **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running.
+* **podspecs** - From version 1.2.0 of the benchmark (tests for Kubernetes 1.8), the remediation instructions were updated to assume that the configuration for several kubernetes components is defined in a pod YAML file, and podspec settings define where to look for that configuration.
+* **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location.
 * **unitfiles** - From version 1.2.0 of the benchmark  (tests for Kubernetes 1.8), the remediation instructions were updated to assume that kubelet configuration is defined in a service file, and this setting defines where to look for that configuration.
 
 ## Test config YAML representation
@@ -147,7 +147,7 @@ These operations are:
 - `has`: tests if the flag value contains the compared value.
 - `nothave`: tests if the flag value does not contain the compared value.
 
-# Roadmap 
-Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release. 
+# Roadmap
+Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
-We welcome PRs and issue reports. 
+We welcome PRs and issue reports.
