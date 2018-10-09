@@ -484,7 +484,7 @@ groups:
       --client-ca-file=<path/to/client-ca-file>
     scored: true
 
-- id: 1.1.30
+  - id: 1.1.30
     text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -492,7 +492,7 @@ groups:
       - flag: "--tls-cipher-suites"
         compare:
           op: has
-          value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM _SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM _SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+          value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
         set: true
     remediation: |
       Edit the API server pod specification file $apiserverconf
@@ -775,7 +775,7 @@ groups:
       --feature-gates=RotateKubeletServerCertificate=true
     scored: true
 
- - id: 1.3.7
+  - id: 1.3.7
     text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
