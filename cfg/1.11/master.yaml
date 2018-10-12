@@ -22,7 +22,6 @@ groups:
       Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
       --anonymous-auth=false
-
     scored: true
 
   - id: 1.1.2
@@ -607,7 +606,16 @@ groups:
   - id: 1.1.37
     text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    type: "manual"
+    tests:
+      bin_op: and
+      test_items:
+      - flag: "--feature-gates"
+        compare:
+          op: nothave
+          value: "AdvancedAuditing=false"
+        set: true
+      - flag: "--audit-policy-file"
+        set: true
     remediation: |
       Follow the Kubernetes documentation and set the desired audit policy in the
       /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
@@ -619,11 +627,11 @@ groups:
     text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--request-timeout"
-        compare:
-          op: eq
-          value: "300s"
+        set: false
+      - flag: "--request-timeout"
         set: true
     remediation: |
       Edit the API server pod specification file $apiserverconf
@@ -670,12 +678,15 @@ groups:
     text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
     audit: "ps -ef | grep $schedulerbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--address"
         compare:
           op: eq
           value: "127.0.0.1"
         set: true
+      - flag: "--address"
+        set: false
     remediation: |
       Edit the Scheduler pod specification file $schedulerconf
       file on the master node and ensure the correct value for the
@@ -690,8 +701,8 @@ groups:
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
-        - flag: "--terminated-pod-gc-threshold"
-          set: true
+      - flag: "--terminated-pod-gc-threshold"
+        set: true
     remediation: |
       Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold, for example:
@@ -709,7 +720,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the below parameter.
       --profiling=false
     scored: true
@@ -725,7 +736,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node to set the below parameter.
       --use-service-account-credentials=true
     scored: true
@@ -738,7 +749,7 @@ groups:
       - flag: "--service-account-private-key-file"
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the --service-account-private-
       key-file parameter to the private key file for service accounts.
       --service-account-private-key-file=<filename>
@@ -752,7 +763,7 @@ groups:
       - flag: "--root-ca-file"
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       on the master node and set the --root-ca-file parameter to
       the certificate bundle file.
       --root-ca-file=<path/to/file>
@@ -763,13 +774,13 @@ groups:
     audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
-      - flag: "RotateKubeletServerCertificate"
+      - flag: "--feature-gates"
         compare:
           op: eq
-          value: true
+          value: "RotateKubeletServerCertificate=true"
         set: true
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       controller-manager.yaml on the master node and set the --feature-gates parameter to
       include RotateKubeletServerCertificate=true.
       --feature-gates=RotateKubeletServerCertificate=true
@@ -785,8 +796,10 @@ groups:
           op: eq
           value: "127.0.0.1"
         set: true
+      - flag: "--address"
+        set: false
     remediation: |
-      Edit the Controller Manager pod specification file $apiserverconf
+      Edit the Controller Manager pod specification file $controllermanagerconf
       controller-manager.yaml on the master node and ensure the correct value
       for the --address parameter.
     scored: true
@@ -1203,8 +1216,8 @@ groups:
         set: false
       - flag: "--auto-tls"
         compare:
-          op: neq
-          value: true
+          op: eq
+          value: false
     remediation: |
       Edit the etcd pod specification file $etcdconf on the master
       node and either remove the --auto-tls parameter or set it to false.
@@ -1215,7 +1228,9 @@ groups:
     text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
     set as appropriate (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
+    type: "manual"
     tests:
+      bin_op: and
       test_items:
       - flag: "--peer-cert-file"
         set: true
@@ -1232,6 +1247,7 @@ groups:
   - id: 1.5.5
     text: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
+    type: "manual"
     tests:
       test_items:
       - flag: "--peer-client-cert-auth"
@@ -1248,6 +1264,7 @@ groups:
   - id: 1.5.6
     text: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
+    type: "manual"
     tests:
       bin_op: or
       test_items:
@@ -1267,6 +1284,7 @@ groups:
   - id: 1.5.7
     text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
     audit: "ps -ef | grep $etcdbin | grep -v grep"
+    type: "manual"
     tests:
       test_items:
       - flag: "--trusted-ca-file"
