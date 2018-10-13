@@ -38,8 +38,11 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+      If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to
+      false .
+      If using executable arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --anonymous-auth=false
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -57,8 +60,10 @@ groups:
           value: "AlwaysAllow"
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable.
+      If using a Kubelet config file, edit the file to set authorization: mode to Webhook.
+      If using executable arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_AUTHZ_ARGS variable.
       --authorization-mode=Webhook
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -73,8 +78,11 @@ groups:
       - flag: "--client-ca-file"
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable.
+      If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to
+      the location of the client CA file.
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_AUTHZ_ARGS variable.
       --client-ca-file=<path/to/client-ca-file>
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -92,8 +100,10 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+      If using a Kubelet config file, edit the file to set readOnlyPort to 0 .
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --read-only-port=0
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -111,8 +121,11 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+      If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a
+      value other than 0.
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --streaming-connection-idle-timeout=5m
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -130,8 +143,10 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+      If using a Kubelet config file, edit the file to set protectKernelDefaults: true .
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --protect-kernel-defaults=true
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -150,8 +165,10 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and remove the --make-iptables-util-chains argument from the
+      If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true .
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      remove the --make-iptables-util-chains argument from the
       KUBELET_SYSTEM_PODS_ARGS variable.
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -185,8 +202,10 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
-      on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+      If using a Kubelet config file, edit the file to set eventRecordQPS: 0 .
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --event-qps=0
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
@@ -197,19 +216,21 @@ groups:
     text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
+      bin_op: and
       test_items:
       - flag: "--tls-cert-file"
         set: true
       - flag: "--tls-private-key-file"
         set: true
     remediation: |
-      Follow the Kubernetes documentation and set up the TLS connection on the Kubelet.
-      Then edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-
-      kubeadm.conf on each worker node and set the below parameters in
-      KUBELET_CERTIFICATE_ARGS variable.
+      If using a Kubelet config file, edit the file to set tlsCertFile to the location of the certificate
+      file to use to identify this Kubelet, and tlsPrivateKeyFile to the location of the
+      corresponding private key file.
+      If using command line arguments, edit the kubelet service file
+      $kubeletconf on each worker node and
+      set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
       --tls-cert-file=<path/to/tls-certificate-file>
       file=<path/to/tls-key-file>
-      --tls-private-key-
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
       systemctl restart kubelet.service
@@ -219,12 +240,15 @@ groups:
     text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
     audit: "ps -ef | grep $kubeletbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--cadvisor-port"
         compare:
           op: eq
           value: 0
         set: true
+      - flag: "--cadvisor-port"
+        set: false
     remediation: |
       Edit the kubelet service file $kubeletconf
       on each worker node and set the below parameter in KUBELET_CADVISOR_ARGS variable.
@@ -246,9 +270,11 @@ groups:
         set: true
     remediation: |
       If using a Kubelet config file, edit the file to add the line rotateCertificates: true.
-      If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and add --rotate-certificates=true argument to the KUBELET_CERTIFICATE_ARGS variable. Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+      If using command line arguments, edit the kubelet service file $kubeletconf 
+      on each worker node and add --rotate-certificates=true argument to the KUBELET_CERTIFICATE_ARGS variable.
+      Based on your system, restart the kubelet service. For example:
+      systemctl daemon-reload
+      systemctl restart kubelet.service
     scored: true
 
   - id: 2.1.14
@@ -282,7 +308,7 @@ groups:
         set: true
     remediation: |
       If using a Kubelet config file, edit the file to set TLSCipherSuites: to TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 ,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 ,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 ,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
-      If using executable arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and set the below parameter.
+      If using executable arguments, edit the kubelet service file $kubeletconf on each worker node and set the below parameter.
       --tls-cipher- suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM _SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM _SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
     scored: false
 
