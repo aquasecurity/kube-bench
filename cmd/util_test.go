@@ -289,6 +289,81 @@ func TestGetConfigFiles(t *testing.T) {
 	}
 }
 
+func TestGetServiceFiles(t *testing.T) {
+	cases := []struct {
+		config      map[string]interface{}
+		exp         map[string]string
+		statResults []error
+	}{
+		{
+			config: map[string]interface{}{
+				"components": []string{"kubelet"},
+				"kubelet":    map[string]interface{}{"svc": []string{"kubelet", "10-kubeadm.conf"}},
+			},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"kubelet": "10-kubeadm.conf"},
+		},
+		{
+			// Component "thing" isn't included in the list of components
+			config: map[string]interface{}{
+				"components": []string{"kubelet"},
+				"kubelet":    map[string]interface{}{"svc": []string{"kubelet", "10-kubeadm.conf"}},
+				"thing":      map[string]interface{}{"svc": []string{"/my/file/thing"}},
+			},
+			statResults: []error{os.ErrNotExist, nil},
+			exp:         map[string]string{"kubelet": "10-kubeadm.conf"},
+		},
+		{
+			// More than one component
+			config: map[string]interface{}{
+				"components": []string{"kubelet", "thing"},
+				"kubelet":    map[string]interface{}{"svc": []string{"kubelet", "10-kubeadm.conf"}},
+				"thing":      map[string]interface{}{"svc": []string{"/my/file/thing"}},
+			},
+			statResults: []error{os.ErrNotExist, nil, nil},
+			exp:         map[string]string{"kubelet": "10-kubeadm.conf", "thing": "/my/file/thing"},
+		},
+		{
+			// Default thing to specified default service
+			config: map[string]interface{}{
+				"components": []string{"kubelet", "thing"},
+				"kubelet":    map[string]interface{}{"svc": []string{"kubelet", "10-kubeadm.conf"}},
+				"thing":      map[string]interface{}{"svc": []string{"/my/file/thing"}, "defaultsvc": "another/thing"},
+			},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"kubelet": "10-kubeadm.conf", "thing": "another/thing"},
+		},
+		{
+			// Default thing to component name
+			config: map[string]interface{}{
+				"components": []string{"kubelet", "thing"},
+				"kubelet":    map[string]interface{}{"svc": []string{"kubelet", "10-kubeadm.conf"}},
+				"thing":      map[string]interface{}{"svc": []string{"/my/file/thing"}},
+			},
+			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
+			exp:         map[string]string{"kubelet": "10-kubeadm.conf", "thing": "thing"},
+		},
+	}
+
+	v := viper.New()
+	statFunc = fakestat
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			e = c.statResults
+			eIndex = 0
+
+			m := getServiceFiles(v)
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
+			}
+		})
+	}
+}
+
 func TestMakeSubsitutions(t *testing.T) {
 	cases := []struct {
 		input string

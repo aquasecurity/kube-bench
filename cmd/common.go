@@ -79,11 +79,13 @@ func runChecks(nodetype check.NodeType) {
 	typeConf = viper.Sub(string(nodetype))
 	binmap := getBinaries(typeConf)
 	confmap := getConfigFiles(typeConf)
+	svcmap := getServiceFiles(typeConf)
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
+	s = makeSubstitutions(s, "svc", svcmap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {

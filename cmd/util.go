@@ -172,8 +172,6 @@ func decrementVersion(version string) string {
 }
 
 // getConfigFiles finds which of the set of candidate config files exist
-// accepts a string 't' which indicates the type of config file, conf,
-// podspec or untifile.
 func getConfigFiles(v *viper.Viper) map[string]string {
 	confmap := make(map[string]string)
 
@@ -202,6 +200,37 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 	}
 
 	return confmap
+}
+
+// getServiceFiles finds which of the set of candidate service files exist
+func getServiceFiles(v *viper.Viper) map[string]string {
+	svcmap := make(map[string]string)
+
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
+		}
+
+		// See if any of the candidate config files exist
+		svc := findConfigFile(s.GetStringSlice("svc"))
+		if svc == "" {
+			if s.IsSet("defaultsvc") {
+				svc = s.GetString("defaultsvc")
+				glog.V(2).Info(fmt.Sprintf("Using default service file name '%s' for component %s", svc, component))
+			} else {
+				// Default the service file name that we'll substitute to the name of the component
+				glog.V(2).Info(fmt.Sprintf("Missing service file for %s", component))
+				svc = component
+			}
+		} else {
+			glog.V(2).Info(fmt.Sprintf("Component %s uses service file '%s'", component, svc))
+		}
+
+		svcmap[component] = svc
+	}
+
+	return svcmap
 }
 
 // verifyBin checks that the binary specified is running
