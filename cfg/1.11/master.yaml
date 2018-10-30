@@ -223,7 +223,7 @@ groups:
       test_items:
       - flag: "--disable-admission-plugins"
         compare:
-          op: has
+          op: nothave
           value: "NamespaceLifecycle"
         set: true
     remediation: |
