@@ -164,6 +164,8 @@ groups:
           op: eq
           value: true
         set: true
+      - flag: "--make-iptables-util-chains"
+        set: false
     remediation: |
       If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true .
       If using command line arguments, edit the kubelet service file
