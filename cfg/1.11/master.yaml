@@ -607,15 +607,15 @@ groups:
     text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
-      bin_op: and
+      bin_op: or
       test_items:
       - flag: "--feature-gates"
         compare:
           op: nothave
           value: "AdvancedAuditing=false"
         set: true
-      - flag: "--audit-policy-file"
-        set: true
+      - flag: "--feature-gates"
+        set: false
     remediation: |
       Follow the Kubernetes documentation and set the desired audit policy in the
       /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
