@@ -43,6 +43,7 @@ master:
   controllermanager:
     bins:
       - "kube-controller-manager"
+      - "kube-controller"
       - "hyperkube controller-manager"
       - "controller-manager"
     confs:
