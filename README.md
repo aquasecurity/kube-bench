@@ -25,16 +25,16 @@ You can choose to
 
 ### Running inside a container
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace.
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions.
 
 ```
-docker run --pid=host -t aquasec/kube-bench:latest <master|node>
+docker run --pid=host -v /etc:/etc -v /var:/var -t aquasec/kube-bench:latest <master|node>
 ```
 
 You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
-docker run --pid=host -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
+docker run --pid=host -v /etc:/etc -v /var:/var -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
 ```
 
 > Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
