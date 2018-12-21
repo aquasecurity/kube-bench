@@ -179,7 +179,7 @@ groups:
       Edit the API server pod specification file $apiserverconf
       on the master node and set the --enable-admission-plugins to
       include AlwaysPullImages.
-      --enable-admission-plugins...,AlwaysPullImages,...
+      --enable-admission-plugins=...,AlwaysPullImages,...
     scored: true
 
   - id: 1.1.12
