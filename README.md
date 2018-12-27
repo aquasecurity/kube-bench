@@ -46,6 +46,8 @@ Run the master check
 kubectl run --rm -i -t kube-bench-master --image=aquasec/kube-bench:latest --restart=Never --overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"hostPID\": true, \"nodeSelector\": { \"node-role.kubernetes.io/master\": \"\" }, \"tolerations\": [ { \"key\": \"node-role.kubernetes.io/master\", \"operator\": \"Exists\", \"effect\": \"NoSchedule\" } ] } }" -- master --version 1.11
 ```
 
+Notice that this requires access to the host PID namespace. Thus it will not work if the recommendation to enable the admission plugin DenyEscalatingExec in the API Server has been implemented. You will see an error message about failing to attach to a container using host PID.
+
 Run the node check
 
 ```
