@@ -1422,7 +1422,7 @@ groups:
     scored: false
 
   - id: 1.7.5
-    text: " Do not admit containers with allowPrivilegeEscalation (Not Scored)"
+    text: "Do not admit containers with allowPrivilegeEscalation (Not Scored)"
     type: "manual"
     remediation: |
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.allowPrivilegeEscalation field is omitted or set to false.
