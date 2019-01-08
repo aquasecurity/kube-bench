@@ -220,12 +220,15 @@ groups:
     text: "Ensure that the admission control plugin NamespaceLifecycle is set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--disable-admission-plugins"
         compare:
           op: nothave
           value: "NamespaceLifecycle"
         set: true
+      - flag: "--disable-admission-plugins"
+        set: false
     remediation: |
       Edit the API server pod specification file $apiserverconf
       on the master node and set the --disable-admission-plugins parameter to
