@@ -57,7 +57,7 @@ kubectl run --rm -i -t kube-bench-node --image=aquasec/kube-bench:latest --resta
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
-** binaries compiled for linux-x86-64 only, (no OSX) **
+** binaries compiled for linux-x86-64 only (so they won't run on OSX or Windows) **
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
