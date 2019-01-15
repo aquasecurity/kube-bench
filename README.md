@@ -40,19 +40,34 @@ docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.ya
 > Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
-Run the master check
 
-```
-kubectl run --rm -i -t kube-bench-master --image=aquasec/kube-bench:latest --restart=Never --overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"hostPID\": true, \"nodeSelector\": { \"node-role.kubernetes.io/master\": \"\" }, \"tolerations\": [ { \"key\": \"node-role.kubernetes.io/master\", \"operator\": \"Exists\", \"effect\": \"NoSchedule\" } ] } }" -- master --version 1.11
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored. 
+
+To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
+
+The supplied `job-node.yaml` and `job-master.yaml` files can be applied to run the tests as a job. For example:
+
+```bash
+$ kubectl apply -f job-master.yaml 
+job.batch/kube-bench-master created
+
+$ kubectl get pods
+NAME                      READY   STATUS              RESTARTS   AGE
+kube-bench-master-j76s9   0/1     ContainerCreating   0          3s
+
+# Wait for a few seconds for the job to complete
+$ kubectl get pods
+NAME                      READY   STATUS      RESTARTS   AGE
+kube-bench-master-j76s9   0/1     Completed   0          11s
+
+# The results are held in the pod's logs
+k logs kube-bench-master-j76s9
+[INFO] 1 Master Node Security Configuration
+[INFO] 1.1 API Server
+...
 ```
 
-Notice that this requires access to the host PID namespace. Thus it will not work if the recommendation to enable the admission plugin DenyEscalatingExec in the API Server has been implemented. You will see an error message about failing to attach to a container using host PID.
-
-Run the node check
-
-```
-kubectl run --rm -i -t kube-bench-node --image=aquasec/kube-bench:latest --restart=Never --overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"hostPID\": true } }" -- node --version 1.11
-```
+The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
 ### Installing from a container
 
@@ -83,6 +98,7 @@ go build -o kube-bench .
 ```
 
 ## Configuration
+
 Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
 
 For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.
