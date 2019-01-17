@@ -18,7 +18,7 @@ spec:
         - name: etc-kubernetes
           mountPath: /etc/kubernetes
           # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version. 
-          # You can omit this mount if you specify --version as part of the command.          
+          # You can omit this mount if you specify --version as part of the command.           
         - name: usr-bin
           mountPath: /usr/bin
       restartPolicy: Never
