@@ -366,15 +366,14 @@ groups:
     scored: true
 
   - id: 1.1.23
-    text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
+    text: "Ensure that the --service-account-lookup argument is not set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--service-account-lookup"
         compare:
-          op: eq
-          value: true
-        set: true
+          op: noteq
+          value: false
     remediation: |
       Edit the API server pod specification file $apiserverconf
       on the master node and set the below parameter.
