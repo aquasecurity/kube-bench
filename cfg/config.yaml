@@ -80,7 +80,8 @@ node:
       - "kubelet"
     confs:
       - /etc/kubernetes/kubelet.conf
-      - /etc/kubernetes/kubelet 
+      - /etc/kubernetes/kubelet
+      - /var/lib/kubelet/config.yaml
     defaultconf: "/etc/kubernetes/kubelet.conf"
 
   proxy:
