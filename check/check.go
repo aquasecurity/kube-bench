@@ -82,6 +82,12 @@ func (c *Check) Run() {
 		return
 	}
 
+	// If check type is skip, force result to INFO.
+	if c.Type == "skip" {
+		c.State = INFO
+		return
+	}
+
 	var out bytes.Buffer
 	var errmsgs string
 

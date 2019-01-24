@@ -46,6 +46,7 @@ type Summary struct {
 	Pass int `json:"total_pass"`
 	Fail int `json:"total_fail"`
 	Warn int `json:"total_warn"`
+	Info int `json:"total_info"`
 }
 
 // NewControls instantiates a new master Controls object.
@@ -182,6 +183,8 @@ func summarize(controls *Controls, check *Check) {
 		controls.Summary.Fail++
 	case WARN:
 		controls.Summary.Warn++
+	case INFO:
+		controls.Summary.Info++
 	}
 }
 
