@@ -44,9 +44,12 @@ func runChecks(nodetype check.NodeType) {
 		file = federatedFile
 	}
 
-	runningVersion, err := getKubeVersion()
-	if err != nil && kubeVersion == "" {
-		exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+	runningVersion := ""
+	if kubeVersion == "" {
+		runningVersion, err = getKubeVersion()
+		if err != nil {
+			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+		}
 	}
 	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
 	if err != nil {
