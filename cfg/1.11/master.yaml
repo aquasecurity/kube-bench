@@ -842,13 +842,13 @@ groups:
   - id: 1.4.2
     text: "Ensure that the API server pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
+    audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%g $apiserverconf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -887,13 +887,13 @@ groups:
   - id: 1.4.4
     text: "Ensure that the controller manager pod specification file
     ownership is set to root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
+    audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%g $controllermanagerconf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -932,13 +932,13 @@ groups:
   - id: 1.4.6
     text: "Ensure that the scheduler pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
+    audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%g $schedulerconf; fi'"
     tests:
       test_items:
-        - flag: "root:root"
+        - flag: "root:0"
           compare:
             op: eq
-            value: "root:root"
+            value: "root:0"
           set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -977,13 +977,13 @@ groups:
   - id: 1.4.8
     text: "Ensure that the etcd pod specification file ownership is set to
     root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
+    audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%g $etcdconf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -1005,7 +1005,7 @@ groups:
   - id: 1.4.10
     text: "Ensure that the Container Network Interface file ownership is set
     to root:root (Not Scored)"
-    audit: "stat -c %U:%G <path/to/cni/files>"
+    audit: "stat -c %U:%g <path/to/cni/files>"
     type: manual
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -1033,7 +1033,7 @@ groups:
 
   - id: 1.4.12
     text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-    audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
+    audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%g
     tests:
       test_items:
       - flag: "etcd:etcd"
@@ -1076,13 +1076,13 @@ groups:
 
   - id: 1.4.14
     text: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %U:%G /etc/kubernetes/admin.conf; fi'"
+    audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %U:%g /etc/kubernetes/admin.conf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the master node.
@@ -1119,13 +1119,13 @@ groups:
 
   - id: 1.4.16
     text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%G /etc/kubernetes/scheduler.conf; fi'"
+    audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%g /etc/kubernetes/scheduler.conf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the
@@ -1161,13 +1161,13 @@ groups:
 
   - id: 1.4.18
     text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
-    audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%G /etc/kubernetes/controller-manager.conf; fi'"
+    audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%g /etc/kubernetes/controller-manager.conf; fi'"
     tests:
       test_items:
-      - flag: "root:root"
+      - flag: "root:0"
         compare:
           op: eq
-          value: "root:root"
+          value: "root:0"
         set: true
     remediation: |
       Run the below command (based on the file location on your system) on the
