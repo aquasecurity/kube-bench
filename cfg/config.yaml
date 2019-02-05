@@ -25,6 +25,7 @@ master:
       - "kube-apiserver"
       - "hyperkube apiserver"
       - "apiserver"
+      - "hypershift openshift-kube-apiserver"
     confs:
       - /etc/kubernetes/apiserver.conf
       - /etc/kubernetes/apiserver
@@ -35,7 +36,8 @@ master:
       - "kube-scheduler"
       - "hyperkube scheduler"
       - "scheduler"
-    confs: 
+      - "hyperkube kube-scheduler"
+    confs:
       - /etc/kubernetes/scheduler.conf
       - /etc/kubernetes/scheduler
     defaultconf: /etc/kubernetes/scheduler
@@ -46,6 +48,7 @@ master:
       - "kube-controller"
       - "hyperkube controller-manager"
       - "controller-manager"
+      - "hyperkube kube-controller-manager"
     confs:
       - /etc/kubernetes/controller-manager.conf
       - /etc/kubernetes/controller-manager
@@ -89,6 +92,7 @@ node:
       - "kube-proxy"
       - "hyperkube proxy"
       - "proxy"
+      - "openshift start network"
     confs:
       - /etc/kubernetes/proxy.conf
       - /etc/kubernetes/proxy
