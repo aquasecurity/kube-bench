@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench-master
+spec:
+  template:
+    spec:
+      hostPID: true
+      nodeSelector: 
+        node-role.kubernetes.io/master: "" 
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: kube-bench
+        image: aquasec/kube-bench:latest
+        command: ["kube-bench","master"]
+        volumeMounts:
+        - name: var-lib-etcd
+          mountPath: /var/lib/etcd
+        - name: etc-kubernetes
+          mountPath: /etc/kubernetes
+          # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version. 
+          # You can omit this mount if you specify --version as part of the command.
+        - name: usr-bin
+          mountPath: /usr/bin
+      restartPolicy: Never
+      volumes:
+      - name: var-lib-etcd
+        hostPath:
+          path: "/var/lib/etcd"
+      - name: etc-kubernetes
+        hostPath:
+          path: "/etc/kubernetes"
+      - name: usr-bin
+        hostPath:
+          path: "/usr/bin"
