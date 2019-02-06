@@ -22,8 +22,14 @@ master:
 
 node:
   kubelet:
-    defaultconf: /etc/kubernetes/kubelet.conf
-    defaultsvc: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    bins:
+      - "hyperkube kubelet"
+    defaultsvc: /etc/systemd/system/k8s-kubelet.service
+    defaultconf: /etc/kubernetes/config/kubelet.yaml
 
   proxy:
-    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    bins:
+      - "hyperkube proxy"
+    confs:
+      - /etc/kubernetes/config/proxy-config.yml
+      - /srv/kube-proxy-ds.yaml
