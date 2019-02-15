@@ -37,6 +37,7 @@ type Group struct {
 	Pass   int      `json:"pass"`
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
+	Info   int      `json:"info"`
 	Text   string   `json:"desc"`
 	Checks []*Check `json:"results"`
 }
@@ -75,7 +76,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 // RunGroup runs all checks in a group.
 func (controls *Controls) RunGroup(gids ...string) Summary {
 	g := []*Group{}
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn = 0, 0, 0
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
 
 	// If no groupid is passed run all group checks.
 	if len(gids) == 0 {
@@ -106,7 +107,7 @@ func (controls *Controls) RunGroup(gids ...string) Summary {
 func (controls *Controls) RunChecks(ids ...string) Summary {
 	g := []*Group{}
 	m := make(map[string]*Group)
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn = 0, 0, 0
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
 
 	// If no groupid is passed run all group checks.
 	if len(ids) == 0 {
@@ -196,5 +197,7 @@ func summarizeGroup(group *Group, check *Check) {
 		group.Fail++
 	case WARN:
 		group.Warn++
+	case INFO:
+		group.Info++
 	}
 }
