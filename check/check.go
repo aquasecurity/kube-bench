@@ -78,6 +78,7 @@ type Check struct {
 // the results.
 func (c *Check) Run() {
 
+	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
 		c.State = INFO
 		return
@@ -86,12 +87,6 @@ func (c *Check) Run() {
 	// If check type is manual or the check is not scored, force result to WARN
 	if c.Type == "manual" || !c.Scored {
 		c.State = WARN
-		return
-	}
-
-	// If check type is skip, force result to INFO.
-	if c.Type == "skip" {
-		c.State = INFO
 		return
 	}
 
