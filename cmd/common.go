@@ -157,7 +157,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colors[check.WARN].Printf("== Remediations ==\n")
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State != check.PASS {
+					if c.State == check.FAIL || c.State == check.WARN {
 						fmt.Printf("%s %s\n", c.ID, c.Remediation)
 					}
 				}
