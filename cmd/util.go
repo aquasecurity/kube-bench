@@ -303,7 +303,7 @@ func getKubeVersion() (string, error) {
 	if err != nil {
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
-			// It might be a PKS platform
+			// It might be a PKS platform. The * in the path is a wildcard for the node ID.
 			cmd := exec.Command("/bin/sh", "-c", "/var/vcap/data/packages/kubernetes/*/bin/kubelet --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
