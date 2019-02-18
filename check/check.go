@@ -78,6 +78,7 @@ type Check struct {
 // the results.
 func (c *Check) Run() {
 
+	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
 		c.State = INFO
 		return
