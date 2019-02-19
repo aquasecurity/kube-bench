@@ -71,13 +71,21 @@ type Check struct {
 	TestInfo    []string    `json:"test_info"`
 	State       `json:"status"`
 	ActualValue string `json:"actual_value"`
+	Scored      bool   `json:"scored"`
 }
 
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) Run() {
-	// If check type is manual, force result to WARN.
-	if c.Type == "manual" {
+
+	// If check type is skip, force result to INFO
+	if c.Type == "skip" {
+		c.State = INFO
+		return
+	}
+
+	// If check type is manual or the check is not scored, force result to WARN
+	if c.Type == "manual" || !c.Scored {
 		c.State = WARN
 		return
 	}

@@ -108,7 +108,7 @@ func runChecks(nodetype check.NodeType) {
 	}
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -117,7 +117,7 @@ func runChecks(nodetype check.NodeType) {
 		fmt.Println(string(out))
 	} else {
 		// if we want to store in PostgreSQL, convert to JSON and save it
-		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0) && pgSQL {
+		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && pgSQL {
 			out, err := controls.JSON()
 			if err != nil {
 				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -157,7 +157,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colors[check.WARN].Printf("== Remediations ==\n")
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State != check.PASS {
+					if c.State == check.FAIL || c.State == check.WARN {
 						fmt.Printf("%s %s\n", c.ID, c.Remediation)
 					}
 				}
@@ -178,8 +178,8 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 		}
 
 		colors[res].Printf("== Summary ==\n")
-		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n",
-			summary.Pass, summary.Fail, summary.Warn,
+		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n",
+			summary.Pass, summary.Fail, summary.Warn, summary.Info,
 		)
 	}
 }
