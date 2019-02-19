@@ -10,6 +10,9 @@ spec:
       - name: kube-bench
         image: aquasec/kube-bench:latest
         command: ["kube-bench","node"]
+        env:
+          - name: PATH
+            value: /bin:/usr/bin:/usr/local/bin
         volumeMounts:
         - name: var-lib-kubelet
           mountPath: /var/lib/kubelet
