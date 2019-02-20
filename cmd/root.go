@@ -27,7 +27,9 @@ import (
 var (
 	envVarsPrefix      = "KUBE_BENCH"
 	defaultKubeVersion = "1.6"
+	defaultOcVersion   = "ocp-3.10"
 	kubeVersion        string
+	openshift          bool
 	cfgFile            string
 	cfgDir             string
 	jsonFmt            bool
@@ -97,10 +99,17 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+    // Check if it is an Openshift distribution
+	openshift = isOpenshift()
+
 	if cfgFile != "" { // enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigName("config") // name of config file (without extension)
+		if openshift {
+			viper.SetConfigName("config_ocp") // name of openshift config file (without extension)
+		} else {
+			viper.SetConfigName("config") // name of config file (without extension)
+		}
 		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
 

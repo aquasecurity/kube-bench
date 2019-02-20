@@ -283,6 +283,11 @@ func multiWordReplace(s string, subname string, sub string) string {
 }
 
 func getKubeVersion() (string, error) {
+	// Check if it is an Openshift distribution
+	if openshift {
+		return getOpenShiftVersion()
+	}
+
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 
@@ -356,4 +361,36 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
+}
+
+func isOpenshift() (bool) {
+	// Search for openshift process
+	cmd := exec.Command("/bin/sh", "-c", "ps -eo cmd | awk '{print $1}' | grep openshift")
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		return string(out) != ""
+	}
+	continueWithError(fmt.Errorf("%s", out), "")
+	return false
+}
+
+func getOpenShiftVersion() (string, error) {
+	// Search for the oc binary all over the filesystem and run the first match to get the oc version
+	cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name oc 2>/dev/null | grep -m1 .` version | head -n 1")
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		ver := getVersionFromOcOutput(string(out))
+		return fmt.Sprintf("ocp-%s", ver), nil
+	}
+	return "", fmt.Errorf("need oc binary to get Openshift version")
+}
+
+func getVersionFromOcOutput(s string) string {
+	serverVersionRe := regexp.MustCompile(`oc v(\d+.\d+)`)
+	subs := serverVersionRe.FindStringSubmatch(s)
+	if len(subs) < 2 {
+		glog.V(1).Info(fmt.Sprintf("Unable to get Openshift version from oc, using default version: %s", defaultOcVersion))
+		return defaultOcVersion
+	}
+	return subs[1]
 }
