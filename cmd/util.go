@@ -219,6 +219,37 @@ func getServiceFiles(v *viper.Viper) map[string]string {
 	return svcmap
 }
 
+// getKubeConfigFiles finds which of the set of candidate kubeconfig files exist
+func getKubeConfigFiles(v *viper.Viper) map[string]string {
+	kubeconfigmap := make(map[string]string)
+
+	for _, component := range v.GetStringSlice("components") {
+		s := v.Sub(component)
+		if s == nil {
+			continue
+		}
+
+		// See if any of the candidate config files exist
+		kubeconfig := findConfigFile(s.GetStringSlice("kubeconfig"))
+		if kubeconfig == "" {
+			if s.IsSet("defaultkubeconfig") {
+				kubeconfig = s.GetString("defaultkubeconfig")
+				glog.V(2).Info(fmt.Sprintf("Using default kubeconfig file name '%s' for component %s", kubeconfig, component))
+			} else {
+				// Default the service file name that we'll substitute to the name of the component
+				glog.V(2).Info(fmt.Sprintf("Missing service file for %s", component))
+				kubeconfig = component
+			}
+		} else {
+			glog.V(2).Info(fmt.Sprintf("Component %s uses service file '%s'", component, kubeconfig))
+		}
+
+		kubeconfigmap[component] = kubeconfig
+	}
+
+	return kubeconfigmap
+}
+
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
 
