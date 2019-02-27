@@ -82,6 +82,7 @@ node:
       - /etc/kubernetes/kubelet.conf
       - /etc/kubernetes/kubelet 
     defaultconf: "/etc/kubernetes/kubelet.conf"
+    defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
 
   proxy:
     bins:
