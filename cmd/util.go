@@ -33,20 +33,6 @@ func init() {
 	statFunc = os.Stat
 }
 
-func printlnWarn(msg string) {
-	fmt.Fprintf(os.Stderr, "[%s] %s\n",
-		colors[check.WARN].Sprintf("%s", check.WARN),
-		msg,
-	)
-}
-
-func sprintlnWarn(msg string) string {
-	return fmt.Sprintf("[%s] %s",
-		colors[check.WARN].Sprintf("%s", check.WARN),
-		msg,
-	)
-}
-
 func exitWithError(err error) {
 	fmt.Fprintf(os.Stderr, "\n%v\n", err)
 	os.Exit(1)
@@ -303,6 +289,12 @@ func getKubeVersion() (string, error) {
 	if err != nil {
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
+			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
+			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
+			out, err := cmd.CombinedOutput()
+			if err == nil {
+				return getVersionFromKubeletOutput(string(out)), nil
+			}
 			return "", fmt.Errorf("need kubectl or kubelet binaries to get kubernetes version")
 		}
 		return getKubeVersionFromKubelet(), nil
@@ -336,7 +328,7 @@ func getVersionFromKubectlOutput(s string) string {
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
-		printlnWarn(fmt.Sprintf("Unable to get kubectl version, using default version: %s", defaultKubeVersion))
+		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
 	}
 	return subs[1]
@@ -346,7 +338,7 @@ func getVersionFromKubeletOutput(s string) string {
 	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
-		printlnWarn(fmt.Sprintf("Unable to get kubelet version, using default version: %s", defaultKubeVersion))
+		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubelet, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
 	}
 	return subs[1]
