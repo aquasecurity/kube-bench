@@ -10,7 +10,7 @@ groups:
   checks:
   - id: 2.1.1
     text: "Ensure that the --allow-privileged argument is set to false (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--allow-privileged"
@@ -19,7 +19,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --allow-privileged=false
       Based on your system, restart the kubelet service. For example:
@@ -29,7 +29,7 @@ groups:
 
   - id: 2.1.2
     text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--anonymous-auth"
@@ -38,7 +38,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --anonymous-auth=false
       Based on your system, restart the kubelet service. For example:
@@ -48,7 +48,7 @@ groups:
 
   - id: 2.1.3
     text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--authorization-mode"
@@ -57,7 +57,7 @@ groups:
           value: "AlwaysAllow"
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable.
       --authorization-mode=Webhook
       Based on your system, restart the kubelet service. For example:
@@ -67,13 +67,13 @@ groups:
 
   - id: 2.1.4
     text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--client-ca-file"
         set: true 
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable.
       --client-ca-file=<path/to/client-ca-file>
       Based on your system, restart the kubelet service. For example:
@@ -83,7 +83,7 @@ groups:
 
   - id: 2.1.5
     text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--read-only-port"
@@ -92,7 +92,7 @@ groups:
           value: 0
         set: true 
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --read-only-port=0
       Based on your system, restart the kubelet service. For example:
@@ -102,7 +102,7 @@ groups:
 
   - id: 2.1.6
     text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--streaming-connection-idle-timeout"
@@ -111,7 +111,7 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --streaming-connection-idle-timeout=5m
       Based on your system, restart the kubelet service. For example:
@@ -121,7 +121,7 @@ groups:
 
   - id: 2.1.7
     text: "Ensure that the --protect-kernel-defaults argument is set to true (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--protect-kernel-defaults"
@@ -130,7 +130,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --protect-kernel-defaults=true
       Based on your system, restart the kubelet service. For example:
@@ -140,7 +140,7 @@ groups:
 
   - id: 2.1.8
     text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       bin_op: or
       test_items:
@@ -150,7 +150,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and remove the --make-iptables-util-chains argument from the
       KUBELET_SYSTEM_PODS_ARGS variable.
       Based on your system, restart the kubelet service. For example:
@@ -160,7 +160,7 @@ groups:
 
   - id: 2.1.9
     text: "Ensure that the --keep-terminated-pod-volumes argument is set to false (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--keep-terminated-pod-volumes"
@@ -169,7 +169,7 @@ groups:
           value: false
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --keep-terminated-pod-volumes=false
       Based on your system, restart the kubelet service. For example:
@@ -179,13 +179,13 @@ groups:
 
   - id: 2.1.10
     text: "Ensure that the --hostname-override argument is not set (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--hostname-override"
         set: false
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and remove the --hostname-override argument from the
       KUBELET_SYSTEM_PODS_ARGS variable.
       Based on your system, restart the kubelet service. For example:
@@ -195,7 +195,7 @@ groups:
 
   - id: 2.1.11
     text: "Ensure that the --event-qps argument is set to 0 (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--event-qps"
@@ -204,7 +204,7 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --event-qps=0
       Based on your system, restart the kubelet service. For example:
@@ -214,7 +214,7 @@ groups:
 
   - id: 2.1.12
     text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--tls-cert-file"
@@ -223,8 +223,7 @@ groups:
         set: true
     remediation: |
       Follow the Kubernetes documentation and set up the TLS connection on the Kubelet.
-      Then edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-
-      kubeadm.conf on each worker node and set the below parameters in
+      Then edit the kubelet service file $kubeletsvc on each worker node and set the below parameters in
       KUBELET_CERTIFICATE_ARGS variable.
       --tls-cert-file=<path/to/tls-certificate-file>
       file=<path/to/tls-key-file>
@@ -236,7 +235,7 @@ groups:
 
   - id: 2.1.13
     text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "--cadvisor-port"
@@ -245,7 +244,7 @@ groups:
           value: 0
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_CADVISOR_ARGS variable.
       --cadvisor-port=0
       Based on your system, restart the kubelet service. For example:
@@ -255,7 +254,7 @@ groups:
 
   - id: 2.1.14
     text: "Ensure that the RotateKubeletClientCertificate argument is set to true"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "RotateKubeletClientCertificate"
@@ -264,7 +263,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and remove the --feature-
       gates=RotateKubeletClientCertificate=false argument from the
       KUBELET_CERTIFICATE_ARGS variable.
@@ -275,7 +274,7 @@ groups:
 
   - id: 2.1.15
     text: "Ensure that the RotateKubeletServerCertificate argument is set to true"
-    audit: "ps -ef | grep $kubeletbin | grep -v grep"
+    audit: "ps -fC $kubeletbin"
     tests:
       test_items:
       - flag: "RotateKubeletServerCertificate"
@@ -284,7 +283,7 @@ groups:
           value: true
         set: true
     remediation: |
-      Edit the kubelet service file $kubeletconf
+      Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
       --feature-gates=RotateKubeletServerCertificate=true
       Based on your system, restart the kubelet service. For example:
@@ -298,7 +297,7 @@ groups:
     - id: 2.2.1
       text: "Ensure that the kubelet.conf file permissions are set to 644 or
       more restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'"
+      audit: "/bin/sh -c 'if test -e $kubeletkubeconfig; then stat -c %a $kubeletkubeconfig; fi'"
       tests:
         bin_op: or
         test_items:
@@ -320,12 +319,12 @@ groups:
       remediation: |
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
-        chmod 644 $kubeletconf
+        chmod 644 $kubeletkubeconfig
       scored: true
 
     - id: 2.2.2
       text: "Ensure that the kubelet.conf file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'"
+      audit: "/bin/sh -c 'if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'"
       tests:
         test_items:
           - flag: "root:root"
@@ -336,13 +335,13 @@ groups:
       remediation: |
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
-        chown root:root /etc/kubernetes/kubelet.conf
+        chown root:root $kubeletkubeconfig
       scored: true
 
     - id: 2.2.3
       text: "Ensure that the kubelet service file permissions are set to 644 or
       more restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'"
+      audit: "/bin/sh -c 'if test -e $kubeletsvc; then stat -c %a $kubeletsvc; fi'"
       tests:
         bin_op: or
         test_items:
@@ -364,12 +363,12 @@ groups:
       remediation: |
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
-        chmod 755 $kubeletconf
+        chmod 755 $kubeletsvc
       scored: true
 
     - id: 2.2.4
       text: "2.2.4 Ensure that the kubelet service file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'"
+      audit: "/bin/sh -c 'if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'"
       tests:
         test_items:
         - flag: "root:root"
@@ -377,13 +376,13 @@ groups:
       remediation: |
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
-        chown root:root $kubeletconf
+        chown root:root $kubeletsvc
       scored: true
 
     - id: 2.2.5
       text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more
       restrictive (Scored)"
-      audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %a $proxyconf; fi'"
+      audit: "/bin/sh -c 'if test -e $proxykubeconfig; then stat -c %a $proxykubeconfig; fi'"
       tests:
         bin_op: or
         test_items:
@@ -405,12 +404,12 @@ groups:
       remediation: |
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
-        chmod 644 $proxyconf
+        chmod 644 $proxykubeconfig
       scored: true
 
     - id: 2.2.6
       text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %U:%G $proxyconf; fi'"
+      audit: "/bin/sh -c 'if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'"
       tests:
         test_items:
         - flag: "root:root"
@@ -418,7 +417,7 @@ groups:
       remediation: |
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
-          chown root:root $proxyconf
+          chown root:root $proxykubeconfig
       scored: true
 
     - id: 2.2.7
