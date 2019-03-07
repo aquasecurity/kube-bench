@@ -10,21 +10,13 @@
 master:
   apiserver:
     bins:
-      - openshift start master api
+      - hypershift openshift-kube-apiserver
 
-  scheduler:
+  etcd:
     bins:
-      - openshift start master controllers
-
-  controllermanager:
-    bins:
-      - openshift start master controllers
+      - openshift start etcd
 
 node:
-  kubelet:
-    bins:
-      - openshift start network
-
   proxy:
     bins:
       - openshift start network
