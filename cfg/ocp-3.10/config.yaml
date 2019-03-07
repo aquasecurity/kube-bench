@@ -11,25 +11,20 @@ master:
   apiserver:
     bins:
       - openshift start master api
-    defaultconf: /etc/origin/master/master-config.yaml
 
   scheduler:
     bins:
       - openshift start master controllers
-    defaultconf: /etc/origin/master/master-config.yaml
 
   controllermanager:
     bins:
       - openshift start master controllers
-    defaultconf: /etc/origin/master/master-config.yaml
-
-  etcd:
-    defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 node:
   kubelet:
-    defaultconf: /etc/kubernetes/kubelet.conf
-    defaultsvc: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    bins:
+      - openshift start network
 
   proxy:
-    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    bins:
+      - openshift start network
