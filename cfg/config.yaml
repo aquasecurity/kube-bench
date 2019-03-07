@@ -24,6 +24,7 @@ master:
     bins:
       - "kube-apiserver"
       - "hyperkube apiserver"
+      - "hyperkube kube-apiserver"
       - "apiserver"
     confs:
       - /etc/kubernetes/apiserver.conf
@@ -34,6 +35,7 @@ master:
     bins:
       - "kube-scheduler"
       - "hyperkube scheduler"
+      - "hyperkube kube-scheduler"
       - "scheduler"
     confs: 
       - /etc/kubernetes/scheduler.conf
@@ -44,6 +46,7 @@ master:
     bins:
       - "kube-controller-manager"
       - "hyperkube controller-manager"
+      - "hyperkube kube-controller-manager"
       - "controller-manager"
     confs:
       - /etc/kubernetes/controller-manager.conf
