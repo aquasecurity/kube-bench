@@ -31,32 +31,8 @@ var (
 
 func runChecks(nodetype check.NodeType) {
 	var summary check.Summary
-	var file string
-	var err error
-	var typeConf *viper.Viper
 
-	switch nodetype {
-	case check.MASTER:
-		file = masterFile
-	case check.NODE:
-		file = nodeFile
-	case check.FEDERATED:
-		file = federatedFile
-	}
-
-	runningVersion := ""
-	if kubeVersion == "" {
-		runningVersion, err = getKubeVersion()
-		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
-		}
-	}
-	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
-	if err != nil {
-		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
-	}
-
-	def := filepath.Join(path, file)
+	def := loadConfig(nodetype)
 	in, err := ioutil.ReadFile(def)
 	if err != nil {
 		exitWithError(fmt.Errorf("error opening %s controls file: %v", nodetype, err))
@@ -64,23 +40,15 @@ func runChecks(nodetype check.NodeType) {
 
 	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
 
-	// Merge kubernetes version specific config if any.
-	viper.SetConfigFile(path + "/config.yaml")
-	err = viper.MergeInConfig()
+	// Get the set of exectuables and config files we care about on this type of node.
+	typeConf := viper.Sub(string(nodetype))
+	binmap, err := getBinaries(typeConf)
+
+	// Checks that the executables we need for the node type are running.
 	if err != nil {
-		if os.IsNotExist(err) {
-			glog.V(2).Info(fmt.Sprintf("No version-specific config.yaml file in %s", path))
-		} else {
-			exitWithError(fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err))
-		}
-	} else {
-		glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+		exitWithError(err)
 	}
 
-	// Get the set of exectuables and config files we care about on this type of node. This also
-	// checks that the executables we need for the node type are running.
-	typeConf = viper.Sub(string(nodetype))
-	binmap := getBinaries(typeConf)
 	confmap := getConfigFiles(typeConf)
 	svcmap := getServiceFiles(typeConf)
 
@@ -182,4 +150,59 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			summary.Pass, summary.Fail, summary.Warn, summary.Info,
 		)
 	}
+}
+
+// loadConfig finds the correct config dir based on the kubernetes version,
+// merges any specific config.yaml file found with the main config
+// and returns the benchmark file to use.
+func loadConfig(nodetype check.NodeType) string {
+	var file string
+	var err error
+
+	switch nodetype {
+	case check.MASTER:
+		file = masterFile
+	case check.NODE:
+		file = nodeFile
+	case check.FEDERATED:
+		file = federatedFile
+	}
+
+	runningVersion := ""
+	if kubeVersion == "" {
+		runningVersion, err = getKubeVersion()
+		if err != nil {
+			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+		}
+	}
+	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
+	if err != nil {
+		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
+	}
+
+	// Merge kubernetes version specific config if any.
+	viper.SetConfigFile(path + "/config.yaml")
+	err = viper.MergeInConfig()
+	if err != nil {
+		if os.IsNotExist(err) {
+			glog.V(2).Info(fmt.Sprintf("No version-specific config.yaml file in %s", path))
+		} else {
+			exitWithError(fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err))
+		}
+	} else {
+		glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+	}
+	return filepath.Join(path, file)
+}
+
+// isMaster verify if master components are running on the node.
+func isMaster() bool {
+	_ = loadConfig(check.MASTER)
+	glog.V(2).Info("Checking if the current node is running master components")
+	masterConf := viper.Sub(string(check.MASTER))
+	if _, err := getBinaries(masterConf); err != nil {
+		glog.V(2).Info(err)
+		return false
+	}
+	return true
 }
