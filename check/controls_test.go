@@ -2,6 +2,8 @@ package check
 
 import (
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 
 	yaml "gopkg.in/yaml.v2"
@@ -11,31 +13,28 @@ const cfgDir = "../cfg/"
 
 // validate that the files we're shipping are valid YAML
 func TestYamlFiles(t *testing.T) {
-	// TODO: make this list dynamic
-	dirs := []string{"1.6/", "1.7/"}
-
-	for _, dir := range dirs {
-		dir = cfgDir + dir
-
-		files, err := ioutil.ReadDir(dir)
+	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			t.Fatalf("error reading %s directory: %v", dir, err)
+			t.Fatalf("failure accessing path %q: %v\n", path, err)
 		}
-
-		for _, file := range files {
-
-			fileName := file.Name()
-			in, err := ioutil.ReadFile(dir + fileName)
+		if !info.IsDir() {
+			t.Logf("reading file: %s", path)
+			in, err := ioutil.ReadFile(path)
 			if err != nil {
-				t.Fatalf("error opening file %s: %v", fileName, err)
+				t.Fatalf("error opening file %s: %v", path, err)
 			}
 
 			c := new(Controls)
-
 			err = yaml.Unmarshal(in, c)
-			if err != nil {
-				t.Fatalf("failed to load YAML from %s: %v", fileName, err)
+			if err == nil {
+				t.Logf("YAML file successfully unmarshalled: %s", path)
+			} else {
+				t.Fatalf("failed to load YAML from %s: %v", path, err)
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("failure walking cfg dir: %v\n", err)
 	}
 }

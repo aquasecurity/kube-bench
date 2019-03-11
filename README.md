@@ -149,7 +149,7 @@ These groups are further organized under `controls` which can be of the type `ma
 ## Tests
 Tests are the items we actually look for to determine if a check is successful or not. Checks can have multiple tests, which must all be successful for the check to pass.
 
-The syntax for tests:
+The syntax for tests operating on a flag:
 ```
 tests:
 - flag:
@@ -159,6 +159,29 @@ tests:
     value:
 ...
 ```
+
+If using a JSON config file, the syntax is:
+```
+tests:
+- jsonpath:
+  set:
+  compare:
+    op:
+    value:
+...
+```
+
+And for a YAML config file:
+```
+tests:
+- yamlpath:
+  set:
+  compare:
+    op:
+    value:
+...
+```
+
 Tests have various `operations` which are used to compare the output of audit commands for success.
 These operations are:
 

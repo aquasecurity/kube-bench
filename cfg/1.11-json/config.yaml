@@ -1,0 +1,30 @@
+---
+## Controls Files.
+# These are YAML files that hold all the details for running checks.
+#
+## Uncomment to use different control file paths.
+# masterControls: ./cfg/master.yaml
+# nodeControls: ./cfg/node.yaml
+# federatedControls: ./cfg/federated.yaml
+
+# Master nodes are controlled by EKS and not user-accessible
+master:
+  components: []
+
+node:
+  kubernetes:
+    confs:
+      - "/var/lib/kubelet/kubeconfig"
+    kubeconfig:
+      - "/var/lib/kubelet/kubeconfig"
+
+  kubelet:
+    bins:
+      - "hyperkube kubelet"
+      - "kubelet"
+    defaultconf: "/etc/kubernetes/kubelet/kubelet-config.json"
+    defaultsvc: "/etc/systemd/system/kubelet.service"
+    defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
+
+  proxy:
+    defaultkubeconfig: "/var/lib/kubelet/kubeconfig"

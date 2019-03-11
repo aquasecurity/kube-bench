@@ -110,12 +110,72 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[13],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=Something ---audit-log-maxage=40",
 		},
+		{
+			controls.Groups[0].Checks[14],
+			"{\"readOnlyPort\": 15000}",
+		},
+		{
+			controls.Groups[0].Checks[15],
+			"{\"stringValue\": \"WebHook,Something,RBAC\"}",
+		},
+		{
+			controls.Groups[0].Checks[16],
+			"{\"trueValue\": true}",
+		},
+		{
+			controls.Groups[0].Checks[17],
+			"{\"readOnlyPort\": 15000}",
+		},
+		{
+			controls.Groups[0].Checks[18],
+			"{\"authentication\": { \"anonymous\": {\"enabled\": false}}}",
+		},
+		{
+			controls.Groups[0].Checks[19],
+			"readOnlyPort: 15000",
+		},
+		{
+			controls.Groups[0].Checks[20],
+			"readOnlyPort: 15000",
+		},
+		{
+			controls.Groups[0].Checks[21],
+			"authentication:\n  anonymous:\n    enabled: false",
+		},
 	}
 
 	for _, c := range cases {
 		res := c.Tests.execute(c.str).testResult
 		if !res {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
+		}
+	}
+}
+
+func TestTestExecuteExceptions(t *testing.T) {
+
+	cases := []struct {
+		*Check
+		str string
+	}{
+		{
+			controls.Groups[0].Checks[22],
+			"this is not valid json {} at all",
+		},
+		{
+			controls.Groups[0].Checks[23],
+			"{\"key\": \"value\"}",
+		},
+		{
+			controls.Groups[0].Checks[24],
+			"broken } yaml\nenabled: true",
+		},
+	}
+
+	for _, c := range cases {
+		res := c.Tests.execute(c.str).testResult
+		if res {
+			t.Errorf("%s, expected:%v, got:%v\n", c.Text, false, res)
 		}
 	}
 }

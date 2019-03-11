@@ -157,4 +157,133 @@ groups:
               value: Something
             set: true
 
+    - id: 14
+      text: "jsonpath correct value on field"
+      tests:
+        test_items:
+          - jsonpath: "{.readOnlyPort}"
+            compare:
+              op: eq
+              value: 15000
+            set: true
+          - jsonpath: "{.readOnlyPort}"
+            compare:
+              op: gte
+              value: 15000
+            set: true
+          - jsonpath: "{.readOnlyPort}"
+            compare:
+              op: lte
+              value: 15000
+            set: true
 
+    - id: 15
+      text: "jsonpath correct case-sensitive value on string field"
+      tests:
+        test_items:
+          - jsonpath: "{.stringValue}"
+            compare:
+              op: noteq
+              value: "None"
+            set: true
+          - jsonpath: "{.stringValue}"
+            compare:
+              op: noteq
+              value: "webhook,Something,RBAC"
+            set: true
+          - jsonpath: "{.stringValue}"
+            compare:
+              op: eq
+              value: "WebHook,Something,RBAC"
+            set: true
+
+    - id: 16
+      text: "jsonpath correct value on boolean field"
+      tests:
+        test_items:
+          - jsonpath: "{.trueValue}"
+            compare:
+              op: noteq
+              value: somethingElse
+            set: true
+          - jsonpath: "{.trueValue}"
+            compare:
+              op: noteq
+              value: false
+            set: true
+          - jsonpath: "{.trueValue}"
+            compare:
+              op: eq
+              value: true
+            set: true
+
+    - id: 17
+      text: "jsonpath field absent"
+      tests:
+        test_items:
+          - jsonpath: "{.notARealField}"
+            set: false
+
+    - id: 18
+      text: "jsonpath correct value on nested field"
+      tests:
+        test_items:
+          - jsonpath: "{.authentication.anonymous.enabled}"
+            compare:
+              op: eq
+              value: "false"
+            set: true
+
+    - id: 19
+      text: "yamlpath correct value on field"
+      tests:
+        test_items:
+          - yamlpath: "{.readOnlyPort}"
+            compare:
+              op: gt
+              value: 14999
+            set: true
+
+    - id: 20
+      text: "yamlpath field absent"
+      tests:
+        test_items:
+          - yamlpath: "{.fieldThatIsUnset}"
+            set: false
+
+    - id: 21
+      text: "yamlpath correct value on nested field"
+      tests:
+        test_items:
+          - yamlpath: "{.authentication.anonymous.enabled}"
+            compare:
+              op: eq
+              value: "false"
+            set: true
+
+    - id: 22
+      text: "jsonpath on invalid json"
+      tests:
+        test_items:
+          - jsonpath: "{.authentication.anonymous.enabled}"
+            compare:
+              op: eq
+              value: "false"
+            set: true
+
+    - id: 23
+      text: "jsonpath with broken expression"
+      tests:
+        test_items:
+          - jsonpath: "{.missingClosingBrace"
+            set: true
+
+    - id: 24
+      text: "yamlpath on invalid yaml"
+      tests:
+        test_items:
+          - yamlpath: "{.authentication.anonymous.enabled}"
+            compare:
+              op: eq
+              value: "false"
+            set: true
