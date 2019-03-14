@@ -1,0 +1,29 @@
+---
+## Controls Files.
+# These are YAML files that hold all the details for running checks.
+#
+## Uncomment to use different control file paths.
+# masterControls: ./cfg/master.yaml
+# nodeControls: ./cfg/node.yaml
+# federatedControls: ./cfg/federated.yaml
+
+master:
+  apiserver:
+    defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
+
+  scheduler:
+    defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
+
+  controllermanager:
+    defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
+
+  etcd:
+    defaultconf: /etc/kubernetes/manifests/etcd.yaml
+
+node:
+  kubelet:
+    defaultconf: /etc/kubernetes/kubelet.conf
+    defaultsvc: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+  proxy:
+    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml

@@ -51,12 +51,14 @@ func runChecks(nodetype check.NodeType) {
 
 	confmap := getConfigFiles(typeConf)
 	svcmap := getServiceFiles(typeConf)
+	kubeconfmap := getKubeConfigFiles(typeConf)
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
 	s = makeSubstitutions(s, "bin", binmap)
 	s = makeSubstitutions(s, "conf", confmap)
 	s = makeSubstitutions(s, "svc", svcmap)
+	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
