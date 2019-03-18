@@ -28,44 +28,49 @@ You can choose to
 You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions.
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest <master|node>
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node]
 ```
 
 You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest <master|node>
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
 ```
 
 > Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
 
-You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored. 
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
-To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
+Master nodes are automatically detected by kube-bench and will run master checks when possible.
+The detection is done by verifying that mandatory components for master are running. (see [config file](#configuration).
 
-The supplied `job-node.yaml` and `job-master.yaml` files can be applied to run the tests as a job. For example:
+The supplied `job.yaml` file can be applied to run the tests as a job. For example:
 
 ```bash
-$ kubectl apply -f job-master.yaml 
-job.batch/kube-bench-master created
+$ kubectl apply -f job.yaml
+job.batch/kube-bench created
 
 $ kubectl get pods
 NAME                      READY   STATUS              RESTARTS   AGE
-kube-bench-master-j76s9   0/1     ContainerCreating   0          3s
+kube-bench-j76s9   0/1     ContainerCreating   0          3s
 
 # Wait for a few seconds for the job to complete
 $ kubectl get pods
 NAME                      READY   STATUS      RESTARTS   AGE
-kube-bench-master-j76s9   0/1     Completed   0          11s
+kube-bench-j76s9   0/1     Completed   0          11s
 
 # The results are held in the pod's logs
-k logs kube-bench-master-j76s9
+k logs kube-bench-j76s9
 [INFO] 1 Master Node Security Configuration
 [INFO] 1.1 API Server
 ...
 ```
+
+You can still force to run specific master or node checks using respectively `job-master.yaml` and `job-node.yaml`.
+
+To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
@@ -77,7 +82,7 @@ This command copies the kube-bench binary and configuration files to your host f
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
-You can then run `./kube-bench <master|node>`.
+You can then run `./kube-bench [master|node]`.
 
 ### Installing from sources
 
@@ -93,8 +98,8 @@ go build -o kube-bench .
 # See all supported options
 ./kube-bench --help
 
-# Run the all checks on a master node
-./kube-bench master
+# Run the all checks
+./kube-bench
 
 ```
 
@@ -170,3 +175,17 @@ These operations are:
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
 We welcome PRs and issue reports.
+
+# Testing locally with kind
+
+Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real kubernetes cluster for development purpose.
+
+First you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
+
+*If kind cannot be found on your system the target will try to install it using `go get`*
+
+Next you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
+
+Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
+
+Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )

@@ -109,38 +109,51 @@ func TestFindExecutable(t *testing.T) {
 
 func TestGetBinaries(t *testing.T) {
 	cases := []struct {
-		config map[string]interface{}
-		psOut  string
-		exp    map[string]string
+		config    map[string]interface{}
+		psOut     string
+		exp       map[string]string
+		expectErr bool
 	}{
 		{
-			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}},
-			psOut:  "kube-apiserver",
-			exp:    map[string]string{"apiserver": "kube-apiserver"},
+			config:    map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}},
+			psOut:     "kube-apiserver",
+			exp:       map[string]string{"apiserver": "kube-apiserver"},
+			expectErr: false,
 		},
 		{
 			// "thing" is not in the list of components
-			config: map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
-			psOut:  "kube-apiserver thing",
-			exp:    map[string]string{"apiserver": "kube-apiserver"},
+			config:    map[string]interface{}{"components": []string{"apiserver"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:     "kube-apiserver thing",
+			exp:       map[string]string{"apiserver": "kube-apiserver"},
+			expectErr: false,
 		},
 		{
 			// "anotherthing" in list of components but doesn't have a defintion
-			config: map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
-			psOut:  "kube-apiserver thing",
-			exp:    map[string]string{"apiserver": "kube-apiserver"},
+			config:    map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:     "kube-apiserver thing",
+			exp:       map[string]string{"apiserver": "kube-apiserver"},
+			expectErr: false,
 		},
 		{
 			// more than one component
-			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
-			psOut:  "kube-apiserver \nthing",
-			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+			config:    map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
+			psOut:     "kube-apiserver \nthing",
+			exp:       map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+			expectErr: false,
 		},
 		{
 			// default binary to component name
-			config: map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
-			psOut:  "kube-apiserver \notherthing some params",
-			exp:    map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+			config:    map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
+			psOut:     "kube-apiserver \notherthing some params",
+			exp:       map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+			expectErr: false,
+		},
+		{
+			// missing mandatory component
+			config:    map[string]interface{}{"components": []string{"apiserver", "thing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}, "optional": true}},
+			psOut:     "otherthing some params",
+			exp:       map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
+			expectErr: true,
 		},
 	}
 
@@ -153,8 +166,12 @@ func TestGetBinaries(t *testing.T) {
 			for k, val := range c.config {
 				v.Set(k, val)
 			}
-			m := getBinaries(v)
-			if !reflect.DeepEqual(m, c.exp) {
+			m, err := getBinaries(v)
+			if c.expectErr {
+				if err == nil {
+					t.Fatal("Got nil Expected error")
+				}
+			} else if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
 		})
