@@ -2,3 +2,6 @@ kube-bench
 *.swp
 vendor
 dist
+
+# JetBrains Goland stuff
+*.idea

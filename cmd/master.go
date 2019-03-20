@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/aquasecurity/kube-bench/check"
+	"github.com/munai-das/kube-bench/check"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ var masterCmd = &cobra.Command{
 	Short: "Run benchmark checks for a Kubernetes master node.",
 	Long:  `Run benchmark checks for a Kubernetes master node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.MASTER)
+		runChecks(check.MASTER, level)
 	},
 }
 

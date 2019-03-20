@@ -10,6 +10,7 @@ groups:
   checks:
   - id: 2.1.1
     text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+    level: 1
     audit: "ps -fC $kubeletbin"
     tests:
       test_items:

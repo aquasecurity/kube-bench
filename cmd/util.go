@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aquasecurity/kube-bench/check"
+	"github.com/munai-das/kube-bench/check"
 	"github.com/fatih/color"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
@@ -22,6 +22,7 @@ var (
 		check.FAIL: color.New(color.FgRed),
 		check.WARN: color.New(color.FgYellow),
 		check.INFO: color.New(color.FgBlue),
+		check.SKIP: color.New(color.FgMagenta)
 	}
 )
 

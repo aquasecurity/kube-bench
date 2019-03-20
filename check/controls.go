@@ -17,17 +17,18 @@ package check
 import (
 	"encoding/json"
 	"fmt"
-
-	yaml "gopkg.in/yaml.v2"
+	"github.com/coreos/go-semver/semver"
+	"gopkg.in/yaml.v2"
 )
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
-	ID      string   `yaml:"id" json:"id"`
-	Version string   `json:"version"`
-	Text    string   `json:"text"`
-	Type    NodeType `json:"node_type"`
-	Groups  []*Group `json:"tests"`
+	ID      		string   `yaml:"id" json:"id"`
+	Version 		string   `json:"version"`
+	Text    		string   `json:"text"`
+	Type    		NodeType `json:"node_type"`
+	UserCISLevel 	string 	 `json:"cis_level"`
+	Groups  		[]*Group `json:"tests"`
 	Summary
 }
 
@@ -37,6 +38,7 @@ type Group struct {
 	Pass   int      `json:"pass"`
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
+	Skip   int      `json:"skip"`
 	Info   int      `json:"info"`
 	Text   string   `json:"desc"`
 	Checks []*Check `json:"results"`
@@ -48,12 +50,14 @@ type Summary struct {
 	Fail int `json:"total_fail"`
 	Warn int `json:"total_warn"`
 	Info int `json:"total_info"`
+	Skip int `json:"total_skip"`
 }
 
 // NewControls instantiates a new master Controls object.
-func NewControls(t NodeType, in []byte) (*Controls, error) {
+func NewControls(t NodeType, level string, in []byte) (*Controls, error) {
 	c := new(Controls)
 
+	c.UserCISLevel = level
 	err := yaml.Unmarshal(in, c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal YAML: %s", err)
@@ -74,13 +78,17 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunGroup runs all checks in a group.
-func (controls *Controls) RunGroup(gids ...string) Summary {
+func (controls *Controls) RunGroup(gids ...string) (Summary, error) {
 	g := []*Group{}
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Info = 0, 0, 0, 0, 0
 
 	// If no groupid is passed run all group checks.
 	if len(gids) == 0 {
 		gids = controls.getAllGroupIDs()
+	}
+	userCISLevel, err := semver.NewVersion(controls.UserCISLevel)
+	if err != nil{
+		return controls.Summary, fmt.Errorf("%s", "error in parsing User CIS level")
 	}
 
 	for _, group := range controls.Groups {
@@ -88,6 +96,14 @@ func (controls *Controls) RunGroup(gids ...string) Summary {
 		for _, gid := range gids {
 			if gid == group.ID {
 				for _, check := range group.Checks {
+
+					checkCIS, err := semver.NewVersion(check.CheckCISLevel)
+					if err != nil{
+						return controls.Summary, fmt.Errorf("%s", "error in parsing Check CIS level")
+					}
+					if userCISLevel.LessThan(*checkCIS){
+						check.State = SKIP
+					}
 					check.Run()
 					check.TestInfo = append(check.TestInfo, check.Remediation)
 					summarize(controls, check)
@@ -100,14 +116,14 @@ func (controls *Controls) RunGroup(gids ...string) Summary {
 	}
 
 	controls.Groups = g
-	return controls.Summary
+	return controls.Summary, nil
 }
 
 // RunChecks runs the checks with the supplied IDs.
-func (controls *Controls) RunChecks(ids ...string) Summary {
+func (controls *Controls) RunChecks(ids ...string) (Summary, error) {
 	g := []*Group{}
 	m := make(map[string]*Group)
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Info = 0, 0, 0, 0, 0
 
 	// If no groupid is passed run all group checks.
 	if len(ids) == 0 {
@@ -147,7 +163,7 @@ func (controls *Controls) RunChecks(ids ...string) Summary {
 	}
 
 	controls.Groups = g
-	return controls.Summary
+	return controls.Summary, nil
 }
 
 // JSON encodes the results of last run to JSON.
@@ -186,6 +202,8 @@ func summarize(controls *Controls, check *Check) {
 		controls.Summary.Warn++
 	case INFO:
 		controls.Summary.Info++
+	case SKIP:
+		controls.Summary.Skip++
 	}
 }
 
@@ -199,5 +217,7 @@ func summarizeGroup(group *Group, check *Check) {
 		group.Warn++
 	case INFO:
 		group.Info++
+	case SKIP:
+		group.Skip++
 	}
 }

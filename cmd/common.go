@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aquasecurity/kube-bench/check"
+	"github.com/munai-das/kube-bench/check"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
@@ -29,7 +29,7 @@ var (
 	errmsgs string
 )
 
-func runChecks(nodetype check.NodeType) {
+func runChecks(nodetype check.NodeType, level string) {
 	var summary check.Summary
 	var file string
 	var err error
@@ -92,25 +92,34 @@ func runChecks(nodetype check.NodeType) {
 	s = makeSubstitutions(s, "svc", svcmap)
 	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 
-	controls, err := check.NewControls(nodetype, []byte(s))
+	controls, err := check.NewControls(nodetype, level,  []byte(s))
 	if err != nil {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
 
 	if groupList != "" && checkList == "" {
 		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(ids...)
+		summary, err = controls.RunGroup(ids...)
+		if err != nil{
+			continueWithError(err, "")
+		}
 	} else if checkList != "" && groupList == "" {
 		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(ids...)
+		summary, err = controls.RunChecks(ids...)
+		if err != nil{
+			continueWithError(err, "")
+		}
 	} else if checkList != "" && groupList != "" {
 		exitWithError(fmt.Errorf("group option and check option can't be used together"))
 	} else {
-		summary = controls.RunGroup()
+		summary, err = controls.RunGroup()
+		if err != nil{
+			continueWithError(err, "")
+		}
 	}
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Pass > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -119,7 +128,7 @@ func runChecks(nodetype check.NodeType) {
 		fmt.Println(string(out))
 	} else {
 		// if we want to store in PostgreSQL, convert to JSON and save it
-		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && pgSQL {
+		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Pass > 0) && pgSQL {
 			out, err := controls.JSON()
 			if err != nil {
 				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
