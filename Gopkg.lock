@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  digest = "1:ffaf8668269fac38a02ba4a488aaebf71d62684edbc4d8408e3e0d1f0775fcab"
-  name = "github.com/aquasecurity/kube-bench"
-  packages = [
-    "check",
-    "cmd",
-  ]
-  pruneopts = "UT"
-  revision = "c4c0d911d40153d2d9af725a6472c4cd9c6f5a7d"
-  version = "v0.0.26"
-
-[[projects]]
   digest = "1:0ef770954bca104ee99b3b6b7f9b240605ac03517d9f98cbc1893daa03f3c038"
   name = "github.com/coreos/go-semver"
   packages = ["semver"]
@@ -212,8 +201,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/aquasecurity/kube-bench/check",
-    "github.com/aquasecurity/kube-bench/cmd",
     "github.com/coreos/go-semver/semver",
     "github.com/fatih/color",
     "github.com/golang/glog",

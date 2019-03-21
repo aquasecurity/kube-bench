@@ -25,7 +25,7 @@ var federatedCmd = &cobra.Command{
 	Short: "Run benchmark checks for a Kubernetes federated deployment.",
 	Long:  `Run benchmark checks for a Kubernetes federated deployment.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.FEDERATED)
+		runChecks(check.FEDERATED, level)
 	},
 }
 

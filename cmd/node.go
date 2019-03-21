@@ -25,7 +25,7 @@ var nodeCmd = &cobra.Command{
 	Short: "Run benchmark checks for a Kubernetes node.",
 	Long:  `Run benchmark checks for a Kubernetes node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.NODE)
+		runChecks(check.NODE, level)
 	},
 }
 

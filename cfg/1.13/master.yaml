@@ -10,6 +10,7 @@ groups:
   checks:
   - id: 1.1.1
     text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
+    level: 1
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:

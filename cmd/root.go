@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/munai-das/kube-bench/check"
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

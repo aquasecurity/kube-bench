@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/munai-das/kube-bench/check"
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
