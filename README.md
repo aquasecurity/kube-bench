@@ -149,7 +149,7 @@ These groups are further organized under `controls` which can be of the type `ma
 ## Tests
 Tests are the items we actually look for to determine if a check is successful or not. Checks can have multiple tests, which must all be successful for the check to pass.
 
-The syntax for tests operating on a flag:
+The syntax for tests:
 ```
 tests:
 - flag:
@@ -160,7 +160,8 @@ tests:
 ...
 ```
 
-If using a JSON config file, the syntax is:
+You can also define jsonpath and yamlpath tests using the following syntax:
+
 ```
 tests:
 - jsonpath:
@@ -171,7 +172,6 @@ tests:
 ...
 ```
 
-And for a YAML config file:
 ```
 tests:
 - yamlpath:
