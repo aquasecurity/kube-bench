@@ -52,10 +52,10 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==\n")
-			runChecks(check.MASTER)
+			runChecks(check.MASTER, level)
 		}
 		glog.V(1).Info("== Running node checks ==\n")
-		runChecks(check.NODE)
+		runChecks(check.NODE, level)
 	},
 }
 
