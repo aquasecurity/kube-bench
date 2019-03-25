@@ -1213,7 +1213,7 @@ groups:
     scored: true
     
   - id: 1.4.21
-    text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
+    text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"
     type: "manual"
     tests:
