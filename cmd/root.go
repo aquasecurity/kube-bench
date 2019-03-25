@@ -17,9 +17,10 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
-	"github.com/aquasecurity/kube-bench/check"
 	"os"
 
+	"github.com/aquasecurity/kube-bench/check"
+	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,8 +35,8 @@ var (
 	pgSQL              bool
 	checkList          string
 	groupList          string
-	masterFile         string
-	nodeFile           string
+	masterFile         = "master.yaml"
+	nodeFile           = "node.yaml"
 	federatedFile      string
 	noResults          bool
 	noSummary          bool
@@ -48,6 +49,14 @@ var RootCmd = &cobra.Command{
 	Use:   os.Args[0],
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if isMaster() {
+			glog.V(1).Info("== Running master checks ==\n")
+			runChecks(check.MASTER)
+		}
+		glog.V(1).Info("== Running node checks ==\n")
+		runChecks(check.NODE)
+	},
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.

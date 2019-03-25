@@ -73,8 +73,9 @@ func ps(proc string) string {
 	return string(out)
 }
 
-// getBinaries finds which of the set of candidate executables are running
-func getBinaries(v *viper.Viper) map[string]string {
+// getBinaries finds which of the set of candidate executables are running.
+// It returns an error if one mandatory executable is not running.
+func getBinaries(v *viper.Viper) (map[string]string, error) {
 	binmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -88,7 +89,7 @@ func getBinaries(v *viper.Viper) map[string]string {
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				exitWithError(fmt.Errorf("need %s executable but none of the candidates are running", component))
+				return nil, fmt.Errorf("need %s executable but none of the candidates are running", component)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
@@ -102,7 +103,7 @@ func getBinaries(v *viper.Viper) map[string]string {
 		}
 	}
 
-	return binmap
+	return binmap, nil
 }
 
 // getConfigFilePath locates the config files we should be using based on either the specified
