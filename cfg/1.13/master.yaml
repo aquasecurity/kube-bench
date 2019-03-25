@@ -366,7 +366,10 @@ groups:
     text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
+      - flag: "--service-account-lookup"
+        set: false
       - flag: "--service-account-lookup"
         compare:
           op: eq
