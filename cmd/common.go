@@ -113,13 +113,12 @@ func runChecks(nodetype check.NodeType, level string) {
 		exitWithError(fmt.Errorf("group option and check option can't be used together"))
 	} else {
 		summary, err = controls.RunGroup()
-		if err != nil{
+		if err != nil {
 			continueWithError(err, "")
 		}
 	}
-
 	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Pass > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Skip > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -128,7 +127,7 @@ func runChecks(nodetype check.NodeType, level string) {
 		fmt.Println(string(out))
 	} else {
 		// if we want to store in PostgreSQL, convert to JSON and save it
-		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Pass > 0) && pgSQL {
+		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0 || summary.Skip > 0 ) && pgSQL {
 			out, err := controls.JSON()
 			if err != nil {
 				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -149,6 +148,9 @@ func colorPrint(state check.State, s string) {
 
 // prettyPrint outputs the results to stdout in human-readable format
 func prettyPrint(r *check.Controls, summary check.Summary) {
+	// Print CIS Level of check that was run
+	colorPrint(check.INFO, fmt.Sprintf("== Running CIS Level %s ==\n", level))
+
 	// Print check results.
 	if !noResults {
 		colorPrint(check.INFO, fmt.Sprintf("%s %s\n", r.ID, r.Text))
@@ -177,6 +179,18 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 		}
 	}
 
+	//Print summary Level-wise
+	if !noSummary {
+		for l, s := range r.SummaryLevelWise{
+			fmt.Printf("== Summary Level "+l+" ==\n")
+			fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n%d checks SKIP\n",
+				s.Pass, s.Fail, s.Warn, s.Info, s.Skip,
+			)
+		}
+
+	}
+
+
 	// Print summary setting output color to highest severity.
 	if !noSummary {
 		var res check.State
@@ -189,8 +203,8 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 		}
 
 		colors[res].Printf("== Summary ==\n")
-		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n",
-			summary.Pass, summary.Fail, summary.Warn, summary.Info,
+		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n%d checks SKIP\n",
+			summary.Pass, summary.Fail, summary.Warn, summary.Info, summary.Skip,
 		)
 	}
 }

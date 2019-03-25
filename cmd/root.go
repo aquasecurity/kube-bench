@@ -17,9 +17,9 @@ package cmd
 import (
 	goflag "flag"
 	"fmt"
+	"github.com/aquasecurity/kube-bench/check"
 	"os"
 
-	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -89,7 +89,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
 	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
-	RootCmd.PersistentFlags().StringVar(&level, "level", "2", "Specify level of compliance. Level 2 by default.")
+	RootCmd.PersistentFlags().StringVar(&level, "level", "2", "Specify CIS Level of compliance. Level 2 by default.")
 
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)

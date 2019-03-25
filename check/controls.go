@@ -17,8 +17,8 @@ package check
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/coreos/go-semver/semver"
 	"gopkg.in/yaml.v2"
+	"strconv"
 )
 
 // Controls holds all controls to check for master nodes.
@@ -30,6 +30,8 @@ type Controls struct {
 	UserCISLevel 	string 	 `json:"cis_level"`
 	Groups  		[]*Group `json:"tests"`
 	Summary
+	// Map level -> Summary
+	SummaryLevelWise map[string]*Summary
 }
 
 // Group is a collection of similar checks.
@@ -80,13 +82,17 @@ func NewControls(t NodeType, level string, in []byte) (*Controls, error) {
 // RunGroup runs all checks in a group.
 func (controls *Controls) RunGroup(gids ...string) (Summary, error) {
 	g := []*Group{}
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Info = 0, 0, 0, 0, 0
+	controls.SummaryLevelWise = map[string]*Summary{}
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Summary.Info = 0, 0, 0, 0, 0
+	controls.SummaryLevelWise["1"] = &Summary{ 0,0,0,0,0}
+	controls.SummaryLevelWise["2"] = &Summary{ 0,0,0,0,0}
 
 	// If no groupid is passed run all group checks.
 	if len(gids) == 0 {
 		gids = controls.getAllGroupIDs()
 	}
-	userCISLevel, err := semver.NewVersion(controls.UserCISLevel)
+
+	userCISLevel, err := strconv.ParseUint(controls.UserCISLevel, 10, 64)
 	if err != nil{
 		return controls.Summary, fmt.Errorf("%s", "error in parsing User CIS level")
 	}
@@ -96,18 +102,18 @@ func (controls *Controls) RunGroup(gids ...string) (Summary, error) {
 		for _, gid := range gids {
 			if gid == group.ID {
 				for _, check := range group.Checks {
-
-					checkCIS, err := semver.NewVersion(check.CheckCISLevel)
+					checkCIS, err := strconv.ParseUint(check.CheckCISLevel, 10, 64)
 					if err != nil{
 						return controls.Summary, fmt.Errorf("%s", "error in parsing Check CIS level")
 					}
-					if userCISLevel.LessThan(*checkCIS){
+					if userCISLevel < checkCIS{
 						check.State = SKIP
 					}
 					check.Run()
 					check.TestInfo = append(check.TestInfo, check.Remediation)
 					summarize(controls, check)
 					summarizeGroup(group, check)
+					summarizeLevel(controls, check)
 				}
 
 				g = append(g, group)
@@ -123,7 +129,10 @@ func (controls *Controls) RunGroup(gids ...string) (Summary, error) {
 func (controls *Controls) RunChecks(ids ...string) (Summary, error) {
 	g := []*Group{}
 	m := make(map[string]*Group)
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Info = 0, 0, 0, 0, 0
+	controls.SummaryLevelWise = map[string]*Summary{}
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Summary.Skip, controls.Summary.Info = 0, 0, 0, 0, 0
+	controls.SummaryLevelWise["1"] = &Summary{ 0,0,0,0,0}
+	controls.SummaryLevelWise["2"] = &Summary{ 0,0,0,0,0}
 
 	// If no groupid is passed run all group checks.
 	if len(ids) == 0 {
@@ -137,6 +146,7 @@ func (controls *Controls) RunChecks(ids ...string) (Summary, error) {
 					check.Run()
 					check.TestInfo = append(check.TestInfo, check.Remediation)
 					summarize(controls, check)
+					summarizeLevel(controls, check)
 
 					// Check if we have already added this checks group.
 					if v, ok := m[group.ID]; !ok {
@@ -220,4 +230,36 @@ func summarizeGroup(group *Group, check *Check) {
 	case SKIP:
 		group.Skip++
 	}
+}
+
+func summarizeLevel(control *Controls, check *Check) {
+	switch check.CheckCISLevel{
+	case "1":
+		switch check.State{
+		case PASS:
+			control.SummaryLevelWise[check.CheckCISLevel].Pass++
+		case FAIL:
+			control.SummaryLevelWise[check.CheckCISLevel].Fail++
+		case WARN:
+			control.SummaryLevelWise[check.CheckCISLevel].Warn++
+		case INFO:
+			control.SummaryLevelWise[check.CheckCISLevel].Info++
+		case SKIP:
+			control.SummaryLevelWise[check.CheckCISLevel].Skip++
+		}
+	case "2":
+		switch check.State{
+		case PASS:
+			control.SummaryLevelWise[check.CheckCISLevel].Pass++
+		case FAIL:
+			control.SummaryLevelWise[check.CheckCISLevel].Fail++
+		case WARN:
+			control.SummaryLevelWise[check.CheckCISLevel].Warn++
+		case INFO:
+			control.SummaryLevelWise[check.CheckCISLevel].Info++
+		case SKIP:
+			control.SummaryLevelWise[check.CheckCISLevel].Skip++
+		}
+	}
+
 }

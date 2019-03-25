@@ -71,7 +71,7 @@ type Check struct {
 	Set         	bool        `json:"omit"`
 	Remediation 	string      `json:"-"`
 	TestInfo    	[]string    `json:"test_info"`
-	CheckCISLevel	string		`json:"level"`
+	CheckCISLevel	string		`yaml:"level" json:"level"`
 	State       				`json:"status"`
 	ActualValue 	string 		`json:"actual_value"`
 	Scored      	bool   		`json:"scored"`

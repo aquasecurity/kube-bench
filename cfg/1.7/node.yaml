@@ -10,6 +10,7 @@ groups:
   checks:
     - id: 2.1.1
       text: "Ensure that the --allow-privileged argument is set to false (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -24,6 +25,7 @@ groups:
 
     - id: 2.1.2
       text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -38,6 +40,7 @@ groups:
  
     - id: 2.1.3
       text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -52,6 +55,7 @@ groups:
    
     - id: 2.1.4
       text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -64,6 +68,7 @@ groups:
 
     - id: 2.1.5
       text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -78,6 +83,7 @@ groups:
  
     - id: 2.1.6
       text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         bin_op: or
@@ -93,6 +99,7 @@ groups:
 
     - id: 2.1.7
       text: "Ensure that the --protect-kernel-defaults argument is set to true (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -107,6 +114,7 @@ groups:
 
     - id: 2.1.8
       text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         bin_op: or
@@ -124,6 +132,7 @@ groups:
 
     - id: 2.1.9
       text: "Ensure that the --keep-terminated-pod-volumes argument is set to false (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -138,6 +147,7 @@ groups:
 
     - id: 2.1.10
       text: "Ensure that the --hostname-override argument is not set (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -149,6 +159,7 @@ groups:
 
     - id: 2.1.11
       text: "Ensure that the --event-qps argument is set to 0 (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -163,6 +174,7 @@ groups:
 
     - id: 2.1.12
       text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -178,6 +190,7 @@ groups:
 
     - id: 2.1.13
       text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -192,6 +205,7 @@ groups:
 
     - id: 2.1.14
       text: "Ensure that the RotateKubeletClientCertificate argument is set to true"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -206,6 +220,7 @@ groups:
 
     - id: 2.1.15
       text: "Ensure that the RotateKubeletServerCertificate argument is set to true"
+      level: 1
       audit: "ps -ef | grep $kubeletbin | grep -v grep"
       tests:
         test_items:
@@ -223,6 +238,7 @@ groups:
   checks:
     - id: 2.2.1
       text: "Ensure that the config file permissions are set to 644 or more restrictive (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %a $kubernetesconf; fi'"
       tests:
         bin_op: or
@@ -248,6 +264,7 @@ groups:
 
     - id: 2.2.2
       text: "Ensure that the config file ownership is set to root:root (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $kubernetesconf; then stat -c %U:%G $kubernetesconf; fi'"
       tests:
         test_items:
@@ -262,6 +279,7 @@ groups:
 
     - id: 2.2.3
       text: "Ensure that the kubelet file permissions are set to 644 or more restrictive (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'"
       tests:
         bin_op: or
@@ -287,6 +305,7 @@ groups:
 
     - id: 2.2.4
       text: "Ensure that the kubelet file ownership is set to root:root (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'"
       tests:
         test_items:
@@ -298,6 +317,7 @@ groups:
 
     - id: 2.2.5
       text: "Ensure that the proxy file permissions are set to 644 or more restrictive (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %a $proxyconf; fi'"
       tests:
         bin_op: or
@@ -323,6 +343,7 @@ groups:
 
     - id: 2.2.6
       text: "Ensure that the proxy file ownership is set to root:root (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $proxyconf; then stat -c %U:%G $proxyconf; fi'"
       tests:
         test_items:
@@ -335,6 +356,7 @@ groups:
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
               644 or more restrictive (Scored)"
+      level: 1
       audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %a $ca-file; fi'"
       tests:
         bin_op: or
@@ -360,6 +382,7 @@ groups:
 
     - id: 2.2.8
       text: "Ensure that the client certificate authorities file ownership is set to root:root"
+      level: 1
       audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %U:%G $ca-file; fi'"
       tests:
         test_items:
