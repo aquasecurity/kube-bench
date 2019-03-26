@@ -233,33 +233,18 @@ func summarizeGroup(group *Group, check *Check) {
 }
 
 func summarizeLevel(control *Controls, check *Check) {
-	switch check.CheckCISLevel{
-	case "1":
-		switch check.State{
-		case PASS:
-			control.SummaryLevelWise[check.CheckCISLevel].Pass++
-		case FAIL:
-			control.SummaryLevelWise[check.CheckCISLevel].Fail++
-		case WARN:
-			control.SummaryLevelWise[check.CheckCISLevel].Warn++
-		case INFO:
-			control.SummaryLevelWise[check.CheckCISLevel].Info++
-		case SKIP:
-			control.SummaryLevelWise[check.CheckCISLevel].Skip++
-		}
-	case "2":
-		switch check.State{
-		case PASS:
-			control.SummaryLevelWise[check.CheckCISLevel].Pass++
-		case FAIL:
-			control.SummaryLevelWise[check.CheckCISLevel].Fail++
-		case WARN:
-			control.SummaryLevelWise[check.CheckCISLevel].Warn++
-		case INFO:
-			control.SummaryLevelWise[check.CheckCISLevel].Info++
-		case SKIP:
-			control.SummaryLevelWise[check.CheckCISLevel].Skip++
-		}
+
+	switch check.State{
+	case PASS:
+		control.SummaryLevelWise[check.CheckCISLevel].Pass++
+	case FAIL:
+		control.SummaryLevelWise[check.CheckCISLevel].Fail++
+	case WARN:
+		control.SummaryLevelWise[check.CheckCISLevel].Warn++
+	case INFO:
+		control.SummaryLevelWise[check.CheckCISLevel].Info++
+	case SKIP:
+		control.SummaryLevelWise[check.CheckCISLevel].Skip++
 	}
 
 }
