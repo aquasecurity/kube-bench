@@ -93,6 +93,7 @@ node:
       - "hyperkube proxy"
       - "proxy"
       - "openshift start network"
+      - "hyperkube kube-proxy"
     confs:
       - /etc/kubernetes/proxy.conf
       - /etc/kubernetes/proxy
