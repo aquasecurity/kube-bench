@@ -68,7 +68,7 @@ func (t *testItem) execute(s string) *testOutput {
 			// --flag
 			// somevalue
 			//pttn := `(` + t.Flag + `)(=)*([^\s,]*) *`
-			pttn := `(` + t.Flag + `)(=)*([^\s]*) *`
+			pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
 			flagRe := regexp.MustCompile(pttn)
 			vals := flagRe.FindStringSubmatch(s)
 

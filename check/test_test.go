@@ -110,6 +110,16 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[13],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=Something ---audit-log-maxage=40",
 		},
+		{
+			// check for ':' as argument-value separator, with space between arg and val
+			controls.Groups[0].Checks[14],
+			"2:45 kube-apiserver some-arg: some-val --admission-control=Something ---audit-log-maxage=40",
+		},
+		{
+			// check for ':' as argument-value separator, with no space between arg and val
+			controls.Groups[0].Checks[14],
+			"2:45 kube-apiserver some-arg:some-val --admission-control=Something ---audit-log-maxage=40",
+		},
 	}
 
 	for _, c := range cases {

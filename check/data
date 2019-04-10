@@ -158,3 +158,12 @@ groups:
             set: true
 
 
+    - id: 14
+      text: "check that flag some-arg is set to some-val with ':' separator"
+      tests:
+        test_items:
+          - flag: "some-arg"
+            compare:
+              op: eq
+              value: some-val
+            set: true
