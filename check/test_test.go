@@ -169,15 +169,15 @@ func TestTestExecuteExceptions(t *testing.T) {
 		str string
 	}{
 		{
-			controls.Groups[0].Checks[22],
+			controls.Groups[0].Checks[23],
 			"this is not valid json {} at all",
 		},
 		{
-			controls.Groups[0].Checks[23],
+			controls.Groups[0].Checks[24],
 			"{\"key\": \"value\"}",
 		},
 		{
-			controls.Groups[0].Checks[24],
+			controls.Groups[0].Checks[25],
 			"broken } yaml\nenabled: true",
 		},
 	}
