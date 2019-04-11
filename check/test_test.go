@@ -119,8 +119,8 @@ func TestTestExecute(t *testing.T) {
 			// check for ':' as argument-value separator, with no space between arg and val
 			controls.Groups[0].Checks[14],
 			"2:45 kube-apiserver some-arg:some-val --admission-control=Something ---audit-log-maxage=40",
-    },
-    {
+		},
+		{
 			controls.Groups[0].Checks[15],
 			"{\"readOnlyPort\": 15000}",
 		},
@@ -169,15 +169,15 @@ func TestTestExecuteExceptions(t *testing.T) {
 		str string
 	}{
 		{
-			controls.Groups[0].Checks[22],
+			controls.Groups[0].Checks[23],
 			"this is not valid json {} at all",
 		},
 		{
-			controls.Groups[0].Checks[23],
+			controls.Groups[0].Checks[24],
 			"{\"key\": \"value\"}",
 		},
 		{
-			controls.Groups[0].Checks[24],
+			controls.Groups[0].Checks[25],
 			"broken } yaml\nenabled: true",
 		},
 	}
