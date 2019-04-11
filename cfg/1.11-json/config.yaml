@@ -1,12 +1,5 @@
 ---
-## Controls Files.
-# These are YAML files that hold all the details for running checks.
-#
-## Uncomment to use different control file paths.
-# masterControls: ./cfg/master.yaml
-# nodeControls: ./cfg/node.yaml
-# federatedControls: ./cfg/federated.yaml
-
+# Config file for systems such as EKS where config is in JSON files
 # Master nodes are controlled by EKS and not user-accessible
 node:
   kubernetes:
