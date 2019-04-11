@@ -32,7 +32,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.authentication.anonymous.enabled}"
+      - path: "{.authentication.anonymous.enabled}"
         compare:
           op: eq
           value: false
@@ -54,7 +54,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.authorization.mode}"
+      - path: "{.authorization.mode}"
         compare:
           op: noteq
           value: "AlwaysAllow"
@@ -75,7 +75,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.authentication.x509.clientCAFile}"
+      - path: "{.authentication.x509.clientCAFile}"
         set: true
     remediation: |
       If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to
@@ -95,9 +95,9 @@ groups:
     tests:
       bin_op: or
       test_items:
-      - jsonpath: "{.readOnlyPort}"
+      - path: "{.readOnlyPort}"
         set: false
-      - jsonpath: "{.readOnlyPort}"
+      - path: "{.readOnlyPort}"
         compare:
           op: eq
           value: "0"
@@ -119,9 +119,9 @@ groups:
     tests:
       bin_op: or
       test_items:
-      - jsonpath: "{.streamingConnectionIdleTimeout}"
+      - path: "{.streamingConnectionIdleTimeout}"
         set: false
-      - jsonpath: "{.streamingConnectionIdleTimeout}"
+      - path: "{.streamingConnectionIdleTimeout}"
         compare:
           op: noteq
           value: 0
@@ -143,7 +143,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.protectKernelDefaults}"
+      - path: "{.protectKernelDefaults}"
         compare:
           op: eq
           value: true
@@ -165,9 +165,9 @@ groups:
     tests:
       bin_op: or
       test_items:
-      - jsonpath: "{.makeIPTablesUtilChains}"
+      - path: "{.makeIPTablesUtilChains}"
         set: false
-      - jsonpath: "{.makeIPTablesUtilChains}"
+      - path: "{.makeIPTablesUtilChains}"
         compare:
           op: eq
           value: true
@@ -188,7 +188,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.hostnameOverride}"
+      - path: "{.hostnameOverride}"
         set: false
     remediation: |
       Edit the kubelet service file $kubeletsvc
@@ -204,7 +204,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.eventRecordQPS}"
+      - path: "{.eventRecordQPS}"
         compare:
           op: eq
           value: 0
@@ -226,9 +226,9 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - jsonpath: "{.tlsCertFile}"
+      - path: "{.tlsCertFile}"
         set: true
-      - jsonpath: "{.tlsPrivateKeyFile}"
+      - path: "{.tlsPrivateKeyFile}"
         set: true
     remediation: |
       If using a Kubelet config file, edit the file to set tlsCertFile to the location of the certificate
@@ -250,12 +250,12 @@ groups:
     tests:
       bin_op: or
       test_items:
-      - jsonpath: "{.cadvisorPort}"
+      - path: "{.cadvisorPort}"
         compare:
           op: eq
           value: 0
         set: true
-      - jsonpath: "{.cadvisorPort}"
+      - path: "{.cadvisorPort}"
         set: false
     remediation: |
       Edit the kubelet service file $kubeletsvc
@@ -272,9 +272,9 @@ groups:
     tests:
       bin_op: or
       test_items:
-      - jsonpath: "{.rotateCertificates}"
+      - path: "{.rotateCertificates}"
         set: false
-      - jsonpath: "{.rotateCertificates}"
+      - path: "{.rotateCertificates}"
         compare:
           op: noteq
           value: "false"
@@ -293,7 +293,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.featureGates.RotateKubeletServerCertificate}"
+      - path: "{.featureGates.RotateKubeletServerCertificate}"
         compare:
           op: eq
           value: true
@@ -312,7 +312,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - jsonpath: "{.tlsCipherSuites}"
+      - path: "{.tlsCipherSuites}"
         compare:
           op: eq
           value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"

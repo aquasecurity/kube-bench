@@ -42,13 +42,12 @@ const (
 )
 
 type testItem struct {
-	Flag     string
-	Jsonpath string
-	Yamlpath string
-	Output   string
-	Value    string
-	Set      bool
-	Compare  compare
+	Flag    string
+	Path    string
+	Output  string
+	Value   string
+	Set     bool
+	Compare compare
 }
 
 type compare struct {
@@ -74,40 +73,34 @@ func (t *testItem) execute(s string) *testOutput {
 		// Flag comparison: check if the flag is present in the input
 		match = strings.Contains(s, t.Flag)
 	} else {
-		// Means either t.Jsonpath != "" or t.Yamlpath != ""
-		// Find out and convert the input as needed
+		// Path != "" - we don't know whether it's YAML or JSON but
+		// we can just try one then the other
 		buf := new(bytes.Buffer)
 		var jsonInterface interface{}
-		var pathExpression string
 
-		if t.Yamlpath != "" {
-			pathExpression = t.Yamlpath
-			err := yaml.Unmarshal([]byte(s), &jsonInterface)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "failed to load YAML from provided input \"%s\": %v\n", s, err)
-				return failTestItem("failed to load YAML")
-			}
-		} else if t.Jsonpath != "" {
-			pathExpression = t.Jsonpath
+		if t.Path != "" {
 			err := json.Unmarshal([]byte(s), &jsonInterface)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "failed to load JSON from provided input: \"%s\": %v\n", s, err)
-				return failTestItem("failed to load JSON")
+				err := yaml.Unmarshal([]byte(s), &jsonInterface)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
+					return failTestItem("failed to load YAML or JSON")
+				}
 			}
 		}
 
 		// Parse the jsonpath/yamlpath expression...
 		j := jsonpath.New("jsonpath")
 		j.AllowMissingKeys(true)
-		err := j.Parse(pathExpression)
+		err := j.Parse(t.Path)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to parse path expression \"%s\": %v\n", pathExpression, err)
+			fmt.Fprintf(os.Stderr, "unable to parse path expression \"%s\": %v\n", t.Path, err)
 			return failTestItem("unable to parse path expression")
 		}
 
 		err = j.Execute(buf, jsonInterface)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error executing path expression \"%s\": %v\n", pathExpression, err)
+			fmt.Fprintf(os.Stderr, "error executing path expression \"%s\": %v\n", t.Path, err)
 			return failTestItem("error executing path expression")
 		}
 
@@ -123,7 +116,7 @@ func (t *testItem) execute(s string) *testOutput {
 			if t.Flag != "" {
 				// Expects flags in the form;
 				// --flag=somevalue
-        // flag: somevalue
+				// flag: somevalue
 				// --flag
 				// somevalue
 				pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`

@@ -195,17 +195,7 @@ You can also define jsonpath and yamlpath tests using the following syntax:
 
 ```
 tests:
-- jsonpath:
-  set:
-  compare:
-    op:
-    value:
-...
-```
-
-```
-tests:
-- yamlpath:
+- path:
   set:
   compare:
     op:

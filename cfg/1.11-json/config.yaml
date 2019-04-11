@@ -8,9 +8,6 @@
 # federatedControls: ./cfg/federated.yaml
 
 # Master nodes are controlled by EKS and not user-accessible
-master:
-  components: []
-
 node:
   kubernetes:
     confs:
