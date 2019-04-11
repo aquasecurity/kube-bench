@@ -72,7 +72,7 @@ NAME                      READY   STATUS      RESTARTS   AGE
 kube-bench-j76s9   0/1     Completed   0          11s
 
 # The results are held in the pod's logs
-k logs kube-bench-j76s9
+kubectl logs kube-bench-j76s9
 [INFO] 1 Master Node Security Configuration
 [INFO] 1.1 API Server
 ...
@@ -83,6 +83,15 @@ You can still force to run specific master or node checks using respectively `jo
 To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+
+### Running in an EKS cluster
+
+There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you must update the image reference in `job-eks.yaml`.** Typically you will push the container image for kube-bench to ECR and refer to it there in the YAML file.
+
+There are two significant differences on EKS:
+
+* It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
+* It's not possible to schedule jobs onto the master node, so master checks can't be performed
 
 ### Installing from a container
 
