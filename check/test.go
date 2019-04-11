@@ -123,10 +123,10 @@ func (t *testItem) execute(s string) *testOutput {
 			if t.Flag != "" {
 				// Expects flags in the form;
 				// --flag=somevalue
+        // flag: somevalue
 				// --flag
 				// somevalue
-				//pttn := `(` + t.Flag + `)(=)*([^\s,]*) *`
-				pttn := `(` + t.Flag + `)(=)*([^\s]*) *`
+				pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
 				flagRe := regexp.MustCompile(pttn)
 				vals := flagRe.FindStringSubmatch(s)
 

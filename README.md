@@ -13,7 +13,17 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for multiple versions of Kubernetes (1.6, 1.7, 1.8, and 1.11) as defined in the CIS Benchmarks 1.0.0, 1.1.0, 1.2.0, and 1.3.0 respectively. It will determine the test set to run based on the Kubernetes version running on the machine.
+kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.0.0 to 1.4.0 respectively. 
+
+| CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
+|---|---|---|
+| 1.0.0| 1.6 | 1.6 |
+| 1.1.0| 1.7 | 1.7 |
+| 1.2.0| 1.8 | 1.8-1.10 |
+| 1.3.0| 1.11 | 1.11-1.12 |
+| 1.4.0| 1.13 | 1.13- |
+
+By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
 ## Installation
 
@@ -114,6 +124,13 @@ For each type of node (*master*, *node* or *federated*) there is a list of compo
 * **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location.
 * **unitfiles** - From version 1.2.0 of the benchmark  (tests for Kubernetes 1.8), the remediation instructions were updated to assume that kubelet configuration is defined in a service file, and this setting defines where to look for that configuration.
 
+## Output
+
+There are three output states
+- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
+- [INFO] is informational output that needs no further action.
+
 ## Test config YAML representation
 The tests are represented as YAML documents (installed by default into ./cfg).
 
@@ -145,6 +162,20 @@ groups:
 Recommendations (called `checks` in this document) can run on Kubernetes Master, Node or Federated API Servers.
 Checks are organized into `groups` which share similar controls (things to check for) and are grouped together in the section of the CIS Kubernetes document.
 These groups are further organized under `controls` which can be of the type `master`, `node` or `federated apiserver` to reflect the various Kubernetes node types.
+
+### Omitting checks
+
+If you decide that a recommendation is not appropriate for your environment, you can choose to omit it by editing the test YAML file to give it the check type `skip` as in this example: 
+
+```yaml
+  checks:
+  - id: 2.1.1
+    text: "Ensure that the --allow-privileged argument is set to false (Scored)"
+    type: "skip"
+    scored: true
+```
+
+No tests will be run for this check and the output will be marked [INFO].
 
 ## Tests
 Tests are the items we actually look for to determine if a check is successful or not. Checks can have multiple tests, which must all be successful for the check to pass.

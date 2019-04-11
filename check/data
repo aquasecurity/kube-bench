@@ -158,6 +158,16 @@ groups:
             set: true
 
     - id: 14
+      text: "check that flag some-arg is set to some-val with ':' separator"
+      tests:
+        test_items:
+          - flag: "some-arg"
+            compare:
+              op: eq
+              value: some-val
+            set: true
+            
+    - id: 15
       text: "jsonpath correct value on field"
       tests:
         test_items:
@@ -177,7 +187,7 @@ groups:
               value: 15000
             set: true
 
-    - id: 15
+    - id: 16
       text: "jsonpath correct case-sensitive value on string field"
       tests:
         test_items:
@@ -197,7 +207,7 @@ groups:
               value: "WebHook,Something,RBAC"
             set: true
 
-    - id: 16
+    - id: 17
       text: "jsonpath correct value on boolean field"
       tests:
         test_items:
@@ -217,14 +227,14 @@ groups:
               value: true
             set: true
 
-    - id: 17
+    - id: 18
       text: "jsonpath field absent"
       tests:
         test_items:
           - jsonpath: "{.notARealField}"
             set: false
 
-    - id: 18
+    - id: 19
       text: "jsonpath correct value on nested field"
       tests:
         test_items:
@@ -234,7 +244,7 @@ groups:
               value: "false"
             set: true
 
-    - id: 19
+    - id: 20
       text: "yamlpath correct value on field"
       tests:
         test_items:
@@ -244,14 +254,14 @@ groups:
               value: 14999
             set: true
 
-    - id: 20
+    - id: 21
       text: "yamlpath field absent"
       tests:
         test_items:
           - yamlpath: "{.fieldThatIsUnset}"
             set: false
 
-    - id: 21
+    - id: 22
       text: "yamlpath correct value on nested field"
       tests:
         test_items:
@@ -261,7 +271,7 @@ groups:
               value: "false"
             set: true
 
-    - id: 22
+    - id: 23
       text: "jsonpath on invalid json"
       tests:
         test_items:
@@ -271,14 +281,14 @@ groups:
               value: "false"
             set: true
 
-    - id: 23
+    - id: 24
       text: "jsonpath with broken expression"
       tests:
         test_items:
           - jsonpath: "{.missingClosingBrace"
             set: true
 
-    - id: 24
+    - id: 25
       text: "yamlpath on invalid yaml"
       tests:
         test_items:

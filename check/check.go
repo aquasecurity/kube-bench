@@ -166,6 +166,8 @@ func (c *Check) Run() {
 		i++
 	}
 
+	glog.V(3).Info(out.String())
+
 	finalOutput := c.Tests.execute(out.String())
 	if finalOutput != nil {
 		c.ActualValue = finalOutput.actualResult

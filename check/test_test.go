@@ -111,28 +111,34 @@ func TestTestExecute(t *testing.T) {
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=Something ---audit-log-maxage=40",
 		},
 		{
+			// check for ':' as argument-value separator, with space between arg and val
 			controls.Groups[0].Checks[14],
-			"{\"readOnlyPort\": 15000}",
+			"2:45 kube-apiserver some-arg: some-val --admission-control=Something ---audit-log-maxage=40",
 		},
 		{
+			// check for ':' as argument-value separator, with no space between arg and val
+			controls.Groups[0].Checks[14],
+			"2:45 kube-apiserver some-arg:some-val --admission-control=Something ---audit-log-maxage=40",
+    },
+    {
 			controls.Groups[0].Checks[15],
-			"{\"stringValue\": \"WebHook,Something,RBAC\"}",
+			"{\"readOnlyPort\": 15000}",
 		},
 		{
 			controls.Groups[0].Checks[16],
-			"{\"trueValue\": true}",
+			"{\"stringValue\": \"WebHook,Something,RBAC\"}",
 		},
 		{
 			controls.Groups[0].Checks[17],
-			"{\"readOnlyPort\": 15000}",
+			"{\"trueValue\": true}",
 		},
 		{
 			controls.Groups[0].Checks[18],
-			"{\"authentication\": { \"anonymous\": {\"enabled\": false}}}",
+			"{\"readOnlyPort\": 15000}",
 		},
 		{
 			controls.Groups[0].Checks[19],
-			"readOnlyPort: 15000",
+			"{\"authentication\": { \"anonymous\": {\"enabled\": false}}}",
 		},
 		{
 			controls.Groups[0].Checks[20],
@@ -140,6 +146,10 @@ func TestTestExecute(t *testing.T) {
 		},
 		{
 			controls.Groups[0].Checks[21],
+			"readOnlyPort: 15000",
+		},
+		{
+			controls.Groups[0].Checks[22],
 			"authentication:\n  anonymous:\n    enabled: false",
 		},
 	}
