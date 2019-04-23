@@ -18,7 +18,7 @@ groups:
     scored: true
 
   - id: 7.3
-    text: "Verify that the --authorization-mode argument is set to WebHook)"
+    text: "Verify that the --authorization-mode argument is set to WebHook"
     audit: "grep -A1 authorization-mode /etc/origin/node/node-config.yaml"
     tests:
       bin_op: or
