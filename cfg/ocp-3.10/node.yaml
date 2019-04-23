@@ -52,7 +52,7 @@ groups:
     scored: true
 
   - id: 7.5
-    text: "Verify the OpenShift default setting for the read-only-port argumen"
+    text: "Verify the OpenShift default setting for the read-only-port argument"
     audit: "grep -A1 read-only-port /etc/origin/node/node-config.yaml"
     tests:
       bin_op: or
