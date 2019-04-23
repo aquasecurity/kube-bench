@@ -49,15 +49,14 @@ You can even use your own configs by mounting them over the default ones in `/op
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes 
-. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
+> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
 
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
-The detection is done by verifying that mandatory components for master are running. (see [config file](#configuration).
+The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
 
 The supplied `job.yaml` file can be applied to run the tests as a job. For example:
 
