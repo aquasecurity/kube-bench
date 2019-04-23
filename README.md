@@ -25,6 +25,8 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
+There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
+
 ## Installation
 
 You can choose to
@@ -47,7 +49,8 @@ You can even use your own configs by mounting them over the default ones in `/op
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
+> Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes 
+. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
 
@@ -112,6 +115,9 @@ go build -o kube-bench .
 ./kube-bench
 
 ```
+## Running on OpenShift 
+
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
 
 ## Configuration
 
