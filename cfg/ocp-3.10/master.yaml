@@ -1157,7 +1157,7 @@ groups:
     tests:
       bin_op: and
       test_items:
-      -  : "Binary file /proc/1/environ matches"
+      - flag: "Binary file /proc/1/environ matches"
         compare:
           op: has
           value: "Binary file /proc/1/environ matches"
