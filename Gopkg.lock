@@ -189,6 +189,17 @@
   pruneopts = "UT"
   revision = "c95af922eae69f190717a0b7148960af8c55a072"
 
+[[projects]]
+  digest = "1:e8e3acc03397f71fad44385631e665c639a8d55bd187bcfa6e70b695e3705edd"
+  name = "k8s.io/client-go"
+  packages = [
+    "third_party/forked/golang/template",
+    "util/jsonpath",
+  ]
+  pruneopts = "UT"
+  revision = "e64494209f554a6723674bd494d69445fb76a1d4"
+  version = "v10.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1

@@ -199,11 +199,16 @@ func loadConfig(nodetype check.NodeType) string {
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
-	_ = loadConfig(check.MASTER)
 	glog.V(2).Info("Checking if the current node is running master components")
 	masterConf := viper.Sub(string(check.MASTER))
-	if _, err := getBinaries(masterConf); err != nil {
+	components, err := getBinaries(masterConf)
+
+	if err != nil {
 		glog.V(2).Info(err)
+		return false
+	}
+	if len(components) == 0 {
+		glog.V(2).Info("No master binaries specified")
 		return false
 	}
 	return true
