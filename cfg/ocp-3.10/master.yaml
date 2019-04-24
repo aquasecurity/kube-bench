@@ -1,20 +1,21 @@
 ---
 controls:
-version: 1.6
+version: 3.10
 id: 1
-text: "Master Node Security Configuration"
+text: "Securing the OpenShift Master"
 type: "master"
 groups:
-- id: 1.1
-  text: "API Server"
+
+- id: 1
+  text: "Protecting the API Server"
   checks:
-  - id: 1.1.1
-    text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+  - id: 1.1
+    text: "Maintain default behavior for anonymous access"
     type: "skip"
     scored: true
 
-  - id: 1.1.2
-    text: "Ensure that the --basic-auth-file argument is not set (Scored)"
+  - id: 1.2
+    text: "Verify that the basic-auth-file method is not enabled"
     audit: "grep -A2 basic-auth-file /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -33,13 +34,13 @@ groups:
              - /path/to/any/file
     scored: true
 
-  - id: 1.1.3
-    text: "Ensure that the --insecure-allow-any-token argument is not set (Scored)"
+  - id: 1.3
+    text: "Insecure Tokens"
     type: "skip"
     scored: true
 
-  - id: 1.1.4
-    text: "Ensure that the --kubelet-https argument is set to true (Scored)"
+  - id: 1.4
+    text: "Secure communications between the API server and master nodes"
     audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
     tests:
       bin_op: and
@@ -80,8 +81,8 @@ groups:
         port: 10250
     scored: true
 
-  - id: 1.1.5
-    text: "Ensure that the --insecure-bind-address argument is not set (Scored)"
+  - id: 1.5
+    text: "Prevent insecure bindings"
     audit: "grep -A2 insecure-bind-address /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -97,8 +98,8 @@ groups:
            - 127.0.0.1
     scored: true
 
-  - id: 1.1.6
-    text: "Ensure that the --insecure-port argument is set to 0 (Scored)"
+  - id: 1.6
+    text: "Prevent insecure port access"
     audit: "grep -A2 insecure-port /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -114,8 +115,8 @@ groups:
          - 0
     scored: true
 
-  - id: 1.1.7
-    text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
+  - id: 1.7
+    text: "Use Secure Ports for API Server Traffic"
     audit: "grep -A2 secure-port /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -138,13 +139,13 @@ groups:
          - 8443
     scored: true
 
-  - id: 1.1.8
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+  - id: 1.8
+    text: "Do not expose API server profiling data"
     type: "skip"
     scored: true
 
-  - id: 1.1.9
-    text: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
+  - id: 1.9
+    text: "Verify repair-malformed-updates argument for API compatibility"
     audit: "grep -A2 repair-malformed-updates /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -161,8 +162,8 @@ groups:
      and remove the repair-malformed-updates entry or set repair-malformed-updates=true.
     scored: true
 
-  - id: 1.1.10
-    text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
+  - id: 1.10
+    text: "Verify that the AlwaysAdmit admission controller is disabled"
     audit: "grep -A4 AlwaysAdmit /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -179,8 +180,8 @@ groups:
           disable: false
     scored: true
 
-  - id: 1.1.11
-    text: "Ensure that the admission control plugin AlwaysPullImages is set (Scored)"
+  - id: 1.11
+    text: "Manage the AlwaysPullImages admission controller"
     audit: "grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -202,18 +203,18 @@ groups:
               disable: false
     scored: true
 
-  - id: 1.1.12
-    text: "Ensure that the admission control plugin DenyEscalatingExec is set (Scored)"
+  - id: 1.12
+    text: "Use Security Context Constraints instead of DenyEscalatingExec admission"
     type: "skip"
     scored: true
 
-  - id: 1.1.13
-    text: "Ensure that the admission control plugin SecurityContextDeny is set (Scored)"
+  - id: 1.13
+    text: "Use Security Context Constraints instead of the SecurityContextDeny admission controller"
     type: "skip"
     scored: true
 
-  - id: 1.1.14
-    text: "Ensure that the admission control plugin NamespaceLifecycle is set (Scored)"
+  - id: 1.14
+    text: "Manage the NamespaceLifecycle admission controller"
     audit: "grep -A4 NamespaceLifecycle /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -230,8 +231,8 @@ groups:
           disable: true
     scored: true
 
-  - id: 1.1.15
-    text: "Ensure that the --audit-log-path argument is set as appropriate (Scored)"
+  - id: 1.15
+    text: "Configure API server auditing - audit log file path"
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -244,22 +245,22 @@ groups:
       Edit the Openshift master config file /etc/origin/master/master-config.yaml, update the following entry and restart the API server.
 
       auditConfig:
-        auditFilePath: "/var/log/audit-ocp.log"
+        auditFilePath: ""/etc/origin/master/audit-ocp.log""
         enabled: true
-        maximumFileRetentionDays: 10
-        maximumFileSizeMegabytes: 100
+        maximumFileRetentionDays: 30
+        maximumFileSizeMegabytes: 10
         maximumRetainedFiles: 10
 
       Make the same changes in the inventory/ansible variables so the changes are not
       lost when an upgrade occurs.
     scored: true
 
-  - id: 1.1.16
-    text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
+  - id: 1.16
+    text: "Configure API server auditing - audit log retention"
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "maximumFileRetentionDays: 10"
+      - flag: "maximumFileRetentionDays: 30"
         compare:
           op: has
           value: "maximumFileRetentionDays"
@@ -269,18 +270,18 @@ groups:
       update the maximumFileRetentionDays entry and restart the API server.
 
       auditConfig:
-        auditFilePath: "/var/log/audit-ocp.log"
+        auditFilePath: ""/etc/origin/master/audit-ocp.log""
         enabled: true
-        maximumFileRetentionDays: 10
-        maximumFileSizeMegabytes: 100
+        maximumFileRetentionDays: 30
+        maximumFileSizeMegabytes: 10
         maximumRetainedFiles: 10
 
       Make the same changes in the inventory/ansible variables so the changes are not
       lost when an upgrade occurs.
     scored: true
 
-  - id: 1.1.17
-    text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
+  - id: 1.17
+    text: "Configure API server auditing - audit log backup retention"
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -294,22 +295,22 @@ groups:
       set enabled to true and restart the API server.
 
       auditConfig:
-        auditFilePath: "/var/log/audit-ocp.log"
+        auditFilePath: ""/etc/origin/master/audit-ocp.log""
         enabled: true
-        maximumFileRetentionDays: 10
-        maximumFileSizeMegabytes: 100
+        maximumFileRetentionDays: 30
+        maximumFileSizeMegabytes: 10
         maximumRetainedFiles: 10
 
       Make the same changes in the inventory/ansible variables so the changes are not
       lost when an upgrade occurs.
     scored: true
 
-  - id: 1.1.18
-    text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
+  - id: 1.18
+    text: "Configure audit log file size"
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "maximumFileSizeMegabytes: 100"
+      - flag: "maximumFileSizeMegabytes: 30"
         compare:
           op: has
           value: "maximumFileSizeMegabytes"
@@ -319,18 +320,18 @@ groups:
       set enabled to true and restart the API server.
 
       auditConfig:
-        auditFilePath: "/var/log/audit-ocp.log"
+        auditFilePath: ""/etc/origin/master/audit-ocp.log""
         enabled: true
-        maximumFileRetentionDays: 10
-        maximumFileSizeMegabytes: 100
+        maximumFileRetentionDays: 30
+        maximumFileSizeMegabytes: 10
         maximumRetainedFiles: 10
 
       Make the same changes in the inventory/ansible variables so the changes are not
       lost when an upgrade occurs.
     scored: true
 
-  - id: 1.1.19
-    text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
+  - id: 1.19
+    text: "Verify that authorization-mode is not set to AlwaysAllow"
     audit: "grep -A1 authorization-mode /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -346,8 +347,8 @@ groups:
              - AllowAll
     scored: true
 
-  - id: 1.1.20
-    text: "Ensure that the --token-auth-file parameter is not set (Scored)"
+  - id: 1.20
+    text: "Verify that the token-auth-file flag is not set"
     audit: "grep token-auth-file /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -363,8 +364,8 @@ groups:
              - /path/to/file
     scored: true
 
-  - id: 1.1.21
-    text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
+  - id: 1.21
+    text: "Verify the API server certificate authority"
     audit: "grep -A1 kubelet-certificate-authority /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -380,8 +381,8 @@ groups:
              - /path/to/ca
     scored: true
 
-  - id: 1.1.22
-    text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)"
+  - id: 1.22
+    text: "Verify the API server client certificate and client key"
     audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
     tests:
       bin_op: and
@@ -407,18 +408,18 @@ groups:
         port: 10250
     scored: true
 
-  - id: 1.1.23
-    text: "Ensure that the --service-account-lookup argument is set to true"
+  - id: 1.23
+    text: "Verify that the service account lookup flag is not set"
     type: skip
     scored: true
 
-  - id: 1.1.24
-    text: "Ensure that the admission control plugin PodSecurityPolicy is set (Scored)"
+  - id: 1.24
+    text: "Verify the PodSecurityPolicy is disabled to ensure use of SecurityContextConstraints"
     type: "skip"
     scored: true
 
-  - id: 1.1.25
-    text: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
+  - id: 1.25
+    text: "Verify that the service account key file argument is not set"
     audit: "grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml"
     tests:
       bin_op: and
@@ -457,8 +458,8 @@ groups:
       Verify that privateKeyFile and publicKeyFile exist and set.
     scored: true
 
-  - id: 1.1.26
-    text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored)"
+  - id: 1.26
+    text: "Verify the certificate and key used for communication with etcd"
     audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
     tests:
       bin_op: and
@@ -483,8 +484,8 @@ groups:
           keyFile: master.etcd-client.key
     scored: true
 
-  - id: 1.1.27
-    text: "Ensure that the admission control plugin ServiceAccount is set (Scored)"
+  - id: 1.27
+    text: "Verify that the ServiceAccount admission controller is enabled"
     audit: "grep -A4 ServiceAccount /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -507,8 +508,8 @@ groups:
             disable: false
     scored: true
 
-  - id: 1.1.28
-    text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
+  - id: 1.28
+    text: "Verify the certificate and key used to encrypt API server traffic"
     audit: "grep -A7 servingInfo /etc/origin/master/master-config.yaml"
     tests:
       bin_op: and
@@ -536,16 +537,13 @@ groups:
           requestTimeoutSeconds: 3600
     scored: true
 
-  - id: 1.1.29
-    text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
-    audit: "grep -A7 servingInfo /etc/origin/master/master-config.yaml"
+  - id: 1.29
+    text: "Verify that the --client-ca-file argument is not set"
+    audit: "grep client-ca-file /etc/origin/master/master-config.yaml"
     tests:
       test_items:
       - flag: "clientCA: ca.crt"
-        compare:
-          op: has
-          value: "clientCA: ca.crt"
-        set: true
+        set: false
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set clientCA under servingInfo.
 
@@ -559,8 +557,8 @@ groups:
           requestTimeoutSeconds: 3600
     scored: true
 
-  - id: 1.1.30
-    text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
+  - id: 1.30
+    text: "Verify the CA used for communication with etcd"
     audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -578,13 +576,13 @@ groups:
           keyFile: master.etcd-client.key
     scored: true
 
-  - id: 1.1.31
-    text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
+  - id: 1.31
+    text: "Verify that the authorization-mode argument is not set"
     type: "skip"
     scored: true
 
-  - id: 1.1.32
-    text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
+  - id: 1.32
+    text: "Verify that the NodeRestriction admission controller is enabled"
     audit: "grep -A4 NodeRestriction /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -606,8 +604,8 @@ groups:
             disable: false
     scored: true
 
-  - id: 1.1.33
-    text: "Ensure that the --experimental-encryption-provider-config argument is set as appropriate (Scored)"
+  - id: 1.33
+    text: "Configure encryption of data at rest in etcd datastore"
     audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -621,8 +619,8 @@ groups:
       https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html
     scored: true
 
-  - id: 1.1.34
-    text: "Ensure that the encryption provider is set to aescbc (Scored)"
+  - id: 1.34
+    text: "Set the encryption provider to aescbc for etcd data at rest"
     audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs grep -A1 providers"
     tests:
       test_items:
@@ -636,8 +634,8 @@ groups:
       See https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html.
     scored: true
 
-  - id: 1.1.35
-    text: "Ensure that the admission control policy is set to EventRateLimit (Scored)"
+  - id: 1.35
+    text: "Enable the EventRateLimit plugin"
     audit: "grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -651,8 +649,8 @@ groups:
       https://docs.openshift.com/container-platform/3.10/architecture/additional_concepts/admission_controllers.html#admission-controllers-general-admission-rules 
     scored: true
 
-  - id: 1.1.36
-    text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
+  - id: 1.36
+    text: "Configure advanced auditing"
     audit: "grep AdvancedAuditing /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -674,8 +672,8 @@ groups:
     scored: true
 
   # Review 1.1.37 in Aquasec shared doc, the tests are net zero.
-  - id: 1.1.37
-    text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
+  - id: 1.37
+    text: "Adjust the request timeout argument for your cluster resources"
     audit: "grep request-timeout /etc/origin/master/master-config.yaml"
     type: manual
     remediation: |
@@ -683,27 +681,27 @@ groups:
     scored: true
 
 
-- id: 1.2
+- id: 2
   text: "Scheduler"
   checks:
-  - id: 1.2.1
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+  - id: 2.1
+    text: "Verify that Scheduler profiling is not exposed to the web"
     type: "skip"
     scored: true
 
 
-- id: 1.3
+- id: 3
   text: "Controller Manager"
   checks:
-  - id: 1.3.1
-    text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
+  - id: 3.1
+    text: "Adjust the terminated-pod-gc-threshold argument as needed"
     audit: "grep terminated-pod-gc-threshold -A1 /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "true"
+      - flag: "terminated-pod-gc-threshold:"
         compare:
           op: has
-          value: "true"
+          value: "12500"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml  and enable terminated-pod-gc-threshold.
@@ -716,13 +714,13 @@ groups:
       Enabling the "terminated-pod-gc-threshold" settings is optional.
     scored: true
 
-  - id: 1.3.2
-    text: "Ensure that the --profiling argument is set to false (Scored)"
+  - id: 3.2
+    text: "Verify that Controller profiling is not exposed to the web"
     type: "skip"
     scored: true
 
-  - id: 1.3.3
-    text: "Ensure that the --use-service-account-credentials argument is set to true (Scored)"
+  - id: 3.3
+    text: "Verify that the --use-service-account-credentials argument is set to true"
     audit: "grep -A2 use-service-account-credentials /etc/origin/master/master-config.yaml"
     tests:
       bin_op: or
@@ -744,9 +742,9 @@ groups:
              - true
     scored: true
 
-  # Review 1.3.4
-  - id: 1.3.4
-    text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
+  # Review 3.4
+  - id: 3.4
+    text: "Verify that the --service-account-private-key-file argument is set as appropriate"
     audit: |
       grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml | grep privateKeyFile;
       grep -A2 service-account-private-key-file /etc/origin/master/master-config.yaml
@@ -763,9 +761,9 @@ groups:
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove service-account-private-key-file
     scored: true
 
-  # Review 1.3.5
-  - id: 1.3.5
-    text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
+  # Review 3.5
+  - id: 3.5
+    text: "Verify that the --root-ca-file argument is set as appropriate"
     audit: "/bin/sh -c 'grep root-ca-file /etc/origin/master/master-config.yaml; grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml'"
     tests:
       bin_op: and
@@ -790,13 +788,13 @@ groups:
       https://docs.openshift.com/container-platform/3.10/admin_guide/service_accounts.html"
     scored: true
 
-  - id: 1.3.6
-    text: "Apply Security Context to Your Pods and Containers (Not Scored)"
+  - id: 3.6
+    text: "Verify that Security Context Constraints are applied to Your Pods and Containers"
     type: "skip"
     scored: false
 
-  - id: 1.3.7
-    text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
+  - id: 3.7
+    text: "Manage certificate rotation"
     audit: "grep -B3 RotateKubeletServerCertificate=true /etc/origin/master/master-config.yaml"
     tests:
       test_items:
@@ -812,38 +810,27 @@ groups:
     scored: true
 
 
-- id: 1.4
+- id: 4
   text: "Configuration Files"
   checks:
-  - id: 1.4.1
-    text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.1
+    text: "Verify the OpenShift default permissions for the API server pod specification file"
     audit: "stat -c %a /etc/origin/node/pods/apiserver.yaml"
-    tests:
-      bin_op: or
+    tests:      
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
-      - flag: "640"
-        compare:
-          op: eq
-          value: "640"
-        set: true
-      - flag: "600"
-        compare:
-          op: eq
-          value: "600"
-        set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
     remediation: |
       Run the below command.
 
-      chmod 644 /etc/origin/node/pods/apiserver.yaml
+      chmod 600 /etc/origin/node/pods/apiserver.yaml
     scored: true
 
-  - id: 1.4.2
-    text: "Ensure that the API server pod specification file ownership is set to root:root (Scored)"
+  - id: 4.2
+    text: "Verify the OpenShift default file ownership for the API server pod specification file"
     audit: "stat -c %U:%G /etc/origin/node/pods/apiserver.yaml"
     tests:
       test_items:
@@ -858,35 +845,24 @@ groups:
       chown root:root /etc/origin/node/pods/apiserver.yaml
     scored: true
 
-  - id: 1.4.3
-    text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.3
+    text: "Verify the OpenShift default file permissions for the controller manager pod specification file"
     audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
-    tests:
-      bin_op: or
+    tests:      
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
-      - flag: "640"
-        compare:
-          op: eq
-          value: "640"
-        set: true
-      - flag: "600"
-        compare:
-          op: eq
-          value: "600"
-        set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
     remediation: |
       Run the below command on the master node.
 
-      chmod 644 /etc/origin/node/pods/controllermanager.yaml
+      chmod 600 /etc/origin/node/pods/controller.yaml
     scored: true
 
-  - id: 1.4.4
-    text: "Ensure that the controller manager pod specification file ownership is set to root:root (Scored)"
+  - id: 4.4
+    text: "Verify the OpenShift default ownership for the controller manager pod specification file"
     audit: "stat -c %U:%G /etc/origin/node/pods/controller.yaml"
     tests:
       test_items:
@@ -898,39 +874,28 @@ groups:
     remediation: |
       Run the below command on the master node.
 
-      chown root:root /etc/origin/node/pods/controllermanager.yaml
+      chown root:root /etc/origin/node/pods/controller.yaml
     scored: true
 
-  - id: 1.4.5
-    text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive (Scored)"
-    audit: "stat -c %a /etc/origin/node/pods/apiserver.yaml"
-    tests:
-      bin_op: or
+  - id: 4.5
+    text: "Verify the OpenShift default permissions for the scheduler pod specification file"
+    audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
+    tests:      
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
-      - flag: "640"
-        compare:
-          op: eq
-          value: "640"
-        set: true
-      - flag: "600"
-        compare:
-          op: eq
-          value: "600"
-        set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
     remediation: |
       Run the below command.
 
-      chmod 644 /etc/origin/node/pods/apiserver.yaml
+      chmod 600 stat -c %a /etc/origin/node/pods/controller.yaml
     scored: true
 
-  - id: 1.4.6
-    text: "Ensure that the scheduler pod specification file ownership is set to root:root (Scored)"
-    audit: "stat -c %U:%G /etc/origin/node/pods/apiserver.yaml"
+  - id: 4.6
+    text: "Verify the scheduler pod specification file ownership set by OpenShift"
+    audit: "stat -c %u:%g /etc/origin/node/pods/controller.yaml"
     tests:
       test_items:
       - flag: "root:root"
@@ -941,38 +906,27 @@ groups:
     remediation: |
       Run the below command on the master node.
 
-      chown root:root /etc/origin/node/pods/apiserver.yaml
+      chown root:root /etc/origin/node/pods/controller.yaml
     scored: true
 
-  - id: 1.4.7
-    text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.7
+    text: "Verify the OpenShift default etcd pod specification file permissions"
     audit: "stat -c %a /etc/origin/node/pods/etcd.yaml"
-    tests:
-      bin_op: or
+    tests:      
       test_items:
-      - flag: "644"
-        compare:
-          op: eq
-          value: "644"
-        set: true
-      - flag: "640"
-        compare:
-          op: eq
-          value: "640"
-        set: true
-      - flag: "600"
-        compare:
-          op: eq
-          value: "600"
-        set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
     remediation: |
       Run the below command.
 
-      chmod 644 /etc/origin/node/pods/etcd.yaml
+      chmod 600 /etc/origin/node/pods/etcd.yaml
     scored: true
 
-  - id: 1.4.8
-    text: "Ensure that the etcd pod specification file ownership is set to root:root (Scored)"
+  - id: 4.8
+    text: "Verify the OpenShift default etcd pod specification file ownership"
     audit: "stat -c %U:%G /etc/origin/node/pods/etcd.yaml"
     tests:
       test_items:
@@ -987,9 +941,9 @@ groups:
       chown root:root /etc/origin/node/pods/etcd.yaml
     scored: true
 
-  - id: 1.4.9
-    text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Scored)"
-    audit: "stat -c %a /etc/origin/openvswitch/"
+  - id: 4.9
+    text: "Verify the default OpenShift Container Network Interface file permissions"
+    audit: "stat -c %a /etc/origin/openvswitch/ /etc/cni/net.d/"
     tests:
       bin_op: or
       test_items:
@@ -1011,12 +965,12 @@ groups:
     remediation: |
       Run the below command.
 
-      chmod 644 /etc/origin/openvswitch/
+      chmod 644 -R /etc/origin/openvswitch/ /etc/cni/net.d/
     scored: true
 
-  - id: 1.4.10
-    text: "Ensure that the Container Network Interface file ownership is set to root:root (Scored)"
-    audit: "stat -c %U:%G /etc/origin/openvswitch/"
+  - id: 4.10
+    text: "Verify the default OpenShift Container Network Interface file ownership"
+    audit: "stat -c %U:%G /etc/origin/openvswitch/ /etc/cni/net.d/"
     tests:
       test_items:
       - flag: "root:root"
@@ -1027,11 +981,11 @@ groups:
     remediation: |
       Run the below command on the master node.
 
-      chown root:root /etc/origin/openvswitch/
+      chown root:root /etc/origin/openvswitch/ /etc/cni/net.d/
     scored: true
 
-  - id: 1.4.11
-    text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive(Scored)"
+  - id: 4.11
+    text: "Verify the default OpenShift etcd data directory permissions"
     audit: "stat -c %a /var/lib/etcd"
     tests:
       test_items:
@@ -1048,8 +1002,8 @@ groups:
       chmod 700 /var/lib/etcd
     scored: true
 
-  - id: 1.4.12
-    text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
+  - id: 4.12
+    text: "Verify the default OpenShift etcd data directory ownership"
     audit: "stat -c %U:%G /var/lib/etcd"
     tests:
       test_items:
@@ -1064,8 +1018,8 @@ groups:
       chown etcd:etcd /var/lib/etcd
     scored: true
 
-  - id: 1.4.13
-    text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.13
+    text: "Verify the default OpenShift admin.conf file permissions"
     audit: "stat -c %a /etc/origin/master/admin.kubeconfig"
     tests:
       bin_op: or
@@ -1091,8 +1045,8 @@ groups:
       chmod 644 /etc/origin/master/admin.kubeconfig"
     scored: true
 
-  - id: 1.4.14
-    text: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
+  - id: 4.14
+    text: "Verify the default OpenShift admin.conf file ownership"
     audit: "stat -c %U:%G /etc/origin/master/admin.kubeconfig"
     tests:
       test_items:
@@ -1107,8 +1061,8 @@ groups:
       chown root:root /etc/origin/master/admin.kubeconfig
     scored: true
 
-  - id: 1.4.15
-    text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.15
+    text: "Verify the default OpenShift scheduler.conf file permissions"
     audit: "stat -c %a /etc/origin/master/openshift-master.kubeconfig"
     tests:
       bin_op: or
@@ -1134,8 +1088,8 @@ groups:
       chmod 644 /etc/origin/master/openshift-master.kubeconfig
     scored: true
 
-  - id: 1.4.16
-    text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
+  - id: 4.16
+    text: "Verify the default OpenShift scheduler.conf file ownership"
     audit: "stat -c %U:%G /etc/origin/master/openshift-master.kubeconfig"
     tests:
       test_items:
@@ -1150,8 +1104,8 @@ groups:
       chown root:root /etc/origin/master/openshift-master.kubeconfig
     scored: true
 
-  - id: 1.4.17
-    text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)"
+  - id: 4.17
+    text: "Verify the default Openshift controller-manager.conf file permissions"
     audit: "stat -c %a /etc/origin/master/openshift-master.kubeconfig"
     tests:
       bin_op: or
@@ -1177,7 +1131,7 @@ groups:
       chmod 644 /etc/origin/master/openshift-master.kubeconfig
     scored: true
 
-  - id: 1.4.18
+  - id: 4.18
     text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
     audit: "stat -c %U:%G /etc/origin/master/openshift-master.kubeconfig"
     tests:
@@ -1194,11 +1148,11 @@ groups:
     scored: true
 
 
-- id: 1.5
+- id: 5
   text: "Etcd"
   checks:
-  - id: 1.5.1
-    text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
+  - id: 5.1
+    text: "Verify the default OpenShift cert-file and key-file configuration"
     audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_CERT_FILE=/etc/etcd/server.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep etcd_key_file=/etc/etcd/server.key /proc/1/environ; grep ETCD_CERT_FILE=/etc/etcd/server.crt /etc/etcd/etcd.conf; grep ETCD_KEY_FILE=/etc/etcd/server.key /etc/etcd/etcd.conf'"
     tests:
       bin_op: and
@@ -1222,8 +1176,8 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.2
-    text: "Ensure that the --client-cert-auth argument is set to true (Scored)"
+  - id: 5.2
+    text: "Verify the default OpenShift setting for the client-cert-auth argument"
     audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
     tests:
       bin_op: and
@@ -1242,8 +1196,8 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.3
-    text: "Ensure that the --auto-tls argument is not set to true (Scored)"
+  - id: 5.3
+    text: "Verify the OpenShift default values for etcd_auto_tls"
     audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_AUTO_TLS /proc/1/environ; grep ETCD_AUTO_TLS /etc/etcd/etcd.conf'"
     tests:
       bin_op: or
@@ -1262,8 +1216,8 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.4
-    text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Scored)"
+  - id: 5.4
+    text: "Verify the OpenShift default peer-cert-file and peer-key-file arguments for etcd"
     audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep ETCD_PEER_KEY_FILE=/etc/etcd/peer.key /proc/1/environ; grep ETCD_PEER_CERT_FILE /etc/etcd/etcd.conf; grep ETCD_PEER_KEY_FILE /etc/etcd/etcd.conf'"
     tests:
       bin_op: and
@@ -1287,8 +1241,8 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.5
-    text: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
+  - id: 5.5
+    text: "Verify the OpenShift default configuration for the peer-client-cert-auth"
     audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_PEER_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
     tests:
       bin_op: and
@@ -1307,8 +1261,8 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.6
-    text: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
+  - id: 5.6
+    text: "Verify the OpenShift default configuration for the peer-auto-tls argument"
     audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_AUTO_TLS /proc/1/environ; grep ETCD_PEER_AUTO_TLS /etc/etcd/etcd.conf'"
     tests:
       bin_op: and
@@ -1327,18 +1281,18 @@ groups:
       Reset to the OpenShift default configuration.
     scored: true
 
-  - id: 1.5.7
-    text: "Ensure that the --wal-dir argument is set as appropriate Scored)"
+  - id: 5.7
+    text: "Optionally modify the wal-dir argument"
     type: "skip"
     scored: true
 
-  - id: 1.5.8
-    text: "Ensure that the --max-wals argument is set to 0 (Scored)"
+  - id: 5.8
+    text: "Optionally modify the max-wals argument"
     type: "skip"
     scored: true
 
-  - id: 1.5.9
-    text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
+  - id: 5.9
+    text: "Verify the OpenShift default configuration for the etcd Certificate Authority"
     audit: "openssl x509 -in /etc/origin/master/master.etcd-ca.crt -subject -issuer -noout | sed 's/@/ /'"
     tests:
       test_items:
@@ -1352,11 +1306,11 @@ groups:
     scored: false
 
 
-- id: 1.6
+- id: 6
   text: "General Security Primitives"
   checks:
-  - id: 1.6.1
-    text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
+  - id: 6.1
+    text: "Ensure that the cluster-admin role is only used where required"
     type: "manual"
     remediation: |
       Review users, groups, serviceaccounts bound to cluster-admin:
@@ -1366,8 +1320,8 @@ groups:
       such access. Consider creating least-privilege roles for users and service accounts
     scored: false
 
-  - id: 1.6.2
-    text: "Create Pod Security Policies for your cluster (Not Scored)"
+  - id: 6.2
+    text: "Verify Security Context Constraints as in use"
     type: "manual"
     remediation: |
       Review Security Context Constraints:
@@ -1383,16 +1337,16 @@ groups:
        https://docs.openshift.com/container-platform/3.10/admin_guide/manage_scc.html"
     scored: false
 
-  - id: 1.6.3
-    text: "Create administrative boundaries between resources using namespaces (Not Scored)"
+  - id: 6.3
+    text: "Use OpenShift projects to maintain boundaries between resources"
     type: "manual"
     remediation: |
       Review projects:
       oc get projects
     scored: false
 
-  - id: 1.6.4
-    text: "Create network segmentation using Network Policies (Not Scored)"
+  - id: 6.4
+    text: "Create network segmentation using the Multi-tenant plugin or Network Policies"
     type: "manual"
     remediation: |
       Verify on masters the plugin being used:
@@ -1414,8 +1368,8 @@ groups:
       https://docs.openshift.com/container-platform/3.10/install/configuring_inventory_file.html
     scored: false
 
-  - id: 1.6.5
-    text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
+  - id: 6.5
+    text: "Enable seccomp and configure custom Security Context Constraints"
     type: "manual"
     remediation: |
       Verify SCCs that have been configured with seccomp:
@@ -1428,8 +1382,8 @@ groups:
       https://docs.openshift.com/container-platform/3.9/admin_guide/seccomp.html#admin-guide-seccomp
     scored: false
 
-  - id: 1.6.6
-    text: "Apply Security Context to Your Pods and Containers (Not Scored)"
+  - id: 6.6
+    text: "Review Security Context Constraints"
     type: "manual"
     remediation: |
       Review SCCs:
@@ -1452,15 +1406,15 @@ groups:
       https://docs.openshift.com/container-platform/3.10/admin_guide/manage_scc.html
     scored: false
 
-  - id: 1.6.7
-    text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
+  - id: 6.7
+    text: "Manage Image Provenance using ImagePolicyWebhook admission controller"
     type: "manual"
     remediation: |
       Review imagePolicyConfig in /etc/origin/master/master-config.yaml.
     scored: false
 
-  - id: 1.6.8
-    text: "Configure Network policies as appropriate (Not Scored)"
+  - id: 6.8
+    text: "Configure Network policies as appropriate"
     type: "manual"
     remediation: |
       If ovs-networkplugin is used, review network policies:
@@ -1471,8 +1425,8 @@ groups:
       netnamespace by default.
     scored: false
 
-  - id: 1.6.9
-    text: "Place compensating controls in the form of PSP and RBAC for privileged containers usage (Not Scored)"
+  - id: 6.9
+    text: "Use Security Context Constraints as compensating controls for privileged containers"
     type: "manual"
     remediation: |
       1) Determine all sccs allowing privileged containers:
