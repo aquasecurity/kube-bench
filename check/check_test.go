@@ -21,7 +21,7 @@ func TestCheck_Run(t *testing.T) {
 
 	for _, testCase := range testCases {
 
-		testCase.check.Run()
+		testCase.check.run()
 
 		if testCase.check.State != testCase.Expected {
 			t.Errorf("test failed, expected %s, actual %s\n", testCase.Expected, testCase.check.State)

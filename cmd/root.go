@@ -25,6 +25,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type FilterOpts struct {
+	CheckList string
+	GroupList string
+	Scored    bool
+	Unscored  bool
+}
+
 var (
 	envVarsPrefix      = "KUBE_BENCH"
 	defaultKubeVersion = "1.6"
@@ -33,14 +40,13 @@ var (
 	cfgDir             string
 	jsonFmt            bool
 	pgSQL              bool
-	checkList          string
-	groupList          string
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
 	federatedFile      string
 	noResults          bool
 	noSummary          bool
 	noRemediations     bool
+	filterOpts         FilterOpts
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -79,16 +85,18 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
+	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", false, "Run only scored CIS checks")
+	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", false, "Run only unscored CIS checks")
 
 	RootCmd.PersistentFlags().StringVarP(
-		&checkList,
+		&filterOpts.CheckList,
 		"check",
 		"c",
 		"",
 		`A comma-delimited list of checks to run as specified in CIS document. Example --check="1.1.1,1.1.2"`,
 	)
 	RootCmd.PersistentFlags().StringVarP(
-		&groupList,
+		&filterOpts.GroupList,
 		"group",
 		"g",
 		"",

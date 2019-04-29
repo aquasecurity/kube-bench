@@ -29,6 +29,51 @@ var (
 	errmsgs string
 )
 
+// NewRunFilter constructs a Predicate based on FilterOptions which determines whether tested Checks should be run or not.
+func NewRunFilter(opts FilterOpts) check.Predicate {
+
+	if opts.CheckList != "" && opts.GroupList != "" {
+		exitWithError(fmt.Errorf("group option and check option can't be used together"))
+	}
+
+	var groupIDs map[string]bool
+	if opts.GroupList != "" {
+		groupIDs = cleanIDs(opts.GroupList)
+	}
+
+	var checkIDs map[string]bool
+	if opts.CheckList != "" {
+		checkIDs = cleanIDs(opts.CheckList)
+	}
+
+	return func(g *check.Group, c *check.Check) bool {
+		if len(groupIDs) > 0 {
+			_, ok := groupIDs[g.ID]
+			if !ok {
+				return false
+			}
+		}
+
+		if len(checkIDs) > 0 {
+			_, ok := checkIDs[c.ID]
+			if !ok {
+				return false
+			}
+		}
+
+		if opts.Scored && opts.Unscored {
+			return true
+		}
+		if opts.Scored {
+			return c.Scored
+		}
+		if opts.Unscored {
+			return !c.Scored
+		}
+		return true
+	}
+}
+
 func runChecks(nodetype check.NodeType) {
 	var summary check.Summary
 
@@ -40,7 +85,7 @@ func runChecks(nodetype check.NodeType) {
 
 	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
 
-	// Get the set of exectuables and config files we care about on this type of node.
+	// Get the set of executables and config files we care about on this type of node.
 	typeConf := viper.Sub(string(nodetype))
 	binmap, err := getBinaries(typeConf)
 
@@ -65,17 +110,10 @@ func runChecks(nodetype check.NodeType) {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
 
-	if groupList != "" && checkList == "" {
-		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(ids...)
-	} else if checkList != "" && groupList == "" {
-		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(ids...)
-	} else if checkList != "" && groupList != "" {
-		exitWithError(fmt.Errorf("group option and check option can't be used together"))
-	} else {
-		summary = controls.RunGroup()
-	}
+	runner := check.NewRunner()
+	filter := NewRunFilter(filterOpts)
+
+	summary = controls.RunChecks(runner, filter)
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
 	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
