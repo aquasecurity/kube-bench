@@ -14,6 +14,10 @@ if [ "$1" == "install" ]; then
     echo "  run:     docker run --rm --pid=host aquasec/kube-bench [command]"
     exit
   fi
+elif [ "$1" == "repeat" ]; then
+  echo "Now scheduling kube-bench to run every 24 hours"
+  touch repeat-logs.txt
+  ./repeat-loop.sh > repeat-logs.txt &
 else
   exec kube-bench "$@"
 fi
