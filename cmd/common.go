@@ -25,15 +25,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	errmsgs string
-)
-
-// NewRunFilter constructs a Predicate based on FilterOptions which determines whether tested Checks should be run or not.
-func NewRunFilter(opts FilterOpts) check.Predicate {
+// NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
+func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 
 	if opts.CheckList != "" && opts.GroupList != "" {
-		exitWithError(fmt.Errorf("group option and check option can't be used together"))
+		return nil, fmt.Errorf("group option and check option can't be used together")
 	}
 
 	var groupIDs map[string]bool
@@ -47,31 +43,21 @@ func NewRunFilter(opts FilterOpts) check.Predicate {
 	}
 
 	return func(g *check.Group, c *check.Check) bool {
+		var test = true
 		if len(groupIDs) > 0 {
 			_, ok := groupIDs[g.ID]
-			if !ok {
-				return false
-			}
+			test = test && ok
 		}
 
 		if len(checkIDs) > 0 {
 			_, ok := checkIDs[c.ID]
-			if !ok {
-				return false
-			}
+			test = test && ok
 		}
 
-		if opts.Scored && opts.Unscored {
-			return true
-		}
-		if opts.Scored {
-			return c.Scored
-		}
-		if opts.Unscored {
-			return !c.Scored
-		}
-		return true
-	}
+		test = test && (opts.Scored && c.Scored || opts.Unscored && !c.Scored)
+
+		return test
+	}, nil
 }
 
 func runChecks(nodetype check.NodeType) {
@@ -111,7 +97,10 @@ func runChecks(nodetype check.NodeType) {
 	}
 
 	runner := check.NewRunner()
-	filter := NewRunFilter(filterOpts)
+	filter, err := NewRunFilter(filterOpts)
+	if err != nil {
+		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
+	}
 
 	summary = controls.RunChecks(runner, filter)
 

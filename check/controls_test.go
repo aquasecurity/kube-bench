@@ -1,3 +1,17 @@
+// Copyright © 2017 Aqua Security Software Ltd. <info@aquasec.com>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package check
 
 import (
@@ -79,7 +93,7 @@ groups:
 
 func TestControls_RunChecks(t *testing.T) {
 
-	t.Run("Should run all checks", func(t *testing.T) {
+	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
 		// given
 		runner := new(mockRunner)
 		// and
@@ -108,15 +122,30 @@ groups:
 		// then
 		assert.Equal(t, 2, len(controls.Groups))
 		// and
-		assert.Equal(t, "G1", controls.Groups[0].ID)
-		assert.Equal(t, "G1/C1", controls.Groups[0].Checks[0].ID)
+		G1 := controls.Groups[0]
+		assert.Equal(t, "G1", G1.ID)
+		assert.Equal(t, "G1/C1", G1.Checks[0].ID)
+		assertEqualGroupSummary(t, 1, 0, 0, 0, G1)
 		// and
-		assert.Equal(t, "G2", controls.Groups[1].ID)
-		assert.Equal(t, "G2/C1", controls.Groups[1].Checks[0].ID)
+		G2 := controls.Groups[1]
+		assert.Equal(t, "G2", G2.ID)
+		assert.Equal(t, "G2/C1", G2.Checks[0].ID)
+		assertEqualGroupSummary(t, 0, 1, 0, 0, G2)
 		// and
-		// TODO We can assert that group and controls summaries are updated.
+		assert.Equal(t, 1, controls.Summary.Pass)
+		assert.Equal(t, 1, controls.Summary.Fail)
+		assert.Equal(t, 0, controls.Summary.Info)
+		assert.Equal(t, 0, controls.Summary.Warn)
 		// and
 		runner.AssertExpectations(t)
 	})
 
+}
+
+func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn int, actual *Group) {
+	t.Helper()
+	assert.Equal(t, pass, actual.Pass)
+	assert.Equal(t, fail, actual.Fail)
+	assert.Equal(t, info, actual.Info)
+	assert.Equal(t, warn, actual.Warn)
 }

@@ -64,7 +64,7 @@ func TestNewRunFilter(t *testing.T) {
 
 		{
 			Name:       "Should return true when group flag contains group's ID",
-			FilterOpts: FilterOpts{GroupList: "G1,G2,G3"},
+			FilterOpts: FilterOpts{Scored: true, Unscored: true, GroupList: "G1,G2,G3"},
 			Group:      &check.Group{ID: "G2"},
 			Check:      &check.Check{},
 			Expected:   true,
@@ -79,7 +79,7 @@ func TestNewRunFilter(t *testing.T) {
 
 		{
 			Name:       "Should return true when check flag contains check's ID",
-			FilterOpts: FilterOpts{CheckList: "C1,C2,C3"},
+			FilterOpts: FilterOpts{Scored: true, Unscored: true, CheckList: "C1,C2,C3"},
 			Group:      &check.Group{},
 			Check:      &check.Check{ID: "C2"},
 			Expected:   true,
@@ -95,9 +95,18 @@ func TestNewRunFilter(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			filter := NewRunFilter(testCase.FilterOpts)
+			filter, _ := NewRunFilter(testCase.FilterOpts)
 			assert.Equal(t, testCase.Expected, filter(testCase.Group, testCase.Check))
 		})
 	}
+
+	t.Run("Should return error when both group and check flags are used", func(t *testing.T) {
+		// given
+		opts := FilterOpts{GroupList: "G1", CheckList: "C1"}
+		// when
+		_, err := NewRunFilter(opts)
+		// then
+		assert.EqualError(t, err, "group option and check option can't be used together")
+	})
 
 }

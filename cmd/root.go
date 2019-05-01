@@ -85,8 +85,8 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
-	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", false, "Run only scored CIS checks")
-	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", false, "Run only unscored CIS checks")
+	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
+	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
 
 	RootCmd.PersistentFlags().StringVarP(
 		&filterOpts.CheckList,

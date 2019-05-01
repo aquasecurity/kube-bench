@@ -17,6 +17,7 @@ package check
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -49,6 +50,7 @@ type Summary struct {
 	Info int `json:"total_info"`
 }
 
+// Predicate a predicate on the given Group and Check arguments.
 type Predicate func(group *Group, check *Check) bool
 
 // NewControls instantiates a new master Controls object.
@@ -134,6 +136,8 @@ func summarize(controls *Controls, state State) {
 		controls.Summary.Warn++
 	case INFO:
 		controls.Summary.Info++
+	default:
+		glog.Warningf("Unrecognized state %s", state)
 	}
 }
 
@@ -147,5 +151,7 @@ func summarizeGroup(group *Group, state State) {
 		group.Warn++
 	case INFO:
 		group.Info++
+	default:
+		glog.Warningf("Unrecognized state %s", state)
 	}
 }
