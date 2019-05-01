@@ -16,8 +16,7 @@ if [ "$1" == "install" ]; then
   fi
 elif [ "$1" == "repeat" ]; then
   echo "Now scheduling kube-bench to run every 24 hours"
-  touch repeat-logs.txt
-  ./repeat-loop.sh > repeat-logs.txt &
+  ./repeat-loop.sh &
 else
   exec kube-bench "$@"
 fi

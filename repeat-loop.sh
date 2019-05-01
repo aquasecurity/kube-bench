@@ -1,6 +1,6 @@
 #!/bin/sh -e
 while true
 do
-  $(which kubectl) apply -f job.yaml
+  exec kube-bench "$@"
   sleep 1d
 done
