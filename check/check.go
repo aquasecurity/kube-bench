@@ -67,7 +67,7 @@ type Check struct {
 	Commands    []*exec.Cmd `json:"omit"`
 	Tests       *tests      `json:"omit"`
 	Set         bool        `json:"omit"`
-	Remediation string      `json:"-"`
+	Remediation string      `json:"remediation"`
 	TestInfo    []string    `json:"test_info"`
 	State       `json:"status"`
 	ActualValue string `json:"actual_value"`
