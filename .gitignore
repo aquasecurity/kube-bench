@@ -4,5 +4,3 @@ vendor
 dist
 .vscode/
 hack/kind.test.yaml
-*.tar.gz
-.DS_Store

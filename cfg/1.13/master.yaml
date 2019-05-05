@@ -366,8 +366,10 @@ groups:
     text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--service-account-lookup"
+        set: false
         compare:
           op: eq
           value: true
@@ -1168,7 +1170,7 @@ groups:
       Run the below command (based on the file location on your system) on the
       master node. For example, chown root:root /etc/kubernetes/controller-manager.conf
     scored: true
-  
+
   - id: 1.4.19
     text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
     audit: "ls -laR /etc/kubernetes/pki/"
@@ -1181,10 +1183,10 @@ groups:
           value: "root root"
         set: true
     remediation: |
-      Run the below command (based on the file location on your system) on the master node. 
+      Run the below command (based on the file location on your system) on the master node.
       For example, chown -R root:root /etc/kubernetes/pki/
     scored: true
-    
+
   - id: 1.4.20
     text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.crt"
@@ -1208,12 +1210,12 @@ groups:
             value: "600"
           set: true
     remediation: |
-      Run the below command (based on the file location on your system) on the master node. 
+      Run the below command (based on the file location on your system) on the master node.
       For example, chmod -R 644 /etc/kubernetes/pki/*.crt
     scored: true
-    
+
   - id: 1.4.21
-    text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
+    text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"
     type: "manual"
     tests:
@@ -1224,7 +1226,7 @@ groups:
             value: "600"
           set: true
     remediation: |
-      Run the below command (based on the file location on your system) on the master node. 
+      Run the below command (based on the file location on your system) on the master node.
       For example, chmod -R 600 /etc/kubernetes/pki/*.key
     scored: true
 
