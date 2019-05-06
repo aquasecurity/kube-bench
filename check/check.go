@@ -72,6 +72,7 @@ type Check struct {
 	State       `json:"status"`
 	ActualValue string `json:"actual_value"`
 	Scored      bool   `json:"scored"`
+	ExpectedResult string `json:"expected_result"`
 }
 
 // Runner wraps the basic Run method.
@@ -188,6 +189,7 @@ func (c *Check) run() State {
 	finalOutput := c.Tests.execute(out.String())
 	if finalOutput != nil {
 		c.ActualValue = finalOutput.actualResult
+		c.ExpectedResult = finalOutput.ExpectedResult
 		if finalOutput.testResult {
 			c.State = PASS
 		} else {
