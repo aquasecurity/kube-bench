@@ -1201,8 +1201,8 @@ groups:
       test_items:
       - flag: "--client-cert-auth"
         compare:
-          op: eq
-          value: true
+          op: noteq
+          value: false
         set: true
     remediation: |
       Edit the etcd pod specification file $etcdconf on the master

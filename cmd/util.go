@@ -50,15 +50,18 @@ func continueWithError(err error, msg string) string {
 	return ""
 }
 
-func cleanIDs(list string) []string {
+func cleanIDs(list string) map[string]bool {
 	list = strings.Trim(list, ",")
 	ids := strings.Split(list, ",")
 
+	set := make(map[string]bool)
+
 	for _, id := range ids {
 		id = strings.Trim(id, " ")
+		set[id] = true
 	}
 
-	return ids
+	return set
 }
 
 // ps execs out to the ps command; it's separated into a function so we can write tests
