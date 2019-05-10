@@ -15,11 +15,16 @@
 package check
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	yaml "gopkg.in/yaml.v2"
+	"k8s.io/client-go/util/jsonpath"
 )
 
 // test:
@@ -38,6 +43,7 @@ const (
 
 type testItem struct {
 	Flag    string
+	Path    string
 	Output  string
 	Value   string
 	Set     bool
@@ -54,33 +60,79 @@ type testOutput struct {
 	actualResult string
 }
 
+func failTestItem(s string) *testOutput {
+	return &testOutput{testResult: false, actualResult: s}
+}
+
 func (t *testItem) execute(s string) *testOutput {
 	result := &testOutput{}
-	match := strings.Contains(s, t.Flag)
+	var match bool
+	var flagVal string
+
+	if t.Flag != "" {
+		// Flag comparison: check if the flag is present in the input
+		match = strings.Contains(s, t.Flag)
+	} else {
+		// Path != "" - we don't know whether it's YAML or JSON but
+		// we can just try one then the other
+		buf := new(bytes.Buffer)
+		var jsonInterface interface{}
+
+		if t.Path != "" {
+			err := json.Unmarshal([]byte(s), &jsonInterface)
+			if err != nil {
+				err := yaml.Unmarshal([]byte(s), &jsonInterface)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
+					return failTestItem("failed to load YAML or JSON")
+				}
+			}
+		}
+
+		// Parse the jsonpath/yamlpath expression...
+		j := jsonpath.New("jsonpath")
+		j.AllowMissingKeys(true)
+		err := j.Parse(t.Path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to parse path expression \"%s\": %v\n", t.Path, err)
+			return failTestItem("unable to parse path expression")
+		}
+
+		err = j.Execute(buf, jsonInterface)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error executing path expression \"%s\": %v\n", t.Path, err)
+			return failTestItem("error executing path expression")
+		}
+
+		jsonpathResult := fmt.Sprintf("%s", buf)
+		match = (jsonpathResult != "")
+		flagVal = jsonpathResult
+	}
 
 	if t.Set {
-		var flagVal string
 		isset := match
 
 		if isset && t.Compare.Op != "" {
-			// Expects flags in the form;
-			// --flag=somevalue
-			// --flag
-			// somevalue
-			//pttn := `(` + t.Flag + `)(=)*([^\s,]*) *`
-			pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
-			flagRe := regexp.MustCompile(pttn)
-			vals := flagRe.FindStringSubmatch(s)
+			if t.Flag != "" {
+				// Expects flags in the form;
+				// --flag=somevalue
+				// flag: somevalue
+				// --flag
+				// somevalue
+				pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
+				flagRe := regexp.MustCompile(pttn)
+				vals := flagRe.FindStringSubmatch(s)
 
-			if len(vals) > 0 {
-				if vals[3] != "" {
-					flagVal = vals[3]
+				if len(vals) > 0 {
+					if vals[3] != "" {
+						flagVal = vals[3]
+					} else {
+						flagVal = vals[1]
+					}
 				} else {
-					flagVal = vals[1]
+					fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
+					os.Exit(1)
 				}
-			} else {
-				fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
-				os.Exit(1)
 			}
 
 			result.actualResult = strings.ToLower(flagVal)

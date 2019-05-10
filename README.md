@@ -25,6 +25,8 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
+There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
+
 ## Installation
 
 You can choose to
@@ -47,14 +49,14 @@ You can even use your own configs by mounting them over the default ones in `/op
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to know the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
+> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
 
 ### Running in a kubernetes cluster
 
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
-The detection is done by verifying that mandatory components for master are running. (see [config file](#configuration).
+The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
 
 The supplied `job.yaml` file can be applied to run the tests as a job. For example:
 
@@ -72,7 +74,7 @@ NAME                      READY   STATUS      RESTARTS   AGE
 kube-bench-j76s9   0/1     Completed   0          11s
 
 # The results are held in the pod's logs
-k logs kube-bench-j76s9
+kubectl logs kube-bench-j76s9
 [INFO] 1 Master Node Security Configuration
 [INFO] 1.1 API Server
 ...
@@ -83,6 +85,15 @@ You can still force to run specific master or node checks using respectively `jo
 To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+
+### Running in an EKS cluster
+
+There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you must update the image reference in `job-eks.yaml`.** Typically you will push the container image for kube-bench to ECR and refer to it there in the YAML file.
+
+There are two significant differences on EKS:
+
+* It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
+* It's not possible to schedule jobs onto the master node, so master checks can't be performed
 
 ### Installing from a container
 
@@ -112,6 +123,9 @@ go build -o kube-bench .
 ./kube-bench
 
 ```
+## Running on OpenShift 
+
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
 
 ## Configuration
 
@@ -190,6 +204,19 @@ tests:
     value:
 ...
 ```
+
+You can also define jsonpath and yamlpath tests using the following syntax:
+
+```
+tests:
+- path:
+  set:
+  compare:
+    op:
+    value:
+...
+```
+
 Tests have various `operations` which are used to compare the output of audit commands for success.
 These operations are:
 

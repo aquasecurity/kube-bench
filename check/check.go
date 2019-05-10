@@ -36,11 +36,11 @@ const (
 	// PASS check passed.
 	PASS State = "PASS"
 	// FAIL check failed.
-	FAIL = "FAIL"
+	FAIL State = "FAIL"
 	// WARN could not carry out check.
-	WARN = "WARN"
+	WARN State = "WARN"
 	// INFO informational message
-	INFO = "INFO"
+	INFO State = "INFO"
 
 	// MASTER a master node
 	MASTER NodeType = "master"
@@ -74,20 +74,37 @@ type Check struct {
 	Scored      bool   `json:"scored"`
 }
 
+// Runner wraps the basic Run method.
+type Runner interface {
+	// Run runs a given check and returns the execution state.
+	Run(c *Check) State
+}
+
+// NewRunner constructs a default Runner.
+func NewRunner() Runner {
+	return &defaultRunner{}
+}
+
+type defaultRunner struct{}
+
+func (r *defaultRunner) Run(c *Check) State {
+	return c.run()
+}
+
 // Run executes the audit commands specified in a check and outputs
 // the results.
-func (c *Check) Run() {
+func (c *Check) run() State {
 
 	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
 		c.State = INFO
-		return
+		return c.State
 	}
 
 	// If check type is manual or the check is not scored, force result to WARN
 	if c.Type == "manual" || !c.Scored {
 		c.State = WARN
-		return
+		return c.State
 	}
 
 	var out bytes.Buffer
@@ -97,7 +114,7 @@ func (c *Check) Run() {
 	for _, cmd := range c.Commands {
 		if !isShellCommand(cmd.Path) {
 			c.State = WARN
-			return
+			return c.State
 		}
 	}
 
@@ -106,7 +123,7 @@ func (c *Check) Run() {
 	if n == 0 {
 		// Likely a warning message.
 		c.State = WARN
-		return
+		return c.State
 	}
 
 	// Each command runs,
@@ -188,6 +205,7 @@ func (c *Check) Run() {
 	if errmsgs != "" {
 		glog.V(2).Info(errmsgs)
 	}
+	return c.State
 }
 
 // textToCommand transforms an input text representation of commands to be
