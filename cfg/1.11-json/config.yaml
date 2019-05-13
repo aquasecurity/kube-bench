@@ -9,10 +9,6 @@ node:
       - "/var/lib/kubelet/kubeconfig"
 
   kubelet:
-    bins:
-      - "hyperkube kubelet"
-      - "kubelet"
-    defaultconf: "/etc/kubernetes/kubelet/kubelet-config.json"
     defaultsvc: "/etc/systemd/system/kubelet.service"
     defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
 
