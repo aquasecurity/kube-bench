@@ -241,11 +241,11 @@ func getKubeConfigFiles(v *viper.Viper) map[string]string {
 				glog.V(2).Info(fmt.Sprintf("Using default kubeconfig file name '%s' for component %s", kubeconfig, component))
 			} else {
 				// Default the service file name that we'll substitute to the name of the component
-				glog.V(2).Info(fmt.Sprintf("Missing service file for %s", component))
+				glog.V(2).Info(fmt.Sprintf("Missing kubeconfig file for %s", component))
 				kubeconfig = component
 			}
 		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses service file '%s'", component, kubeconfig))
+			glog.V(2).Info(fmt.Sprintf("Component %s uses kubeconfig file '%s'", component, kubeconfig))
 		}
 
 		kubeconfigmap[component] = kubeconfig
