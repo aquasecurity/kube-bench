@@ -1,11 +1,5 @@
 ---
-## Controls Files.
-# These are YAML files that hold all the details for running checks.
-#
-## Uncomment to use different control file paths.
-# masterControls: ./cfg/master.yaml
-# nodeControls: ./cfg/node.yaml
-# federatedControls: ./cfg/federated.yaml
+## Version-specific settings that override the values in cfg/config.yaml
 
 master:
   apiserver:
