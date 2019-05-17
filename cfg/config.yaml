@@ -81,6 +81,9 @@ node:
     bins:
       - "hyperkube kubelet"
       - "kubelet"
+    confs:
+      - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
@@ -93,6 +96,7 @@ node:
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
     defaultkubeconfig: "/etc/kubernetes/proxy.conf"
 
 federated:

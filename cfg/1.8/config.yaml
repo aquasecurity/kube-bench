@@ -31,12 +31,3 @@ master:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.manifest
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
-
-node:
-  kubelet:
-    defaultconf: /var/lib/kubelet/config.yaml
-    defaultsvc: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    defaultkubeconfig: /etc/kubernetes/kubelet.conf
-  
-  proxy:
-    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
