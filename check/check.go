@@ -62,7 +62,7 @@ func handleError(err error, context string) (errmsg string) {
 type Check struct {
 	ID          string      `yaml:"id" json:"test_number"`
 	Text        string      `json:"test_desc"`
-	Audit       string      `json:"omit"`
+	Audit       string      `json:"audit"`
 	Type        string      `json:"type"`
 	Commands    []*exec.Cmd `json:"omit"`
 	Tests       *tests      `json:"omit"`
