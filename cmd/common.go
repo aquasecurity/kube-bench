@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
@@ -142,6 +143,10 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
 			for _, c := range g.Checks {
 				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
+
+				if includeTestOutput && c.State == check.FAIL && len(c.ActualValue) > 0 {
+					printRawOutput(c.ActualValue)
+				}
 			}
 		}
 
@@ -239,4 +244,10 @@ func isMaster() bool {
 		return false
 	}
 	return true
+}
+
+func printRawOutput(output string) {
+	for _, row := range strings.Split(output, "\n") {
+		fmt.Println(fmt.Sprintf("\t %s", row))
+	}
 }
