@@ -219,8 +219,11 @@ func (ts *tests) execute(s string) *testOutput {
 		return finalOutput
 	}
 
+	expectedResultArr := make([]string, len(res))
+
 	for i, t := range ts.TestItems {
 		res[i] = *(t.execute(s))
+		expectedResultArr[i] = res[i].ExpectedResult
 	}
 
 	var result bool
@@ -232,19 +235,18 @@ func (ts *tests) execute(s string) *testOutput {
 	case and, "":
 		result = true
 		for i := range res {
-			finalOutput.ExpectedResult += fmt.Sprintf("%s AND ", res[i].ExpectedResult)
 			result = result && res[i].testResult
 		}
-		// Delete last iteration ' AND '
-		finalOutput.ExpectedResult = finalOutput.ExpectedResult[:len(finalOutput.ExpectedResult)-5]
+		// Generate an AND expected result
+		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " AND ")
+
 	case or:
 		result = false
 		for i := range res {
-			finalOutput.ExpectedResult += fmt.Sprintf("%s OR ", res[i].ExpectedResult)
 			result = result || res[i].testResult
 		}
-		// Delete last iteration ' OR '
-		finalOutput.ExpectedResult = finalOutput.ExpectedResult[:len(finalOutput.ExpectedResult)-4]
+		// Generate an OR expected result
+		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " OR ")
 	}
 
 	finalOutput.testResult = result
