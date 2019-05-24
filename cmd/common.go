@@ -19,15 +19,47 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
 )
 
-var (
-	errmsgs string
-)
+// NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
+func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
+
+	if opts.CheckList != "" && opts.GroupList != "" {
+		return nil, fmt.Errorf("group option and check option can't be used together")
+	}
+
+	var groupIDs map[string]bool
+	if opts.GroupList != "" {
+		groupIDs = cleanIDs(opts.GroupList)
+	}
+
+	var checkIDs map[string]bool
+	if opts.CheckList != "" {
+		checkIDs = cleanIDs(opts.CheckList)
+	}
+
+	return func(g *check.Group, c *check.Check) bool {
+		var test = true
+		if len(groupIDs) > 0 {
+			_, ok := groupIDs[g.ID]
+			test = test && ok
+		}
+
+		if len(checkIDs) > 0 {
+			_, ok := checkIDs[c.ID]
+			test = test && ok
+		}
+
+		test = test && (opts.Scored && c.Scored || opts.Unscored && !c.Scored)
+
+		return test
+	}, nil
+}
 
 func runChecks(nodetype check.NodeType) {
 	var summary check.Summary
@@ -40,7 +72,7 @@ func runChecks(nodetype check.NodeType) {
 
 	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
 
-	// Get the set of exectuables and config files we care about on this type of node.
+	// Get the set of executables and config files we care about on this type of node.
 	typeConf := viper.Sub(string(nodetype))
 	binmap, err := getBinaries(typeConf)
 
@@ -65,17 +97,13 @@ func runChecks(nodetype check.NodeType) {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
 
-	if groupList != "" && checkList == "" {
-		ids := cleanIDs(groupList)
-		summary = controls.RunGroup(ids...)
-	} else if checkList != "" && groupList == "" {
-		ids := cleanIDs(checkList)
-		summary = controls.RunChecks(ids...)
-	} else if checkList != "" && groupList != "" {
-		exitWithError(fmt.Errorf("group option and check option can't be used together"))
-	} else {
-		summary = controls.RunGroup()
+	runner := check.NewRunner()
+	filter, err := NewRunFilter(filterOpts)
+	if err != nil {
+		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
+
+	summary = controls.RunChecks(runner, filter)
 
 	// if we successfully ran some tests and it's json format, ignore the warnings
 	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
@@ -115,6 +143,10 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colorPrint(check.INFO, fmt.Sprintf("%s %s\n", g.ID, g.Text))
 			for _, c := range g.Checks {
 				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
+
+				if includeTestOutput && c.State == check.FAIL && len(c.ActualValue) > 0 {
+					printRawOutput(c.ActualValue)
+				}
 			}
 		}
 
@@ -212,4 +244,10 @@ func isMaster() bool {
 		return false
 	}
 	return true
+}
+
+func printRawOutput(output string) {
+	for _, row := range strings.Split(output, "\n") {
+		fmt.Println(fmt.Sprintf("\t %s", row))
+	}
 }
