@@ -135,7 +135,6 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 			}
 
-			result.actualResult = strings.ToLower(flagVal)
 			switch t.Compare.Op {
 			case "eq":
 				value := strings.ToLower(flagVal)
@@ -231,6 +230,10 @@ func (ts *tests) execute(s string) *testOutput {
 
 	finalOutput.testResult = result
 	finalOutput.actualResult = res[0].actualResult
+
+	if finalOutput.actualResult == "" {
+		finalOutput.actualResult = s
+	}
 
 	return finalOutput
 }
