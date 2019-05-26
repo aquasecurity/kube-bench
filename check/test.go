@@ -58,6 +58,7 @@ type compare struct {
 type testOutput struct {
 	testResult   bool
 	actualResult string
+	ExpectedResult string
 }
 
 func failTestItem(s string) *testOutput {
@@ -135,8 +136,10 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 			}
 
+			expectedResultPattern := ""
 			switch t.Compare.Op {
 			case "eq":
+				expectedResultPattern = "'%s' is equal to '%s'"
 				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
@@ -146,6 +149,7 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 
 			case "noteq":
+				expectedResultPattern = "'%s' is not equal to '%s'"
 				value := strings.ToLower(flagVal)
 				// Do case insensitive comparaison for booleans ...
 				if value == "false" || value == "true" {
@@ -155,32 +159,41 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 
 			case "gt":
+				expectedResultPattern = "%s is greater then %s"
 				a, b := toNumeric(flagVal, t.Compare.Value)
 				result.testResult = a > b
 
 			case "gte":
+				expectedResultPattern = "%s is greater or equal to %s"
 				a, b := toNumeric(flagVal, t.Compare.Value)
 				result.testResult = a >= b
 
 			case "lt":
+				expectedResultPattern = "%s is lower then %s"
 				a, b := toNumeric(flagVal, t.Compare.Value)
 				result.testResult = a < b
 
 			case "lte":
+				expectedResultPattern = "%s is lower or equal to %s"
 				a, b := toNumeric(flagVal, t.Compare.Value)
 				result.testResult = a <= b
 
 			case "has":
+				expectedResultPattern = "'%s' has '%s'"
 				result.testResult = strings.Contains(flagVal, t.Compare.Value)
 
 			case "nothave":
+				expectedResultPattern = " '%s' not have '%s'"
 				result.testResult = !strings.Contains(flagVal, t.Compare.Value)
 			}
+
+			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
 		} else {
+			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.Flag)
 			result.testResult = isset
 		}
-
 	} else {
+		result.ExpectedResult = fmt.Sprintf("'%s' is not present", t.Flag)
 		notset := !match
 		result.testResult = notset
 	}
@@ -206,8 +219,11 @@ func (ts *tests) execute(s string) *testOutput {
 		return finalOutput
 	}
 
+	expectedResultArr := make([]string, len(res))
+
 	for i, t := range ts.TestItems {
 		res[i] = *(t.execute(s))
+		expectedResultArr[i] = res[i].ExpectedResult
 	}
 
 	var result bool
@@ -221,11 +237,16 @@ func (ts *tests) execute(s string) *testOutput {
 		for i := range res {
 			result = result && res[i].testResult
 		}
+		// Generate an AND expected result
+		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " AND ")
+
 	case or:
 		result = false
 		for i := range res {
 			result = result || res[i].testResult
 		}
+		// Generate an OR expected result
+		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " OR ")
 	}
 
 	finalOutput.testResult = result
