@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -112,7 +113,7 @@ func runChecks(nodetype check.NodeType) {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 		}
 
-		fmt.Println(string(out))
+		PrintOutput(string(out), outputFile)
 	} else {
 		// if we want to store in PostgreSQL, convert to JSON and save it
 		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && pgSQL {
@@ -249,5 +250,28 @@ func isMaster() bool {
 func printRawOutput(output string) {
 	for _, row := range strings.Split(output, "\n") {
 		fmt.Println(fmt.Sprintf("\t %s", row))
+	}
+}
+
+func writeOutputToFile(output string, outputFile string) error {
+	file, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	fmt.Fprintln(w, output)
+	return w.Flush()
+}
+
+func PrintOutput(output string, outputFile string) {
+	if len(outputFile) == 0 {
+		fmt.Println(output)
+	} else {
+		err := writeOutputToFile(output, outputFile)
+		if err != nil {
+			exitWithError(fmt.Errorf("Failed to write to output file %s: %v", outputFile, err))
+		}
 	}
 }
