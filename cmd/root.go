@@ -47,7 +47,8 @@ var (
 	noSummary          bool
 	noRemediations     bool
 	filterOpts         FilterOpts
-	includeTestOutput bool
+	includeTestOutput  bool
+	outputFile         string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -89,6 +90,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&includeTestOutput, "include-test-output", false, "Prints the actual result when test fails")
+	RootCmd.PersistentFlags().StringVar(&outputFile, "outputfile", "", "Writes the JSON results to output file")
 
 	RootCmd.PersistentFlags().StringVarP(
 		&filterOpts.CheckList,
