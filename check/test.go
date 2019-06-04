@@ -185,6 +185,11 @@ func (t *testItem) execute(s string) *testOutput {
 			case "nothave":
 				expectedResultPattern = " '%s' not have '%s'"
 				result.testResult = !strings.Contains(flagVal, t.Compare.Value)
+
+			case "regex":
+				expectedResultPattern = " '%s' matched by '%s'"
+				opRe := regexp.MustCompile(t.Compare.Value)
+				result.testResult = opRe.MatchString(flagVal)
 			}
 
 			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
