@@ -133,22 +133,6 @@ groups:
       --profiling=false
     scored: true
 
-  - id: 1.1.9
-    text: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    tests:
-      test_items:
-      - flag: "--repair-malformed-updates"
-        compare:
-          op: eq
-          value: false
-        set: true
-    remediation: |
-      Edit the API server pod specification file $apiserverconf
-      on the master node and set the below parameter.
-      --repair-malformed-updates=false
-    scored: true
-
   - id: 1.1.10
     text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
