@@ -86,6 +86,7 @@ node:
     confs:
       - "/var/lib/kubelet/config.yaml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/home/kubernetes/kubelet-config.yaml"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
