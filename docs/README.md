@@ -1,4 +1,4 @@
-# Overview
+# Test and config files
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
 representation of the CIS Kubernetes Benchmark checks. There is a 
@@ -377,21 +377,3 @@ Every node type has a subsection that specifies the main configurations items.
       audit: "/bin/sh -c 'if test -e $kubeletkubeconfig; then stat -c %a $kubeletkubeconfig; fi'"
       ...
     ```
-
-## Versions and distributions
-
-`kube-bench` has `controls` files for multiple Kubernetes versions and 
-distributions. The supported versions and distributions can be found under the
-`cfg/` directory in the project root.
-
-The versions listed in `cfg` are kubernetes versions not CIS Kubernetes Benchmark 
-versions and they are not the same. Please refer to the version matrix below to 
-see how kubernetes versions map to CIS Kubernetes Benchmarks versions.
-
-| CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
-|---|---|---|
-| 1.0.0| 1.6 | 1.6 |
-| 1.1.0| 1.7 | 1.7 |
-| 1.2.0| 1.8 | 1.8-1.10 |
-| 1.3.0| 1.11 | 1.11-1.12 |
-| 1.4.0| 1.13 | 1.13- |
