@@ -254,3 +254,26 @@ Next you'll have to build the kube-bench docker image using `make build-docker`,
 Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
 Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+
+# GitHub Issues
+
+## Bugs
+
+If you think you have found a bug please follow the instructions below.
+
+- Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
+- Note the version of kube-bench you are running and the command line options you are using.
+- Note the version of kubernetes you are running (from `kubectl version` or `oc version` for Openshift).
+- Set `-v 10` command line option and save the log output. Please paste this into your issue.
+- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
+- Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
+
+## Features
+
+We also use the issue tracker to track features. If you have an idea for a feature, or think you can help kube-bench become even more awesome follow the steps below.
+
+- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
+- Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
+- Clearly define the use case, using concrete examples. EG: I type `this` and kube-bench does `that`.
+- Some of our larger features will require some design. If you would like to include a technical design for your feature please include it in the issue.
+- After the new feature is well understood, and the design agreed upon we can start coding the feature. We would love for you to code it. So please open up a **WIP** *(work in progress)* pull request, and happy coding.
