@@ -5,9 +5,8 @@
 
 <img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
-kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/). 
-
-Note that it is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
+kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the
+checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/).
 
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve.
 
@@ -15,7 +14,9 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.0.0 to 1.4.0 respectively. 
+kube-bench supports tests for Kubernetes as defined in the CIS Benchmarks 1.0.0 to 1.4.0
+respectively. By default kube-bench will determine the test set to run based on the Kubernetes
+version running on the machine.
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
@@ -25,40 +26,45 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | 1.3.0| 1.11 | 1.11-1.12 |
 | 1.4.0| 1.13 | 1.13- |
 
-By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
+There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11.
+Please note that kube-bench does not automatically detect Openshift - see below. 
 
-There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
+## Getting Started
 
-## Installation
+Get kube-bench up and running quickly on a variety of platforms.
 
-You can choose to
-* run kube-bench from inside a container (sharing PID namespace with the host)
-* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
-* compile it from source.
+### Docker
 
-### Running inside a container
+Run the following command on the kubernetes master to run master checks:
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions.
-
-```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node]
-```
-
-You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
-
-```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
+```shell
+docker run --pid=host \
+  -v /etc:/etc:ro \
+  -v /var:/var:ro \
+  -v $(which kubectl):/usr/bin/kubectl \
+  -t aquasec/kube-bench:latest master
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
+Use your own tests and configuration, see [CHANGEME:custom config](#custom) for more
+information.
 
-### Running in a kubernetes cluster
+```shell
+docker run --pid=host \
+  -v /etc:/etc:ro \
+  -v /var:/var:ro -t \
+  -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml \
+  aquasec/kube-bench:latest master
+```
 
-You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
+### Kubernetes
+
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order
+to check the running processes, as well as access to some directories on the host where config
+files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
-The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
+The detection is done by verifying that mandatory components for master, as defined in the config
+files, are running (see [CHANGME:Configuration](#configuration)).
 
 The supplied `job.yaml` file can be applied to run the tests as a job. For example:
 
@@ -82,20 +88,45 @@ kubectl logs kube-bench-j76s9
 ...
 ```
 
-You can still force to run specific master or node checks using respectively `job-master.yaml` and `job-node.yaml`.
+You can still force to run specific master or node checks using respectively `job-master.yaml` and
+`job-node.yaml`.
 
-To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
+To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting
+a nodeSelector and tolerations in the pod spec.
 
-The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an
+older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
-### Running in an EKS cluster
+### OpenShift
 
-There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you must update the image reference in `job-eks.yaml`.** Typically you will push the container image for kube-bench to ECR and refer to it there in the YAML file.
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11.
+To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command
+(either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
+
+### EKS
+> kube-bench can not check master configuration in managed clusters like GKE, EKS and AKS, because
+> these providers do not allow customers access to the master.
+> However kube-bench can check worker node configuration in these environments.
+
+There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you
+must update the image reference in `job-eks.yaml`.** Typically you will push the container image for
+kube-bench to ECR and refer to it there in the YAML file.
 
 There are two significant differences on EKS:
 
 * It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
 * It's not possible to schedule jobs onto the master node, so master checks can't be performed
+
+# Work on Content Below
+
+## Installation
+
+You can choose to
+* run kube-bench from inside a container (sharing PID namespace with the host)
+* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
+* compile it from source.
+
 
 ### Installing from a container
 
@@ -125,22 +156,6 @@ go build -o kube-bench .
 ./kube-bench
 
 ```
-## Running on OpenShift 
-
-kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
-
-## Configuration
-
-Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
-
-Any settings in the version-specific config file `cfg/<version>/config.yaml` take precedence over settings in the main `cfg/config.yaml` file.
-
-For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.
-
-* **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running.
-* **podspecs** - From version 1.2.0 of the benchmark (tests for Kubernetes 1.8), the remediation instructions were updated to assume that the configuration for several kubernetes components is defined in a pod YAML file, and podspec settings define where to look for that configuration.
-* **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location.
-* **unitfiles** - From version 1.2.0 of the benchmark  (tests for Kubernetes 1.8), the remediation instructions were updated to assume that kubelet configuration is defined in a service file, and this setting defines where to look for that configuration.
 
 ## Output
 
@@ -148,38 +163,6 @@ There are three output states
 - [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
 - [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
 - [INFO] is informational output that needs no further action.
-
-## Test config YAML representation
-The tests are represented as YAML documents (installed by default into ./cfg).
-
-An example is as listed below:
-```
----
-controls:
-id: 1
-text: "Master Checks"
-type: "master"
-groups:
-- id: 1.1
-  text: "Kube-apiserver"
-  checks:
-    - id: 1.1.1
-      text: "Ensure that the --allow-privileged argument is set (Scored)"
-      audit: "ps -ef | grep kube-apiserver | grep -v grep"
-      tests:
-      bin_op: or
-      test_items:
-      - flag: "--allow-privileged"
-        set: true
-      - flag: "--some-other-flag"
-        set: false
-      remediation: "Edit the /etc/kubernetes/config file on the master node and set the KUBE_ALLOW_PRIV parameter to '--allow-privileged=false'"
-      scored: true
-```
-
-Recommendations (called `checks` in this document) can run on Kubernetes Master, Node or Federated API Servers.
-Checks are organized into `groups` which share similar controls (things to check for) and are grouped together in the section of the CIS Kubernetes document.
-These groups are further organized under `controls` which can be of the type `master`, `node` or `federated apiserver` to reflect the various Kubernetes node types.
 
 ### Omitting checks
 
