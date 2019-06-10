@@ -103,13 +103,26 @@ type: "master"
 groups:
 - id: G1
   checks:
-    - id: G1/C1
+  - id: G1/C1
 - id: G2
   checks:
-    - id: G2/C1
+  - id: G2/C1
+    text: "Verify that the SomeSampleFlag argument is set to true"
+    audit: "grep -B1 SomeSampleFlag=true /this/is/a/file/path"
+    tests:
+      test_items:
+      - flag: "SomeSampleFlag=true"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
+    scored: true
 `)
 		// and
-		controls, _ := NewControls(MASTER, in)
+		controls, err := NewControls(MASTER, in)
+		assert.NoError(t, err)
 		// and
 		runner.On("Run", controls.Groups[0].Checks[0]).Return(PASS)
 		runner.On("Run", controls.Groups[1].Checks[0]).Return(FAIL)
@@ -130,6 +143,12 @@ groups:
 		G2 := controls.Groups[1]
 		assert.Equal(t, "G2", G2.ID)
 		assert.Equal(t, "G2/C1", G2.Checks[0].ID)
+		assert.Equal(t, "has", G2.Checks[0].Tests.TestItems[0].Compare.Op)
+		assert.Equal(t, "true", G2.Checks[0].Tests.TestItems[0].Compare.Value)
+		assert.Equal(t, true, G2.Checks[0].Tests.TestItems[0].Set)
+		assert.Equal(t, "SomeSampleFlag=true", G2.Checks[0].Tests.TestItems[0].Flag)
+		assert.Equal(t, "Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.\n", G2.Checks[0].Remediation)
+		assert.Equal(t, true, G2.Checks[0].Scored)
 		assertEqualGroupSummary(t, 0, 1, 0, 0, G2)
 		// and
 		assert.Equal(t, 1, controls.Summary.Pass)
@@ -139,7 +158,6 @@ groups:
 		// and
 		runner.AssertExpectations(t)
 	})
-
 }
 
 func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn int, actual *Group) {
