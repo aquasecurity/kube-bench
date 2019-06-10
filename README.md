@@ -195,44 +195,6 @@ If you decide that a recommendation is not appropriate for your environment, you
 
 No tests will be run for this check and the output will be marked [INFO].
 
-## Tests
-Tests are the items we actually look for to determine if a check is successful or not. Checks can have multiple tests, which must all be successful for the check to pass.
-
-The syntax for tests:
-```
-tests:
-- flag:
-  set:
-  compare:
-    op:
-    value:
-...
-```
-
-You can also define jsonpath and yamlpath tests using the following syntax:
-
-```
-tests:
-- path:
-  set:
-  compare:
-    op:
-    value:
-...
-```
-
-Tests have various `operations` which are used to compare the output of audit commands for success.
-These operations are:
-
-- `eq`: tests if the flag value is equal to the compared value.
-- `noteq`: tests if the flag value is unequal to the compared value.
-- `gt`: tests if the flag value is greater than the compared value.
-- `gte`: tests if the flag value is greater than or equal to the compared value.
-- `lt`: tests if the flag value is less than the compared value.
-- `lte`: tests if the flag value is less than or equal to the compared value.
-- `has`: tests if the flag value contains the compared value.
-- `nothave`: tests if the flag value does not contain the compared value.
-
 # Roadmap
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
