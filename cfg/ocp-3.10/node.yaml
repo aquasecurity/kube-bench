@@ -196,7 +196,7 @@ groups:
   - id: 7.15
     text: "Verify that the RotateKubeletServerCertificate argument is set to true"
     audit: "grep -B1 RotateKubeletServerCertificate=true /etc/origin/node/node-config.yaml"
-    test:
+    tests:
       test_items:
       - flag: "RotateKubeletServerCertificate=true"
         compare:
