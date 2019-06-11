@@ -234,7 +234,7 @@ These operations are:
 - `nothave`: tests if the flag value does not contain the compared value.
 - `regex`: tests if the flag value matches the compared value regular expression.
 
-When defining regular expressions in YAML it is generally easier to wrap them in single quotes, for example `'^[abc]$`, to avoid issues with string escaping.
+When defining regular expressions in YAML it is generally easier to wrap them in single quotes, for example `'^[abc]$'`, to avoid issues with string escaping.
 
 # Roadmap
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
