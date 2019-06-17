@@ -1,0 +1,376 @@
+---
+controls:
+id: 2
+text: "Worker Node Security Configuration"
+type: "node"
+groups:
+- id: 7
+  text: "Kubelet"
+  checks:
+  - id: 7.1
+    text: "Use Security Context Constraints to manage privileged containers as needed"
+    type: "skip"
+    scored: true
+
+  - id: 7.2
+    text: "Ensure anonymous-auth is not disabled"
+    type: "skip"
+    scored: true
+
+  - id: 7.3
+    text: "Verify that the --authorization-mode argument is set to WebHook"
+    audit: "grep -A1 authorization-mode /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "authorization-mode"
+        set: false
+      - flag: "authorization-mode: Webhook"
+        compare:
+          op: has
+          value: "Webhook"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove authorization-mode under
+      kubeletArguments in /etc/origin/node/node-config.yaml or set it to "Webhook".
+    scored: true
+
+  - id: 7.4
+    text: "Verify the OpenShift default for the client-ca-file argument"
+    audit: "grep -A1 client-ca-file /etc/origin/node/node-config.yaml"
+    tests:
+      test_items:
+      - flag: "client-ca-file"
+        set: false
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove any configuration returned by the following:
+      grep -A1 client-ca-file /etc/origin/node/node-config.yaml
+
+      Reset to the OpenShift default. 
+      See https://github.com/openshift/openshift-ansible/blob/release-3.10/roles/openshift_node_group/templates/node-config.yaml.j2#L65
+      The config file does not have this defined in kubeletArgument, but in PodManifestConfig.
+    scored: true
+
+  - id: 7.5
+    text: "Verify the OpenShift default setting for the read-only-port argument"
+    audit: "grep -A1 read-only-port /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "read-only-port"
+        set: false
+      - flag: "read-only-port: 0"
+        compare:
+          op: has
+          value: "0"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and removed so that the OpenShift default is applied.
+    scored: true
+
+  - id: 7.6
+    text: "Adjust the streaming-connection-idle-timeout argument"
+    audit: "grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "streaming-connection-idle-timeout"
+        set: false
+      - flag: "5m"
+        set: false
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and set the streaming-connection-timeout
+      value like the following in node-config.yaml.
+      
+      kubeletArguments:
+        streaming-connection-idle-timeout:
+           - "5m"
+    scored: true
+
+  - id: 7.7
+    text: "Verify the OpenShift defaults for the protect-kernel-defaults argument"
+    type: "skip"
+    scored: true
+
+  - id: 7.8
+    text: "Verify the OpenShift default value of true for the make-iptables-util-chains argument"
+    audit: "grep -A1 make-iptables-util-chains /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "make-iptables-util-chains"
+        set: false
+      - flag: "make-iptables-util-chains: true"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and reset make-iptables-util-chains to the OpenShift
+      default value of true. 
+    scored: true
+
+  - id: 7.9
+    text: "Verify that the --keep-terminated-pod-volumes argument is set to false"
+    audit: "grep -A1 keep-terminated-pod-volumes /etc/origin/node/node-config.yaml"
+    tests:
+      test_items:
+      - flag: "keep-terminated-pod-volumes: false"
+        compare:
+          op: has
+          value: "false"
+        set: true
+    remediation: |
+      Reset to the OpenShift defaults
+    scored: true
+
+  - id: 7.10
+    text: "Verify the OpenShift defaults for the hostname-override argument"
+    type: "skip"
+    scored: true
+
+  - id: 7.11
+    text: "Set the --event-qps argument to 0"
+    audit: "grep -A1 event-qps /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "event-qps"
+        set: false
+      - flag: "event-qps: 0"
+        compare:
+          op: has
+          value: "0"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml set the event-qps argument to 0 in
+      the kubeletArguments section of.
+    scored: true
+
+  - id: 7.12
+    text: "Verify the OpenShift cert-dir flag for HTTPS traffic"
+    audit: "grep -A1 cert-dir /etc/origin/node/node-config.yaml"
+    tests:
+      test_items:
+      - flag: "/etc/origin/node/certificates"
+        compare:
+          op: has
+          value: "/etc/origin/node/certificates"
+        set: true
+    remediation: |
+      Reset to the OpenShift default values.
+    scored: true
+
+  - id: 7.13
+    text: "Verify the OpenShift default of 0 for the cadvisor-port argument"
+    audit: "grep -A1 cadvisor-port /etc/origin/node/node-config.yaml"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "cadvisor-port"
+        set: false
+      - flag: "cadvisor-port: 0"
+        compare:
+          op: has
+          value: "0"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove the cadvisor-port flag 
+      if it is set in the  kubeletArguments section.
+    scored: true
+
+  - id: 7.14
+    text: "Verify that the RotateKubeletClientCertificate argument is set to true"
+    audit: "grep -B1 RotateKubeletClientCertificate=true /etc/origin/node/node-config.yaml"
+    tests:
+      test_items:
+      - flag: "RotateKubeletClientCertificate=true"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletClientCertificate to true.
+    scored: true
+
+  - id: 7.15
+    text: "Verify that the RotateKubeletServerCertificate argument is set to true"
+    audit: "grep -B1 RotateKubeletServerCertificate=true /etc/origin/node/node-config.yaml"
+    tests:
+      test_items:
+      - flag: "RotateKubeletServerCertificate=true"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletServerCertificate to true.
+    scored: true
+
+
+- id: 8
+  text: "Configuration Files"
+  checks:
+  - id: 8.1
+    text: "Verify the OpenShift default permissions for the kubelet.conf file"
+    audit: "stat -c %a  /etc/origin/node/node.kubeconfig"
+    tests:
+      bin_op: or
+      test_items:
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
+    remediation: |
+      Run the below command on each worker node.
+      chmod 644 /etc/origin/node/node.kubeconfig
+    scored: true
+
+  - id: 8.2
+    text: "Verify the kubeconfig file ownership of root:root"
+    audit: "stat -c %U:%G /etc/origin/node/node.kubeconfig"
+    tests:
+      test_items:
+        - flag: "root:root"
+          compare:
+            op: eq
+            value: root:root
+          set: true
+      remediation: |
+        Run the below command on each worker node.
+        chown root:root /etc/origin/node/node.kubeconfig
+      scored: true
+
+  - id: 8.3
+    text: "Verify the kubelet service file permissions of 644"
+    audit: "stat -c %a /etc/systemd/system/atomic-openshift-node.service"
+    tests:
+      bin_op: or
+      test_items:
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
+    remediation: |
+      Run the below command on each worker node.
+      chmod 644 /etc/systemd/system/atomic-openshift-node.service
+    scored: true
+
+  - id: 8.4
+    text: "Verify the kubelet service file ownership of root:root"
+    audit: "stat -c %U:%G /etc/systemd/system/atomic-openshift-node.service"
+    tests:
+      test_items:
+        - flag: "root:root"
+          compare:
+            op: eq
+            value: root:root
+          set: true
+      remediation: |
+        Run the below command on each worker node.
+        chown root:root /etc/systemd/system/atomic-openshift-node.service
+      scored: true
+
+  - id: 8.5
+    text: "Verify the OpenShift default permissions for the proxy kubeconfig file"
+    audit: "stat -c %a /etc/origin/node/node.kubeconfig"
+    tests:
+      bin_op: or
+      test_items:
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
+    remediation: |
+      Run the below command on each worker node.
+      chmod 644 /etc/origin/node/node.kubeconfig
+    scored: true
+
+  - id: 8.6
+    text: "Verify the proxy kubeconfig file ownership of root:root"
+    audit: "stat -c %U:%G /etc/origin/node/node.kubeconfig"
+    tests:
+      test_items:
+        - flag: "root:root"
+          compare:
+            op: eq
+            value: root:root
+          set: true
+      remediation: |
+        Run the below command on each worker node.
+        chown root:root /etc/origin/node/node.kubeconfig
+      scored: true
+
+  - id: 8.7
+    text: "Verify the OpenShift default permissions for the certificate authorities file."
+    audit: "stat -c %a /etc/origin/node/client-ca.crt"
+    tests:
+      bin_op: or
+      test_items:
+        - flag: "644"
+          compare:
+            op: eq
+            value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
+          set: true
+    remediation: |
+      Run the below command on each worker node.
+      chmod 644 /etc/origin/node/client-ca.crt
+    scored: true
+
+  - id: 8.8
+    text: "Verify the client certificate authorities file ownership of root:root"
+    audit: "stat -c %U:%G /etc/origin/node/client-ca.crt"
+    tests:
+      test_items:
+        - flag: "root:root"
+          compare:
+            op: eq
+            value: root:root
+          set: true
+      remediation: |
+        Run the below command on each worker node.
+        chown root:root /etc/origin/node/client-ca.crt
+      scored: true
