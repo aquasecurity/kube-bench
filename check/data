@@ -297,3 +297,13 @@ groups:
               op: eq
               value: "false"
             set: true
+
+    - id: 26
+      text: "check regex op matches"
+      tests:
+        test_items:
+          - path: "{.currentMasterVersion}"
+            compare:
+              op: regex
+              value: '^1\.12.*$'
+            set: true

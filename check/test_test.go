@@ -152,6 +152,10 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[22],
 			"authentication:\n  anonymous:\n    enabled: false",
 		},
+		{
+			controls.Groups[0].Checks[26],
+			"currentMasterVersion: 1.12.7",
+		},
 	}
 
 	for _, c := range cases {
@@ -179,6 +183,14 @@ func TestTestExecuteExceptions(t *testing.T) {
 		{
 			controls.Groups[0].Checks[25],
 			"broken } yaml\nenabled: true",
+		},
+		{
+			controls.Groups[0].Checks[26],
+			"currentMasterVersion: 1.11",
+		},
+		{
+			controls.Groups[0].Checks[26],
+			"currentMasterVersion: ",
 		},
 	}
 
