@@ -1,0 +1,27 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+master:
+  apiserver:
+    bins:
+      - openshift start master api
+      - hypershift openshift-kube-apiserver
+     
+  scheduler:
+    bins:
+      - "openshift start master controllers"
+    confs:
+      - /etc/origin/master/scheduler.json
+
+  controllermanager:
+    bins:
+      - "openshift start master controllers"
+
+  etcd:
+    bins:
+      - openshift start etcd
+
+node:
+  proxy:
+    bins:
+      - openshift start network
