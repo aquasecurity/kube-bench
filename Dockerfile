@@ -1,11 +1,10 @@
-FROM golang:1.9 AS build
+FROM golang:1.12 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
-ADD Gopkg.toml Gopkg.lock ./
-RUN go get -v github.com/golang/dep/cmd/dep && dep ensure -v -vendor-only
+ADD go.mod go.sum ./
 ADD main.go .
 ADD check/ check/
 ADD cmd/ cmd/
-RUN CGO_ENABLED=0 go install -a -ldflags '-w'
+RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags '-w'
 
 FROM alpine:3.10 AS run
 WORKDIR /opt/kube-bench/
