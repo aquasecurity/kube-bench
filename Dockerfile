@@ -7,7 +7,7 @@ ADD check/ check/
 ADD cmd/ cmd/
 RUN CGO_ENABLED=0 go install -a -ldflags '-w'
 
-FROM alpine:3.7 AS run
+FROM alpine:3.10 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
