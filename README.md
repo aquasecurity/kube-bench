@@ -262,18 +262,28 @@ Everytime you want to test a change, you'll need to rebuild the docker image and
 If you think you have found a bug please follow the instructions below.
 
 - Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
-- Note the version of kube-bench you are running and the command line options you are using.
+- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
+- Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
 - Note the version of kubernetes you are running (from `kubectl version` or `oc version` for Openshift).
 - Set `-v 10` command line option and save the log output. Please paste this into your issue.
-- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
-- Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
+- Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 
 ## Features
 
-We also use the issue tracker to track features. If you have an idea for a feature, or think you can help kube-bench become even more awesome follow the steps below.
+We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
 
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
-- Clearly define the use case, using concrete examples. EG: I type `this` and kube-bench does `that`.
-- Some of our larger features will require some design. If you would like to include a technical design for your feature please include it in the issue.
-- After the new feature is well understood, and the design agreed upon we can start coding the feature. We would love for you to code it. So please open up a **WIP** *(work in progress)* pull request, and happy coding.
+- Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
+- If you would like to include a technical design for your feature please feel free to do so.
+
+## Pull Requests 
+
+We welcome pull requests! 
+
+- Your PR is more likely to be accepted if it focuses on just one change.
+- Please include a comment with the results before and after your change. 
+- Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!). 
+- You're welcome to submit a **WIP** *(work in progress)* PR if you would like early feedback on an idea or an approach. 
+- Happy coding!
+
