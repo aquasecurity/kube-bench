@@ -14,12 +14,8 @@ before_install:
   - sudo apt-get install -y rpm
   - gem install --no-ri --no-rdoc fpm
 
-install:
-  - go get -v github.com/golang/dep/cmd/dep
-  - dep ensure -v -vendor-only
-
 script:
-  - go test ./...
+  - GO111MODULE=on go test ./...
   - docker build --tag kube-bench .
   - docker run -v `pwd`:/host kube-bench install 
   - test -d cfg
