@@ -556,19 +556,19 @@ groups:
     scored: true
 
   - id: 1.1.34
-    text: "Ensure that the --experimental-encryption-provider-config argument is
+    text: "Ensure that the --encryption-provider-config argument is
     set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
-      - flag: "--experimental-encryption-provider-config"
+      - flag: "--encryption-provider-config"
         set: true
     remediation: |
       Follow the Kubernetes documentation and configure a EncryptionConfig file.
       Then, edit the API server pod specification file $apiserverconf on the
-      master node and set the --experimental-encryption-provider-config parameter
+      master node and set the --encryption-provider-config parameter
       to the path of that file:
-      --experimental-encryption-provider-config=</path/to/EncryptionConfig/File>
+      --encryption-provider-config=</path/to/EncryptionConfig/File>
     scored: true
 
   - id: 1.1.35
