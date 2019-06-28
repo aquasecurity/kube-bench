@@ -76,6 +76,8 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
+	// flush after exit
+	glog.Flush()
 }
 
 func init() {
