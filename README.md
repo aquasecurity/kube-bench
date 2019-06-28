@@ -39,19 +39,23 @@ You can choose to
 
 ### Running inside a container
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions.
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions. 
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node]
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node] --version 1.13
 ```
 
-You can even use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
+> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to resolve this. You will also need to pass in kubeconfig credentials. For example:
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml aquasec/kube-bench:latest [master|node]
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t aquasec/kube-bench:latest [master|node] 
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to the above invocations to resolve this.
+You can use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
+
+```
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
+```
 
 ### Running in a kubernetes cluster
 
