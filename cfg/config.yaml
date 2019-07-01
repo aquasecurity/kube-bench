@@ -45,6 +45,7 @@ master:
   controllermanager:
     bins:
       - "kube-controller-manager"
+      - "kube-controller"
       - "hyperkube controller-manager"
       - "hyperkube kube-controller-manager"
       - "controller-manager"
