@@ -13,6 +13,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y rpm
   - gem install --no-ri --no-rdoc fpm
+  - go get -t -v ./...
 
 script:
   - GO111MODULE=on go test ./...
@@ -20,10 +21,17 @@ script:
   - docker run -v `pwd`:/host kube-bench install 
   - test -d cfg
   - test -f kube-bench
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
-  - test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
   - bash <(curl -s https://codecov.io/bash)
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: "$TRAVIS_OS_NAME = linux"
 
 env:
   global:
