@@ -74,8 +74,12 @@ func Execute() {
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
+		// flush before exit non-zero
+		glog.Flush()
 		os.Exit(-1)
 	}
+	// flush before exit
+	glog.Flush()
 }
 
 func init() {
