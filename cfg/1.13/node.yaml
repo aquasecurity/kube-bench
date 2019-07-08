@@ -434,8 +434,7 @@ groups:
 
     - id: 2.2.8
       text: "Ensure that the client certificate authorities file ownership is set to root:root (Scored)"
-      audit: "/bin/sh -c 'if test -e $ca-file; then stat -c %U:%G $ca-file; fi'"
-      type: manual
+      audit: "/bin/sh -c 'if test -e $kubeletcafile; then stat -c %U:%G $kubeletcafile; fi'"
       remediation: |
         Run the following command to modify the ownership of the --client-ca-file .
         chown root:root <filename>

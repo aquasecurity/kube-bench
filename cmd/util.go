@@ -256,6 +256,35 @@ func getKubeConfigFiles(v *viper.Viper) map[string]string {
 	return kubeconfigmap
 }
 
+func getCaFile(v *viper.Viper) map[string]string {
+        cafilemap := make(map[string]string)
+
+        for _, component := range v.GetStringSlice("components") {
+                s := v.Sub(component)
+                if s == nil {
+                        continue
+                }
+
+                cafile := findConfigFile(s.GetStringSlice("cafile"))
+                if cafile == "" {
+                        if s.IsSet("defaultcafile") {
+                                cafile = s.GetString("defaultcafile")
+                                glog.V(2).Info(fmt.Sprintf("Using default ca file name '%s' for component %s", cafile, component))
+                        } else {
+                                glog.V(2).Info(fmt.Sprintf("Missing ca file for %s", component))
+                                cafile = component
+                        }
+                } else {
+                        glog.V(2).Info(fmt.Sprintf("Component %s uses ca file '%s'", component, cafile))
+                }
+
+                cafilemap[component] = cafile
+        }
+
+        return cafilemap
+}
+
+
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
 
