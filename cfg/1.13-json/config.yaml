@@ -1,0 +1,16 @@
+---
+# Config file for systems such as EKS where config is in JSON files
+# Master nodes are controlled by EKS and not user-accessible
+node:
+  kubernetes:
+    confs:
+      - "/var/lib/kubelet/kubeconfig"
+    kubeconfig:
+      - "/var/lib/kubelet/kubeconfig"
+
+  kubelet:
+    defaultsvc: "/etc/systemd/system/kubelet.service"
+    defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
+
+  proxy:
+    defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
