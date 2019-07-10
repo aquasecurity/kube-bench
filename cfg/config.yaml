@@ -81,6 +81,8 @@ node:
     defaultconf: /etc/kubernetes/config    
 
   kubelet:
+    cafile:
+      - "/etc/kubernetes/pki/ca.crt"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
@@ -91,6 +93,7 @@ node:
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
+    defaultcafile: "/etc/kubernetes/pki/ca.crt"
 
   proxy:
     bins:
