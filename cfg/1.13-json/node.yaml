@@ -22,7 +22,7 @@ groups:
       If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to
       false .
       If using executable arguments, edit the kubelet service file
-      $kubeletconf on each worker node and
+      $kubeletsvc on each worker node and
       set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
       --anonymous-auth=false
       Based on your system, restart the kubelet service. For example:
