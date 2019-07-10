@@ -68,6 +68,8 @@ func cleanIDs(list string) map[string]bool {
 
 // ps execs out to the ps command; it's separated into a function so we can write tests
 func ps(proc string) string {
+	// TODO: truncate proc to 15 chars
+	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
 	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
