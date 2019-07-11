@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -215,7 +214,7 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 	buf := new(bytes.Buffer)
 	err = j.Execute(buf, jsonInterface)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	jsonpathResult := fmt.Sprintf("%s", buf)
 	return jsonpathResult, nil
