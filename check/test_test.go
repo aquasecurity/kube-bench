@@ -201,3 +201,67 @@ func TestTestExecuteExceptions(t *testing.T) {
 		}
 	}
 }
+
+func TestTestUnmarshal(t *testing.T) {
+	type kubeletConfig struct {
+		Kind       string
+		ApiVersion string
+		Address    string
+	}
+	cases := []struct {
+		content        string
+		jsonInterface  interface{}
+		expectedToFail bool
+	}{
+		{
+			`{
+			"kind": "KubeletConfiguration",
+			"apiVersion": "kubelet.config.k8s.io/v1beta1",
+			"address": "0.0.0.0"
+			}
+			`,
+			kubeletConfig{},
+			false,
+		}, {
+			`
+kind: KubeletConfiguration
+address: 0.0.0.0
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+  enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+tlsCipherSuites:
+  - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+  - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+`,
+			kubeletConfig{},
+			false,
+		},
+		{
+			`
+kind: ddress: 0.0.0.0
+apiVersion: kubelet.config.k8s.io/v1beta
+`,
+			kubeletConfig{},
+			true,
+		},
+	}
+
+	for _, c := range cases {
+		err := unmarshal(c.content, &c.jsonInterface)
+		if err != nil {
+			if !c.expectedToFail {
+				t.Errorf("%s, expectedToFail:%v, got:%v\n", c.content, c.expectedToFail, err)
+			}
+		} else {
+			if c.expectedToFail {
+				t.Errorf("%s, expectedToFail:%v, got:Did not fail\n", c.content, c.expectedToFail)
+			}
+		}
+	}
+}

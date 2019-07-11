@@ -56,8 +56,8 @@ type compare struct {
 }
 
 type testOutput struct {
-	testResult   bool
-	actualResult string
+	testResult     bool
+	actualResult   string
 	ExpectedResult string
 }
 
@@ -80,14 +80,12 @@ func (t *testItem) execute(s string) *testOutput {
 		var jsonInterface interface{}
 
 		if t.Path != "" {
-			err := json.Unmarshal([]byte(s), &jsonInterface)
+			err := unmarshal(s, &jsonInterface)
 			if err != nil {
-				err := yaml.Unmarshal([]byte(s), &jsonInterface)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
-					return failTestItem("failed to load YAML or JSON")
-				}
+				fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
+				return failTestItem("failed to load YAML or JSON")
 			}
+
 		}
 
 		// Parse the jsonpath/yamlpath expression...
@@ -203,6 +201,18 @@ func (t *testItem) execute(s string) *testOutput {
 		result.testResult = notset
 	}
 	return result
+}
+
+func unmarshal(s string, jsonInterface *interface{}) error {
+	data := []byte(s)
+	err := json.Unmarshal(data, jsonInterface)
+	if err != nil {
+		err := yaml.Unmarshal(data, jsonInterface)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type tests struct {
