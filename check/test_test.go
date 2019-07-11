@@ -265,3 +265,60 @@ apiVersion: kubelet.config.k8s.io/v1beta
 		}
 	}
 }
+
+func TestExecuteJSONPath(t *testing.T) {
+	type kubeletConfig struct {
+		Kind       string
+		ApiVersion string
+		Address    string
+	}
+	cases := []struct {
+		jsonPath       string
+		jsonInterface  kubeletConfig
+		expectedResult string
+		expectedToFail bool
+	}{
+		{
+			// JSONPath parse works, results don't match
+			"{.Kind}",
+			kubeletConfig{
+				Kind:       "KubeletConfiguration",
+				ApiVersion: "kubelet.config.k8s.io/v1beta1",
+				Address:    "127.0.0.0",
+			},
+			"blah",
+			true,
+		},
+		{
+			// JSONPath parse works, results match
+			"{.Kind}",
+			kubeletConfig{
+				Kind:       "KubeletConfiguration",
+				ApiVersion: "kubelet.config.k8s.io/v1beta1",
+				Address:    "127.0.0.0",
+			},
+			"KubeletConfiguration",
+			false,
+		},
+		{
+			// JSONPath parse fails
+			"{.ApiVersion",
+			kubeletConfig{
+				Kind:       "KubeletConfiguration",
+				ApiVersion: "kubelet.config.k8s.io/v1beta1",
+				Address:    "127.0.0.0",
+			},
+			"",
+			true,
+		},
+	}
+	for _, c := range cases {
+		result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
+		if err != nil && !c.expectedToFail {
+			t.Fatalf("jsonPath:%q, expectedResult:%q got:%v\n", c.jsonPath, c.expectedResult, err)
+		}
+		if c.expectedResult != result && !c.expectedToFail {
+			t.Errorf("jsonPath:%q, expectedResult:%q got:%q\n", c.jsonPath, c.expectedResult, result)
+		}
+	}
+}
