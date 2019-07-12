@@ -2,7 +2,6 @@ builds:
   - main: main.go
     binary: kube-bench
     goos:
-      - darwin
       - linux
     goarch:
       - amd64
