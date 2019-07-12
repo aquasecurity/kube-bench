@@ -98,12 +98,15 @@ groups:
     text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
     audit: "cat $kubeletconf"
     tests:
+      bin_op: or
       test_items:
       - path: "{.streamingConnectionIdleTimeout}"
         compare:
           op: noteq
           value: 0
         set: true
+      - path: "{.streamingConnectionIdleTimeout}"
+        set: false
     remediation: |
       If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a
       value other than 0.
