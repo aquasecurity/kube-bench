@@ -56,8 +56,8 @@ type compare struct {
 }
 
 type testOutput struct {
-	testResult   bool
-	actualResult string
+	testResult     bool
+	actualResult   string
 	ExpectedResult string
 }
 
@@ -76,36 +76,22 @@ func (t *testItem) execute(s string) *testOutput {
 	} else {
 		// Path != "" - we don't know whether it's YAML or JSON but
 		// we can just try one then the other
-		buf := new(bytes.Buffer)
 		var jsonInterface interface{}
 
 		if t.Path != "" {
-			err := json.Unmarshal([]byte(s), &jsonInterface)
+			err := unmarshal(s, &jsonInterface)
 			if err != nil {
-				err := yaml.Unmarshal([]byte(s), &jsonInterface)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
-					return failTestItem("failed to load YAML or JSON")
-				}
+				fmt.Fprintf(os.Stderr, "failed to load YAML or JSON from provided input \"%s\": %v\n", s, err)
+				return failTestItem("failed to load YAML or JSON")
 			}
+
 		}
 
-		// Parse the jsonpath/yamlpath expression...
-		j := jsonpath.New("jsonpath")
-		j.AllowMissingKeys(true)
-		err := j.Parse(t.Path)
+		jsonpathResult, err := executeJSONPath(t.Path, &jsonInterface)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to parse path expression \"%s\": %v\n", t.Path, err)
-			return failTestItem("unable to parse path expression")
-		}
-
-		err = j.Execute(buf, jsonInterface)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error executing path expression \"%s\": %v\n", t.Path, err)
 			return failTestItem("error executing path expression")
 		}
-
-		jsonpathResult := fmt.Sprintf("%s", buf)
 		match = (jsonpathResult != "")
 		flagVal = jsonpathResult
 	}
@@ -203,6 +189,35 @@ func (t *testItem) execute(s string) *testOutput {
 		result.testResult = notset
 	}
 	return result
+}
+
+func unmarshal(s string, jsonInterface *interface{}) error {
+	data := []byte(s)
+	err := json.Unmarshal(data, jsonInterface)
+	if err != nil {
+		err := yaml.Unmarshal(data, jsonInterface)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
+	j := jsonpath.New("jsonpath")
+	j.AllowMissingKeys(true)
+	err := j.Parse(path)
+	if err != nil {
+		return "", err
+	}
+
+	buf := new(bytes.Buffer)
+	err = j.Execute(buf, jsonInterface)
+	if err != nil {
+		return "", err
+	}
+	jsonpathResult := fmt.Sprintf("%s", buf)
+	return jsonpathResult, nil
 }
 
 type tests struct {
