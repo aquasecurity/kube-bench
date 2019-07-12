@@ -74,12 +74,15 @@ groups:
     text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
     audit: "cat $kubeletconf"
     tests:
+      bin_op: or
       test_items:
       - path: "{.readOnlyPort}"
         compare:
           op: eq
           value: 0
         set: true
+      - path: "{.readOnlyPort}"
+        set: false
     remediation: |
       If using a Kubelet config file, edit the file to set readOnlyPort to 0 .
       If using command line arguments, edit the kubelet service file
