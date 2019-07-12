@@ -102,7 +102,7 @@ func (c *Check) run() State {
 		return c.State
 	}
 
-	// If check type is manual or the check is not scored, force result to WARN
+	// If check type is manual force result to WARN
 	if c.Type == "manual" {
 		c.State = WARN
 		return c.State
