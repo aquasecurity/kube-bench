@@ -60,18 +60,18 @@ func handleError(err error, context string) (errmsg string) {
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
-	ID          string      `yaml:"id" json:"test_number"`
-	Text        string      `json:"test_desc"`
-	Audit       string      `json:"audit"`
-	Type        string      `json:"type"`
-	Commands    []*exec.Cmd `json:"omit"`
-	Tests       *tests      `json:"omit"`
-	Set         bool        `json:"omit"`
-	Remediation string      `json:"remediation"`
-	TestInfo    []string    `json:"test_info"`
-	State       `json:"status"`
-	ActualValue string `json:"actual_value"`
-	Scored      bool   `json:"scored"`
+	ID             string      `yaml:"id" json:"test_number"`
+	Text           string      `json:"test_desc"`
+	Audit          string      `json:"audit"`
+	Type           string      `json:"type"`
+	Commands       []*exec.Cmd `json:"omit"`
+	Tests          *tests      `json:"omit"`
+	Set            bool        `json:"omit"`
+	Remediation    string      `json:"remediation"`
+	TestInfo       []string    `json:"test_info"`
+	State          `json:"status"`
+	ActualValue    string `json:"actual_value"`
+	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
 }
 
@@ -102,8 +102,8 @@ func (c *Check) run() State {
 		return c.State
 	}
 
-	// If check type is manual or the check is not scored, force result to WARN
-	if c.Type == "manual" || !c.Scored {
+	// If check type is manual force result to WARN
+	if c.Type == "manual" {
 		c.State = WARN
 		return c.State
 	}
@@ -193,7 +193,11 @@ func (c *Check) run() State {
 		if finalOutput.testResult {
 			c.State = PASS
 		} else {
-			c.State = FAIL
+			if c.Scored {
+				c.State = FAIL
+			} else {
+				c.State = WARN
+			}
 		}
 	} else {
 		errmsgs += handleError(
