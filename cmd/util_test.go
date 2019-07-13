@@ -298,7 +298,7 @@ func TestGetConfigFiles(t *testing.T) {
 			e = c.statResults
 			eIndex = 0
 
-			m := getConfigFiles(v)
+			m := getFiles(v, "config")
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
@@ -373,7 +373,7 @@ func TestGetServiceFiles(t *testing.T) {
 			e = c.statResults
 			eIndex = 0
 
-			m := getServiceFiles(v)
+			m := getFiles(v, "service")
 			if !reflect.DeepEqual(m, c.exp) {
 				t.Fatalf("Got %v\nExpected %v", m, c.exp)
 			}
