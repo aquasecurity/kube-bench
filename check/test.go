@@ -37,8 +37,9 @@ import (
 type binOp string
 
 const (
-	and binOp = "and"
-	or        = "or"
+	and                   binOp = "and"
+	or                          = "or"
+	defaultArraySeperator       = ","
 )
 
 type testItem struct {
@@ -176,6 +177,13 @@ func (t *testItem) execute(s string) *testOutput {
 				expectedResultPattern = " '%s' matched by '%s'"
 				opRe := regexp.MustCompile(t.Compare.Value)
 				result.testResult = opRe.MatchString(flagVal)
+
+			case "valid_elements":
+				expectedResultPattern = " '%s' contains valid elements from '%s'"
+				s := splitAndRemoveLastSeparator(flagVal, ",")
+				target := splitAndRemoveLastSeparator(t.Compare.Value, ",")
+				result.testResult = allElementsValid(s, target)
+
 			}
 
 			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
@@ -218,6 +226,33 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 	}
 	jsonpathResult := fmt.Sprintf("%s", buf)
 	return jsonpathResult, nil
+}
+
+func allElementsValid(s, t []string) bool {
+	if s == nil || len(s) == 0 {
+		return false
+	}
+	for _, sv := range s {
+		found := false
+		for _, tv := range t {
+			if sv == tv {
+				found = true
+				break
+			}
+		}
+		if found == false {
+			return false
+		}
+	}
+	return true
+}
+
+func splitAndRemoveLastSeparator(s, sep string) []string {
+	cleanS := strings.TrimRight(s, sep)
+	if len(cleanS) == 0 {
+		return []string{}
+	}
+	return strings.Split(cleanS, sep)
 }
 
 type tests struct {
