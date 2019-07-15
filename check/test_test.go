@@ -403,6 +403,25 @@ func TestCompareOp(t *testing.T) {
 			compareValue:          "",
 			expectedResultPattern: "'KubeletConfiguration' is not equal to ''",
 			testResult:            true},
+
+		// Test Op "gt"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=gt, both empty", op: "gt", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is greater than ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 > 0", op: "gt", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is greater than 0",
+			testResult: false},
+		{label: "op=gt, 4 > 5", op: "gt", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is greater than 5",
+			testResult: false},
+		{label: "op=gt, 5 > 4", op: "gt", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is greater than 4",
+			testResult: true},
+		{label: "op=gt, 5 > 5", op: "gt", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is greater than 5",
+			testResult: false},
 	}
 
 	for _, c := range cases {

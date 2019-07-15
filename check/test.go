@@ -162,7 +162,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		}
 
 	case "gt":
-		expectedResultPattern = "%s is greater then %s"
+		expectedResultPattern = "%s is greater than %s"
 		a, b := toNumeric(flagVal, tCompareValue)
 		testResult = a > b
 
@@ -172,7 +172,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		testResult = a >= b
 
 	case "lt":
-		expectedResultPattern = "%s is lower then %s"
+		expectedResultPattern = "%s is lower than %s"
 		a, b := toNumeric(flagVal, tCompareValue)
 		testResult = a < b
 
