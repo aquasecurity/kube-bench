@@ -325,30 +325,60 @@ func TestExecuteJSONPath(t *testing.T) {
 
 func TestCompareOp(t *testing.T) {
 	cases := []struct {
+		label                 string
 		op                    string
 		flagVal               string
 		compareValue          string
 		expectedResultPattern string
 		testResult            bool
 	}{
-		{op: "blah", flagVal: "foo", compareValue: "bar", expectedResultPattern: "", testResult: false},
-		{op: "eq", flagVal: "KubeletConfiguration",
+		// Test Op not matching
+		{label: "empty - op", op: "", flagVal: "", compareValue: "", expectedResultPattern: "", testResult: false},
+		{label: "op=blah", op: "blah", flagVal: "foo", compareValue: "bar", expectedResultPattern: "", testResult: false},
+
+		// Test Op "eq"
+		{label: "op=eq, empty", op: "eq", flagVal: "", compareValue: "", expectedResultPattern: "'' is equal to ''", testResult: true},
+
+		{label: "op=eq, true==true", op: "eq", flagVal: "true",
+			compareValue:          "true",
+			expectedResultPattern: "'true' is equal to 'true'",
+			testResult:            true},
+
+		{label: "op=eq, false==false", op: "eq", flagVal: "false",
+			compareValue:          "false",
+			expectedResultPattern: "'false' is equal to 'false'",
+			testResult:            true},
+
+		{label: "op=eq, false==true", op: "eq", flagVal: "false",
+			compareValue:          "true",
+			expectedResultPattern: "'false' is equal to 'true'",
+			testResult:            false},
+
+		{label: "op=eq, strings match", op: "eq", flagVal: "KubeletConfiguration",
 			compareValue:          "KubeletConfiguration",
 			expectedResultPattern: "'KubeletConfiguration' is equal to 'KubeletConfiguration'",
 			testResult:            true},
+
+		{label: "op=eq, flagVal=empty", op: "eq", flagVal: "",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'' is equal to 'KubeletConfiguration'",
+			testResult:            false},
+
+		{label: "op=eq, compareValue=empty", op: "eq", flagVal: "KubeletConfiguration",
+			compareValue:          "",
+			expectedResultPattern: "'KubeletConfiguration' is equal to ''",
+			testResult:            false},
 	}
 
 	for _, c := range cases {
 		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
 
 		if expectedResultPattern != c.expectedResultPattern {
-			t.Errorf("Expected result did not match - expectedResult:%q got:%q\n", c.expectedResultPattern, expectedResultPattern)
+			t.Errorf("Expected result did not match - label: %q op: %q expectedResult:%q got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
 		}
 
 		if testResult != c.testResult {
-			t.Errorf("Expected result did not match - testResult:%t got:%t\n", c.testResult, testResult)
+			t.Errorf("Expected result did not match - label: %q op: %q testResult:%t got:%t\n", c.label, c.op, c.testResult, testResult)
 		}
-
 	}
-
 }

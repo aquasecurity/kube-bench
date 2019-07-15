@@ -122,10 +122,7 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 			}
 
-			expectedResultPattern, testResult := compareOp(t.Compare.Op, flagVal, t.Compare.Value)
-			result.testResult = testResult
-
-			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
+			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, flagVal, t.Compare.Value)
 		} else {
 			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.Flag)
 			result.testResult = isset
@@ -203,7 +200,6 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 	}
 
 	return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), testResult
-
 }
 
 func unmarshal(s string, jsonInterface *interface{}) error {
