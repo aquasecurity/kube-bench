@@ -27,6 +27,12 @@ var (
 
 var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
+var TypeMap = map[string][]string{
+	"ca": []string{"cafile", "defaultcafile"},
+	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
+	"service": []string{"svc", "defaultsvc"},
+	"config": []string{"confs", "defaultconf"},
+}
 
 func init() {
 	psFunc = ps
@@ -68,6 +74,8 @@ func cleanIDs(list string) map[string]bool {
 
 // ps execs out to the ps command; it's separated into a function so we can write tests
 func ps(proc string) string {
+	// TODO: truncate proc to 15 chars
+	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
 	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
@@ -163,9 +171,11 @@ func decrementVersion(version string) string {
 	return strings.Join(split, ".")
 }
 
-// getConfigFiles finds which of the set of candidate config files exist
-func getConfigFiles(v *viper.Viper) map[string]string {
-	confmap := make(map[string]string)
+// getFiles finds which of the set of candidate files exist
+func getFiles(v *viper.Viper, fileType string) map[string]string {
+	filemap := make(map[string]string)
+	mainOpt := TypeMap[fileType][0]
+	defaultOpt := TypeMap[fileType][1]
 
 	for _, component := range v.GetStringSlice("components") {
 		s := v.Sub(component)
@@ -173,87 +183,25 @@ func getConfigFiles(v *viper.Viper) map[string]string {
 			continue
 		}
 
-		// See if any of the candidate config files exist
-		conf := findConfigFile(s.GetStringSlice("confs"))
-		if conf == "" {
-			if s.IsSet("defaultconf") {
-				conf = s.GetString("defaultconf")
-				glog.V(2).Info(fmt.Sprintf("Using default config file name '%s' for component %s", conf, component))
+		// See if any of the candidate files exist
+		file := findConfigFile(s.GetStringSlice(mainOpt))
+		if file == "" {
+			if s.IsSet(defaultOpt) {
+				file = s.GetString(defaultOpt)
+				glog.V(2).Info(fmt.Sprintf("Using default %s file name '%s' for component %s", fileType, file, component))
 			} else {
-				// Default the config file name that we'll substitute to the name of the component
-				glog.V(2).Info(fmt.Sprintf("Missing config file for %s", component))
-				conf = component
+				// Default the file name that we'll substitute to the name of the component
+				glog.V(2).Info(fmt.Sprintf("Missing %s file for %s", fileType, component))
+				file = component
 			}
 		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses config file '%s'", component, conf))
+			glog.V(2).Info(fmt.Sprintf("Component %s uses %s file '%s'", component, fileType, file))
 		}
 
-		confmap[component] = conf
+		filemap[component] = file
 	}
 
-	return confmap
-}
-
-// getServiceFiles finds which of the set of candidate service files exist
-func getServiceFiles(v *viper.Viper) map[string]string {
-	svcmap := make(map[string]string)
-
-	for _, component := range v.GetStringSlice("components") {
-		s := v.Sub(component)
-		if s == nil {
-			continue
-		}
-
-		// See if any of the candidate config files exist
-		svc := findConfigFile(s.GetStringSlice("svc"))
-		if svc == "" {
-			if s.IsSet("defaultsvc") {
-				svc = s.GetString("defaultsvc")
-				glog.V(2).Info(fmt.Sprintf("Using default service file name '%s' for component %s", svc, component))
-			} else {
-				// Default the service file name that we'll substitute to the name of the component
-				glog.V(2).Info(fmt.Sprintf("Missing service file for %s", component))
-				svc = component
-			}
-		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses service file '%s'", component, svc))
-		}
-
-		svcmap[component] = svc
-	}
-
-	return svcmap
-}
-
-// getKubeConfigFiles finds which of the set of candidate kubeconfig files exist
-func getKubeConfigFiles(v *viper.Viper) map[string]string {
-	kubeconfigmap := make(map[string]string)
-
-	for _, component := range v.GetStringSlice("components") {
-		s := v.Sub(component)
-		if s == nil {
-			continue
-		}
-
-		// See if any of the candidate config files exist
-		kubeconfig := findConfigFile(s.GetStringSlice("kubeconfig"))
-		if kubeconfig == "" {
-			if s.IsSet("defaultkubeconfig") {
-				kubeconfig = s.GetString("defaultkubeconfig")
-				glog.V(2).Info(fmt.Sprintf("Using default kubeconfig file name '%s' for component %s", kubeconfig, component))
-			} else {
-				// Default the service file name that we'll substitute to the name of the component
-				glog.V(2).Info(fmt.Sprintf("Missing kubeconfig file for %s", component))
-				kubeconfig = component
-			}
-		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses kubeconfig file '%s'", component, kubeconfig))
-		}
-
-		kubeconfigmap[component] = kubeconfig
-	}
-
-	return kubeconfigmap
+	return filemap
 }
 
 // verifyBin checks that the binary specified is running
