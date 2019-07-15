@@ -21,7 +21,7 @@ script:
   - docker run -v `pwd`:/host kube-bench install 
   - test -d cfg
   - test -f kube-bench
-  - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+  - make tests
   
 after_success:
   - bash <(curl -s https://codecov.io/bash)
