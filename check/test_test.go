@@ -337,7 +337,7 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=blah", op: "blah", flagVal: "foo", compareValue: "bar", expectedResultPattern: "", testResult: false},
 
 		// Test Op "eq"
-		{label: "op=eq, empty", op: "eq", flagVal: "", compareValue: "", expectedResultPattern: "'' is equal to ''", testResult: true},
+		{label: "op=eq, both empty", op: "eq", flagVal: "", compareValue: "", expectedResultPattern: "'' is equal to ''", testResult: true},
 
 		{label: "op=eq, true==true", op: "eq", flagVal: "true",
 			compareValue:          "true",
@@ -368,6 +368,41 @@ func TestCompareOp(t *testing.T) {
 			compareValue:          "",
 			expectedResultPattern: "'KubeletConfiguration' is equal to ''",
 			testResult:            false},
+
+		// Test Op "noteq"
+		{label: "op=noteq, both empty", op: "noteq", flagVal: "",
+			compareValue: "", expectedResultPattern: "'' is not equal to ''",
+			testResult: false},
+
+		{label: "op=noteq, true!=true", op: "noteq", flagVal: "true",
+			compareValue:          "true",
+			expectedResultPattern: "'true' is not equal to 'true'",
+			testResult:            false},
+
+		{label: "op=noteq, false!=false", op: "noteq", flagVal: "false",
+			compareValue:          "false",
+			expectedResultPattern: "'false' is not equal to 'false'",
+			testResult:            false},
+
+		{label: "op=noteq, false!=true", op: "noteq", flagVal: "false",
+			compareValue:          "true",
+			expectedResultPattern: "'false' is not equal to 'true'",
+			testResult:            true},
+
+		{label: "op=noteq, strings match", op: "noteq", flagVal: "KubeletConfiguration",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'KubeletConfiguration' is not equal to 'KubeletConfiguration'",
+			testResult:            false},
+
+		{label: "op=noteq, flagVal=empty", op: "noteq", flagVal: "",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'' is not equal to 'KubeletConfiguration'",
+			testResult:            true},
+
+		{label: "op=noteq, compareValue=empty", op: "noteq", flagVal: "KubeletConfiguration",
+			compareValue:          "",
+			expectedResultPattern: "'KubeletConfiguration' is not equal to ''",
+			testResult:            true},
 	}
 
 	for _, c := range cases {
