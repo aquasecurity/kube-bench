@@ -32,7 +32,6 @@ build-docker:
              -t $(IMAGE_NAME) .
 
 tests:
-	go test -race -timeout 30s -cover ./cmd ./check
 	GO111MODULE=on go test -v -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
 
 # creates a kind cluster to be used for development.
