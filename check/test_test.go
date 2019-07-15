@@ -519,6 +519,14 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=gt, 'blah' not have 'lo'", op: "nothave", flagVal: "blah",
 			compareValue: "lo", expectedResultPattern: " 'blah' not have 'lo'",
 			testResult: true},
+
+		// Test Op "regex"
+		{label: "op=gt, both empty", op: "regex", flagVal: "",
+			compareValue: "", expectedResultPattern: " '' matched by ''",
+			testResult: true},
+		{label: "op=gt, flagVal=empty", op: "regex", flagVal: "",
+			compareValue: "blah", expectedResultPattern: " '' matched by 'blah'",
+			testResult: false},
 	}
 
 	for _, c := range cases {
