@@ -2,7 +2,10 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
+[![Coverage Status][cov-img]][cov]
 
+[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/master/graph/badge.svg
+[cov]: https://codecov.io/github/aquasecurity/kube-bench
 <img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/). 
