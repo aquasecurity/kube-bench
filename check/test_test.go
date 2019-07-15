@@ -374,11 +374,11 @@ func TestCompareOp(t *testing.T) {
 		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
 
 		if expectedResultPattern != c.expectedResultPattern {
-			t.Errorf("Expected result did not match - label: %q op: %q expectedResult:%q got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
+			t.Errorf("'expectedResultPattern' did not match - label: %q op: %q expected 'expectedResultPattern':%q  got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
 		}
 
 		if testResult != c.testResult {
-			t.Errorf("Expected result did not match - label: %q op: %q testResult:%t got:%t\n", c.label, c.op, c.testResult, testResult)
+			t.Errorf("'testResult' did not match - label: %q op: %q expected 'testResult':%t  got:%t\n", c.label, c.op, c.testResult, testResult)
 		}
 	}
 }
