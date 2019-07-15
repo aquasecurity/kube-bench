@@ -479,6 +479,26 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=gt, 5 <= 5", op: "lte", flagVal: "5",
 			compareValue: "5", expectedResultPattern: "5 is lower or equal to 5",
 			testResult: true},
+
+		// Test Op "has"
+		{label: "op=gt, both empty", op: "has", flagVal: "",
+			compareValue: "", expectedResultPattern: "'' has ''",
+			testResult: true},
+		{label: "op=gt, flagVal=empty", op: "has", flagVal: "",
+			compareValue: "blah", expectedResultPattern: "'' has 'blah'",
+			testResult: false},
+		{label: "op=gt, compareValue=empty", op: "has", flagVal: "blah",
+			compareValue: "", expectedResultPattern: "'blah' has ''",
+			testResult: true},
+		{label: "op=gt, 'blah' has 'la'", op: "has", flagVal: "blah",
+			compareValue: "la", expectedResultPattern: "'blah' has 'la'",
+			testResult: true},
+		{label: "op=gt, 'blah' has 'LA'", op: "has", flagVal: "blah",
+			compareValue: "LA", expectedResultPattern: "'blah' has 'LA'",
+			testResult: false},
+		{label: "op=gt, 'blah' has 'lo'", op: "has", flagVal: "blah",
+			compareValue: "lo", expectedResultPattern: "'blah' has 'lo'",
+			testResult: false},
 	}
 
 	for _, c := range cases {
