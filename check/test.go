@@ -122,61 +122,8 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 			}
 
-			expectedResultPattern := ""
-			switch t.Compare.Op {
-			case "eq":
-				expectedResultPattern = "'%s' is equal to '%s'"
-				value := strings.ToLower(flagVal)
-				// Do case insensitive comparaison for booleans ...
-				if value == "false" || value == "true" {
-					result.testResult = value == t.Compare.Value
-				} else {
-					result.testResult = flagVal == t.Compare.Value
-				}
-
-			case "noteq":
-				expectedResultPattern = "'%s' is not equal to '%s'"
-				value := strings.ToLower(flagVal)
-				// Do case insensitive comparaison for booleans ...
-				if value == "false" || value == "true" {
-					result.testResult = !(value == t.Compare.Value)
-				} else {
-					result.testResult = !(flagVal == t.Compare.Value)
-				}
-
-			case "gt":
-				expectedResultPattern = "%s is greater then %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a > b
-
-			case "gte":
-				expectedResultPattern = "%s is greater or equal to %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a >= b
-
-			case "lt":
-				expectedResultPattern = "%s is lower then %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a < b
-
-			case "lte":
-				expectedResultPattern = "%s is lower or equal to %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a <= b
-
-			case "has":
-				expectedResultPattern = "'%s' has '%s'"
-				result.testResult = strings.Contains(flagVal, t.Compare.Value)
-
-			case "nothave":
-				expectedResultPattern = " '%s' not have '%s'"
-				result.testResult = !strings.Contains(flagVal, t.Compare.Value)
-
-			case "regex":
-				expectedResultPattern = " '%s' matched by '%s'"
-				opRe := regexp.MustCompile(t.Compare.Value)
-				result.testResult = opRe.MatchString(flagVal)
-			}
+			expectedResultPattern, testResult := compareOp(t.Compare.Op, flagVal, t.Compare.Value)
+			result.testResult = testResult
 
 			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
 		} else {
@@ -189,6 +136,74 @@ func (t *testItem) execute(s string) *testOutput {
 		result.testResult = notset
 	}
 	return result
+}
+
+func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string, bool) {
+
+	expectedResultPattern := ""
+	testResult := false
+
+	switch tCompareOp {
+	case "eq":
+		expectedResultPattern = "'%s' is equal to '%s'"
+		value := strings.ToLower(flagVal)
+		// Do case insensitive comparaison for booleans ...
+		if value == "false" || value == "true" {
+			testResult = value == tCompareValue
+		} else {
+			testResult = flagVal == tCompareValue
+		}
+
+	case "noteq":
+		expectedResultPattern = "'%s' is not equal to '%s'"
+		value := strings.ToLower(flagVal)
+		// Do case insensitive comparaison for booleans ...
+		if value == "false" || value == "true" {
+			testResult = !(value == tCompareValue)
+		} else {
+			testResult = !(flagVal == tCompareValue)
+		}
+
+	case "gt":
+		expectedResultPattern = "%s is greater then %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a > b
+
+	case "gte":
+		expectedResultPattern = "%s is greater or equal to %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a >= b
+
+	case "lt":
+		expectedResultPattern = "%s is lower then %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a < b
+
+	case "lte":
+		expectedResultPattern = "%s is lower or equal to %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a <= b
+
+	case "has":
+		expectedResultPattern = "'%s' has '%s'"
+		testResult = strings.Contains(flagVal, tCompareValue)
+
+	case "nothave":
+		expectedResultPattern = " '%s' not have '%s'"
+		testResult = !strings.Contains(flagVal, tCompareValue)
+
+	case "regex":
+		expectedResultPattern = " '%s' matched by '%s'"
+		opRe := regexp.MustCompile(tCompareValue)
+		testResult = opRe.MatchString(flagVal)
+	}
+
+	if expectedResultPattern == "" {
+		return expectedResultPattern, testResult
+	}
+
+	return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), testResult
+
 }
 
 func unmarshal(s string, jsonInterface *interface{}) error {

@@ -322,3 +322,33 @@ func TestExecuteJSONPath(t *testing.T) {
 		}
 	}
 }
+
+func TestCompareOp(t *testing.T) {
+	cases := []struct {
+		op                    string
+		flagVal               string
+		compareValue          string
+		expectedResultPattern string
+		testResult            bool
+	}{
+		{op: "blah", flagVal: "foo", compareValue: "bar", expectedResultPattern: "", testResult: false},
+		{op: "eq", flagVal: "KubeletConfiguration",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'KubeletConfiguration' is equal to 'KubeletConfiguration'",
+			testResult:            true},
+	}
+
+	for _, c := range cases {
+		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+
+		if expectedResultPattern != c.expectedResultPattern {
+			t.Errorf("Expected result did not match - expectedResult:%q got:%q\n", c.expectedResultPattern, expectedResultPattern)
+		}
+
+		if testResult != c.testResult {
+			t.Errorf("Expected result did not match - testResult:%t got:%t\n", c.testResult, testResult)
+		}
+
+	}
+
+}
