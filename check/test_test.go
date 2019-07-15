@@ -499,6 +499,26 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=gt, 'blah' has 'lo'", op: "has", flagVal: "blah",
 			compareValue: "lo", expectedResultPattern: "'blah' has 'lo'",
 			testResult: false},
+
+		// Test Op "nothave"
+		{label: "op=gt, both empty", op: "nothave", flagVal: "",
+			compareValue: "", expectedResultPattern: " '' not have ''",
+			testResult: false},
+		{label: "op=gt, flagVal=empty", op: "nothave", flagVal: "",
+			compareValue: "blah", expectedResultPattern: " '' not have 'blah'",
+			testResult: true},
+		{label: "op=gt, compareValue=empty", op: "nothave", flagVal: "blah",
+			compareValue: "", expectedResultPattern: " 'blah' not have ''",
+			testResult: false},
+		{label: "op=gt, 'blah' not have 'la'", op: "nothave", flagVal: "blah",
+			compareValue: "la", expectedResultPattern: " 'blah' not have 'la'",
+			testResult: false},
+		{label: "op=gt, 'blah' not have 'LA'", op: "nothave", flagVal: "blah",
+			compareValue: "LA", expectedResultPattern: " 'blah' not have 'LA'",
+			testResult: true},
+		{label: "op=gt, 'blah' not have 'lo'", op: "nothave", flagVal: "blah",
+			compareValue: "lo", expectedResultPattern: " 'blah' not have 'lo'",
+			testResult: true},
 	}
 
 	for _, c := range cases {
