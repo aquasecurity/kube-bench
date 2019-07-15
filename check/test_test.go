@@ -422,6 +422,25 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=gt, 5 > 5", op: "gt", flagVal: "5",
 			compareValue: "5", expectedResultPattern: "5 is greater than 5",
 			testResult: false},
+
+		// Test Op "lt"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=lt, both empty", op: "lt", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is lower than ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 < 0", op: "lt", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is lower than 0",
+			testResult: false},
+		{label: "op=gt, 4 < 5", op: "lt", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is lower than 5",
+			testResult: true},
+		{label: "op=gt, 5 < 4", op: "lt", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is lower than 4",
+			testResult: false},
+		{label: "op=gt, 5 < 5", op: "lt", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is lower than 5",
+			testResult: false},
 	}
 
 	for _, c := range cases {
