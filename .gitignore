@@ -4,5 +4,6 @@ vendor
 dist
 .vscode/
 hack/kind.test.yaml
+coverage.txt
 
 .idea/
