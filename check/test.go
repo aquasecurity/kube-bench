@@ -39,7 +39,7 @@ type binOp string
 const (
 	and                   binOp = "and"
 	or                          = "or"
-	defaultArraySeperator       = ","
+	defaultArraySeparator       = ","
 )
 
 type testItem struct {
@@ -180,8 +180,8 @@ func (t *testItem) execute(s string) *testOutput {
 
 			case "valid_elements":
 				expectedResultPattern = " '%s' contains valid elements from '%s'"
-				s := splitAndRemoveLastSeparator(flagVal, ",")
-				target := splitAndRemoveLastSeparator(t.Compare.Value, ",")
+				s := splitAndRemoveLastSeparator(flagVal, defaultArraySeparator)
+				target := splitAndRemoveLastSeparator(t.Compare.Value, defaultArraySeparator)
 				result.testResult = allElementsValid(s, target)
 
 			}
@@ -240,7 +240,7 @@ func allElementsValid(s, t []string) bool {
 				break
 			}
 		}
-		if found == false {
+		if !found {
 			return false
 		}
 	}

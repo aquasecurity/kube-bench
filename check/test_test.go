@@ -385,7 +385,7 @@ func TestSplitAndRemoveLastSeparator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		if len(splitAndRemoveLastSeparator(c.source, defaultArraySeperator)) == 0 && c.valid {
+		if len(splitAndRemoveLastSeparator(c.source, defaultArraySeparator)) == 0 && c.valid {
 			t.Errorf("Split did not work with %q \n", c.source)
 		}
 	}
