@@ -322,3 +322,222 @@ func TestExecuteJSONPath(t *testing.T) {
 		}
 	}
 }
+
+func TestCompareOp(t *testing.T) {
+	cases := []struct {
+		label                 string
+		op                    string
+		flagVal               string
+		compareValue          string
+		expectedResultPattern string
+		testResult            bool
+	}{
+		// Test Op not matching
+		{label: "empty - op", op: "", flagVal: "", compareValue: "", expectedResultPattern: "", testResult: false},
+		{label: "op=blah", op: "blah", flagVal: "foo", compareValue: "bar", expectedResultPattern: "", testResult: false},
+
+		// Test Op "eq"
+		{label: "op=eq, both empty", op: "eq", flagVal: "", compareValue: "", expectedResultPattern: "'' is equal to ''", testResult: true},
+
+		{label: "op=eq, true==true", op: "eq", flagVal: "true",
+			compareValue:          "true",
+			expectedResultPattern: "'true' is equal to 'true'",
+			testResult:            true},
+
+		{label: "op=eq, false==false", op: "eq", flagVal: "false",
+			compareValue:          "false",
+			expectedResultPattern: "'false' is equal to 'false'",
+			testResult:            true},
+
+		{label: "op=eq, false==true", op: "eq", flagVal: "false",
+			compareValue:          "true",
+			expectedResultPattern: "'false' is equal to 'true'",
+			testResult:            false},
+
+		{label: "op=eq, strings match", op: "eq", flagVal: "KubeletConfiguration",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'KubeletConfiguration' is equal to 'KubeletConfiguration'",
+			testResult:            true},
+
+		{label: "op=eq, flagVal=empty", op: "eq", flagVal: "",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'' is equal to 'KubeletConfiguration'",
+			testResult:            false},
+
+		{label: "op=eq, compareValue=empty", op: "eq", flagVal: "KubeletConfiguration",
+			compareValue:          "",
+			expectedResultPattern: "'KubeletConfiguration' is equal to ''",
+			testResult:            false},
+
+		// Test Op "noteq"
+		{label: "op=noteq, both empty", op: "noteq", flagVal: "",
+			compareValue: "", expectedResultPattern: "'' is not equal to ''",
+			testResult: false},
+
+		{label: "op=noteq, true!=true", op: "noteq", flagVal: "true",
+			compareValue:          "true",
+			expectedResultPattern: "'true' is not equal to 'true'",
+			testResult:            false},
+
+		{label: "op=noteq, false!=false", op: "noteq", flagVal: "false",
+			compareValue:          "false",
+			expectedResultPattern: "'false' is not equal to 'false'",
+			testResult:            false},
+
+		{label: "op=noteq, false!=true", op: "noteq", flagVal: "false",
+			compareValue:          "true",
+			expectedResultPattern: "'false' is not equal to 'true'",
+			testResult:            true},
+
+		{label: "op=noteq, strings match", op: "noteq", flagVal: "KubeletConfiguration",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'KubeletConfiguration' is not equal to 'KubeletConfiguration'",
+			testResult:            false},
+
+		{label: "op=noteq, flagVal=empty", op: "noteq", flagVal: "",
+			compareValue:          "KubeletConfiguration",
+			expectedResultPattern: "'' is not equal to 'KubeletConfiguration'",
+			testResult:            true},
+
+		{label: "op=noteq, compareValue=empty", op: "noteq", flagVal: "KubeletConfiguration",
+			compareValue:          "",
+			expectedResultPattern: "'KubeletConfiguration' is not equal to ''",
+			testResult:            true},
+
+		// Test Op "gt"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=gt, both empty", op: "gt", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is greater than ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 > 0", op: "gt", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is greater than 0",
+			testResult: false},
+		{label: "op=gt, 4 > 5", op: "gt", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is greater than 5",
+			testResult: false},
+		{label: "op=gt, 5 > 4", op: "gt", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is greater than 4",
+			testResult: true},
+		{label: "op=gt, 5 > 5", op: "gt", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is greater than 5",
+			testResult: false},
+
+		// Test Op "lt"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=lt, both empty", op: "lt", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is lower than ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 < 0", op: "lt", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is lower than 0",
+			testResult: false},
+		{label: "op=gt, 4 < 5", op: "lt", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is lower than 5",
+			testResult: true},
+		{label: "op=gt, 5 < 4", op: "lt", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is lower than 4",
+			testResult: false},
+		{label: "op=gt, 5 < 5", op: "lt", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is lower than 5",
+			testResult: false},
+
+		// Test Op "gte"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=gt, both empty", op: "gte", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is greater or equal to ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 >= 0", op: "gte", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is greater or equal to 0",
+			testResult: true},
+		{label: "op=gt, 4 >= 5", op: "gte", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is greater or equal to 5",
+			testResult: false},
+		{label: "op=gt, 5 >= 4", op: "gte", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is greater or equal to 4",
+			testResult: true},
+		{label: "op=gt, 5 >= 5", op: "gte", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is greater or equal to 5",
+			testResult: true},
+
+		// Test Op "lte"
+		// TODO: test for non-numeric values.
+		//        toNumeric function currently uses os.Exit, which stops tests.
+		// {label: "op=gt, both empty", op: "lte", flagVal: "",
+		// 	compareValue: "", expectedResultPattern: "'' is lower or equal to ''",
+		// 	testResult: true},
+		{label: "op=gt, 0 <= 0", op: "lte", flagVal: "0",
+			compareValue: "0", expectedResultPattern: "0 is lower or equal to 0",
+			testResult: true},
+		{label: "op=gt, 4 <= 5", op: "lte", flagVal: "4",
+			compareValue: "5", expectedResultPattern: "4 is lower or equal to 5",
+			testResult: true},
+		{label: "op=gt, 5 <= 4", op: "lte", flagVal: "5",
+			compareValue: "4", expectedResultPattern: "5 is lower or equal to 4",
+			testResult: false},
+		{label: "op=gt, 5 <= 5", op: "lte", flagVal: "5",
+			compareValue: "5", expectedResultPattern: "5 is lower or equal to 5",
+			testResult: true},
+
+		// Test Op "has"
+		{label: "op=gt, both empty", op: "has", flagVal: "",
+			compareValue: "", expectedResultPattern: "'' has ''",
+			testResult: true},
+		{label: "op=gt, flagVal=empty", op: "has", flagVal: "",
+			compareValue: "blah", expectedResultPattern: "'' has 'blah'",
+			testResult: false},
+		{label: "op=gt, compareValue=empty", op: "has", flagVal: "blah",
+			compareValue: "", expectedResultPattern: "'blah' has ''",
+			testResult: true},
+		{label: "op=gt, 'blah' has 'la'", op: "has", flagVal: "blah",
+			compareValue: "la", expectedResultPattern: "'blah' has 'la'",
+			testResult: true},
+		{label: "op=gt, 'blah' has 'LA'", op: "has", flagVal: "blah",
+			compareValue: "LA", expectedResultPattern: "'blah' has 'LA'",
+			testResult: false},
+		{label: "op=gt, 'blah' has 'lo'", op: "has", flagVal: "blah",
+			compareValue: "lo", expectedResultPattern: "'blah' has 'lo'",
+			testResult: false},
+
+		// Test Op "nothave"
+		{label: "op=gt, both empty", op: "nothave", flagVal: "",
+			compareValue: "", expectedResultPattern: " '' not have ''",
+			testResult: false},
+		{label: "op=gt, flagVal=empty", op: "nothave", flagVal: "",
+			compareValue: "blah", expectedResultPattern: " '' not have 'blah'",
+			testResult: true},
+		{label: "op=gt, compareValue=empty", op: "nothave", flagVal: "blah",
+			compareValue: "", expectedResultPattern: " 'blah' not have ''",
+			testResult: false},
+		{label: "op=gt, 'blah' not have 'la'", op: "nothave", flagVal: "blah",
+			compareValue: "la", expectedResultPattern: " 'blah' not have 'la'",
+			testResult: false},
+		{label: "op=gt, 'blah' not have 'LA'", op: "nothave", flagVal: "blah",
+			compareValue: "LA", expectedResultPattern: " 'blah' not have 'LA'",
+			testResult: true},
+		{label: "op=gt, 'blah' not have 'lo'", op: "nothave", flagVal: "blah",
+			compareValue: "lo", expectedResultPattern: " 'blah' not have 'lo'",
+			testResult: true},
+
+		// Test Op "regex"
+		{label: "op=gt, both empty", op: "regex", flagVal: "",
+			compareValue: "", expectedResultPattern: " '' matched by ''",
+			testResult: true},
+		{label: "op=gt, flagVal=empty", op: "regex", flagVal: "",
+			compareValue: "blah", expectedResultPattern: " '' matched by 'blah'",
+			testResult: false},
+	}
+
+	for _, c := range cases {
+		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+
+		if expectedResultPattern != c.expectedResultPattern {
+			t.Errorf("'expectedResultPattern' did not match - label: %q op: %q expected 'expectedResultPattern':%q  got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
+		}
+
+		if testResult != c.testResult {
+			t.Errorf("'testResult' did not match - label: %q op: %q expected 'testResult':%t  got:%t\n", c.label, c.op, c.testResult, testResult)
+		}
+	}
+}
