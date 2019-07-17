@@ -82,10 +82,10 @@ func runChecks(nodetype check.NodeType) {
 		exitWithError(err)
 	}
 
-	confmap := getConfigFiles(typeConf)
-	svcmap := getServiceFiles(typeConf)
-	kubeconfmap := getKubeConfigFiles(typeConf)
-	cafilemap := getCaFile(typeConf)
+	confmap := getFiles(typeConf, "config")
+	svcmap := getFiles(typeConf, "service")
+	kubeconfmap := getFiles(typeConf, "kubeconfig")
+	cafilemap := getFiles(typeConf, "ca")
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
