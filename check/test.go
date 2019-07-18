@@ -123,70 +123,7 @@ func (t *testItem) execute(s string) *testOutput {
 				}
 			}
 
-			expectedResultPattern := ""
-			switch t.Compare.Op {
-			case "eq":
-				expectedResultPattern = "'%s' is equal to '%s'"
-				value := strings.ToLower(flagVal)
-				// Do case insensitive comparaison for booleans ...
-				if value == "false" || value == "true" {
-					result.testResult = value == t.Compare.Value
-				} else {
-					result.testResult = flagVal == t.Compare.Value
-				}
-
-			case "noteq":
-				expectedResultPattern = "'%s' is not equal to '%s'"
-				value := strings.ToLower(flagVal)
-				// Do case insensitive comparaison for booleans ...
-				if value == "false" || value == "true" {
-					result.testResult = !(value == t.Compare.Value)
-				} else {
-					result.testResult = !(flagVal == t.Compare.Value)
-				}
-
-			case "gt":
-				expectedResultPattern = "%s is greater then %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a > b
-
-			case "gte":
-				expectedResultPattern = "%s is greater or equal to %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a >= b
-
-			case "lt":
-				expectedResultPattern = "%s is lower then %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a < b
-
-			case "lte":
-				expectedResultPattern = "%s is lower or equal to %s"
-				a, b := toNumeric(flagVal, t.Compare.Value)
-				result.testResult = a <= b
-
-			case "has":
-				expectedResultPattern = "'%s' has '%s'"
-				result.testResult = strings.Contains(flagVal, t.Compare.Value)
-
-			case "nothave":
-				expectedResultPattern = " '%s' not have '%s'"
-				result.testResult = !strings.Contains(flagVal, t.Compare.Value)
-
-			case "regex":
-				expectedResultPattern = " '%s' matched by '%s'"
-				opRe := regexp.MustCompile(t.Compare.Value)
-				result.testResult = opRe.MatchString(flagVal)
-
-			case "valid_elements":
-				expectedResultPattern = " '%s' contains valid elements from '%s'"
-				s := splitAndRemoveLastSeparator(flagVal, defaultArraySeparator)
-				target := splitAndRemoveLastSeparator(t.Compare.Value, defaultArraySeparator)
-				result.testResult = allElementsValid(s, target)
-
-			}
-
-			result.ExpectedResult = fmt.Sprintf(expectedResultPattern, t.Flag, t.Compare.Value)
+			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, flagVal, t.Compare.Value)
 		} else {
 			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.Flag)
 			result.testResult = isset
@@ -197,6 +134,80 @@ func (t *testItem) execute(s string) *testOutput {
 		result.testResult = notset
 	}
 	return result
+}
+
+func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string, bool) {
+
+	expectedResultPattern := ""
+	testResult := false
+
+	switch tCompareOp {
+	case "eq":
+		expectedResultPattern = "'%s' is equal to '%s'"
+		value := strings.ToLower(flagVal)
+		// Do case insensitive comparaison for booleans ...
+		if value == "false" || value == "true" {
+			testResult = value == tCompareValue
+		} else {
+			testResult = flagVal == tCompareValue
+		}
+
+	case "noteq":
+		expectedResultPattern = "'%s' is not equal to '%s'"
+		value := strings.ToLower(flagVal)
+		// Do case insensitive comparaison for booleans ...
+		if value == "false" || value == "true" {
+			testResult = !(value == tCompareValue)
+		} else {
+			testResult = !(flagVal == tCompareValue)
+		}
+
+	case "gt":
+		expectedResultPattern = "%s is greater than %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a > b
+
+	case "gte":
+		expectedResultPattern = "%s is greater or equal to %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a >= b
+
+	case "lt":
+		expectedResultPattern = "%s is lower than %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a < b
+
+	case "lte":
+		expectedResultPattern = "%s is lower or equal to %s"
+		a, b := toNumeric(flagVal, tCompareValue)
+		testResult = a <= b
+
+	case "has":
+		expectedResultPattern = "'%s' has '%s'"
+		testResult = strings.Contains(flagVal, tCompareValue)
+
+	case "nothave":
+		expectedResultPattern = " '%s' not have '%s'"
+		testResult = !strings.Contains(flagVal, tCompareValue)
+
+	case "regex":
+		expectedResultPattern = " '%s' matched by '%s'"
+		opRe := regexp.MustCompile(tCompareValue)
+		testResult = opRe.MatchString(flagVal)
+
+	case "valid_elements":
+		expectedResultPattern = "'%s' contains valid elements from '%s'"
+		s := splitAndRemoveLastSeparator(flagVal, defaultArraySeparator)
+		target := splitAndRemoveLastSeparator(tCompareValue, defaultArraySeparator)
+		testResult = allElementsValid(s, target)
+
+	}
+
+	if expectedResultPattern == "" {
+		return expectedResultPattern, testResult
+	}
+
+	return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), testResult
 }
 
 func unmarshal(s string, jsonInterface *interface{}) error {
@@ -229,9 +240,20 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 }
 
 func allElementsValid(s, t []string) bool {
-	if s == nil || len(s) == 0 {
+	sourceEmpty := s == nil || len(s) == 0
+	targetEmpty := t == nil || len(t) == 0
+
+	if sourceEmpty && targetEmpty {
+		return true
+	}
+
+	// XOR comparison -
+	//     if either value is empty and the other is not empty,
+	//     not all elements are valid
+	if (sourceEmpty || targetEmpty) && !(sourceEmpty && targetEmpty) {
 		return false
 	}
+
 	for _, sv := range s {
 		found := false
 		for _, tv := range t {
