@@ -610,6 +610,14 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=valid_elements, valid_elements both empty", op: "valid_elements", flagVal: "",
 			compareValue: "", expectedResultPattern: "'' contains valid elements from ''",
 			testResult: true},
+
+		{label: "op=valid_elements, valid_elements flagVal empty", op: "valid_elements", flagVal: "",
+			compareValue: "a,b", expectedResultPattern: "'' contains valid elements from 'a,b'",
+			testResult: false},
+
+		{label: "op=valid_elements, valid_elements expectedResultPattern empty", op: "valid_elements", flagVal: "a,b",
+			compareValue: "", expectedResultPattern: "'a,b' contains valid elements from ''",
+			testResult: false},
 	}
 
 	for _, c := range cases {
