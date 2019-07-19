@@ -270,11 +270,17 @@ func allElementsValid(s, t []string) bool {
 }
 
 func splitAndRemoveLastSeparator(s, sep string) []string {
-	cleanS := strings.TrimRight(s, sep)
+	cleanS := strings.TrimRight(strings.TrimSpace(s), sep)
 	if len(cleanS) == 0 {
 		return []string{}
 	}
-	return strings.Split(cleanS, sep)
+
+	ts := strings.Split(cleanS, sep)
+	for i := range ts {
+		ts[i] = strings.TrimSpace(ts[i])
+	}
+
+	return ts
 }
 
 type tests struct {

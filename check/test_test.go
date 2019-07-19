@@ -381,23 +381,47 @@ func TestAllElementsValid(t *testing.T) {
 
 func TestSplitAndRemoveLastSeparator(t *testing.T) {
 	cases := []struct {
-		source string
-		valid  bool
+		source     string
+		valid      bool
+		elementCnt int
 	}{
 		{
-			source: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256",
-			valid:  true,
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256",
+			valid:      true,
+			elementCnt: 8,
 		},
 		{
-			source: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
-			valid:  true,
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, ",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     " TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
 		},
 	}
 
 	for _, c := range cases {
-		if len(splitAndRemoveLastSeparator(c.source, defaultArraySeparator)) == 0 && c.valid {
+		as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
+		if len(as) == 0 && c.valid {
 			t.Errorf("Split did not work with %q \n", c.source)
 		}
+
+		if c.elementCnt != len(as) {
+			t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
+		}
+
 	}
 }
 
