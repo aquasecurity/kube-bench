@@ -142,12 +142,7 @@ Kubernetes config and binary file locations and names can vary from installation
 
 Any settings in the version-specific config file `cfg/<version>/config.yaml` take precedence over settings in the main `cfg/config.yaml` file.
 
-For each type of node (*master*, *node* or *federated*) there is a list of components, and for each component there is a set of binaries (*bins*) and config files (*confs*) that kube-bench will look for (in the order they are listed). If your installation uses a different binary name or config file location for a Kubernetes component, you can add it to `cfg/config.yaml`.
-
-* **bins** - If there is a *bins* list for a component, at least one of these binaries must be running. The tests will consider the parameters for the first binary in the list found to be running.
-* **podspecs** - From version 1.2.0 of the benchmark (tests for Kubernetes 1.8), the remediation instructions were updated to assume that the configuration for several kubernetes components is defined in a pod YAML file, and podspec settings define where to look for that configuration.
-* **confs** - If one of the listed config files is found, this will be considered for the test. Tests can continue even if no config file is found. If no file is found at any of the listed locations, and a *defaultconf* location is given for the component, the test will give remediation advice using the *defaultconf* location.
-* **unitfiles** - From version 1.2.0 of the benchmark  (tests for Kubernetes 1.8), the remediation instructions were updated to assume that kubelet configuration is defined in a service file, and this setting defines where to look for that configuration.
+You can read more about `kube-bench` configuration in our [documentation](docs/README.md#configuration-and-variables).
 
 ## Output
 
@@ -155,38 +150,6 @@ There are three output states
 - [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
 - [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
 - [INFO] is informational output that needs no further action.
-
-## Test config YAML representation
-The tests are represented as YAML documents (installed by default into ./cfg).
-
-An example is as listed below:
-```
----
-controls:
-id: 1
-text: "Master Checks"
-type: "master"
-groups:
-- id: 1.1
-  text: "Kube-apiserver"
-  checks:
-    - id: 1.1.1
-      text: "Ensure that the --allow-privileged argument is set (Scored)"
-      audit: "ps -ef | grep kube-apiserver | grep -v grep"
-      tests:
-      bin_op: or
-      test_items:
-      - flag: "--allow-privileged"
-        set: true
-      - flag: "--some-other-flag"
-        set: false
-      remediation: "Edit the /etc/kubernetes/config file on the master node and set the KUBE_ALLOW_PRIV parameter to '--allow-privileged=false'"
-      scored: true
-```
-
-Recommendations (called `checks` in this document) can run on Kubernetes Master, Node or Federated API Servers.
-Checks are organized into `groups` which share similar controls (things to check for) and are grouped together in the section of the CIS Kubernetes document.
-These groups are further organized under `controls` which can be of the type `master`, `node` or `federated apiserver` to reflect the various Kubernetes node types.
 
 ### Omitting checks
 
@@ -201,45 +164,6 @@ If you decide that a recommendation is not appropriate for your environment, you
 ```
 
 No tests will be run for this check and the output will be marked [INFO].
-
-## Tests
-Tests are the items we actually look for to determine if a check is successful or not. Checks can have multiple tests, which must all be successful for the check to pass.
-
-The syntax for tests:
-```
-tests:
-- flag:
-  set:
-  compare:
-    op:
-    value:
-...
-```
-
-You can also define jsonpath and yamlpath tests using the following syntax:
-
-```
-tests:
-- path:
-  set:
-  compare:
-    op:
-    value:
-...
-```
-
-Tests have various `operations` which are used to compare the output of audit commands for success.
-These operations are:
-
-- `eq`: tests if the flag value is equal to the compared value.
-- `noteq`: tests if the flag value is unequal to the compared value.
-- `gt`: tests if the flag value is greater than the compared value.
-- `gte`: tests if the flag value is greater than or equal to the compared value.
-- `lt`: tests if the flag value is less than the compared value.
-- `lte`: tests if the flag value is less than or equal to the compared value.
-- `has`: tests if the flag value contains the compared value.
-- `nothave`: tests if the flag value does not contain the compared value.
-- `regex`: tests if the flag value matches the compared value regular expression.
 
 When defining regular expressions in YAML it is generally easier to wrap them in single quotes, for example `'^[abc]$'`, to avoid issues with string escaping.
 
