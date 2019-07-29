@@ -49,6 +49,7 @@ var (
 	filterOpts         FilterOpts
 	includeTestOutput  bool
 	outputFile         string
+	configFileError    error
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -134,7 +135,15 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
-		os.Exit(1)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error for now to prevent commands
+			// which don't need the config file exiting, because of the missing
+			// config file (https://github.com/aquasecurity/kube-bench/issues/334).
+			configFileError = err
+		} else {
+			// Config file was found but another error was produced
+			colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", err))
+			os.Exit(1)
+		}
 	}
 }
