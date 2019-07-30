@@ -323,6 +323,108 @@ func TestExecuteJSONPath(t *testing.T) {
 	}
 }
 
+func TestAllElementsValid(t *testing.T) {
+	cases := []struct {
+		source []string
+		target []string
+		valid  bool
+	}{
+		{
+			source: []string{},
+			target: []string{},
+			valid:  true,
+		},
+		{
+			source: []string{"blah"},
+			target: []string{},
+			valid:  false,
+		},
+		{
+			source: []string{},
+			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+			valid: false,
+		},
+		{
+			source: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"},
+			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+			valid: true,
+		},
+		{
+			source: []string{"blah"},
+			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+			valid: false,
+		},
+		{
+			source: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "blah"},
+			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+			valid: false,
+		},
+	}
+	for _, c := range cases {
+		if !allElementsValid(c.source, c.target) && c.valid {
+			t.Errorf("Not All Elements in %q are found in %q \n", c.source, c.target)
+		}
+	}
+}
+
+func TestSplitAndRemoveLastSeparator(t *testing.T) {
+	cases := []struct {
+		source     string
+		valid      bool
+		elementCnt int
+	}{
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256",
+			valid:      true,
+			elementCnt: 8,
+		},
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, ",
+			valid:      true,
+			elementCnt: 2,
+		},
+		{
+			source:     " TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,",
+			valid:      true,
+			elementCnt: 2,
+		},
+	}
+
+	for _, c := range cases {
+		as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
+		if len(as) == 0 && c.valid {
+			t.Errorf("Split did not work with %q \n", c.source)
+		}
+
+		if c.elementCnt != len(as) {
+			t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
+		}
+
+	}
+}
+
 func TestCompareOp(t *testing.T) {
 	cases := []struct {
 		label                 string
@@ -526,6 +628,19 @@ func TestCompareOp(t *testing.T) {
 			testResult: true},
 		{label: "op=gt, flagVal=empty", op: "regex", flagVal: "",
 			compareValue: "blah", expectedResultPattern: " '' matched by 'blah'",
+			testResult: false},
+
+		// Test Op "valid_elements"
+		{label: "op=valid_elements, valid_elements both empty", op: "valid_elements", flagVal: "",
+			compareValue: "", expectedResultPattern: "'' contains valid elements from ''",
+			testResult: true},
+
+		{label: "op=valid_elements, valid_elements flagVal empty", op: "valid_elements", flagVal: "",
+			compareValue: "a,b", expectedResultPattern: "'' contains valid elements from 'a,b'",
+			testResult: false},
+
+		{label: "op=valid_elements, valid_elements expectedResultPattern empty", op: "valid_elements", flagVal: "a,b",
+			compareValue: "", expectedResultPattern: "'a,b' contains valid elements from ''",
 			testResult: false},
 	}
 
