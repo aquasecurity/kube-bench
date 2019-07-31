@@ -294,12 +294,11 @@ Every node type has a subsection that specifies the main configurations items.
   Each component has the following entries:
 
 - `bins`: A list of candidate binaries for a component. `kube-bench` checks this
-   list and selects the first binary that is running on the node, if none is
-   running, `kube-bench` terminates.
+   list and selects the first binary that is running on the node.
 
-   If `defaultbin` is specified, `kube-bench` ignores the `bins` list (if it is
-   specified) and verifies the binary specified with `defaultbin` is running on
-   the node. `kube-bench` terminates if this binary is not running.
+   if none of the binaries in `bins` list is running, `kube-bench` checks if the
+   binary specified by `defaultbin` is running and terminates if none of the 
+   binaries in both `bins` and `defaultbin` is running.
    
    The selected binary for a component can be referenced in `controls` using a 
    variable in the form `$<component>bin`. In the example below, we reference 
@@ -314,12 +313,9 @@ Every node type has a subsection that specifies the main configurations items.
    ```
    
 - `confs`: A list of candidate configuration files for a component. `kube-bench`
-  checks this list and selects the first config fille that is found on the node,
-  if none of the config files exists `kube-bench` terminates.
-  
-  If `defaultconf`is specified for a component, `kube-bench` ignores the `confs`
-  list (if it is specified) and verifies the config specified by `defaultconf`
-  exists on the node. `kube-bench` terminates if this file does not exist.
+  checks this list and selects the first config file that is found on the node,
+  if none of the config files exists, `kube-bench` defaults conf to the value
+  of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
   variable in the form `$<component>conf`. In the example below we reference the 
@@ -336,11 +332,7 @@ Every node type has a subsection that specifies the main configurations items.
   
 - `svcs`:  A list of candidates unitfiles for a component. `kube-bench` checks this 
   list and selects the first unitfile that is found on the node, if none of the
-  unitfiles exists `kube-bench` terminates.
-  
-  If `defaultsvc`is specified for a component, `kube-bench` ignores the `svcs`
-  list (if it is specified) and verifies the unitfile specified by `defaultsvc`
-  exists on the node. `kube-bench` terminates if this file does not exist.
+  unitfiles exists, `kube-bench` defaults unitfile to the value of `defaultsvc`.
   
   The selected unitfile for a component can be referenced in `controls` via a
   variable in the form `$<component>svc`. In the example below, the selected 
@@ -362,11 +354,8 @@ Every node type has a subsection that specifies the main configurations items.
   
   - `kubeconfig`: A list of candidate kubeconfig files for a component. `kube-bench`
     checks this list and selects the first file that is found on the node, if none
-    of the files exists `kube-bench` terminates.
-    
-    If `defaultkubeconfig` is specified for a component, `kube-bench` ignores the
-    `kubeconfig` list (if it is specified) and verifies the kubeconfig file exists on
-    the node. `kube-bench` terminates if this file does not exist.
+    of the files exists, `kube-bench` defaults kubeconfig to the value of 
+    `defaultkubeconfig`.
     
     The selected kubeconfig for a component can be referenced in `controls` with
     a variable in the form `$<component>kubeconfig`. In the example below, the
