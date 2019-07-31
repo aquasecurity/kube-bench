@@ -444,12 +444,15 @@ groups:
     text: "Ensure that the admission control plugin ServiceAccount is set(Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--enable-admission-plugins"
         compare:
           op: has
           value: "ServiceAccount"
         set: true
+      - flag: "--enable-admission-plugins"
+        set: false
     remediation: |
       Follow the documentation and create ServiceAccount objects as per your environment.
       Then, edit the API server pod specification file $apiserverconf
