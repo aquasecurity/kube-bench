@@ -4,29 +4,10 @@
 representation of the CIS Kubernetes Benchmark checks. There is a 
 `controls` file per kubernetes version and node type.
 
-kube-bench automatically selects which `controls` to use based on the detected
-node type and the version of kubernetes a cluster is running. This behaviour
-can be overridden by specifying the `master` or `node` subcommand and the
-`--version` flag on the command line.
-
-For example:
-run kube-bench against a master with version  auto-detection:
-
-```
-kube-bench master
-```
-
-or run kube-bench against a node with the node `controls` for kubernetes 
-version 1.12:
-```
-kube-bench node --version 1.12
-```
-
 `controls` for the various versions of kubernetes can be found in directories
 with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
-
 
 ## Controls
 
