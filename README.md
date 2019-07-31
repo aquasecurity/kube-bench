@@ -151,6 +151,8 @@ There are three output states
 - [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
 - [INFO] is informational output that needs no further action.
 
+## Test config YAML representation
+
 ### Omitting checks
 
 If you decide that a recommendation is not appropriate for your environment, you can choose to omit it by editing the test YAML file to give it the check type `skip` as in this example: 
