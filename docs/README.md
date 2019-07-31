@@ -248,6 +248,9 @@ The `op` (operations) currently supported in `kube-bench` are:
 - `lte`: tests if the keyword is less than or equal to the compared value.
 - `has`: tests if the keyword contains the compared value.
 - `nothave`: tests if the keyword does not contain the compared value.
+- `regex`: tests if the flag value matches the compared value regular expression.
+   When defining regular expressions in YAML it is generally easier to wrap them in
+   single quotes, for example `'^[abc]$'`, to avoid issues with string escaping.
 
 ## Configuration and Variables
 
