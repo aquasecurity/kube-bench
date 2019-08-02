@@ -40,7 +40,6 @@ You can choose to
 * install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
 * compile it from source.
 
-
 ## Running kube-bench
 
 kube-bench automatically selects which `controls` to use based on the detected
@@ -162,6 +161,13 @@ go build -o kube-bench .
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
 
+## Output
+
+There are three output states
+- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
+- [INFO] is informational output that needs no further action.
+
 ## Configuration
 
 Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
@@ -170,14 +176,9 @@ Any settings in the version-specific config file `cfg/<version>/config.yaml` tak
 
 You can read more about `kube-bench` configuration in our [documentation](docs/README.md#configuration-and-variables).
 
-## Output
-
-There are three output states
-- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
-- [INFO] is informational output that needs no further action.
-
 ## Test config YAML representation
+
+The tests (or "controls") are represented as YAML documents (installed by default into ./cfg). There are different versions of these test YAML files reflecting different versions of the CIS Kubernetes Benchmark. You will find more information about the test file YAML definitions in our [documentation](docs/README.md).
 
 ### Omitting checks
 
