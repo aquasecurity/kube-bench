@@ -37,8 +37,9 @@ import (
 type binOp string
 
 const (
-	and binOp = "and"
-	or        = "or"
+	and                   binOp = "and"
+	or                          = "or"
+	defaultArraySeparator       = ","
 )
 
 type testItem struct {
@@ -193,6 +194,13 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		expectedResultPattern = " '%s' matched by '%s'"
 		opRe := regexp.MustCompile(tCompareValue)
 		testResult = opRe.MatchString(flagVal)
+
+	case "valid_elements":
+		expectedResultPattern = "'%s' contains valid elements from '%s'"
+		s := splitAndRemoveLastSeparator(flagVal, defaultArraySeparator)
+		target := splitAndRemoveLastSeparator(tCompareValue, defaultArraySeparator)
+		testResult = allElementsValid(s, target)
+
 	}
 
 	if expectedResultPattern == "" {
@@ -229,6 +237,50 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 	}
 	jsonpathResult := fmt.Sprintf("%s", buf)
 	return jsonpathResult, nil
+}
+
+func allElementsValid(s, t []string) bool {
+	sourceEmpty := s == nil || len(s) == 0
+	targetEmpty := t == nil || len(t) == 0
+
+	if sourceEmpty && targetEmpty {
+		return true
+	}
+
+	// XOR comparison -
+	//     if either value is empty and the other is not empty,
+	//     not all elements are valid
+	if (sourceEmpty || targetEmpty) && !(sourceEmpty && targetEmpty) {
+		return false
+	}
+
+	for _, sv := range s {
+		found := false
+		for _, tv := range t {
+			if sv == tv {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func splitAndRemoveLastSeparator(s, sep string) []string {
+	cleanS := strings.TrimRight(strings.TrimSpace(s), sep)
+	if len(cleanS) == 0 {
+		return []string{}
+	}
+
+	ts := strings.Split(cleanS, sep)
+	for i := range ts {
+		ts[i] = strings.TrimSpace(ts[i])
+	}
+
+	return ts
 }
 
 type tests struct {
