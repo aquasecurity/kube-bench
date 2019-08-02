@@ -153,12 +153,15 @@ groups:
     text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--enable-admission-plugins"
         compare:
           op: nothave
           value: AlwaysAdmit
         set: true
+      - flag: "--enable-admission-plugins"
+        set: false
     remediation: |
       Edit the API server pod specification file $apiserverconf
       on the master node and set the --enable-admission-plugins parameter to a
