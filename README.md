@@ -193,8 +193,6 @@ If you decide that a recommendation is not appropriate for your environment, you
 
 No tests will be run for this check and the output will be marked [INFO].
 
-When defining regular expressions in YAML it is generally easier to wrap them in single quotes, for example `'^[abc]$'`, to avoid issues with string escaping.
-
 # Roadmap
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
