@@ -49,20 +49,20 @@ can be overridden by specifying the `master` or `node` subcommand and the
 `--version` flag on the command line.
 
 For example:
-run kube-bench against a master with version  auto-detection:
+run kube-bench against a master with version auto-detection:
 
 ```
 kube-bench master
 ```
 
 or run kube-bench against a node with the node `controls` for kubernetes 
-version 1.12:
+version 1.13:
 ```
-kube-bench node --version 1.12
+kube-bench node --version 1.13
 ```
 
 `controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
+with same name as the kubernetes versions under `cfg/`, for example `cfg/1.13`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
