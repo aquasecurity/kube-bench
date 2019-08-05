@@ -183,9 +183,8 @@ groups:
     scored: true
 
   - id: 1.1.12
-    text: "Ensure that the admission control plugin DenyEscalatingExec is set (Scored)"
+    text: "[DEPRECATED] Ensure that the admission control plugin DenyEscalatingExec is set (Not Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    # [DEPRECATED]
     type: skip
     tests:
       test_items:
@@ -199,7 +198,7 @@ groups:
       on the master node and set the --enable-admission-plugins parameter to a
       value that includes DenyEscalatingExec.
       --enable-admission-plugins=...,DenyEscalatingExec,...
-    scored: true
+    scored: false
 
   - id: 1.1.13
     text: "Ensure that the admission control plugin SecurityContextDeny is set (Scored)"
@@ -564,9 +563,6 @@ groups:
     tests:
       test_items:
       - flag: "--encryption-provider-config"
-        compare:
-          op: has
-          value: "</path/to/EncryptionConfig/File>"
         set: true
     remediation: |
       Follow the Kubernetes documentation and configure a EncryptionConfig file.
