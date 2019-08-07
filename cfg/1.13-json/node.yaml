@@ -277,7 +277,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - path: "{.RotateKubeletServerCertificate}"
+      - path: "{.featureGates.RotateKubeletServerCertificate}"
         compare:
           op: eq
           value: true
@@ -296,9 +296,9 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - path: "{.tlsCipherSuites}"
+      - path: "{range .tlsCipherSuites[:]}{}{','}{end}"
         compare:
-          op: eq
+          op: valid_elements
           value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
         set: true
     remediation: |
