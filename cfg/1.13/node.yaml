@@ -95,12 +95,15 @@ groups:
     text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
     audit: "ps -fC $kubeletbin"
     tests:
+      bin_op: or
       test_items:
       - flag: "--streaming-connection-idle-timeout"
         compare:
           op: noteq
           value: 0
         set: true
+      - flag: "--streaming-connection-idle-timeout"
+        set: false
     remediation: |
       If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a
       value other than 0.
@@ -220,8 +223,9 @@ groups:
     scored: true
 
   - id: 2.1.11
-    text: "Ensure that the --cadvisor-port argument is set to 0 (Scored)"
+    text: "[DEPRECATED] Ensure that the --cadvisor-port argument is set to 0 (Not Scored)"
     audit: "ps -fC $kubeletbin"
+    type: skip
     tests:
       bin_op: or
       test_items:
@@ -239,7 +243,7 @@ groups:
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
       systemctl restart kubelet.service
-    scored: true
+    scored: false
 
   - id: 2.1.12
     text: "Ensure that the --rotate-certificates argument is not set to false (Scored)"

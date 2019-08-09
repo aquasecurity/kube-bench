@@ -277,7 +277,7 @@ groups:
     audit: "cat $kubeletconf"
     tests:
       test_items:
-      - path: "{.RotateKubeletServerCertificate}"
+      - path: "{.featureGates.RotateKubeletServerCertificate}"
         compare:
           op: eq
           value: true
