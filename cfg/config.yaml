@@ -1,5 +1,5 @@
 ---
-## Controls Files. 
+## Controls Files.
 # These are YAML files that hold all the details for running checks.
 #
 ## Uncomment to use different control file paths.
@@ -12,7 +12,7 @@ master:
     - apiserver
     - scheduler
     - controllermanager
-    - etcd 
+    - etcd
     - flanneld
     # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
     - kubernetes
@@ -78,15 +78,26 @@ node:
     - kubernetes
 
   kubernetes:
-    defaultconf: /etc/kubernetes/config    
+    confs:
+      - "/etc/default/kubelet"
+      - "/etc/kubernetes/config"
+    defaultconf: "/etc/kubernetes/config"
 
   kubelet:
     cafile:
       - "/etc/kubernetes/pki/ca.crt"
+      - "/etc/kubernetes/certs/ca.crt"
+    svc:
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      - "/etc/systemd/system/kubelet.service"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
+    kubeconfig:
+      - "/etc/default/kubelet"
+      - "/etc/kubernetes/kubelet.conf"
     confs:
+      - "/var/lib/kubelet/kubeconfig"
       - "/var/lib/kubelet/config.yaml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
