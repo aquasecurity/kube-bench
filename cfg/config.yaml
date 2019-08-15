@@ -79,7 +79,7 @@ node:
 
   kubernetes:
     confs:
-      - "/etc/default/kubelet"
+      - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/config"
     defaultconf: "/etc/kubernetes/config"
 
@@ -94,10 +94,10 @@ node:
       - "hyperkube kubelet"
       - "kubelet"
     kubeconfig:
-      - "/etc/default/kubelet"
+      - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet.conf"
     confs:
-      - "/var/lib/kubelet/kubeconfig"
+      - "/etc/default/kubelet"
       - "/var/lib/kubelet/config.yaml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
