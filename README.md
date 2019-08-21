@@ -26,7 +26,7 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | 1.1.0| 1.7 | 1.7 |
 | 1.2.0| 1.8 | 1.8-1.10 |
 | 1.3.0| 1.11 | 1.11-1.12 |
-| 1.4.0| 1.13 | 1.13- |
+| 1.4.1| 1.13 | 1.13- |
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
