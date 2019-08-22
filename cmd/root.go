@@ -130,8 +130,16 @@ func initConfig() {
 		viper.AddConfigPath(cfgDir)   // adding ./cfg as first search path
 	}
 
+	// Read flag values from environment variables.
+	// Precedence: Command line flags take precedence over environment variables.
 	viper.SetEnvPrefix(envVarsPrefix)
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.AutomaticEnv()
+	
+	if kubeVersion == "" {
+		if env := viper.Get("version"); env != nil {
+			kubeVersion = env.(string)
+		}
+ 	}
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
