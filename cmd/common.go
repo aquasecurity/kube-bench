@@ -65,6 +65,12 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 func runChecks(nodetype check.NodeType) {
 	var summary check.Summary
 
+	// Verify config file was loaded into Viper during Cobra sub-command initialization.
+	if configFileError != nil {
+		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", configFileError))
+		os.Exit(1)
+	}
+
 	def := loadConfig(nodetype)
 	in, err := ioutil.ReadFile(def)
 	if err != nil {
