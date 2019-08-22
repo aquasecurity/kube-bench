@@ -137,8 +137,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error for now to prevent commands
-			// which don't need the config file exiting, because of the missing
-			// config file (https://github.com/aquasecurity/kube-bench/issues/334).
+			// which don't need the config file exiting.
 			configFileError = err
 		} else {
 			// Config file was found but another error was produced
