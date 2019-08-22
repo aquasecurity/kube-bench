@@ -161,6 +161,10 @@ go build -o kube-bench .
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
 
+## Running on snap installed clusters
+
+Cluster components installed with snap packages utilize systemd services and files that reside in various snap-related directories. kube-bench includes support for these types of clusters in the `cfg/1.13-snap` subdirectory. To use this configuration, specify `--version 1.13-snap` when you run the `kube-bench` command.
+
 ## Output
 
 There are three output states
