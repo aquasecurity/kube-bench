@@ -153,12 +153,15 @@ groups:
     text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--enable-admission-plugins"
         compare:
           op: nothave
           value: AlwaysAdmit
         set: true
+      - flag: "--enable-admission-plugins"
+        set: false
     remediation: |
       Edit the API server pod specification file $apiserverconf
       on the master node and set the --enable-admission-plugins parameter to a
@@ -183,8 +186,9 @@ groups:
     scored: true
 
   - id: 1.1.12
-    text: "Ensure that the admission control plugin DenyEscalatingExec is set (Scored)"
+    text: "[DEPRECATED] Ensure that the admission control plugin DenyEscalatingExec is set (Not Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    type: skip
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -197,7 +201,7 @@ groups:
       on the master node and set the --enable-admission-plugins parameter to a
       value that includes DenyEscalatingExec.
       --enable-admission-plugins=...,DenyEscalatingExec,...
-    scored: true
+    scored: false
 
   - id: 1.1.13
     text: "Ensure that the admission control plugin SecurityContextDeny is set (Scored)"
@@ -441,12 +445,15 @@ groups:
     text: "Ensure that the admission control plugin ServiceAccount is set(Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--enable-admission-plugins"
         compare:
           op: has
           value: "ServiceAccount"
         set: true
+      - flag: "--enable-admission-plugins"
+        set: false
     remediation: |
       Follow the documentation and create ServiceAccount objects as per your environment.
       Then, edit the API server pod specification file $apiserverconf
@@ -556,19 +563,19 @@ groups:
     scored: true
 
   - id: 1.1.34
-    text: "Ensure that the --experimental-encryption-provider-config argument is
-    set as appropriate (Scored)"
+    text: "Ensure that the --encryption-provider-config argument is set as appropriate (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    type: "manual"
     tests:
       test_items:
-      - flag: "--experimental-encryption-provider-config"
+      - flag: "--encryption-provider-config"
         set: true
     remediation: |
       Follow the Kubernetes documentation and configure a EncryptionConfig file.
       Then, edit the API server pod specification file $apiserverconf on the
-      master node and set the --experimental-encryption-provider-config parameter
+      master node and set the --encryption-provider-config parameter
       to the path of that file:
-      --experimental-encryption-provider-config=</path/to/EncryptionConfig/File>
+      --encryption-provider-config=</path/to/EncryptionConfig/File>
     scored: true
 
   - id: 1.1.35
@@ -1219,7 +1226,7 @@ groups:
     scored: true
     
   - id: 1.4.21
-    text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Scored)"
+    text: "Ensure that the Kubernetes PKI key file permissions are set to 600 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"
     type: "manual"
     tests:
