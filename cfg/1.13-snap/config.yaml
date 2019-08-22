@@ -1,0 +1,68 @@
+---
+# Config file for clusters where components are installed using snap packages.
+
+master:
+  components:
+    - apiserver
+    - scheduler
+    - controllermanager
+    - etcd
+    - flanneld
+
+  apiserver:
+    bins:
+      - "kube-apiserver"
+    confs:
+      - /var/snap/kube-apiserver/current/args
+    defaultconf: /var/snap/kube-apiserver/current/args
+
+  scheduler:
+    bins:
+      - "kube-scheduler"
+    confs:
+      - /var/snap/kube-scheduler/current/args
+    defaultconf: /var/snap/kube-scheduler/current/args
+
+  controllermanager:
+    bins:
+      - "kube-controller-manager"
+    confs:
+      - /var/snap/kube-controller-manager/current/args
+    defaultconf: /var/snap/kube-controller-manager/current/args
+
+  etcd:
+    optional: true
+    bins:
+      - "etcd"
+    confs:
+      - /var/snap/etcd/common/etcd.conf.yml
+    defaultconf: /var/snap/etcd/common/etcd.conf.yml
+
+  flanneld:
+    optional: true
+    bins:
+      - flanneld
+    defaultconf: /etc/sysconfig/flanneld
+
+node:
+  components:
+    - kubelet
+    - proxy
+
+  kubelet:
+    svc:
+      - "/etc/systemd/system/snap.kubelet.daemon.service"
+    bins:
+      - "kubelet"
+    confs:
+      - "/var/snap/kubelet/current/args"
+    defaultconf: "/var/snap/kubelet/current/args"
+    defaultsvc: "/etc/systemd/system/snap.kubelet.daemon.service"
+
+  proxy:
+    bins:
+      - "kube-proxy"
+    confs:
+      - /var/snap/kube-proxy/current/args
+    defaultconf: /var/snap/kube-proxy/current/args
+
