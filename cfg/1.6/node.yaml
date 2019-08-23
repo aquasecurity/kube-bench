@@ -83,7 +83,7 @@ groups:
         test_items:
           - flag: "--streaming-connection-idle-timeout"
             compare:
-              op: gt
+              op: noteq
               value: 0
             set: true
       remediation: "Edit the $kubeletconf file on each node and set the KUBELET_ARGS 
