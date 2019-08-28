@@ -105,7 +105,8 @@ node:
       - "/etc/default/kubelet"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around
-      ## of poitning to the systemd file.
+      ## of pointing to the systemd service file (which can also
+      ## hold kubelet configuration).
       ## Note: The following paths must match the one under 'svc'
       - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
       - "/etc/systemd/system/kubelet.service"
