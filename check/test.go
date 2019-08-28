@@ -164,22 +164,22 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 
 	case "gt":
 		expectedResultPattern = "%s is greater than %s"
-		a, b := toNumeric(flagVal, tCompareValue)
+		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
 		testResult = a > b
 
 	case "gte":
 		expectedResultPattern = "%s is greater or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue)
+		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
 		testResult = a >= b
 
 	case "lt":
 		expectedResultPattern = "%s is lower than %s"
-		a, b := toNumeric(flagVal, tCompareValue)
+		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
 		testResult = a < b
 
 	case "lte":
 		expectedResultPattern = "%s is lower or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue)
+		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
 		testResult = a <= b
 
 	case "has":
@@ -342,17 +342,36 @@ func (ts *tests) execute(s string) *testOutput {
 	return finalOutput
 }
 
-func toNumeric(a, b string) (c, d int) {
-	var err error
-	c, err = strconv.Atoi(a)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error converting %s: %s\n", a, err)
-		os.Exit(1)
+type exiter interface {
+	Exit(code int)
+}
+
+type osExit struct{}
+
+var oe *osExit
+
+func newOsExit() *osExit {
+	if oe == nil {
+		oe = &osExit{}
 	}
-	d, err = strconv.Atoi(b)
+	return oe
+}
+
+func (eh *osExit) Exit(code int) {
+	os.Exit(code)
+}
+
+func toNumeric(a, b string, e exiter) (c, d int) {
+	var err error
+	c, err = strconv.Atoi(strings.TrimSpace(a))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error converting %s: %s\n", b, err)
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "toNumeric - error converting %s: %s\n", a, err)
+		e.Exit(1)
+	}
+	d, err = strconv.Atoi(strings.TrimSpace(b))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "toNumeric - error converting %s: %s\n", b, err)
+		e.Exit(1)
 	}
 
 	return c, d
