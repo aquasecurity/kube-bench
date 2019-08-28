@@ -15,7 +15,6 @@
 package check
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -665,7 +664,6 @@ type mockExiter struct {
 
 func (me *mockExiter) Exit(code int) {
 	me.passedExitCode = code
-	fmt.Printf("mockExiter.Exit(%d) expectedExitCode(%d)\n", me.passedExitCode, me.expectedExitCode)
 }
 
 func TestToNumeric(t *testing.T) {
@@ -675,7 +673,7 @@ func TestToNumeric(t *testing.T) {
 
 	toNumeric("a", "b", me)
 	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
+		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
 	}
 
 	me = &mockExiter{
@@ -684,7 +682,7 @@ func TestToNumeric(t *testing.T) {
 
 	toNumeric("5", "b", me)
 	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
+		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
 	}
 
 	me = &mockExiter{
@@ -693,7 +691,7 @@ func TestToNumeric(t *testing.T) {
 
 	a, b := toNumeric("5", "6", me)
 	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
+		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
 	}
 
 	if a != 5 || b != 6 {
