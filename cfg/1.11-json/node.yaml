@@ -439,7 +439,7 @@ groups:
 
         Note - This test reports "FAIL" if kube-proxy has been configured
         using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
-        as the kube-proxy does not expose the configuration file to the worker node.
+        as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.6
@@ -456,7 +456,7 @@ groups:
                  
           Note - This test reports "FAIL" if kube-proxy has been configured
           using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
-          as the kube-proxy does not expose the configuration file to the worker node.
+          as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.7
