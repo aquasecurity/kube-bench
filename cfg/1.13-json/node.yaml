@@ -417,6 +417,10 @@ groups:
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
         chmod 644 $proxykubeconfig
+
+        Note - This test reports "FAIL" if kube-proxy has been configured
+        using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
+        as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.6
@@ -430,6 +434,10 @@ groups:
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
           chown root:root $proxykubeconfig
+          
+          Note - This test reports "FAIL" if kube-proxy has been configured
+          using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
+          as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.7
