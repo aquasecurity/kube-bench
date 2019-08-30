@@ -267,12 +267,15 @@ groups:
     text: "Ensure that the --rotate-certificates argument is not set to false (Scored)"
     audit: "ps -fC $kubeletbin"
     tests:
+      bin_op: or
       test_items:
       - flag: "--rotate-certificates"
         compare:
           op: eq
           value: true
         set: true
+      - flag: "--rotate-certificates"
+        set: false
     remediation: |
       If using a Kubelet config file, edit the file to add the line rotateCertificates: true.
       If using command line arguments, edit the kubelet service file $kubeletsvc 
