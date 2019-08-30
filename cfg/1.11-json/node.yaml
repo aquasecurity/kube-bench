@@ -96,10 +96,7 @@ groups:
     text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
     audit: "cat $kubeletconf"
     tests:
-      bin_op: or
       test_items:
-      - path: "{.readOnlyPort}"
-        set: false
       - path: "{.readOnlyPort}"
         compare:
           op: eq
