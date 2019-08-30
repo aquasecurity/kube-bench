@@ -45,7 +45,10 @@ You can choose to
 kube-bench automatically selects which `controls` to use based on the detected
 node type and the version of kubernetes a cluster is running. This behaviour
 can be overridden by specifying the `master` or `node` subcommand and the
-`--version` flag on the command line.
+`--version` flag on the command line. 
+
+The kubernetes version can also be set with the KUBE_BENCH_VERSION environment variable.
+The value of `--version` takes precedence over the value of KUBE_BENCH_VERSION.
 
 For example:
 run kube-bench against a master with version auto-detection:
