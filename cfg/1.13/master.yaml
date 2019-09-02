@@ -204,7 +204,7 @@ groups:
     scored: false
 
   - id: 1.1.13
-    text: "Ensure that the admission control plugin SecurityContextDeny is set (Scored)"
+    text: "Ensure that the admission control plugin SecurityContextDeny is set (Not Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
