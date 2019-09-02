@@ -42,6 +42,8 @@ You can choose to
 
 ## Running kube-bench
 
+If you run kube-bench directly from the command line you may need to be root / sudo in order to have access to all the config files.
+
 kube-bench automatically selects which `controls` to use based on the detected
 node type and the version of kubernetes a cluster is running. This behaviour
 can be overridden by specifying the `master` or `node` subcommand and the
