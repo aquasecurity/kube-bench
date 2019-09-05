@@ -60,19 +60,27 @@ func handleError(err error, context string) (errmsg string) {
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
-	ID             string      `yaml:"id" json:"test_number"`
-	Text           string      `json:"test_desc"`
-	Audit          string      `json:"audit"`
-	Type           string      `json:"type"`
-	Commands       []*exec.Cmd `json:"omit"`
-	Tests          *tests      `json:"omit"`
-	Set            bool        `json:"omit"`
-	Remediation    string      `json:"remediation"`
-	TestInfo       []string    `json:"test_info"`
+	ID             string       `yaml:"id" json:"test_number"`
+	Text           string       `json:"test_desc"`
+	Audit          string       `json:"audit"`
+	AuditOptions   AuditOptions `yaml:"audit_options"`
+	Type           string       `json:"type"`
+	Commands       []*exec.Cmd  `json:"omit"`
+	Tests          *tests       `json:"omit"`
+	Set            bool         `json:"omit"`
+	Remediation    string       `json:"remediation"`
+	TestInfo       []string     `json:"test_info"`
 	State          `json:"status"`
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
+}
+
+type AuditOptions struct {
+	FromConfig string      `yaml:"from_config"`
+	FromParams string      `yaml:"from_params"`
+	ConfigCmds []*exec.Cmd `json:"omit"`
+	ParamsCmds []*exec.Cmd `json:"omit"`
 }
 
 // Runner wraps the basic Run method.
@@ -111,82 +119,76 @@ func (c *Check) run() State {
 	var out bytes.Buffer
 	var errmsgs string
 
-	// Check if command exists or exit with WARN.
-	for _, cmd := range c.Commands {
-		if !isShellCommand(cmd.Path) {
-			c.State = WARN
+	var finalOutput *testOutput
+
+	var lastCommand string
+
+	if c.Commands != nil {
+		lastCommand = c.Audit
+		state, retErrmsgs := runExecCommands(c.Audit, c.Commands, &out)
+		if len(state) > 0 {
+			c.State = state
 			return c.State
 		}
-	}
 
-	// Run commands.
-	n := len(c.Commands)
-	if n == 0 {
-		// Likely a warning message.
-		c.State = WARN
-		return c.State
-	}
-
-	// Each command runs,
-	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
-	//   cmd0 err should terminate chain
-	cs := c.Commands
-
-	// Initialize command pipeline
-	cs[n-1].Stdout = &out
-	i := 1
-
-	var err error
-	errmsgs = ""
-
-	for i < n {
-		cs[i-1].Stdout, err = cs[i].StdinPipe()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-		i++
-	}
-
-	// Start command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Start()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-		i++
-	}
-
-	// Complete command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Wait()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command:%s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-
-		if i < n-1 {
-			cs[i].Stdout.(io.Closer).Close()
+		if len(retErrmsgs) > 0 {
+			errmsgs += retErrmsgs
 		}
 
-		i++
+		finalOutput = c.Tests.execute(out.String())
+		if finalOutput == nil {
+			errmsgs += handleError(
+				fmt.Errorf("final output is nil"),
+				fmt.Sprintf("failed to run: %s\n",
+					c.Audit,
+				),
+			)
+		}
+	} else {
+		// Run Params Commands
+		// - Run exec command and get buffer output
+		lastCommand = c.AuditOptions.FromParams
+		state, retErrmsgs := runExecCommands(c.AuditOptions.FromParams, c.AuditOptions.ParamsCmds, &out)
+		if len(state) > 0 {
+			c.State = state
+			return c.State
+		}
+
+		if len(retErrmsgs) > 0 {
+			errmsgs += retErrmsgs
+		}
+
+		// - Run Test using buffer output
+		finalOutput = c.Tests.execute(out.String())
+
+		// If the config command test failed, Run Config Commands
+		if !finalOutput.testResult {
+			glog.V(3).Infof("check.ID: %s AuditOptions.FromParams: %q failed, trying Config Commands\n", c.ID, c.AuditOptions.FromParams)
+
+			out.Reset()
+			lastCommand = c.AuditOptions.FromConfig
+			state, retErrmsgs = runExecCommands(c.AuditOptions.FromConfig, c.AuditOptions.ConfigCmds, &out)
+			if len(state) > 0 {
+				c.State = state
+				return c.State
+			}
+
+			if len(retErrmsgs) > 0 {
+				errmsgs += retErrmsgs
+			}
+
+			finalOutput = c.Tests.execute(out.String())
+			if finalOutput == nil {
+				errmsgs += handleError(
+					fmt.Errorf("final output is nil"),
+					fmt.Sprintf("failed to run: %s\n",
+						c.AuditOptions.FromParams,
+					),
+				)
+			}
+		}
 	}
 
-	glog.V(3).Info(out.String())
-
-	finalOutput := c.Tests.execute(out.String())
 	if finalOutput != nil {
 		c.ActualValue = finalOutput.actualResult
 		c.ExpectedResult = finalOutput.ExpectedResult
@@ -199,13 +201,9 @@ func (c *Check) run() State {
 				c.State = WARN
 			}
 		}
+		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t Score: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
 	} else {
-		errmsgs += handleError(
-			fmt.Errorf("final output is nil"),
-			fmt.Sprintf("failed to run: %s\n",
-				c.Audit,
-			),
-		)
+		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
 	}
 
 	if errmsgs != "" {
@@ -218,6 +216,7 @@ func (c *Check) run() State {
 // run into a slice of commands.
 // TODO: Make this more robust.
 func textToCommand(s string) []*exec.Cmd {
+	glog.V(3).Infof("textToCommand: %q\n", s)
 	cmds := []*exec.Cmd{}
 
 	cp := strings.Split(s, "|")
@@ -273,4 +272,82 @@ func isShellCommand(s string) bool {
 		return true
 	}
 	return false
+}
+
+func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (State, string) {
+	var err error
+	errmsgs := ""
+
+	// Check if command exists or exit with WARN.
+	for _, cmd := range commands {
+		if !isShellCommand(cmd.Path) {
+			return WARN, errmsgs
+		}
+	}
+
+	// Run commands.
+	n := len(commands)
+	if n == 0 {
+		// Likely a warning message.
+		//c.State = WARN
+		//return c.State
+		return WARN, errmsgs
+	}
+
+	// Each command runs,
+	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
+	//   cmd0 err should terminate chain
+	cs := commands
+
+	// Initialize command pipeline
+	cs[n-1].Stdout = out
+	i := 1
+
+	for i < n {
+		cs[i-1].Stdout, err = cs[i].StdinPipe()
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
+				audit,
+				cs[i].Args,
+			),
+		)
+		i++
+	}
+
+	// Start command pipeline
+	i = 0
+	for i < n {
+		err := cs[i].Start()
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command: %s",
+				audit,
+				cs[i].Args,
+			),
+		)
+		i++
+	}
+
+	// Complete command pipeline
+	i = 0
+	for i < n {
+		err := cs[i].Wait()
+		errmsgs += handleError(
+			err,
+			fmt.Sprintf("failed to run: %s\nfailed command:%s",
+				audit,
+				cs[i].Args,
+			),
+		)
+
+		if i < n-1 {
+			cs[i].Stdout.(io.Closer).Close()
+		}
+
+		i++
+	}
+
+	glog.V(9).Infof("Command %q - Output: %s\n", audit, out.String())
+	return "", errmsgs
 }
