@@ -48,6 +48,9 @@ const (
 	NODE NodeType = "node"
 	// FEDERATED a federated deployment.
 	FEDERATED NodeType = "federated"
+
+	// MANUAL Check Type
+	MANUAL string = "manual"
 )
 
 func handleError(err error, context string) (errmsg string) {
@@ -60,23 +63,23 @@ func handleError(err error, context string) (errmsg string) {
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
-	ID             string       `yaml:"id" json:"test_number"`
-	Text           string       `json:"test_desc"`
-	Audit          string       `json:"audit"`
-	AuditOptions   AuditOptions `yaml:"audit_options"`
-	Type           string       `json:"type"`
-	Commands       []*exec.Cmd  `json:"omit"`
-	Tests          *tests       `json:"omit"`
-	Set            bool         `json:"omit"`
-	Remediation    string       `json:"remediation"`
-	TestInfo       []string     `json:"test_info"`
+	ID             string        `yaml:"id" json:"test_number"`
+	Text           string        `json:"test_desc"`
+	Audit          string        `json:"audit"`
+	AuditCommands  AuditCommands `yaml:"audit_commands"`
+	Type           string        `json:"type"`
+	Commands       []*exec.Cmd   `json:"omit"`
+	Tests          *tests        `json:"omit"`
+	Set            bool          `json:"omit"`
+	Remediation    string        `json:"remediation"`
+	TestInfo       []string      `json:"test_info"`
 	State          `json:"status"`
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
 }
 
-type AuditOptions struct {
+type AuditCommands struct {
 	FromConfig string      `yaml:"from_config"`
 	FromParams string      `yaml:"from_params"`
 	ConfigCmds []*exec.Cmd `json:"omit"`
@@ -111,7 +114,7 @@ func (c *Check) run() State {
 	}
 
 	// If check type is manual force result to WARN
-	if c.Type == "manual" {
+	if c.Type == MANUAL {
 		c.State = WARN
 		return c.State
 	}
@@ -147,8 +150,8 @@ func (c *Check) run() State {
 	} else {
 		// Run Params Commands
 		// - Run exec command and get buffer output
-		lastCommand = c.AuditOptions.FromParams
-		state, retErrmsgs := runExecCommands(c.AuditOptions.FromParams, c.AuditOptions.ParamsCmds, &out)
+		lastCommand = c.AuditCommands.FromParams
+		state, retErrmsgs := runExecCommands(c.AuditCommands.FromParams, c.AuditCommands.ParamsCmds, &out)
 		if len(state) > 0 {
 			c.State = state
 			return c.State
@@ -158,16 +161,28 @@ func (c *Check) run() State {
 			errmsgs += retErrmsgs
 		}
 
-		// - Run Test using buffer output
-		finalOutput = c.Tests.execute(out.String())
+		currentTests := &tests{
+			BinOp:     c.Tests.BinOp,
+			TestItems: make([]*testItem, 0),
+		}
+		// Try Tests using Path first
+		for _, ti := range c.Tests.TestItems {
+			nti := &testItem{
+				Path:    ti.Path,
+				Set:     ti.Set,
+				Compare: ti.Compare,
+			}
+			currentTests.TestItems = append(currentTests.TestItems, nti)
+		}
+		finalOutput = currentTests.execute(out.String())
 
 		// If the config command test failed, Run Config Commands
 		if !finalOutput.testResult {
-			glog.V(3).Infof("check.ID: %s AuditOptions.FromParams: %q failed, trying Config Commands\n", c.ID, c.AuditOptions.FromParams)
+			glog.V(3).Infof("check.ID: %s AuditCommands.FromParams: %q failed, trying Config Commands\n", c.ID, c.AuditCommands.FromParams)
 
 			out.Reset()
-			lastCommand = c.AuditOptions.FromConfig
-			state, retErrmsgs = runExecCommands(c.AuditOptions.FromConfig, c.AuditOptions.ConfigCmds, &out)
+			lastCommand = c.AuditCommands.FromConfig
+			state, retErrmsgs = runExecCommands(c.AuditCommands.FromConfig, c.AuditCommands.ConfigCmds, &out)
 			if len(state) > 0 {
 				c.State = state
 				return c.State
@@ -177,12 +192,23 @@ func (c *Check) run() State {
 				errmsgs += retErrmsgs
 			}
 
-			finalOutput = c.Tests.execute(out.String())
+			// reset testitems
+			currentTests.TestItems = make([]*testItem, 0)
+			// Try Tests using Flag
+			for _, ti := range c.Tests.TestItems {
+				nti := &testItem{
+					Flag:    ti.Flag,
+					Set:     ti.Set,
+					Compare: ti.Compare,
+				}
+				currentTests.TestItems = append(currentTests.TestItems, nti)
+			}
+			finalOutput = currentTests.execute(out.String())
 			if finalOutput == nil {
 				errmsgs += handleError(
 					fmt.Errorf("final output is nil"),
 					fmt.Sprintf("failed to run: %s\n",
-						c.AuditOptions.FromParams,
+						c.AuditCommands.FromParams,
 					),
 				)
 			}

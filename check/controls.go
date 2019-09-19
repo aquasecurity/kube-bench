@@ -72,13 +72,13 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 	for _, group := range c.Groups {
 		for _, check := range group.Checks {
 			glog.V(3).Infof("Check.ID %s\n", check.ID)
-			if check.Type == "manual" || len(strings.TrimSpace(check.Audit)) > 0 { // Stay Backwards compatible
+			if check.Type == MANUAL || len(strings.TrimSpace(check.Audit)) > 0 { // Stay Backwards compatible
 				glog.V(3).Infof("Executing Audit...\n")
 				check.Commands = textToCommand(check.Audit)
 			} else {
-				glog.V(3).Infof("Executing AuditOptions...\n")
-				check.AuditOptions.ParamsCmds = textToCommand(check.AuditOptions.FromParams)
-				check.AuditOptions.ConfigCmds = textToCommand(check.AuditOptions.FromConfig)
+				glog.V(3).Infof("Executing AuditCommands...\n")
+				check.AuditCommands.ParamsCmds = textToCommand(check.AuditCommands.FromParams)
+				check.AuditCommands.ConfigCmds = textToCommand(check.AuditCommands.FromConfig)
 			}
 		}
 	}
