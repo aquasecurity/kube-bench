@@ -20,7 +20,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "false"
+          value: false
     remediation: |
       If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to
       false .
@@ -88,7 +88,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "0"
+          value: 0
     remediation: |
       If using a Kubelet config file, edit the file to set readOnlyPort to 0 .
       If using command line arguments, edit the kubelet service file
@@ -111,7 +111,7 @@ groups:
         set: true
         compare:
           op: noteq
-          value: "0"
+          value: 0
       - flag: --streaming-connection-idle-timeout
         path: '{.streamingConnectionIdleTimeout}'
         set: false
@@ -139,7 +139,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "true"
+          value: true
     remediation: |
       If using a Kubelet config file, edit the file to set protectKernelDefaults: true .
       If using command line arguments, edit the kubelet service file
@@ -162,7 +162,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "true"
+          value: true
       - flag: --make-iptables-util-chains
         path: '{.makeIPTablesUtilChains}'
         set: false
@@ -204,7 +204,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "0"
+          value: 0
     remediation: |
       If using a Kubelet config file, edit the file to set eventRecordQPS: 0 .
       If using command line arguments, edit the kubelet service file
@@ -252,7 +252,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "0"
+          value: 0
       - flag: --cadvisor-port
         set: false
       bin_op: or
@@ -276,7 +276,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "true"
+          value: true
       - flag: --rotate-certificates
         path: '{.rotateCertificates}'
         set: false
@@ -301,7 +301,7 @@ groups:
         set: true
         compare:
           op: eq
-          value: "true"
+          value: true
     remediation: |
       Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
