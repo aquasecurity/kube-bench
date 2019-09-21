@@ -165,10 +165,10 @@ func (c *Check) run() State {
 			BinOp:     c.Tests.BinOp,
 			TestItems: make([]*testItem, 0),
 		}
-		// Try Tests using Path first
+		// Try Tests using Flag first
 		for _, ti := range c.Tests.TestItems {
 			nti := &testItem{
-				Path:    ti.Path,
+				Flag:    ti.Flag,
 				Set:     ti.Set,
 				Compare: ti.Compare,
 			}
@@ -194,10 +194,10 @@ func (c *Check) run() State {
 
 			// reset testitems
 			currentTests.TestItems = make([]*testItem, 0)
-			// Try Tests using Flag
+			// Try Tests using Path
 			for _, ti := range c.Tests.TestItems {
 				nti := &testItem{
-					Flag:    ti.Flag,
+					Path:    ti.Path,
 					Set:     ti.Set,
 					Compare: ti.Compare,
 				}
@@ -374,6 +374,6 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 		i++
 	}
 
-	glog.V(9).Infof("Command %q - Output: %s\n", audit, out.String())
+	glog.V(9).Infof("Command %q - Output:\n\n %s\n", audit, out.String())
 	return "", errmsgs
 }

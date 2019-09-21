@@ -15,7 +15,7 @@ groups:
       from_params: "ps -fC $kubeletbin "
     tests:
       test_items:
-      - flag: --anonymous-auth
+      - flag: "--anonymous-auth"
         path: '{.authentication.anonymous.enabled}'
         set: true
         compare:
@@ -83,7 +83,7 @@ groups:
       from_params: "ps -fC $kubeletbin "
     tests:
       test_items:
-      - flag: --read-only-port
+      - flag: "--read-only-port"
         path: '{.readOnlyPort}'
         set: true
         compare:
