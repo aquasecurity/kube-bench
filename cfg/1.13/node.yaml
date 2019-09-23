@@ -225,7 +225,7 @@ groups:
       - flag: --tls-cert-file
         path: '{.tlsCertFile}'
         set: true
-      - flag: --tls-cert-file
+      - flag: --tls-private-key-file
         path: '{.tlsPrivateKeyFile}'
         set: true
       bin_op: and
