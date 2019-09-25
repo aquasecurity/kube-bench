@@ -162,25 +162,29 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 			testResult = !(flagVal == tCompareValue)
 		}
 
-	case "gt":
-		expectedResultPattern = "%s is greater than %s"
-		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
-		testResult = a > b
+	case "gt", "gte", "lt", "lte":
+		a, b, err := toNumeric(flagVal, tCompareValue)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		switch tCompareOp {
+		case "gt":
+			expectedResultPattern = "%s is greater than %s"
+			testResult = a > b
 
-	case "gte":
-		expectedResultPattern = "%s is greater or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
-		testResult = a >= b
+		case "gte":
+			expectedResultPattern = "%s is greater or equal to %s"
+			testResult = a >= b
 
-	case "lt":
-		expectedResultPattern = "%s is lower than %s"
-		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
-		testResult = a < b
+		case "lt":
+			expectedResultPattern = "%s is lower than %s"
+			testResult = a < b
 
-	case "lte":
-		expectedResultPattern = "%s is lower or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue, newOsExit())
-		testResult = a <= b
+		case "lte":
+			expectedResultPattern = "%s is lower or equal to %s"
+			testResult = a <= b
+		}
 
 	case "has":
 		expectedResultPattern = "'%s' has '%s'"
@@ -342,37 +346,15 @@ func (ts *tests) execute(s string) *testOutput {
 	return finalOutput
 }
 
-type exiter interface {
-	Exit(code int)
-}
-
-type osExit struct{}
-
-var oe *osExit
-
-func newOsExit() *osExit {
-	if oe == nil {
-		oe = &osExit{}
-	}
-	return oe
-}
-
-func (eh *osExit) Exit(code int) {
-	os.Exit(code)
-}
-
-func toNumeric(a, b string, e exiter) (c, d int) {
-	var err error
+func toNumeric(a, b string) (c, d int, err error) {
 	c, err = strconv.Atoi(strings.TrimSpace(a))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "toNumeric - error converting %s: %s\n", a, err)
-		e.Exit(1)
+		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", a, err)
 	}
 	d, err = strconv.Atoi(strings.TrimSpace(b))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "toNumeric - error converting %s: %s\n", b, err)
-		e.Exit(1)
+		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", b, err)
 	}
 
-	return c, d
+	return c, d, nil
 }

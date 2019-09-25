@@ -657,44 +657,37 @@ func TestCompareOp(t *testing.T) {
 	}
 }
 
-type mockExiter struct {
-	expectedExitCode int
-	passedExitCode   int
-}
-
-func (me *mockExiter) Exit(code int) {
-	me.passedExitCode = code
-}
-
 func TestToNumeric(t *testing.T) {
-	me := &mockExiter{
-		expectedExitCode: 1,
+	cases := []struct {
+		firstValue     string
+		secondValue    string
+		expectedToFail bool
+	}{
+		{
+			firstValue:     "a",
+			secondValue:    "b",
+			expectedToFail: true,
+		},
+		{
+			firstValue:     "5",
+			secondValue:    "b",
+			expectedToFail: true,
+		},
+		{
+			firstValue:     "5",
+			secondValue:    "6",
+			expectedToFail: false,
+		},
 	}
 
-	toNumeric("a", "b", me)
-	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
-	}
+	for _, c := range cases {
+		f, s, err := toNumeric(c.firstValue, c.secondValue)
+		if c.expectedToFail && err == nil {
+			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
+		}
 
-	me = &mockExiter{
-		expectedExitCode: 1,
-	}
-
-	toNumeric("5", "b", me)
-	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
-	}
-
-	me = &mockExiter{
-		expectedExitCode: 0,
-	}
-
-	a, b := toNumeric("5", "6", me)
-	if me.expectedExitCode != me.passedExitCode {
-		t.Errorf("TestToNumeric - Expected Exit Code %d , but instead got %d", me.expectedExitCode, me.passedExitCode)
-	}
-
-	if a != 5 || b != 6 {
-		t.Errorf("TestToNumeric - to return %d,%d , but instead got %d,%d", 5, 6, a, b)
+		if !c.expectedToFail && (f != 5 || s != 6) {
+			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
+		}
 	}
 }
