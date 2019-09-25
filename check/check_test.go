@@ -25,7 +25,7 @@ func TestCheck_Run(t *testing.T) {
 	}
 
 	testCases := []TestCase{
-		{check: Check{Type: MANUAL, Expected: WARN},
+		{check: Check{Type: MANUAL}, Expected: WARN},
 		{check: Check{Type: "skip"}, Expected: INFO},
 		{check: Check{Type: "", Scored: false}, Expected: WARN}, // Not scored checks with no type should be marked warn
 		{check: Check{Type: "", Scored: true}, Expected: WARN},  // If there are no tests in the check, warn
