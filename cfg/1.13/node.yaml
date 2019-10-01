@@ -1,7 +1,7 @@
 ---
 controls:
-id: "2"
 version: "1.13"
+id: "2"
 text: Worker Node Security Configuration
 type: "node"
 groups:
@@ -10,9 +10,8 @@ groups:
   checks:
   - id: 2.1.1
     text: Ensure that the --anonymous-auth argument is set to false (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: "--anonymous-auth"
@@ -35,9 +34,8 @@ groups:
 
   - id: 2.1.2
     text: Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --authorization-mode
@@ -59,9 +57,8 @@ groups:
 
   - id: 2.1.3
     text: Ensure that the --client-ca-file argument is set as appropriate (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --client-ca-file
@@ -81,9 +78,8 @@ groups:
 
   - id: 2.1.4
     text: Ensure that the --read-only-port argument is set to 0 (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: "--read-only-port"
@@ -105,9 +101,8 @@ groups:
 
   - id: 2.1.5
     text: Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --streaming-connection-idle-timeout
@@ -134,9 +129,8 @@ groups:
 
   - id: 2.1.6
     text: Ensure that the --protect-kernel-defaults argument is set to true (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --protect-kernel-defaults
@@ -158,9 +152,8 @@ groups:
 
   - id: 2.1.7
     text: Ensure that the --make-iptables-util-chains argument is set to true (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --make-iptables-util-chains
@@ -205,9 +198,8 @@ groups:
 
   - id: 2.1.9
     text: Ensure that the --event-qps argument is set to 0 (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --event-qps
@@ -229,9 +221,8 @@ groups:
 
   - id: 2.1.10
     text: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --tls-cert-file
@@ -283,9 +274,8 @@ groups:
 
   - id: 2.1.12
     text: Ensure that the --rotate-certificates argument is not set to false (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --rotate-certificates
@@ -309,9 +299,8 @@ groups:
 
   - id: 2.1.13
     text: Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: RotateKubeletServerCertificate
@@ -331,9 +320,8 @@ groups:
 
   - id: 2.1.14
     text: Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)
-    audit_commands:
-      from_config: "cat $kubeletconf "
-      from_params: "ps -fC $kubeletbin "
+    audit: "ps -fC $kubeletbin"      
+    audit_config: "cat $kubeletconf"
     tests:
       test_items:
       - flag: --tls-cipher-suites

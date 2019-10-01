@@ -63,27 +63,21 @@ func handleError(err error, context string) (errmsg string) {
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
-	ID             string        `yaml:"id" json:"test_number"`
-	Text           string        `json:"test_desc"`
-	Audit          string        `json:"audit"`
-	AuditCommands  AuditCommands `yaml:"audit_commands"`
-	Type           string        `json:"type"`
-	Commands       []*exec.Cmd   `json:"omit"`
-	Tests          *tests        `json:"omit"`
-	Set            bool          `json:"omit"`
-	Remediation    string        `json:"remediation"`
-	TestInfo       []string      `json:"test_info"`
+	ID             string      `yaml:"id" json:"test_number"`
+	Text           string      `json:"test_desc"`
+	Audit          string      `json:"audit"`
+	AuditConfig    string      `yaml:"audit_config"`
+	Type           string      `json:"type"`
+	Commands       []*exec.Cmd `json:"omit"`
+	ConfigCommands []*exec.Cmd `json:"omit"`
+	Tests          *tests      `json:"omit"`
+	Set            bool        `json:"omit"`
+	Remediation    string      `json:"remediation"`
+	TestInfo       []string    `json:"test_info"`
 	State          `json:"status"`
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
-}
-
-type AuditCommands struct {
-	FromConfig string      `yaml:"from_config"`
-	FromParams string      `yaml:"from_params"`
-	ConfigCmds []*exec.Cmd `json:"omit"`
-	ParamsCmds []*exec.Cmd `json:"omit"`
 }
 
 // Runner wraps the basic Run method.
@@ -119,116 +113,82 @@ func (c *Check) run() State {
 		return c.State
 	}
 
-	var out bytes.Buffer
-	var errmsgs string
+	lastCommand := c.Audit
+	currentTests := c.Tests
+	hasAuditConfig := c.ConfigCommands != nil
 
-	var finalOutput *testOutput
-
-	var lastCommand string
-
-	if c.Commands != nil {
-		lastCommand = c.Audit
-		state, retErrmsgs := runExecCommands(c.Audit, c.Commands, &out)
-		if len(state) > 0 {
-			c.State = state
-			return c.State
-		}
-
-		if len(retErrmsgs) > 0 {
-			errmsgs += retErrmsgs
-		}
-
-		finalOutput = c.Tests.execute(out.String())
-		if finalOutput == nil {
-			errmsgs += handleError(
-				fmt.Errorf("final output is nil"),
-				fmt.Sprintf("failed to run: %s\n",
-					c.Audit,
-				),
-			)
-		}
-	} else {
-		// Run Params Commands
-		// - Run exec command and get buffer output
-		lastCommand = c.AuditCommands.FromParams
-		state, retErrmsgs := runExecCommands(c.AuditCommands.FromParams, c.AuditCommands.ParamsCmds, &out)
-		if len(state) > 0 {
-			c.State = state
-			return c.State
-		}
-
-		if len(retErrmsgs) > 0 {
-			errmsgs += retErrmsgs
-		}
-
-		currentTests := &tests{
+	// The following if-block will only be executed
+	// when an 'AuditConfig' command was provided
+	if hasAuditConfig {
+		nItems := len(c.Tests.TestItems)
+		// The reason we're creating a copy of the "tests"
+		// is so that we can perform tests in asolation
+		// comparing the output of the Audit command
+		// against the Flag and, if needed, then
+		// test the AuditConfig command
+		// against the Path
+		currentTests = &tests{
 			BinOp:     c.Tests.BinOp,
-			TestItems: make([]*testItem, 0),
+			TestItems: make([]*testItem, nItems),
 		}
-		// Try Tests using Flag first
-		for _, ti := range c.Tests.TestItems {
+
+		for i := 0; i < nItems; i++ {
+			ti := c.Tests.TestItems[i]
 			nti := &testItem{
+				// Flag is used to test Command Param values
+				// Audit ==> Flag
 				Flag:    ti.Flag,
 				Set:     ti.Set,
 				Compare: ti.Compare,
 			}
-			currentTests.TestItems = append(currentTests.TestItems, nti)
-		}
-		finalOutput = currentTests.execute(out.String())
-
-		// If the config command test failed, Run Config Commands
-		if !finalOutput.testResult {
-			glog.V(3).Infof("check.ID: %s AuditCommands.FromParams: %q failed, trying Config Commands\n", c.ID, c.AuditCommands.FromParams)
-
-			out.Reset()
-			lastCommand = c.AuditCommands.FromConfig
-			state, retErrmsgs = runExecCommands(c.AuditCommands.FromConfig, c.AuditCommands.ConfigCmds, &out)
-			if len(state) > 0 {
-				c.State = state
-				return c.State
-			}
-
-			if len(retErrmsgs) > 0 {
-				errmsgs += retErrmsgs
-			}
-
-			// reset testitems
-			currentTests.TestItems = make([]*testItem, 0)
-			// Try Tests using Path
-			for _, ti := range c.Tests.TestItems {
-				nti := &testItem{
-					Path:    ti.Path,
-					Set:     ti.Set,
-					Compare: ti.Compare,
-				}
-				currentTests.TestItems = append(currentTests.TestItems, nti)
-			}
-			finalOutput = currentTests.execute(out.String())
-			if finalOutput == nil {
-				errmsgs += handleError(
-					fmt.Errorf("final output is nil"),
-					fmt.Sprintf("failed to run: %s\n",
-						c.AuditCommands.FromParams,
-					),
-				)
-			}
+			currentTests.TestItems[i] = nti
 		}
 	}
 
-	if finalOutput != nil {
+	state, finalOutput, retErrmsgs := performAuditTest(c.Audit, c.Commands, currentTests)
+	if len(state) > 0 {
+		c.State = state
+		return c.State
+	}
+	errmsgs := retErrmsgs
+
+	// If something went wrong with the 'Audit' command
+	// and an 'AuditConfig' command was provided, use it to
+	// perform the Check/Test
+	if (finalOutput == nil || !finalOutput.testResult) && hasAuditConfig {
+		lastCommand = c.AuditConfig
+
+		// reset testitems to use Path instead of Flag
+		nItems := len(c.Tests.TestItems)
+		for i := 0; i < nItems; i++ {
+			currentTests.TestItems[i].Flag = ""
+			// Path is used to test Command Param values
+			// AuditConfig ==> Path
+			currentTests.TestItems[i].Path = c.Tests.TestItems[i].Path
+		}
+
+		state, finalOutput, retErrmsgs = performAuditTest(c.AuditConfig, c.ConfigCommands, currentTests)
+		if len(state) > 0 {
+			c.State = state
+			return c.State
+		}
+		errmsgs += retErrmsgs
+	}
+
+	if finalOutput != nil && finalOutput.testResult {
+		c.State = PASS
 		c.ActualValue = finalOutput.actualResult
 		c.ExpectedResult = finalOutput.ExpectedResult
-		if finalOutput.testResult {
-			c.State = PASS
-		} else {
-			if c.Scored {
-				c.State = FAIL
-			} else {
-				c.State = WARN
-			}
-		}
 		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t Score: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
 	} else {
+		if c.Scored {
+			c.State = FAIL
+		} else {
+			c.State = WARN
+		}
+	}
+
+	if finalOutput == nil {
 		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
 	}
 
@@ -300,6 +260,27 @@ func isShellCommand(s string) bool {
 	return false
 }
 
+func performAuditTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
+	var out bytes.Buffer
+	state, retErrmsgs := runExecCommands(audit, commands, &out)
+	if len(state) > 0 {
+		return state, nil, ""
+	}
+	errmsgs := retErrmsgs
+
+	finalOutput := tests.execute(out.String())
+	if finalOutput == nil {
+		errmsgs += handleError(
+			fmt.Errorf("final output is nil"),
+			fmt.Sprintf("failed to run: %s\n",
+				audit,
+			),
+		)
+	}
+
+	return "", finalOutput, errmsgs
+}
+
 func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (State, string) {
 	var err error
 	errmsgs := ""
@@ -315,8 +296,6 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	n := len(commands)
 	if n == 0 {
 		// Likely a warning message.
-		//c.State = WARN
-		//return c.State
 		return WARN, errmsgs
 	}
 
@@ -331,13 +310,15 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 
 	for i < n {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				audit,
-				cs[i].Args,
-			),
-		)
+		if err != nil {
+			errmsgs += handleError(
+				err,
+				fmt.Sprintf("failed to run: %s\nfailed command: %s",
+					audit,
+					cs[i].Args,
+				),
+			)
+		}
 		i++
 	}
 
@@ -345,13 +326,15 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	i = 0
 	for i < n {
 		err := cs[i].Start()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				audit,
-				cs[i].Args,
-			),
-		)
+		if err != nil {
+			errmsgs += handleError(
+				err,
+				fmt.Sprintf("failed to run: %s\nfailed command: %s",
+					audit,
+					cs[i].Args,
+				),
+			)
+		}
 		i++
 	}
 
@@ -359,18 +342,19 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	i = 0
 	for i < n {
 		err := cs[i].Wait()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command:%s",
-				audit,
-				cs[i].Args,
-			),
-		)
+		if err != nil {
+			errmsgs += handleError(
+				err,
+				fmt.Sprintf("failed to run: %s\nfailed command:%s",
+					audit,
+					cs[i].Args,
+				),
+			)
+		}
 
 		if i < n-1 {
 			cs[i].Stdout.(io.Closer).Close()
 		}
-
 		i++
 	}
 

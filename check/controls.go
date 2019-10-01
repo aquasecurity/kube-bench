@@ -17,7 +17,6 @@ package check
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
@@ -72,13 +71,11 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 	for _, group := range c.Groups {
 		for _, check := range group.Checks {
 			glog.V(3).Infof("Check.ID %s\n", check.ID)
-			if check.Type == MANUAL || len(strings.TrimSpace(check.Audit)) > 0 { // Stay Backwards compatible
-				glog.V(3).Infof("Executing Audit...\n")
-				check.Commands = textToCommand(check.Audit)
-			} else {
-				glog.V(3).Infof("Executing AuditCommands...\n")
-				check.AuditCommands.ParamsCmds = textToCommand(check.AuditCommands.FromParams)
-				check.AuditCommands.ConfigCmds = textToCommand(check.AuditCommands.FromConfig)
+			glog.V(3).Infof("Text to Command Audit...\n")
+			check.Commands = textToCommand(check.Audit)
+			if len(check.AuditConfig) > 0 {
+				glog.V(3).Infof("Text to Command AuditConfig...\n")
+				check.ConfigCommands = textToCommand(check.AuditConfig)
 			}
 		}
 	}

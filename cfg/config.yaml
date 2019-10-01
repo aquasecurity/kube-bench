@@ -103,6 +103,7 @@ node:
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/etc/default/kubelet"
+      - "/var/lib/kubelet/kubeconfig"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around
       ## of pointing to the systemd service file (which can also
