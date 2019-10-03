@@ -125,36 +125,9 @@ func (c *Check) run() State {
 	}
 
 	lastCommand := c.Audit
-	currentTests := c.Tests
 	hasAuditConfig := c.ConfigCommands != nil
 
-	if hasAuditConfig {
-		nItems := len(c.Tests.TestItems)
-		// The reason we're creating a copy of the "tests"
-		// is so that we can perform tests in asolation
-		// comparing the output of the Audit command
-		// against the Flag and, if needed, then
-		// test the AuditConfig command
-		// against the Path
-		currentTests = &tests{
-			BinOp:     c.Tests.BinOp,
-			TestItems: make([]*testItem, nItems),
-		}
-
-		for i := 0; i < nItems; i++ {
-			ti := c.Tests.TestItems[i]
-			nti := &testItem{
-				// Flag is used to test Command Param values
-				// Audit ==> Flag
-				Flag:    ti.Flag,
-				Set:     ti.Set,
-				Compare: ti.Compare,
-			}
-			currentTests.TestItems[i] = nti
-		}
-	}
-
-	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, currentTests)
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, c.Tests)
 	if len(state) > 0 {
 		c.State = state
 		return c.State
@@ -163,17 +136,30 @@ func (c *Check) run() State {
 
 	// If something went wrong with the 'Audit' command
 	// and an 'AuditConfig' command was provided, use it to
-	// perform the Check/Test
+	// execute tests
 	if (finalOutput == nil || !finalOutput.testResult) && hasAuditConfig {
 		lastCommand = c.AuditConfig
 
-		// reset testitems to use Path instead of Flag
 		nItems := len(c.Tests.TestItems)
+		// The reason we're creating a copy of the "tests"
+		// is so that tests can executed
+		// with the AuditConfig command
+		// against the Path only
+		currentTests := &tests{
+			BinOp:     c.Tests.BinOp,
+			TestItems: make([]*testItem, nItems),
+		}
+
 		for i := 0; i < nItems; i++ {
-			currentTests.TestItems[i].Flag = ""
-			// Path is used to test Command Param values
-			// AuditConfig ==> Path
-			currentTests.TestItems[i].Path = c.Tests.TestItems[i].Path
+			ti := c.Tests.TestItems[i]
+			nti := &testItem{
+				// Path is used to test Command Param values
+				// AuditConfig ==> Path
+				Path:    ti.Path,
+				Set:     ti.Set,
+				Compare: ti.Compare,
+			}
+			currentTests.TestItems[i] = nti
 		}
 
 		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, c.ConfigCommands, currentTests)
