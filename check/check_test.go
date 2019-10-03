@@ -32,6 +32,57 @@ func TestCheck_Run(t *testing.T) {
 		{check: Check{Type: MANUAL, Scored: false}, Expected: WARN},
 		{check: Check{Type: "skip", Scored: false}, Expected: INFO},
 	}
+func TestCheckAuditConfig(t *testing.T) {
+
+	cases := []struct {
+		*Check
+		expected State
+	}{
+		{
+			controls.Groups[1].Checks[0],
+			"PASS",
+		},
+		{
+			controls.Groups[1].Checks[1],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[2],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[3],
+			"PASS",
+		},
+		{
+			controls.Groups[1].Checks[4],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[5],
+			"PASS",
+		},
+		{
+			controls.Groups[1].Checks[6],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[7],
+			"PASS",
+		},
+		{
+			controls.Groups[1].Checks[8],
+			"FAIL",
+		},		
+	}
+
+	for _, c := range cases {
+		c.run()
+		if c.State != c.expected {
+			t.Errorf("%s, expected:%v, got:%v\n", c.Text, c.expected, c.State)
+		}
+	}
+}
 
 	for _, testCase := range testCases {
 
