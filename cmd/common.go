@@ -240,7 +240,7 @@ func loadConfig(nodetype check.NodeType) string {
 func isMaster() bool {
 	glog.V(2).Info("Checking if the current node is running master components")
 	masterConf := viper.New()
-	components, err := getBinaries(masterConf)
+	components, err := getBinariesFunc(masterConf)
 
 	if err != nil {
 		glog.V(2).Info(err)

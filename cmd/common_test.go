@@ -15,7 +15,9 @@
 package cmd
 
 import (
+	"errors"
 	"github.com/aquasecurity/kube-bench/check"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -111,8 +113,30 @@ func TestNewRunFilter(t *testing.T) {
 
 }
 
-func Test_isMaster(t *testing.T){
-	t.Run("not master", func(t *testing.T) {
+func Test_isMaster(t *testing.T) {
+	t.Run("valid config, not master", func(t *testing.T) {
+		assert.False(t, isMaster())
+	})
+
+	t.Run("valid config, is master", func(t *testing.T) {
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = func(viper *viper.Viper) (strings map[string]string, i error) {
+			return map[string]string{"apiserver": "kube-apiserver"}, nil
+		}
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+		}()
+		assert.True(t, isMaster())
+	})
+
+	t.Run("invalid config", func(t *testing.T) {
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = func(viper *viper.Viper) (strings map[string]string, i error) {
+			return nil, errors.New("invalid config passed")
+		}
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+		}()
 		assert.False(t, isMaster())
 	})
 }
