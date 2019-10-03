@@ -101,6 +101,17 @@ func (r *defaultRunner) Run(c *Check) State {
 // the results.
 func (c *Check) run() State {
 
+	// Since this is an Scored check
+	// without tests return a 'WARN' to alert
+	// the user that this check needs attention
+	if c.Scored &&
+		len(strings.TrimSpace(c.Type)) == 0 &&
+		c.Tests == nil {
+
+		c.State = WARN
+		return c.State
+	}
+
 	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
 		c.State = INFO
