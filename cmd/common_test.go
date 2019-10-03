@@ -110,3 +110,7 @@ func TestNewRunFilter(t *testing.T) {
 	})
 
 }
+
+func Test_isMaster(t *testing.T){
+	assert.True(t, isMaster())
+}
