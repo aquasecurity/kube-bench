@@ -58,7 +58,7 @@ func handleError(err error, context string) (errmsg string) {
 }
 
 // Check contains information about a recommendation in the
-// CIS Kubernetes 1.6+ document.
+// CIS Kubernetes document.
 type Check struct {
 	ID             string      `yaml:"id" json:"test_number"`
 	Text           string      `json:"test_desc"`

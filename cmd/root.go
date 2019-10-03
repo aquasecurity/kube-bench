@@ -34,7 +34,7 @@ type FilterOpts struct {
 
 var (
 	envVarsPrefix      = "KUBE_BENCH"
-	defaultKubeVersion = "1.6"
+	defaultKubeVersion = "1.11"
 	kubeVersion        string
 	cfgFile            string
 	cfgDir             string
@@ -134,12 +134,12 @@ func initConfig() {
 	// Precedence: Command line flags take precedence over environment variables.
 	viper.SetEnvPrefix(envVarsPrefix)
 	viper.AutomaticEnv()
-	
+
 	if kubeVersion == "" {
 		if env := viper.Get("version"); env != nil {
 			kubeVersion = env.(string)
 		}
- 	}
+	}
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
