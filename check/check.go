@@ -117,8 +117,6 @@ func (c *Check) run() State {
 	currentTests := c.Tests
 	hasAuditConfig := c.ConfigCommands != nil
 
-	// The following if-block will only be executed
-	// when an 'AuditConfig' command was provided
 	if hasAuditConfig {
 		nItems := len(c.Tests.TestItems)
 		// The reason we're creating a copy of the "tests"
@@ -145,7 +143,7 @@ func (c *Check) run() State {
 		}
 	}
 
-	state, finalOutput, retErrmsgs := performAuditTest(c.Audit, c.Commands, currentTests)
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, currentTests)
 	if len(state) > 0 {
 		c.State = state
 		return c.State
@@ -167,7 +165,7 @@ func (c *Check) run() State {
 			currentTests.TestItems[i].Path = c.Tests.TestItems[i].Path
 		}
 
-		state, finalOutput, retErrmsgs = performAuditTest(c.AuditConfig, c.ConfigCommands, currentTests)
+		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, c.ConfigCommands, currentTests)
 		if len(state) > 0 {
 			c.State = state
 			return c.State
@@ -260,7 +258,11 @@ func isShellCommand(s string) bool {
 	return false
 }
 
-func performAuditTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
+func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
+	if len(strings.TrimSpace(audit)) == 0 {
+		return "", failTestItem("missing command"), ""
+	}
+
 	var out bytes.Buffer
 	state, retErrmsgs := runExecCommands(audit, commands, &out)
 	if len(state) > 0 {

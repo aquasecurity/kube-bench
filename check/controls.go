@@ -70,11 +70,10 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 	// Prepare audit commands
 	for _, group := range c.Groups {
 		for _, check := range group.Checks {
-			glog.V(3).Infof("Check.ID %s\n", check.ID)
-			glog.V(3).Infof("Text to Command Audit...\n")
+			glog.V(3).Infof("Check.ID %s", check.ID)
 			check.Commands = textToCommand(check.Audit)
 			if len(check.AuditConfig) > 0 {
-				glog.V(3).Infof("Text to Command AuditConfig...\n")
+				glog.V(3).Infof("Check.ID has audit_config %s", check.ID)
 				check.ConfigCommands = textToCommand(check.AuditConfig)
 			}
 		}
