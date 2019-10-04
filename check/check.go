@@ -104,10 +104,7 @@ func (c *Check) run() State {
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
-	if c.Scored &&
-		len(strings.TrimSpace(c.Type)) == 0 &&
-		c.Tests == nil {
-
+	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
 		c.State = WARN
 		return c.State
 	}
