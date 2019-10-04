@@ -548,8 +548,14 @@ groups:
     text: "Ensure that the admission control plugin NodeRestriction is set (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
+      bin_op: or
       test_items:
       - flag: "--enable-admission-plugins"
+        compare:
+          op: has
+          value: "NodeRestriction"
+        set: true
+      - flag: "--admission-control"
         compare:
           op: has
           value: "NodeRestriction"
