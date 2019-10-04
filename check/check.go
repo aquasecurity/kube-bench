@@ -53,13 +53,6 @@ const (
 	MANUAL string = "manual"
 )
 
-func handleError(err error, context string) (errmsg string) {
-	if err != nil {
-		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
-	}
-	return
-}
-
 // Check contains information about a recommendation in the
 // CIS Kubernetes 1.6+ document.
 type Check struct {
@@ -266,12 +259,7 @@ func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *test
 
 	finalOutput := tests.execute(out.String())
 	if finalOutput == nil {
-		errmsgs += handleError(
-			fmt.Errorf("final output is nil"),
-			fmt.Sprintf("failed to run: %s\n",
-				audit,
-			),
-		)
+		errmsgs += fmt.Sprintf("Final output is <<EMPTY>>. Failed to run: %s\n", audit)
 	}
 
 	return "", finalOutput, errmsgs
@@ -307,13 +295,7 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	for i < n {
 		cs[i-1].Stdout, err = cs[i].StdinPipe()
 		if err != nil {
-			errmsgs += handleError(
-				err,
-				fmt.Sprintf("failed to run: %s\nfailed command: %s",
-					audit,
-					cs[i].Args,
-				),
-			)
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
 		}
 		i++
 	}
@@ -323,13 +305,7 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	for i < n {
 		err := cs[i].Start()
 		if err != nil {
-			errmsgs += handleError(
-				err,
-				fmt.Sprintf("failed to run: %s\nfailed command: %s",
-					audit,
-					cs[i].Args,
-				),
-			)
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
 		}
 		i++
 	}
@@ -339,13 +315,7 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	for i < n {
 		err := cs[i].Wait()
 		if err != nil {
-			errmsgs += handleError(
-				err,
-				fmt.Sprintf("failed to run: %s\nfailed command:%s",
-					audit,
-					cs[i].Args,
-				),
-			)
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
 		}
 
 		if i < n-1 {
