@@ -173,6 +173,11 @@ There are three output states
 - [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
 - [INFO] is informational output that needs no further action.
 
+Note:
+- If the test is Manual, this always generates WARN (because the user has to run it manually)
+- If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
+- If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
+
 ## Configuration
 
 Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
