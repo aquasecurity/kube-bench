@@ -231,7 +231,7 @@ groups:
     # To check if the property is set as expected, we need to parse the kubelet command 
     # instead reading the Kubelet Configuration file.
     audit: "ps -fC $kubeletbin"
-    type: skip
+    type: "skip"
     tests:
       bin_op: or
       test_items:
@@ -444,8 +444,9 @@ groups:
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
       644 or more restrictive (Scored)"
-      type: manual
+      type: "manual"
       remediation: |
+        [Manual test]
         Run the following command to modify the file permissions of the --client-ca-file
         chmod 644 <filename>
       scored: true
