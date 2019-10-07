@@ -113,7 +113,7 @@ func TestNewRunFilter(t *testing.T) {
 
 }
 
-func Test_isMaster(t *testing.T) {
+func TestIsMaster(t *testing.T) {
 	t.Run("valid config, not master", func(t *testing.T) {
 		assert.False(t, isMaster())
 	})
