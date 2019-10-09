@@ -2,22 +2,22 @@
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
 representation of the CIS Kubernetes Benchmark checks. There is a 
-`controls` file per kubernetes version and node type.
+`controls` file per Kubernetes version and node type.
 
-`controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
+`controls` for the various versions of Kubernetes can be found in directories
+with same name as the Kubernetes versions under `cfg/`, for example `cfg/1.12`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
 ## Controls
 
 `controls` is a YAML document that contains checks that must be run against a 
-specific kubernetes node type, master or node and version.
+specific Kubernetes node type, master or node and version.
 
 `controls` is the fundamental input to `kube-bench`. The following is an example 
 of a basic `controls`:
 
-```
+```yml
 ---
 controls:
 id: 1
@@ -58,29 +58,29 @@ groups:
       scored: true
 ```
 
-`controls` is composed of a hierachy of groups, sub-groups and checks. Each of
+`controls` is composed of a hierarchy of groups, sub-groups and checks. Each of
 the `controls` components have an id and a text description which are displayed 
 in the `kube-bench` output.
 
-`type` specifies what kubernetes node type a `controls` is for. Possible  values
+`type` specifies what Kubernetes node type a `controls` is for. Possible  values
 for `type` are `master` and `node`.
 
 ## Groups
 
-`groups` is list of subgroups which test the various kubernetes components
+`groups` is list of subgroups which test the various Kubernetes components
 that run on the node type specified in the `controls`. 
 
 For example one subgroup checks parameters passed to the apiserver binary, while 
 another subgroup checks parameters passed to the controller-manager binary.
 
-```
+```yml
 groups:
 - id: 1.1
   text: API Server
-  ...
+  # ...
 - id: 1.2
   text: Scheduler
-  ...
+  # ...
 ```
 
 These subgroups have `id`, `text` fields which serve the same purposes described
@@ -89,7 +89,7 @@ in the previous paragraphs. The most important part of the subgroup is the
 
 This is an example of a subgroup and checks in the subgroup.
 
-```
+```yml
 id: 1.1
 text: API Server
 checks:
@@ -97,12 +97,12 @@ checks:
     text: "Ensure that the --allow-privileged argument is set (Scored)"
     audit: "ps -ef | grep kube-apiserver | grep -v grep"
     tests:
-    ...
+    # ...
   - id: 1.1.2
     text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
     audit: "ps -ef | grep kube-apiserver | grep -v grep"
     tests:
-    ...
+    # ...
 ``` 
 
 `kube-bench` supports running a subgroup by specifying the subgroup `id` on the
@@ -110,18 +110,18 @@ command line, with the flag `--group` or `-g`.
 
 ## Check
 
-The CIS Kubernetes Benchmark recommends configurations to harden kubernetes 
+The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes 
 components. These recommendations are usually configuration options, and can be 
-specified by flags to kubernetes binaries, or in configuration files.
+specified by flags to Kubernetes binaries, or in configuration files.
 
-The Benchmark also provides commands to audit a kubernetes installation, identify
+The Benchmark also provides commands to audit a Kubernetes installation, identify
 places where the cluster security can be improved, and steps to remediate these
 identified problems.
 
 In `kube-bench`, `check` objects embody these recommendations.  This an example
 `check` object:
 
-```
+```yml
 id: 1.1.1
 text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
 audit: "ps -ef | grep kube-apiserver | grep -v grep"
@@ -139,7 +139,7 @@ remediation: |
 scored: false
 ```
 
-A `check` object has an `id`, a `text`, an `audit` , a `tests`,`remediation`
+A `check` object has an `id`, a `text`, an `audit`, a `tests`, `remediation`
 and `scored` fields.
 
 `kube-bench` supports running individual checks by specifying the check's `id`
@@ -164,40 +164,39 @@ The are two ways to extract keywords from the output of the `audit` command,
 command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
-```
+```sh
 ps -ef | grep somebinary | grep -v grep
 ``` 
 
 Here is an example usage of the `flag` option:
 
-```
-...
+```yml
+# ...
 audit: "ps -ef | grep kube-apiserver | grep -v grep"
 tests:
   test_items:
   - flag: "--anonymous-auth"
-  ...
+  # ...
 ```
 
 `path` is used when the keyword is an option set in a JSON or YAML config file.
 The associated `audit` command is usually `cat /path/to/config-yaml-or-json`.
 For example:
 
-```
-...
-
+```yml
+# ...
 text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
 audit: "cat /path/to/some/config"
 tests:
   test_items:
   - path: "{.someoption.value}"
-    ...
+    # ...
 ```
 
 `test_item` compares the output of the audit command and keywords using the
 `set` and `compare` fields.
 
-```
+```yml
   test_items:
   - flag: "--anonymous-auth"
     compare:
@@ -236,7 +235,7 @@ The `op` (operations) currently supported in `kube-bench` are:
 ## Configuration and Variables
 
 Kubernetes component configuration and binary file locations and names 
-vary based on cluster deployment methods and kubernetes distribution used.
+vary based on cluster deployment methods and Kubernetes distribution used.
 For this reason, the locations of these binaries and config files are configurable
 by editing the `cfg/config.yaml` file and these binaries and files can be
 referenced in a `controls` file via variables.
@@ -245,7 +244,7 @@ The `cfg/config.yaml` file is a global configuration file. Configuration files
 can be created for specific Kubernetes versions (distributions). Values in the
 version specific config overwrite similar values in `cfg/config.yaml`.
 
-For example, the kube-apiserver in Redhat OCP distribution is run as 
+For example, the kube-apiserver in Red Hat OCP distribution is run as 
 `hypershift openshift-kube-apiserver` instead of the default `kube-apiserver`.
 This difference can be specified by editing the `master.apiserver.defaultbin`
 entry `cfg/ocp-3.10/config.yaml`.
@@ -277,7 +276,7 @@ Every node type has a subsection that specifies the main configurations items.
 - `bins`: A list of candidate binaries for a component. `kube-bench` checks this
    list and selects the first binary that is running on the node.
 
-   if none of the binaries in `bins` list is running, `kube-bench` checks if the
+   If none of the binaries in `bins` list is running, `kube-bench` checks if the
    binary specified by `defaultbin` is running and terminates if none of the 
    binaries in both `bins` and `defaultbin` is running.
    
@@ -286,11 +285,11 @@ Every node type has a subsection that specifies the main configurations items.
    the selected API server binary with the variable `$apiserverbin` in an `audit`
    command.
    
-   ```
+   ```yml
    id: 1.1.1
     text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    ...
+    # ...
    ```
    
 - `confs`: A list of candidate configuration files for a component. `kube-bench`
@@ -303,12 +302,11 @@ Every node type has a subsection that specifies the main configurations items.
   selected API server config file with the variable `$apiserverconf` in an `audit`
   command.
   
-  ```
+  ```yml
   id: 1.4.1
     text: "Ensure that the API server pod specification file permissions are
     set to 644 or more restrictive (Scored)"
     audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
-
   ```
   
 - `svcs`:  A list of candidates unitfiles for a component. `kube-bench` checks this 
@@ -320,9 +318,9 @@ Every node type has a subsection that specifies the main configurations items.
   kubelet unitfile is referenced with `$kubeletsvc` in the `remediation` of the 
   `check`.
   
-  ```
+  ```yml
   id: 2.1.1
-    ...
+    # ...
     remediation: |
       Edit the kubelet service file $kubeletsvc
       on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
@@ -330,7 +328,7 @@ Every node type has a subsection that specifies the main configurations items.
       Based on your system, restart the kubelet service. For example:
       systemctl daemon-reload
       systemctl restart kubelet.service
-    ...
+    # ...
   ```
   
   - `kubeconfig`: A list of candidate kubeconfig files for a component. `kube-bench`
@@ -343,10 +341,10 @@ Every node type has a subsection that specifies the main configurations items.
     selected kubelet kubeconfig is referenced with `$kubeletkubeconfig` in the
     `audit` command.
     
-    ```
+    ```yml
     id: 2.2.1
       text: "Ensure that the kubelet.conf file permissions are set to 644 or
       more restrictive (Scored)"
       audit: "/bin/sh -c 'if test -e $kubeletkubeconfig; then stat -c %a $kubeletkubeconfig; fi'"
-      ...
+      # ...
     ```

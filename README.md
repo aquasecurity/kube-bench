@@ -30,7 +30,7 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
-There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
+There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
 
 ## Installation
 
@@ -42,31 +42,30 @@ You can choose to
 
 ## Running kube-bench
 
-If you run kube-bench directly from the command line you may need to be root / sudo in order to have access to all the config files.
+If you run kube-bench directly from the command line you may need to be root/sudo in order to have access to all the config files.
 
 kube-bench automatically selects which `controls` to use based on the detected
-node type and the version of kubernetes a cluster is running. This behaviour
+node type and the version of Kubernetes a cluster is running. This behavior
 can be overridden by specifying the `master` or `node` subcommand and the
 `--version` flag on the command line. 
 
-The kubernetes version can also be set with the KUBE_BENCH_VERSION environment variable.
-The value of `--version` takes precedence over the value of KUBE_BENCH_VERSION.
+The Kubernetes version can also be set with the `KUBE_BENCH_VERSION` environment variable.
+The value of `--version` takes precedence over the value of `KUBE_BENCH_VERSION`.
 
-For example:
-run kube-bench against a master with version auto-detection:
+For example, run kube-bench against a master with version auto-detection:
 
 ```
 kube-bench master
 ```
 
-or run kube-bench against a node with the node `controls` for kubernetes 
-version 1.13:
+Or run kube-bench against a node with the node `controls` for Kubernetes  version 1.13:
+
 ```
 kube-bench node --version 1.13
 ```
 
-`controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.13`.
+`controls` for the various versions of Kubernetes can be found in directories
+with same name as the Kubernetes versions under `cfg/`, for example `cfg/1.13`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
@@ -90,7 +89,7 @@ You can use your own configs by mounting them over the default ones in `/opt/kub
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
 ```
 
-### Running in a kubernetes cluster
+### Running in a Kubernetes cluster
 
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
@@ -137,7 +136,7 @@ There are two significant differences on EKS:
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
-** binaries compiled for linux-x86-64 only (so they won't run on OSX or Windows) **
+** binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows) **
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
@@ -146,7 +145,7 @@ You can then run `./kube-bench [master|node]`.
 
 ### Installing from sources
 
-If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [$GOPATH is set](https://github.com/golang/go/wiki/GOPATH)):
+If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [`GOPATH` is set](https://github.com/golang/go/wiki/GOPATH)):
 
 ```shell
 go get github.com/aquasecurity/kube-bench
@@ -160,17 +159,17 @@ go build -o kube-bench .
 
 # Run the all checks
 ./kube-bench
-
 ```
+
 ## Running on OpenShift 
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
 
 ## Output
 
-There are three output states
-- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
+There are three output states:
+- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed.
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually.
 - [INFO] is informational output that needs no further action.
 
 ## Configuration
@@ -183,7 +182,7 @@ You can read more about `kube-bench` configuration in our [documentation](docs/R
 
 ## Test config YAML representation
 
-The tests (or "controls") are represented as YAML documents (installed by default into ./cfg). There are different versions of these test YAML files reflecting different versions of the CIS Kubernetes Benchmark. You will find more information about the test file YAML definitions in our [documentation](docs/README.md).
+The tests (or "controls") are represented as YAML documents (installed by default into `./cfg`). There are different versions of these test YAML files reflecting different versions of the CIS Kubernetes Benchmark. You will find more information about the test file YAML definitions in our [documentation](docs/README.md).
 
 ### Omitting checks
 
@@ -199,14 +198,15 @@ If you decide that a recommendation is not appropriate for your environment, you
 
 No tests will be run for this check and the output will be marked [INFO].
 
-# Roadmap
+## Roadmap
+
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
 We welcome PRs and issue reports.
 
-# Testing locally with kind
+## Testing locally with kind
 
-Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real kubernetes cluster for development purpose.
+Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purpose.
 
 First you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
@@ -218,20 +218,20 @@ Finally we can use the `make kind-run` target to run the current version of kube
 
 Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
-# GitHub Issues
+## Contributing
 
-## Bugs
+### Bugs
 
 If you think you have found a bug please follow the instructions below.
 
 - Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
 - Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
-- Note the version of kubernetes you are running (from `kubectl version` or `oc version` for Openshift).
+- Note the version of Kubernetes you are running (from `kubectl version` or `oc version` for OpenShift).
 - Set `-v 10` command line option and save the log output. Please paste this into your issue.
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 
-## Features
+### Features
 
 We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
 
@@ -240,7 +240,7 @@ We also use the GitHub issue tracker to track feature requests. If you have an i
 - Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
 
-## Pull Requests 
+### Pull Requests 
 
 We welcome pull requests! 
 
