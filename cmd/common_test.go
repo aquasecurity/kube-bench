@@ -19,6 +19,7 @@ import (
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
 )
 
@@ -114,11 +115,13 @@ func TestNewRunFilter(t *testing.T) {
 }
 
 func TestIsMaster(t *testing.T) {
-	t.Run("valid config, not master", func(t *testing.T) {
-		assert.False(t, isMaster())
-	})
+	t.Run("valid config, is master and all components are running", func(t *testing.T) {
+		cfgFile = "../cfg/config.yaml"
+		defer func() {
+			cfgFile = ""
+		}()
+		initConfig()
 
-	t.Run("valid config, is master", func(t *testing.T) {
 		oldGetBinariesFunc := getBinariesFunc
 		getBinariesFunc = func(viper *viper.Viper) (strings map[string]string, i error) {
 			return map[string]string{"apiserver": "kube-apiserver"}, nil
@@ -126,17 +129,119 @@ func TestIsMaster(t *testing.T) {
 		defer func() {
 			getBinariesFunc = oldGetBinariesFunc
 		}()
+
 		assert.True(t, isMaster())
 	})
 
-	t.Run("invalid config", func(t *testing.T) {
+	t.Run("valid config, is master and but not all components are running", func(t *testing.T) {
+		cfgFile = "../cfg/config.yaml"
+		defer func() {
+			cfgFile = ""
+		}()
+		initConfig()
+
 		oldGetBinariesFunc := getBinariesFunc
 		getBinariesFunc = func(viper *viper.Viper) (strings map[string]string, i error) {
-			return nil, errors.New("invalid config passed")
+			return map[string]string{}, nil
 		}
 		defer func() {
 			getBinariesFunc = oldGetBinariesFunc
 		}()
+
+		assert.False(t, isMaster())
+	})
+
+	t.Run("valid config, is master, not all components are running and fails to find all binaries", func(t *testing.T) {
+		cfgFile = "../cfg/config.yaml"
+		defer func() {
+			cfgFile = ""
+		}()
+		initConfig()
+
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = func(viper *viper.Viper) (strings map[string]string, i error) {
+			return map[string]string{}, errors.New("failed to find binaries")
+		}
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+		}()
+
+		assert.False(t, isMaster())
+	})
+
+	t.Run("valid config, does not include master", func(t *testing.T) {
+		f, _ := ioutil.TempFile("", "TestIsMaster_valid_config_no_master*.yaml")
+		defer f.Close()
+		_, _ = f.Write([]byte(`---
+node:
+  components:
+    - kubelet
+    - proxy
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    - kubernetes
+
+  kubernetes:
+    defaultconf: "/etc/kubernetes/config"
+
+  kubelet:
+    cafile:
+      - "/etc/kubernetes/pki/ca.crt"
+      - "/etc/kubernetes/certs/ca.crt"
+      - "/etc/kubernetes/cert/ca.pem"
+    svc: 
+      # These paths must also be included
+      #  in the 'confs' property below
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      - "/etc/systemd/system/kubelet.service"
+      - "/lib/systemd/system/kubelet.service"
+    bins:
+      - "hyperkube kubelet"
+      - "kubelet"
+    kubeconfig:
+      - "/etc/kubernetes/kubelet.conf"
+      - "/var/lib/kubelet/kubeconfig"
+      - "/etc/kubernetes/kubelet-kubeconfig"
+    confs:
+      - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/home/kubernetes/kubelet-config.yaml"
+      - "/etc/default/kubelet"
+      ## Due to the fact that the kubelet might be configured
+      ## without a kubelet-config file, we use a work-around
+      ## of pointing to the systemd service file (which can also
+      ## hold kubelet configuration).
+      ## Note: The following paths must match the one under 'svc'
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      - "/etc/systemd/system/kubelet.service"
+      - "/lib/systemd/system/kubelet.service"
+    defaultconf: "/var/lib/kubelet/config.yaml"
+    defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+    defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
+    defaultcafile: "/etc/kubernetes/pki/ca.crt"
+
+  proxy:
+    bins:
+      - "kube-proxy"
+      - "hyperkube proxy"
+      - "hyperkube kube-proxy"
+      - "proxy"
+    confs:
+      - /etc/kubernetes/proxy
+      - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    kubeconfig:
+      - /etc/kubernetes/kubelet-kubeconfig
+    svc:
+      - "/lib/systemd/system/kube-proxy.service"
+    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    defaultkubeconfig: "/etc/kubernetes/proxy.conf"
+`))
+
+		cfgFile = f.Name()
+		defer func() {
+			cfgFile = ""
+		}()
+
+		initConfig()
 		assert.False(t, isMaster())
 	})
 }
