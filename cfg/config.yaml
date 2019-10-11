@@ -14,11 +14,11 @@ master:
     - controllermanager
     - etcd
     - flanneld
-    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    # kubernetes is a component to cover the config file /etc/kubernetes/1.7/master that is referred to in the benchmark
     - kubernetes
 
   kubernetes:
-    defaultconf: /etc/kubernetes/config
+    defaultconf: /etc/kubernetes/1.7/master
 
   apiserver:
     bins:
@@ -74,11 +74,11 @@ node:
   components:
     - kubelet
     - proxy
-    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    # kubernetes is a component to cover the config file /etc/kubernetes/1.7/master that is referred to in the benchmark
     - kubernetes
 
   kubernetes:
-    defaultconf: "/etc/kubernetes/config"
+    defaultconf: "/etc/kubernetes/1.7/master"
 
   kubelet:
     cafile:
