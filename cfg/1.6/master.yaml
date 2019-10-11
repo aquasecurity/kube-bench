@@ -909,58 +909,73 @@ groups:
     - id: 1.6.1
       text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
       type: "manual"
-      remediation: "Remove any unneeded clusterrolebindings: kubectl delete clusterrolebinding [name]"
+      remediation: |
+        [Manual test]
+        Remove any unneeded clusterrolebindings: kubectl delete clusterrolebinding [name]
       scored: false
 
     - id: 1.6.2
       text: "Create Pod Security Policies for your cluster (Not Scored)"
       type: "manual"
-      remediation: "Follow the documentation and create and enforce Pod Security Policies for your cluster.
-              Additionally, you could refer the \"CIS Security Benchmark for Docker\" and follow the
-              suggested Pod Security Policies for your environment."
+      remediation: |
+        [Manual test]
+        Follow the documentation and create and enforce Pod Security Policies for your cluster.
+        Additionally, you could refer the "CIS Security Benchmark for Docker" and follow the
+        suggested Pod Security Policies for your environment.
       scored: false
 
     - id: 1.6.3
       text: "Create administrative boundaries between resources using namespaces (Not Scored)"
       type: "manual"
-      remediation: "Follow the documentation and create namespaces for objects in your deployment as you
-              need them."
+      remediation: |
+        [Manual test]
+        Follow the documentation and create namespaces for objects in your deployment as you need them.
       scored: false
 
     - id: 1.6.4
       text: "Create network segmentation using Network Policies (Not Scored)"
       type: "manual"
-      remediation: "Follow the documentation and create NetworkPolicy objects as you need them."
+      remediation: |
+        [Manual test]
+        Follow the documentation and create NetworkPolicy objects as you need them.
       scored: false
 
     - id: 1.6.5
       text: "Avoid using Kubernetes Secrets (Not Scored)"
       type: "manual"
-      remediation: "Use other mechanisms such as vaults to manage your cluster secrets."
+      remediation: |
+        [Manual test]
+        Use other mechanisms such as vaults to manage your cluster secrets.
       scored: false
 
 
     - id: 1.6.6
       text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
       type: "manual"
-      remediation: "Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
-              would need to enable alpha features in the apiserver by passing \"--feature-
-              gates=AllAlpha=true\" argument.\n
-              Edit the $apiserverconf file on the master node and set the KUBE_API_ARGS
-              parameter to \"--feature-gates=AllAlpha=true\"
-              KUBE_API_ARGS=\"--feature-gates=AllAlpha=true\""
+      remediation: |
+        [Manual test]
+        Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+        would need to enable alpha features in the apiserver by passing "--feature-
+        gates=AllAlpha=true" argument.
+        Edit the $apiserverconf file on the master node and set the KUBE_API_ARGS
+        parameter to "--feature-gates=AllAlpha=true"
+        KUBE_API_ARGS="--feature-gates=AllAlpha=true"
       scored: false
 
     - id: 1.6.7
       text: "Apply Security Context to Your Pods and Containers (Not Scored)"
       type: "manual"
-      remediation: "Follow the Kubernetes documentation and apply security contexts to your pods. For a
-              suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
-              Containers."
+      remediation: |
+        [Manual test]
+        Follow the Kubernetes documentation and apply security contexts to your pods. For a
+        suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
+        Containers.
       scored: false
 
     - id: 1.6.8
       text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
       type: "manual"
-      remediation: "Follow the Kubernetes documentation and setup image provenance."
+      remediation: |
+        [Manual test]
+        Follow the Kubernetes documentation and setup image provenance.
       scored: false

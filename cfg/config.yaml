@@ -116,6 +116,7 @@ node:
     defaultcafile: "/etc/kubernetes/pki/ca.crt"
 
   proxy:
+    optional: true
     bins:
       - "kube-proxy"
       - "hyperkube proxy"
