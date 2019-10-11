@@ -169,8 +169,8 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 ## Output
 
 There are three output states
-- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
+- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed.
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. 
 - [INFO] is informational output that needs no further action.
 
 ## Configuration
@@ -250,3 +250,5 @@ We welcome pull requests!
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach. 
 - Happy coding!
 
+### License
+This repository is available under the [Apache License 2.0](https://github.com/ladybug-tools/ladybug/blob/master/LICENSE).
