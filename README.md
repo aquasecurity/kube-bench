@@ -3,6 +3,7 @@
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
+[![Go Report Card](https://goreportcard.com/badge/github.com/aquasecurity/kube-bench)](https://goreportcard.com/report/github.com/aquasecurity/kube-bench)
 
 [cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/master/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
@@ -249,4 +250,9 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!). 
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach. 
 - Happy coding!
+
+
+# License
+
+Apache License 2.0
 
