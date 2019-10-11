@@ -42,7 +42,7 @@ ifndef HAS_KIND
 endif
 	@if [ -z $$(kind get clusters | grep $(KIND_PROFILE)) ]; then\
 		echo "Could not find $(KIND_PROFILE) cluster. Creating...";\
-		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.11.3 --wait 5m;\
+		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
 	fi
 
 # pushses the current dev version to the kind cluster.

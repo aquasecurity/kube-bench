@@ -26,7 +26,7 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | 1.1.0| 1.7 | 1.7 |
 | 1.2.0| 1.8 | 1.8-1.10 |
 | 1.3.0| 1.11 | 1.11-1.12 |
-| 1.4.0| 1.13 | 1.13- |
+| 1.4.1| 1.13 | 1.13- |
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
@@ -41,6 +41,8 @@ You can choose to
 * compile it from source.
 
 ## Running kube-bench
+
+If you run kube-bench directly from the command line you may need to be root / sudo in order to have access to all the config files.
 
 kube-bench automatically selects which `controls` to use based on the detected
 node type and the version of kubernetes a cluster is running. This behaviour

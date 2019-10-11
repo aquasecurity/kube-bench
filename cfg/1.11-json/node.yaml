@@ -96,10 +96,7 @@ groups:
     text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
     audit: "cat $kubeletconf"
     tests:
-      bin_op: or
       test_items:
-      - path: "{.readOnlyPort}"
-        set: false
       - path: "{.readOnlyPort}"
         compare:
           op: eq
@@ -317,12 +314,12 @@ groups:
       test_items:
       - path: "{.tlsCipherSuites}"
         compare:
-          op: eq
+          op: valid_elements
           value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
         set: true
     remediation: |
       If using a Kubelet config file, edit the file to set TLSCipherSuites: to TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
-      If using executable arguments, edit the kubelet service file $kubeletconf on each worker node and set the below parameter.
+      If using executable arguments, edit the kubelet service file $kubeletsvc on each worker node and set the below parameter.
       --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
     scored: false
 
@@ -439,6 +436,10 @@ groups:
         Run the below command (based on the file location on your system) on the each worker
         node. For example,
         chmod 644 $proxykubeconfig
+
+        Note - This test reports "FAIL" if kube-proxy has been configured
+        using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
+        as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.6
@@ -452,13 +453,18 @@ groups:
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
           chown root:root $proxykubeconfig
+                 
+          Note - This test reports "FAIL" if kube-proxy has been configured
+          using a kubernetes configMap. Only under this situation, the "FAIL" can safely be ignored 
+          as the kube-proxy does not expose the kubeconfig file to the worker node.
       scored: true
 
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
       644 or more restrictive (Scored)"
-      type: manual
+      type: "manual"
       remediation: |
+        [Manual test]
         Run the following command to modify the file permissions of the --client-ca-file
         chmod 644 <filename>
       scored: true
