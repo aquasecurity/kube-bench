@@ -26,7 +26,7 @@ import (
 	"github.com/golang/glog"
 )
 
-// NodeType indicates the type of node (master, node, federated).
+// NodeType indicates the type of node (master, node).
 type NodeType string
 
 // State is the state of a control check.
@@ -46,8 +46,6 @@ const (
 	MASTER NodeType = "master"
 	// NODE a node
 	NODE NodeType = "node"
-	// FEDERATED a federated deployment.
-	FEDERATED NodeType = "federated"
 )
 
 func handleError(err error, context string) (errmsg string) {

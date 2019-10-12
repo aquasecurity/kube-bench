@@ -5,7 +5,6 @@
 ## Uncomment to use different control file paths.
 # masterControls: ./cfg/master.yaml
 # nodeControls: ./cfg/node.yaml
-# federatedControls: ./cfg/federated.yaml
 
 master:
   components:
@@ -132,20 +131,3 @@ node:
       - "/lib/systemd/system/kube-proxy.service"
     defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
     defaultkubeconfig: "/etc/kubernetes/proxy.conf"
-
-federated:
-  components:
-    - fedapiserver
-    - fedcontrollermanager
-
-  fedapiserver:
-    bins:
-      - "hyperkube federation-apiserver"
-      - "kube-federation-apiserver"
-      - "federation-apiserver"
-
-  fedcontrollermanager:
-    bins:
-      - "hyperkube federation-controller-manager"
-      - "kube-federation-controller-manager"
-      - "federation-controller-manager"
