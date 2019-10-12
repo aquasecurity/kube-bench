@@ -451,8 +451,9 @@ groups:
     - id: 2.2.7
       text: "Ensure that the certificate authorities file permissions are set to
       644 or more restrictive (Scored)"
-      type: manual
+      type: "manual"
       remediation: |
+        [Manual test]
         Run the following command to modify the file permissions of the --client-ca-file
         chmod 644 <filename>
       scored: true
