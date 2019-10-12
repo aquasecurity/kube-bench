@@ -2,17 +2,17 @@
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
 representation of the CIS Kubernetes Benchmark checks. There is a 
-`controls` file per kubernetes version and node type.
+`controls` file per Kubernetes version and node type.
 
-`controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
+`controls` for the various versions of Kubernetes can be found in directories
+with the same name as the Kubernetes versions under `cfg/`, for example, `cfg/1.12`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
 ## Controls
 
 `controls` is a YAML document that contains checks that must be run against a 
-specific kubernetes node type, master or node and version.
+specific Kubernetes node type, master or node and version.
 
 `controls` is the fundamental input to `kube-bench`. The following is an example 
 of a basic `controls`:
@@ -67,7 +67,7 @@ for `type` are `master` and `node`.
 
 ## Groups
 
-`groups` is a list of subgroups that test the various kubernetes components
+`groups` is a list of subgroups that test the various Kubernetes components
 that run on the node type specified in the `controls`. 
 
 For example, one subgroup checks parameters passed to the API server binary, while 
@@ -111,9 +111,9 @@ command line, with the flag `--group` or `-g`.
 ## Check
 
 The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
-specified by flags to kubernetes binaries, or in configuration files.
+specified by flags to Kubernetes binaries, or in configuration files.
 
-The Benchmark also provides commands to audit a kubernetes installation, identify
+The Benchmark also provides commands to audit a Kubernetes installation, identify
 places where the cluster security can be improved, and steps to remediate these
 identified problems.
 
@@ -159,7 +159,7 @@ values expected by the CIS Kubernetes Benchmark.
 They are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
-`flag` is used when the keyword is a command line flag. The associated `audit`
+`flag` is used when the keyword is a command-line flag. The associated `audit`
 a command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
@@ -205,15 +205,14 @@ tests:
     set: true
 ```
 
-`set` checks if a keyword is present in the output of the audit command or in
-a config file. The possible values for `set` are true and false.
+`set` checks if a keyword is present in the output of the audit command or a config file. The possible values for `set` are true and false.
 
 If `set` is true, the check passes only if the keyword is present in the output
 of the audit command, or config file. If `set` is false, the check passes only
 if the keyword is not present in the output of the audit command, or config file.
 
 `compare` has two fields `op` and `value` to compare keywords with expected
-value. `op` specifies which operation is used for the comparison , and `value`
+value. `op` specifies which operation is used for the comparison, and `value`
 specifies the value to compare against.
 
 > To use `compare`, `set` must true. The comparison will be ignored if `set` is
@@ -235,7 +234,7 @@ The `op` (operations) currently supported in `kube-bench` are:
 ## Configuration and Variables
 
 Kubernetes component configuration and binary file locations and names 
-vary based on cluster deployment methods and kubernetes distribution used.
+vary based on cluster deployment methods and Kubernetes distribution used.
 For this reason, the locations of these binaries and config files are configurable
 by editing the `cfg/config.yaml` file and these binaries and files can be
 referenced in a `controls` file via variables.
