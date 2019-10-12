@@ -28,7 +28,7 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | 1.3.0| 1.11 | 1.11-1.12 |
 | 1.4.1| 1.13 | 1.13- |
 
-By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
+By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
 There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
 
@@ -38,18 +38,18 @@ You can choose to
 * run kube-bench from inside a container (sharing PID namespace with the host)
 * run a container that installs kube-bench on the host, and then run kube-bench directly on the host
 * install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
-* compile it from source.
+* compile it from the source.
 
 ## Running kube-bench
 
-If you run kube-bench directly from the command line you may need to be root / sudo in order to have access to all the config files.
+If you run kube-bench directly from the command line you may need to be root / sudo to have access to all the config files.
 
 kube-bench automatically selects which `controls` to use based on the detected
-node type and the version of kubernetes a cluster is running. This behaviour
+node type and the version of Kubernetes a cluster is running. This behavior
 can be overridden by specifying the `master` or `node` subcommand and the
 `--version` flag on the command line. 
 
-The kubernetes version can also be set with the KUBE_BENCH_VERSION environment variable.
+The Kubernetes version can also be set with the KUBE_BENCH_VERSION environment variable.
 The value of `--version` takes precedence over the value of KUBE_BENCH_VERSION.
 
 For example:
@@ -59,20 +59,20 @@ run kube-bench against a master with version auto-detection:
 kube-bench master
 ```
 
-or run kube-bench against a node with the node `controls` for kubernetes 
+or run kube-bench against a node with the node `controls` for Kubernetes 
 version 1.13:
 ```
 kube-bench node --version 1.13
 ```
 
 `controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.13`.
+with same name as the Kubernetes versions under `cfg/`, for example, `cfg/1.13`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
 ### Running inside a container
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions. 
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host so that kube-bench can check their existence and permissions. 
 
 ```
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node] --version 1.13
@@ -84,15 +84,15 @@ docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:late
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t aquasec/kube-bench:latest [master|node] 
 ```
 
-You can use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
+You can use your configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
 ```
 
-### Running in a kubernetes cluster
+### Running in a Kubernetes cluster
 
-You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
 The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
@@ -158,7 +158,7 @@ go build -o kube-bench .
 # See all supported options
 ./kube-bench --help
 
-# Run the all checks
+# Run all checks
 ./kube-bench
 
 ```
@@ -170,8 +170,8 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 There are three output states
 - [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually 
-- [INFO] is informational output that needs no further action.
+- [WARN] means this test needs further attention, for example, it is a test that needs to be run manually 
+- [INFO] is an informational output that needs no further action.
 
 ## Configuration
 
@@ -206,17 +206,17 @@ We welcome PRs and issue reports.
 
 # Testing locally with kind
 
-Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real kubernetes cluster for development purpose.
+Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real kubernetes cluster for development purposes.
 
-First you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
+First, you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
 *If kind cannot be found on your system the target will try to install it using `go get`*
 
-Next you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
+Next, you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
 
-Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
+Finally, we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
-Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 # GitHub Issues
 
@@ -237,7 +237,7 @@ We also use the GitHub issue tracker to track feature requests. If you have an i
 
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
-- Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
+- Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
 
 ## Pull Requests 
