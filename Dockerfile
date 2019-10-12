@@ -4,7 +4,8 @@ ADD go.mod go.sum ./
 ADD main.go .
 ADD check/ check/
 ADD cmd/ cmd/
-RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags '-w'
+ARG KUBEBENCH_VERSION
+RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
 FROM alpine:3.10 AS run
 WORKDIR /opt/kube-bench/
