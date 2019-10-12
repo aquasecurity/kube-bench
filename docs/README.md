@@ -58,7 +58,7 @@ groups:
       scored: true
 ```
 
-`controls` is composed of a hierachy of groups, sub-groups and checks. Each of
+`controls` is composed of a hierarchy of groups, sub-groups and checks. Each of
 the `controls` components have an id and a text description which are displayed 
 in the `kube-bench` output.
 
@@ -67,10 +67,10 @@ for `type` are `master` and `node`.
 
 ## Groups
 
-`groups` is list of subgroups which test the various kubernetes components
+`groups` is a list of subgroups that test the various kubernetes components
 that run on the node type specified in the `controls`. 
 
-For example one subgroup checks parameters passed to the apiserver binary, while 
+For example, one subgroup checks parameters passed to the API server binary, while 
 another subgroup checks parameters passed to the controller-manager binary.
 
 ```
@@ -110,8 +110,7 @@ command line, with the flag `--group` or `-g`.
 
 ## Check
 
-The CIS Kubernetes Benchmark recommends configurations to harden kubernetes 
-components. These recommendations are usually configuration options, and can be 
+The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
 specified by flags to kubernetes binaries, or in configuration files.
 
 The Benchmark also provides commands to audit a kubernetes installation, identify
@@ -146,22 +145,22 @@ and `scored` fields.
 as a comma-delimited list on the command line with the `--check` flag.
 
 The `audit` field specifies the command to run for a check. The output of this
-command is then evaluated for conformance with the CIS Kubernetes Benchmark
+a command is then evaluated for conformance with the CIS Kubernetes Benchmark
 recommendation.
 
-The audit is evaluated against a criteria specified by the `tests`
+The audit is evaluated against criteria specified by the `tests`
 object. `tests` contain `bin_op` and `test_items`.
 
 `test_items` specify the criteria(s) the `audit` command's output should meet to
-pass a check. This criteria is made up of keywords extracted from the output of
-the `audit` command and operations that compare the these keywords against
+pass a check. This criterion is made up of keywords extracted from the output of
+the `audit` command and operations that compare these keywords against
 values expected by the CIS Kubernetes Benchmark. 
 
-The are two ways to extract keywords from the output of the `audit` command,
+They are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
 `flag` is used when the keyword is a command line flag. The associated `audit`
-command is usually a `ps` command and a `grep` for the binary whose flag we are
+a command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
 ```
@@ -243,7 +242,7 @@ referenced in a `controls` file via variables.
 
 The `cfg/config.yaml` file is a global configuration file. Configuration files
 can be created for specific Kubernetes versions (distributions). Values in the
-version specific config overwrite similar values in `cfg/config.yaml`.
+version-specific config overwrite similar values in `cfg/config.yaml`.
 
 For example, the kube-apiserver in Redhat OCP distribution is run as 
 `hypershift openshift-kube-apiserver` instead of the default `kube-apiserver`.
@@ -299,7 +298,7 @@ Every node type has a subsection that specifies the main configurations items.
   of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
-  variable in the form `$<component>conf`. In the example below we reference the 
+  variable in the form `$<component>conf`. In the example below, we reference the 
   selected API server config file with the variable `$apiserverconf` in an `audit`
   command.
   
@@ -338,8 +337,7 @@ Every node type has a subsection that specifies the main configurations items.
     of the files exists, `kube-bench` defaults kubeconfig to the value of 
     `defaultkubeconfig`.
     
-    The selected kubeconfig for a component can be referenced in `controls` with
-    a variable in the form `$<component>kubeconfig`. In the example below, the
+    The selected kubeconfig for a component can be referenced in `controls` with a variable in the form `$<component>kubeconfig`. In the example below, the
     selected kubelet kubeconfig is referenced with `$kubeletkubeconfig` in the
     `audit` command.
     
