@@ -154,14 +154,14 @@ object. `tests` contain `bin_op` and `test_items`.
 
 `test_items` specify the criteria(s) the `audit` command's output should meet to
 pass a check. This criteria is made up of keywords extracted from the output of
-the `audit` command and operations that compare the these keywords against
+the `audit` command and operations that compare these keywords against
 values expected by the CIS Kubernetes Benchmark. 
 
-The are two ways to extract keywords from the output of the `audit` command,
+They are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
-`flag` is used when the keyword is a command line flag. The associated `audit`
-command is usually a `ps` command and a `grep` for the binary whose flag we are
+`flag` is used when the keyword is a command-line flag. The associated `audit`
+the command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
 ```
@@ -179,7 +179,7 @@ tests:
   ...
 ```
 
-`path` is used when the keyword is an option set in a JSON or YAML config file.
+`path` is used when a keyword is an option set in a JSON or YAML config file.
 The associated `audit` command is usually `cat /path/to/config-yaml-or-json`.
 For example:
 
@@ -206,8 +206,7 @@ tests:
     set: true
 ```
 
-`set` checks if a keyword is present in the output of the audit command or in
-a config file. The possible values for `set` are true and false.
+`set` checks if a keyword is present in the output of the audit command or a config file. The possible values for `set` are true and false.
 
 If `set` is true, the check passes only if the keyword is present in the output
 of the audit command, or config file. If `set` is false, the check passes only
