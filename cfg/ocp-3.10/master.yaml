@@ -410,7 +410,7 @@ groups:
 
   - id: 1.23
     text: "Verify that the service account lookup flag is not set"
-    type: skip
+    type: "skip"
     scored: true
 
   - id: 1.24
@@ -675,8 +675,9 @@ groups:
   - id: 1.37
     text: "Adjust the request timeout argument for your cluster resources"
     audit: "grep request-timeout /etc/origin/master/master-config.yaml"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       change the request-timeout value in the  /etc/origin/master/master-config.yaml
     scored: true
 
@@ -1313,6 +1314,7 @@ groups:
     text: "Ensure that the cluster-admin role is only used where required"
     type: "manual"
     remediation: |
+      [Manual test]
       Review users, groups, serviceaccounts bound to cluster-admin:
       oc get clusterrolebindings | grep cluster-admin
 
@@ -1324,6 +1326,7 @@ groups:
     text: "Verify Security Context Constraints as in use"
     type: "manual"
     remediation: |
+      [Manual test]
       Review Security Context Constraints:
       oc get scc
 
@@ -1341,6 +1344,7 @@ groups:
     text: "Use OpenShift projects to maintain boundaries between resources"
     type: "manual"
     remediation: |
+      [Manual test]
       Review projects:
       oc get projects
     scored: false
@@ -1349,6 +1353,7 @@ groups:
     text: "Create network segmentation using the Multi-tenant plugin or Network Policies"
     type: "manual"
     remediation: |
+      [Manual test]
       Verify on masters the plugin being used:
       grep networkPluginName /etc/origin/master/master-config.yaml
 
@@ -1372,6 +1377,7 @@ groups:
     text: "Enable seccomp and configure custom Security Context Constraints"
     type: "manual"
     remediation: |
+      [Manual test]
       Verify SCCs that have been configured with seccomp:
       oc get scc -ocustom-columns=NAME:.metadata.name,SECCOMP-PROFILES:.seccompProfiles
 
@@ -1386,6 +1392,7 @@ groups:
     text: "Review Security Context Constraints"
     type: "manual"
     remediation: |
+      [Manual test]
       Review SCCs:
       oc describe scc
 
@@ -1410,6 +1417,7 @@ groups:
     text: "Manage Image Provenance using ImagePolicyWebhook admission controller"
     type: "manual"
     remediation: |
+      [Manual test]
       Review imagePolicyConfig in /etc/origin/master/master-config.yaml.
     scored: false
 
@@ -1417,6 +1425,7 @@ groups:
     text: "Configure Network policies as appropriate"
     type: "manual"
     remediation: |
+      [Manual test]
       If ovs-networkplugin is used, review network policies:
       oc get networkpolicies
 
@@ -1429,6 +1438,7 @@ groups:
     text: "Use Security Context Constraints as compensating controls for privileged containers"
     type: "manual"
     remediation: |
+      [Manual test]
       1) Determine all sccs allowing privileged containers:
          oc get scc -ocustom-columns=NAME:.metadata.name,ALLOWS_PRIVILEGED:.allowPrivilegedContainer
       2) Review users and groups assigned to sccs allowing priviliged containers:
