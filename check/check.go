@@ -324,6 +324,6 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 		i++
 	}
 
-	glog.V(9).Infof("Command %q - Output:\n\n %s\n", audit, out.String())
+	glog.V(3).Infof("Command %q - Output:\n\n %s\n", audit, out.String())
 	return "", errmsgs
 }
