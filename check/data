@@ -307,3 +307,116 @@ groups:
               op: regex
               value: '^1\.12.*$'
             set: true
+
+- id: 2.1
+  text: "audit and audit_config commands"
+  checks:
+    - id: 0
+      text: "audit finds flag and passes, audit_config doesn't exist -> pass"
+      audit: "echo flag=correct"
+      tests:
+        test_items:
+          - flag: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 1
+      text: "audit finds flag and fails, audit_config doesn't exist -> fail"
+      audit: "echo flag=wrong"
+      tests:
+        test_items:
+          - flag: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 2
+      text: "audit doesn't find flag, audit_config doesn't exist -> fail"
+      audit: "echo somethingElse=correct"
+      tests:
+        test_items:
+          - flag: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 3
+      text: "audit doesn't find flag, audit_config has correct setting -> pass"
+      audit: "echo somethingElse=correct"
+      audit_config: "echo 'flag: correct'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 4
+      text: "audit doesn't find flag, audit_config has wrong setting -> fail"
+      audit: "echo somethingElse=correct"
+      audit_config: "echo 'flag: wrong'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 5
+      text: "audit finds correct flag, audit_config has wrong setting -> pass"
+      audit: "echo flag=correct"
+      audit_config: "echo 'flag: wrong'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 6
+      text: "neither audit nor audit_config has correct setting -> fail"
+      audit: "echo flag=wrong"
+      audit_config: "echo 'flag: wrong'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 7
+      text: "audit isn't present, superfluous flag field,audit_config is correct -> pass"
+      audit_config: "echo 'flag: correct'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 8
+      text: "audit isn't present, superfluous flag field,audit_config is wrong -> fail"
+      audit_config: "echo 'flag: wrong'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
