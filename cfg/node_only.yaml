@@ -1,0 +1,62 @@
+---
+node:
+  components:
+    - kubelet
+    - proxy
+    # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
+    - kubernetes
+
+  kubernetes:
+    defaultconf: "/etc/kubernetes/config"
+
+  kubelet:
+    cafile:
+      - "/etc/kubernetes/pki/ca.crt"
+      - "/etc/kubernetes/certs/ca.crt"
+      - "/etc/kubernetes/cert/ca.pem"
+    svc:
+      # These paths must also be included
+      #  in the 'confs' property below
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      - "/etc/systemd/system/kubelet.service"
+      - "/lib/systemd/system/kubelet.service"
+    bins:
+      - "hyperkube kubelet"
+      - "kubelet"
+    kubeconfig:
+      - "/etc/kubernetes/kubelet.conf"
+      - "/var/lib/kubelet/kubeconfig"
+      - "/etc/kubernetes/kubelet-kubeconfig"
+    confs:
+      - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/home/kubernetes/kubelet-config.yaml"
+      - "/etc/default/kubelet"
+      ## Due to the fact that the kubelet might be configured
+      ## without a kubelet-config file, we use a work-around
+      ## of pointing to the systemd service file (which can also
+      ## hold kubelet configuration).
+      ## Note: The following paths must match the one under 'svc'
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+      - "/etc/systemd/system/kubelet.service"
+      - "/lib/systemd/system/kubelet.service"
+    defaultconf: "/var/lib/kubelet/config.yaml"
+    defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
+    defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
+    defaultcafile: "/etc/kubernetes/pki/ca.crt"
+
+  proxy:
+    bins:
+      - "kube-proxy"
+      - "hyperkube proxy"
+      - "hyperkube kube-proxy"
+      - "proxy"
+    confs:
+      - /etc/kubernetes/proxy
+      - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    kubeconfig:
+      - /etc/kubernetes/kubelet-kubeconfig
+    svc:
+      - "/lib/systemd/system/kube-proxy.service"
+    defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+    defaultkubeconfig: "/etc/kubernetes/proxy.conf"
