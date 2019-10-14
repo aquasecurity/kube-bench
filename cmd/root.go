@@ -42,7 +42,6 @@ var (
 	pgSQL              bool
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
-	federatedFile      string
 	noResults          bool
 	noSummary          bool
 	noRemediations     bool

@@ -207,8 +207,6 @@ func loadConfig(nodetype check.NodeType) string {
 		file = masterFile
 	case check.NODE:
 		file = nodeFile
-	case check.FEDERATED:
-		file = federatedFile
 	}
 
 	runningVersion := ""
@@ -218,6 +216,7 @@ func loadConfig(nodetype check.NodeType) string {
 			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
 		}
 	}
+
 	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
