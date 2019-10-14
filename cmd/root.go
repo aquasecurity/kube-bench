@@ -42,7 +42,6 @@ var (
 	pgSQL              bool
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
-	federatedFile      string
 	noResults          bool
 	noSummary          bool
 	noRemediations     bool
@@ -134,12 +133,12 @@ func initConfig() {
 	// Precedence: Command line flags take precedence over environment variables.
 	viper.SetEnvPrefix(envVarsPrefix)
 	viper.AutomaticEnv()
-	
+
 	if kubeVersion == "" {
 		if env := viper.Get("version"); env != nil {
 			kubeVersion = env.(string)
 		}
- 	}
+	}
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {

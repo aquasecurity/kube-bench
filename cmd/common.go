@@ -207,8 +207,6 @@ func loadConfig(nodetype check.NodeType) string {
 		file = masterFile
 	case check.NODE:
 		file = nodeFile
-	case check.FEDERATED:
-		file = federatedFile
 	}
 
 	runningVersion := ""
