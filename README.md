@@ -174,6 +174,7 @@ Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
 
 ## Configuration
 
