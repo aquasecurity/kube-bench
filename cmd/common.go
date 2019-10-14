@@ -211,92 +211,17 @@ func loadConfig(nodetype check.NodeType) string {
 		file = federatedFile
 	}
 
-	// runningVersion := ""
-	// if kubeVersion == "" {
-	// 	runningVersion, err = getKubeVersion()
-	// 	if err != nil {
-	// 		exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
-	// 	}
-	// }
-
-	/*
-
-			  if kubeVersion == "" && benchmarkVersion == "" {
-					kubeVersion, err = getKubeVersion()
-					if err != nil {
-						exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
-					}
-			   }
-
-			   if kubeVersion != "" && benchmarkVersion != "" {
-				   exitWithError("Can not specify both version and benchmarkVersion")
-			   }
-
-			   var fileVersion string
-
-				if benchmarkVersion != "" {
-					fileVersion = benchmarkVersion
-				} else {
-					cis-ver	kube-bench config	k8s-ver
-					1.3.0	   1.11	            1.11-1.12
-					1.4.1	   1.13	            1.13-
-
-					cis-ver	kube-bench(--benchmark)  k8s-ver
-					1.3.0	   cis-1.3.0	         1.11-1.12
-					1.4.1	   cis-1.4.1	         1.13-
-
-					k8sToCISVersions := map[string]string {
-						"1.11": "cis-1.3.0",
-						"1.12": "cis-1.3.0",
-						"1.13": "cis-1.4.1",
-						"1.14": "cis-1.4.1",
-						"1.15": "cis-1.4.1",
-						"1.16": "cis-1.4.1",
-					}
-
-		            fileVersion, err := convertKubernetesVersionToCISVersion(kubeVersion)
-					if err != nil {
-					  exitWithError(err)
-				    }
-				}
-				path, err := getConfigFilePath(fileVersion, file)
-				if err != nil {
-					exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
-				}
-
-	*/
-
-	if kubeVersion == "" && benchmarkVersion == "" {
-		kubeVersion, err = getKubeVersion()
+	runningVersion := ""
+	if kubeVersion == "" {
+		runningVersion, err = getKubeVersion()
 		if err != nil {
 			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
 		}
 	}
-
-	if kubeVersion != "" && benchmarkVersion != "" {
-		exitWithError(fmt.Errorf("It is not valid to specify both --version and --benchmark"))
-	}
-
-	var fileVersion string
-
-	if benchmarkVersion != "" {
-		fileVersion = benchmarkVersion
-	} else {
-		fileVersion, err = convertToCISVersion(kubeVersion)
-		if err != nil {
-			exitWithError(fmt.Errorf("failed to convert kubernetes version to CIS version: %v", err))
-		}
-	}
-
-	path, err := getConfigFilePath(fileVersion, file)
+	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
-
-	// path, err := getConfigFilePath(kubeVersion, runningVersion, file)
-	// if err != nil {
-	// 	exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
-	// }
 
 	// Merge kubernetes version specific config if any.
 	viper.SetConfigFile(path + "/config.yaml")

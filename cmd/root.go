@@ -36,7 +36,6 @@ var (
 	envVarsPrefix      = "KUBE_BENCH"
 	defaultKubeVersion = "1.6"
 	kubeVersion        string
-	benchmarkVersion   string
 	cfgFile            string
 	cfgDir             string
 	jsonFmt            bool
@@ -115,7 +114,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
 	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
-	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify Kubernetes version, automatically detected if unset")
 
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
