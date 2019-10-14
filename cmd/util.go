@@ -27,16 +27,27 @@ var (
 
 var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
+var getBinariesFunc func(*viper.Viper) (map[string]string, error)
 var TypeMap = map[string][]string{
-	"ca": []string{"cafile", "defaultcafile"},
+	"ca":         []string{"cafile", "defaultcafile"},
 	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
-	"service": []string{"svc", "defaultsvc"},
-	"config": []string{"confs", "defaultconf"},
+	"service":    []string{"svc", "defaultsvc"},
+	"config":     []string{"confs", "defaultconf"},
+}
+
+var k8sToCISVersions = map[string]string {
+	"1.11": "cis-1.3.0",
+	"1.12": "cis-1.3.0",
+	"1.13": "cis-1.4.1",
+	"1.14": "cis-1.4.1",
+	"1.15": "cis-1.4.1",
+	"1.16": "cis-1.4.1",
 }
 
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
+	getBinariesFunc = getBinaries
 }
 
 func exitWithError(err error) {
@@ -118,16 +129,16 @@ func getBinaries(v *viper.Viper) (map[string]string, error) {
 	return binmap, nil
 }
 
-// getConfigFilePath locates the config files we should be using based on either the specified
-// version, or the running version of kubernetes if not specified
-func getConfigFilePath(specifiedVersion string, runningVersion string, filename string) (path string, err error) {
-	var fileVersion string
+// getConfigFilePath locates the config files we should be using based on 
+// the specified version
+func getConfigFilePath(fileVersion string, filename string) (path string, err error) {
+	// var fileVersion string
 
-	if specifiedVersion != "" {
-		fileVersion = specifiedVersion
-	} else {
-		fileVersion = runningVersion
-	}
+	// if specifiedVersion != "" {
+	// 	fileVersion = specifiedVersion
+	// } else {
+	// 	fileVersion = runningVersion
+	// }
 
 	glog.V(2).Info(fmt.Sprintf("Looking for config for version %s", fileVersion))
 
@@ -137,16 +148,19 @@ func getConfigFilePath(specifiedVersion string, runningVersion string, filename 
 		glog.V(2).Info(fmt.Sprintf("Looking for config file: %s\n", file))
 
 		if _, err = os.Stat(file); !os.IsNotExist(err) {
-			if specifiedVersion == "" && fileVersion != runningVersion {
-				glog.V(1).Info(fmt.Sprintf("No test file found for %s - using tests for Kubernetes %s\n", runningVersion, fileVersion))
+			// if specifiedVersion == "" && fileVersion != runningVersion {
+			// 	glog.V(1).Info(fmt.Sprintf("No test file found for %s - using tests for Kubernetes %s\n", runningVersion, fileVersion))
+			// }
+			if fileVersion == "" {
+				glog.V(1).Info(fmt.Sprintf("No test file found for CIS Version %s\n", fileVersion))
 			}
 			return path, nil
 		}
 
-		// If we were given an explicit version to look for, don't look for any others
-		if specifiedVersion != "" {
-			return "", err
-		}
+		// // If we were given an explicit version to look for, don't look for any others
+		// if specifiedVersion != "" {
+		// 	return "", err
+		// }
 
 		fileVersion = decrementVersion(fileVersion)
 		if fileVersion == "" {
@@ -341,4 +355,12 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
+}
+
+func convertToCISVersion(kubeVersion string) (string, error) {
+	cisVersion, found := k8sToCISVersions[kubeVersion]
+	 if !found {
+		 return "", fmt.Errorf("Unable to find a CIS version for Kubernetes version: %s", kubeVersion)
+	 } 
+	 return cisVersion, nil
 }
