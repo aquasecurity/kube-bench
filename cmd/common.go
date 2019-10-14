@@ -241,6 +241,7 @@ func isMaster() bool {
 	glog.V(2).Info("Checking if the current node is running master components")
 	masterConf := viper.Sub(string(check.MASTER))
 	if masterConf == nil {
+		glog.V(2).Info("No master components found to be running")
 		return false
 	}
 	components, err := getBinariesFunc(masterConf)
