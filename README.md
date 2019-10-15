@@ -178,7 +178,7 @@ Note:
 
 ## Configuration
 
-Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
+Kubernetes configuration and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
 
 Any settings in the version-specific config file `cfg/<version>/config.yaml` take precedence over settings in the main `cfg/config.yaml` file.
 
