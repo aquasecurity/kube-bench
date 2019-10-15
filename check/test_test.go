@@ -656,3 +656,38 @@ func TestCompareOp(t *testing.T) {
 		}
 	}
 }
+
+func TestToNumeric(t *testing.T) {
+	cases := []struct {
+		firstValue     string
+		secondValue    string
+		expectedToFail bool
+	}{
+		{
+			firstValue:     "a",
+			secondValue:    "b",
+			expectedToFail: true,
+		},
+		{
+			firstValue:     "5",
+			secondValue:    "b",
+			expectedToFail: true,
+		},
+		{
+			firstValue:     "5",
+			secondValue:    "6",
+			expectedToFail: false,
+		},
+	}
+
+	for _, c := range cases {
+		f, s, err := toNumeric(c.firstValue, c.secondValue)
+		if c.expectedToFail && err == nil {
+			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
+		}
+
+		if !c.expectedToFail && (f != 5 || s != 6) {
+			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
+		}
+	}
+}
