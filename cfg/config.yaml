@@ -5,7 +5,6 @@
 ## Uncomment to use different control file paths.
 # masterControls: ./cfg/master.yaml
 # nodeControls: ./cfg/node.yaml
-# federatedControls: ./cfg/federated.yaml
 
 master:
   components:
@@ -108,6 +107,7 @@ node:
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/etc/default/kubelet"
+      - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/kubelet/current/args"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around
@@ -124,6 +124,7 @@ node:
     defaultcafile: "/etc/kubernetes/pki/ca.crt"
 
   proxy:
+    optional: true
     bins:
       - "kube-proxy"
       - "hyperkube proxy"
@@ -139,20 +140,3 @@ node:
       - "/lib/systemd/system/kube-proxy.service"
     defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
     defaultkubeconfig: "/etc/kubernetes/proxy.conf"
-
-federated:
-  components:
-    - fedapiserver
-    - fedcontrollermanager
-
-  fedapiserver:
-    bins:
-      - "hyperkube federation-apiserver"
-      - "kube-federation-apiserver"
-      - "federation-apiserver"
-
-  fedcontrollermanager:
-    bins:
-      - "hyperkube federation-controller-manager"
-      - "kube-federation-controller-manager"
-      - "federation-controller-manager"
