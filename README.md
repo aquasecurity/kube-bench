@@ -18,13 +18,10 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.0.0 to 1.4.0 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.0 respectively. 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| 1.0.0| 1.6 | 1.6 |
-| 1.1.0| 1.7 | 1.7 |
-| 1.2.0| 1.8 | 1.8-1.10 |
 | 1.3.0| 1.11 | 1.11-1.12 |
 | 1.4.1| 1.13 | 1.13- |
 
@@ -173,9 +170,15 @@ There are three output states
 - [WARN] means this test needs further attention, for example it is a test that needs to be run manually. 
 - [INFO] is informational output that needs no further action.
 
+Note:
+- If the test is Manual, this always generates WARN (because the user has to run it manually)
+- If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
+- If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
+
 ## Configuration
 
-Kubernetes config and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
+Kubernetes configuration and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
 
 Any settings in the version-specific config file `cfg/<version>/config.yaml` take precedence over settings in the main `cfg/config.yaml` file.
 
@@ -217,38 +220,6 @@ Next you'll have to build the kube-bench docker image using `make build-docker`,
 Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
 Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
-
-# GitHub Issues
-
-## Bugs
-
-If you think you have found a bug please follow the instructions below.
-
-- Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
-- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
-- Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
-- Note the version of kubernetes you are running (from `kubectl version` or `oc version` for Openshift).
-- Set `-v 10` command line option and save the log output. Please paste this into your issue.
-- Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
-
-## Features
-
-We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
-
-- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
-- Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
-- Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
-- If you would like to include a technical design for your feature please feel free to do so.
-
-## Pull Requests 
-
-We welcome pull requests! 
-
-- Your PR is more likely to be accepted if it focuses on just one change.
-- Please include a comment with the results before and after your change. 
-- Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!). 
-- You're welcome to submit a draft PR if you would like early feedback on an idea or an approach. 
-- Happy coding!
 
 ### License
 This repository is available under the [Apache License 2.0](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE).
