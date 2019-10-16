@@ -251,4 +251,4 @@ We welcome pull requests!
 - Happy coding!
 
 ### License
-This repository is available under the [Apache License 2.0](https://github.com/ladybug-tools/ladybug/blob/master/LICENSE).
+This repository is available under the [Apache License 2.0](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE).
