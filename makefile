@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_REGISTRY)/$(BINARY):$(VERSION)
-TARGET_OS := linux
+TARGET_OS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
 
@@ -29,6 +29,7 @@ $(BINARY): $(SOURCES)
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
              --build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
              -t $(IMAGE_NAME) .
 
 tests:
