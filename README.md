@@ -224,4 +224,4 @@ Every time you want to test a change, you'll need to rebuild the docker image an
 
 # License
 
-This repository is available under the [Apache License 2.0](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE)
+This repository is available under the [Apache License 2.0](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE).
