@@ -128,8 +128,8 @@ There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS 
 
 There are two significant differences on EKS:
 
-* It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
-* It's not possible to schedule jobs onto the master node, so master checks can't be performed
+* It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/).
+* It's not possible to schedule jobs onto the master node, so master checks can't be performed.
 
 ### Installing from a container
 
