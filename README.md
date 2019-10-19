@@ -174,7 +174,7 @@ Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
+- If the test is Scored, type is empty, and there are no `test_items` present, this generates a WARN.
 
 ## Configuration
 
@@ -203,7 +203,7 @@ If you decide that a recommendation is not appropriate for your environment, you
 No tests will be run for this check and the output will be marked [INFO].
 
 # Roadmap
-Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
+Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn, we can anticipate being made for each new Kubernetes release.
 
 We welcome PRs and issue reports.
 
