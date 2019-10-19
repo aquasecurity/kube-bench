@@ -220,3 +220,7 @@ Next you'll have to build the kube-bench docker image using `make build-docker`,
 Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
 Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+
+#
+kube-bench is licensed under the
+Apache License 2.0
