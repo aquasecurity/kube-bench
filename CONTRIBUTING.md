@@ -13,11 +13,11 @@ Thank you for taking interest in contributing to kube-bench !
 
 ## Pull Requests
 
-1. Every Pull Request should have an associated Issue unless you are fixing a trivial documentation issue.
-1. Your PR is more likely to be accepted if it focuses on just one change.
-1. Describe what the PR does. There's no convention enforced, but please try to be concise and descriptive. Treat the PR description as a commit message. Titles that starts with "fix"/"add"/"improve"/"remove" are good examples.
-1. Please add the associated Issue in the PR description.
-1. There's no need to add or tag reviewers.
-1. If a reviewer commented on your code, or asked for changes, please remember to mark the discussion as resolved after you address it. PRs with unresolved issues should not be merged (even if the comment is unclear or requires no action from your side).
-1. Please include a comment with the results before and after your change.
-1. Your PR is more likely to be accepted if it includes tests (We have not historically been very strict about tests, but we would like to improve this!).
+1. Every pull request(PR) should have an associated issue unless you are fixing a trivial documentation issue.
+2. Your PR is more likely to be accepted if it focuses on just one change.
+3. Describe what the PR does. There's no convention enforced, but please try to be concise and descriptive. Treat the PR description as a commit message. Titles that starts with "fix"/"add"/"improve"/"remove" are good examples.
+4. Please add the associated Issue in the PR description.
+5. There's no need to add or tag reviewers.
+6. If a reviewer commented on your code, or asked for changes, please remember to mark the discussion as resolved after you address it. PRs with unresolved issues should not be merged (even if the comment is unclear or requires no action from your side).
+7. Please include a comment with the results before and after your change.
+8. Your PR is more likely to be accepted if it includes tests (We have not historically been very strict about tests, but we would like to improve this!).
