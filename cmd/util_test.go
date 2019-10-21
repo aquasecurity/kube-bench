@@ -408,7 +408,7 @@ func TestGetConfigFilePath(t *testing.T) {
 		t.Fatalf("Failed to create temp directory")
 	}
 	defer os.RemoveAll(cfgDir)
-	d := filepath.Join(cfgDir, "1.8")
+	d := filepath.Join(cfgDir, "cis-1.4.1")
 	err = os.Mkdir(d, 0666)
 	if err != nil {
 		t.Fatalf("Failed to create temp file")
@@ -416,23 +416,19 @@ func TestGetConfigFilePath(t *testing.T) {
 	ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
 
 	cases := []struct {
-		specifiedVersion string
-		runningVersion   string
+		benchmarkVersion string
+		specifiedVersion bool
 		succeed          bool
 		exp              string
 	}{
-		{runningVersion: "1.8", succeed: true, exp: d},
-		{runningVersion: "1.9", succeed: true, exp: d},
-		{runningVersion: "1.10", succeed: true, exp: d},
-		{runningVersion: "1.1", succeed: false},
-		{specifiedVersion: "1.8", succeed: true, exp: d},
-		{specifiedVersion: "1.9", succeed: false},
-		{specifiedVersion: "1.10", succeed: false},
+		{benchmarkVersion: "cis-1.4.1", specifiedVersion: true, succeed: true, exp: d},
+		{benchmarkVersion: "cis-1.5.0", specifiedVersion: false, succeed: true, exp: d},
+		{benchmarkVersion: "1.1", succeed: false},
 	}
 
 	for _, c := range cases {
-		t.Run(c.specifiedVersion+"-"+c.runningVersion, func(t *testing.T) {
-			path, err := getConfigFilePath(c.specifiedVersion, c.runningVersion, "/master.yaml")
+		t.Run(c.benchmarkVersion, func(t *testing.T) {
+			path, err := getConfigFilePath(c.benchmarkVersion, c.specifiedVersion, "/master.yaml")
 			if err != nil && c.succeed {
 				t.Fatalf("Error %v", err)
 			}
@@ -440,5 +436,31 @@ func TestGetConfigFilePath(t *testing.T) {
 				t.Fatalf("Got %s expected %s", path, c.exp)
 			}
 		})
+	}
+}
+
+func TestDecrementVersion(t *testing.T) {
+
+	cases := []struct {
+		benchmarkVersion string
+		succeed          bool
+		exp              string
+	}{
+		{benchmarkVersion: "cis-1.5.0", succeed: true, exp: "cis-1.4.1"},
+		{benchmarkVersion: "cis-1.4.1", succeed: true, exp: "cis-1.4.0"},
+		{benchmarkVersion: "cis-1.2.0", succeed: true, exp: "cis-1.1.0"},
+		{benchmarkVersion: "cis-1.20", succeed: false, exp: "cis-1.1.0"},
+	}
+	for _, c := range cases {
+		rv := decrementVersion(c.benchmarkVersion)
+		if c.succeed {
+			if c.exp != rv {
+				t.Fatalf("Got %s expected %s", rv, c.exp)
+			}
+		} else {
+			if len(rv) > 0 {
+				t.Fatalf("Expected empty string but Got %s", rv)
+			}
+		}
 	}
 }

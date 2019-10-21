@@ -27,6 +27,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+var kubeToCISMap = map[string]string{
+	"1.11": "1.3.0",
+	"1.12": "1.3.0",
+	"1.13": "1.4.1",
+	"1.14": "1.4.1",
+	"1.15": "1.4.1",
+	"1.16": "1.4.1",
+	"1.17": "1.4.1",
+}
+
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
 func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 
@@ -209,15 +219,23 @@ func loadConfig(nodetype check.NodeType) string {
 		file = nodeFile
 	}
 
-	runningVersion := ""
-	if kubeVersion == "" {
-		runningVersion, err = getKubeVersion()
-		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+	specificBenchmarkVersion := isNotEmpty(benchmarkVersion)
+	if !specificBenchmarkVersion {
+		if isEmpty(kubeVersion) {
+			kubeVersion, err = getKubeVersion()
+			if err != nil {
+				exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+			}
 		}
+		benchmarkVersion = mapToCISVersion(kubeVersion)
+		if isEmpty(benchmarkVersion) {
+			// unable to find a match for kubeVersion
+			exitWithError(fmt.Errorf("unable to find a matching CIS Version match for kubernetes version: %s", kubeVersion))
+		}
+		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to CIS version: %s", kubeVersion, benchmarkVersion))
 	}
 
-	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
+	path, err := getConfigFilePath(benchmarkVersion, specificBenchmarkVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
@@ -235,6 +253,14 @@ func loadConfig(nodetype check.NodeType) string {
 		glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	}
 	return filepath.Join(path, file)
+}
+
+func mapToCISVersion(kv string) string {
+	cisVersion, found := kubeToCISMap[kv]
+	if !found {
+		return ""
+	}
+	return cisVersion
 }
 
 // isMaster verify if master components are running on the node.
