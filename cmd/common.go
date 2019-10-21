@@ -28,13 +28,13 @@ import (
 )
 
 var kubeToCISMap = map[string]string{
-	"1.11": "1.3.0",
-	"1.12": "1.3.0",
-	"1.13": "1.4.1",
-	"1.14": "1.4.1",
-	"1.15": "1.4.1",
-	"1.16": "1.4.1",
-	"1.17": "1.4.1",
+	"1.11": "cis-1.3.0",
+	"1.12": "cis-1.3.0",
+	"1.13": "cis-1.4.1",
+	"1.14": "cis-1.4.1",
+	"1.15": "cis-1.4.1",
+	"1.16": "cis-1.4.1",
+	"1.17": "cis-1.4.1",
 }
 
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.

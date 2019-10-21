@@ -173,9 +173,9 @@ func TestMapToCISVersion(t *testing.T) {
 		succeed     bool
 		exp         string
 	}{
-		{kubeVersion: "1.11", succeed: true, exp: "1.3.0"},
-		{kubeVersion: "1.12", succeed: true, exp: "1.3.0"},
-		{kubeVersion: "1.13", succeed: true, exp: "1.4.1"},
+		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3.0"},
+		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3.0"},
+		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4.1"},
 		{kubeVersion: "unknown", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
