@@ -16,10 +16,11 @@ package cmd
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestNewRunFilter(t *testing.T) {
@@ -114,14 +115,14 @@ func TestNewRunFilter(t *testing.T) {
 }
 
 func TestIsMaster(t *testing.T) {
-	testCases := []struct{
-		name string
-		cfgFile string
+	testCases := []struct {
+		name            string
+		cfgFile         string
 		getBinariesFunc func(*viper.Viper) (map[string]string, error)
-		isMaster bool
+		isMaster        bool
 	}{
 		{
-			name: "valid config, is master and all components are running",
+			name:    "valid config, is master and all components are running",
 			cfgFile: "../cfg/config.yaml",
 			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
 				return map[string]string{"apiserver": "kube-apiserver"}, nil
@@ -129,7 +130,7 @@ func TestIsMaster(t *testing.T) {
 			isMaster: true,
 		},
 		{
-			name: "valid config, is master and but not all components are running",
+			name:    "valid config, is master and but not all components are running",
 			cfgFile: "../cfg/config.yaml",
 			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
 				return map[string]string{}, nil
@@ -137,7 +138,7 @@ func TestIsMaster(t *testing.T) {
 			isMaster: false,
 		},
 		{
-			name: "valid config, is master, not all components are running and fails to find all binaries",
+			name:    "valid config, is master, not all components are running and fails to find all binaries",
 			cfgFile: "../cfg/config.yaml",
 			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
 				return map[string]string{}, errors.New("failed to find binaries")
@@ -145,13 +146,13 @@ func TestIsMaster(t *testing.T) {
 			isMaster: false,
 		},
 		{
-			name: "valid config, does not include master",
-			cfgFile: "../cfg/node_only.yaml",
+			name:     "valid config, does not include master",
+			cfgFile:  "../cfg/node_only.yaml",
 			isMaster: false,
 		},
 	}
 
-	for _, tc := range testCases{
+	for _, tc := range testCases {
 		cfgFile = tc.cfgFile
 		initConfig()
 
@@ -163,5 +164,24 @@ func TestIsMaster(t *testing.T) {
 		}()
 
 		assert.Equal(t, tc.isMaster, isMaster(), tc.name)
+	}
+}
+
+func TestMapToCISVersion(t *testing.T) {
+	cases := []struct {
+		kubeVersion string
+		succeed     bool
+		exp         string
+	}{
+		{kubeVersion: "1.11", succeed: true, exp: "1.3.0"},
+		{kubeVersion: "1.12", succeed: true, exp: "1.3.0"},
+		{kubeVersion: "1.13", succeed: true, exp: "1.4.1"},
+		{kubeVersion: "unknown", succeed: false, exp: ""},
+	}
+	for _, c := range cases {
+		rv := mapToCISVersion(c.kubeVersion)
+		if c.exp != rv {
+			t.Errorf("mapToCISVersion kubeversion: %s Got %s expected %s", c.kubeVersion, rv, c.exp)
+		}
 	}
 }
