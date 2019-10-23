@@ -209,8 +209,8 @@ func TestKubeVersionRegex(t *testing.T) {
 	}
 
 	ver = getVersionFromKubectlOutput("Something completely different")
-	if ver != "1.6" {
-		t.Fatalf("Expected 1.6 got %s", ver)
+	if ver != defaultKubeVersion {
+		t.Fatalf("Expected %s got %s", defaultKubeVersion, ver)
 	}
 }
 

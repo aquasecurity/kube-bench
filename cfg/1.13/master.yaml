@@ -188,7 +188,7 @@ groups:
   - id: 1.1.12
     text: "[DEPRECATED] Ensure that the admission control plugin DenyEscalatingExec is set (Not Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    type: skip
+    type: "skip"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -571,6 +571,7 @@ groups:
       - flag: "--encryption-provider-config"
         set: true
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and configure a EncryptionConfig file.
       Then, edit the API server pod specification file $apiserverconf on the
       master node and set the --encryption-provider-config parameter
@@ -583,6 +584,7 @@ groups:
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and configure a EncryptionConfig file. In this file,
       choose aescbc as the encryption provider.
       For example,
@@ -616,7 +618,7 @@ groups:
       --admission-control-config-file=<path/to/configuration/file>
     scored: true
 
-  - id: 1.1.37
+  - id: 1.1.37a
     text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
     audit: "ps -ef | grep $apiserverbin | grep -v grep"
     tests:
@@ -629,6 +631,23 @@ groups:
         set: true
       - flag: "--feature-gates"
         set: false
+    remediation: |
+      Follow the Kubernetes documentation and set the desired audit policy in the
+      /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
+      and set the below parameters.
+      --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+    scored: true
+
+  - id: 1.1.37b
+    text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
+    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    tests:
+      test_items:
+      - flag: "--audit-policy-file"
+        compare:
+          op: eq
+          value: "/etc/kubernetes/audit-policy.yaml"
+        set: true
     remediation: |
       Follow the Kubernetes documentation and set the desired audit policy in the
       /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
@@ -1003,8 +1022,9 @@ groups:
     text: "Ensure that the Container Network Interface file permissions are
     set to 644 or more restrictive (Not Scored)"
     audit: "stat -c %a <path/to/cni/files>"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node.
       For example,
       chmod 644 <path/to/cni/files>
@@ -1014,8 +1034,9 @@ groups:
     text: "Ensure that the Container Network Interface file ownership is set
     to root:root (Not Scored)"
     audit: "stat -c %U:%G <path/to/cni/files>"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node.
       For example,
       chown root:root <path/to/cni/files>
@@ -1194,6 +1215,7 @@ groups:
           value: "root root"
         set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chown -R root:root /etc/kubernetes/pki/
     scored: true
@@ -1221,6 +1243,7 @@ groups:
             value: "600"
           set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chmod -R 644 /etc/kubernetes/pki/*.crt
     scored: true
@@ -1237,6 +1260,7 @@ groups:
             value: "600"
           set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chmod -R 600 /etc/kubernetes/pki/*.key
     scored: true
@@ -1358,6 +1382,7 @@ groups:
       - flag: "--trusted-ca-file"
         set: true
     remediation: |
+      [Manual test]
       Follow the etcd documentation and create a dedicated certificate authority setup for the
       etcd service.
       Then, edit the etcd pod specification file $etcdconf on the
@@ -1372,6 +1397,7 @@ groups:
     text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Remove any unneeded clusterrolebindings :
       kubectl delete clusterrolebinding [name]
     scored: false
@@ -1380,6 +1406,7 @@ groups:
     text: "Create administrative boundaries between resources using namespaces (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the documentation and create namespaces for objects in your deployment as you
       need them.
     scored: false
@@ -1388,6 +1415,7 @@ groups:
     text: "Create network segmentation using Network Policies (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the documentation and create NetworkPolicy objects as you need them.
     scored: false
 
@@ -1396,6 +1424,7 @@ groups:
     definitions (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
       would need to enable alpha features in the apiserver by passing "--feature-
       gates=AllAlpha=true" argument.
@@ -1422,6 +1451,7 @@ groups:
     text: "Apply Security Context to Your Pods and Containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and apply security contexts to your pods. For a
       suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
       Containers.
@@ -1431,6 +1461,7 @@ groups:
     text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and setup image provenance.
     scored: false
 
@@ -1438,6 +1469,7 @@ groups:
     text: "Configure Network policies as appropriate (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and setup network policies as appropriate.
       For example, you could create a "default" isolation policy for a Namespace by creating a
       NetworkPolicy that selects all pods but does not allow any traffic:
@@ -1454,6 +1486,7 @@ groups:
     privileged containers usage (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow Kubernetes documentation and setup PSP and RBAC authorization for your cluster.
     scored: false
 
@@ -1464,6 +1497,7 @@ groups:
     text: "Do not admit privileged containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.privileged field is omitted or set to false.
     scored: false
 
@@ -1471,6 +1505,7 @@ groups:
     text: "Do not admit containers wishing to share the host process ID namespace (Not Scored)"
     type: "manual"
     remediation: |
+     [Manual test]
      Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostPID field is omitted or set to false.
     scored: false
 
@@ -1478,6 +1513,7 @@ groups:
     text: "Do not admit containers wishing to share the host IPC namespace (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostIPC field is omitted or set to false.
     scored: false
 
@@ -1485,6 +1521,7 @@ groups:
     text: "Do not admit containers wishing to share the host network namespace (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostNetwork field is omitted or set to false.
     scored: false
 
@@ -1492,6 +1529,7 @@ groups:
     text: " Do not admit containers with allowPrivilegeEscalation (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.allowPrivilegeEscalation field is omitted or set to false.
     scored: false
 
@@ -1499,6 +1537,7 @@ groups:
     text: "Do not admit root containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of UIDs not including 0.
     scored: false
 
@@ -1506,5 +1545,6 @@ groups:
     text: "Do not admit containers with dangerous capabilities (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
     scored: false

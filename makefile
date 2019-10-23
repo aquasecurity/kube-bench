@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_REGISTRY)/$(BINARY):$(VERSION)
-TARGET_OS := linux
+TARGET_OS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
 
@@ -29,6 +29,7 @@ $(BINARY): $(SOURCES)
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
              --build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
              -t $(IMAGE_NAME) .
 
 tests:
@@ -42,15 +43,12 @@ ifndef HAS_KIND
 endif
 	@if [ -z $$(kind get clusters | grep $(KIND_PROFILE)) ]; then\
 		echo "Could not find $(KIND_PROFILE) cluster. Creating...";\
-		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.11.3 --wait 5m;\
+		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
 	fi
 
 # pushses the current dev version to the kind cluster.
 kind-push:
-	docker save $(IMAGE_NAME) -o kube-bench.tar.gz; \
-	docker cp kube-bench.tar.gz $(KIND_CONTAINER_NAME):/kube-bench.tar.gz; \
-	docker exec $(KIND_CONTAINER_NAME) docker load -i /kube-bench.tar.gz;
-	-rm -f kube-bench.tar.gz
+	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
 # runs the current version on kind using a job and follow logs
 kind-run: KUBECONFIG = "$(shell kind get kubeconfig-path --name="$(KIND_PROFILE)")"
