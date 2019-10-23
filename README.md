@@ -16,6 +16,29 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
 
+Table of Contents
+=================
+
+* [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
+* [Installation](#installation)
+* [Running kube-bench](#running-kube-bench)
+  * [Running inside a container](#running-inside-a-container)
+  * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
+  * [Running in an EKS cluster](#running-in-an-eks-cluster)
+  * [Installing from a container](#installing-from-a-container)
+  * [Installing from sources](#installing-from-sources)
+* [Running on OpenShift](#running-on-openshift)
+* [Output](#output)
+* [Configuration](#configuration)
+* [Test config YAML representation](#test-config-yaml-representation)
+  * [Omitting checks](#omitting-checks)
+* [Roadmap](#roadmap)
+* [Testing locally with kind](#testing-locally-with-kind)
+* [GitHub Issues](#github-issues)
+  * [Bugs](#bugs)
+  * [Features](#features)
+  * [Pull Requests](#pull-requests)
+      
 ## CIS Kubernetes Benchmark support
 
 kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.0 respectively. 
