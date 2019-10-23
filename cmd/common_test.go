@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"errors"
+	"path/filepath"
 	"testing"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -168,20 +169,87 @@ func TestIsMaster(t *testing.T) {
 }
 
 func TestMapToCISVersion(t *testing.T) {
+
+	viperWithData, err := loadConfigForTest()
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
+	kubeToCISMap, err := loadVersionMapping(viperWithData)
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
+
 	cases := []struct {
 		kubeVersion string
 		succeed     bool
 		exp         string
 	}{
-		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3.0"},
-		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3.0"},
-		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4.1"},
+		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
+		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
+		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.16", succeed: true, exp: "cis-1.4"},
 		{kubeVersion: "unknown", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
-		rv := mapToCISVersion(c.kubeVersion)
+		rv := mapToCISVersion(kubeToCISMap, c.kubeVersion)
 		if c.exp != rv {
-			t.Errorf("mapToCISVersion kubeversion: %s Got %s expected %s", c.kubeVersion, rv, c.exp)
+			t.Errorf("mapToCISVersion kubeversion: %q Got %q expected %s", c.kubeVersion, rv, c.exp)
 		}
 	}
+}
+
+func TestLoadVersionMapping(t *testing.T) {
+	setDefault := func(v *viper.Viper, key string, value interface{}) *viper.Viper {
+		v.SetDefault(key, value)
+		return v
+	}
+
+	viperWithData, err := loadConfigForTest()
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
+
+	cases := []struct {
+		n       string
+		v       *viper.Viper
+		succeed bool
+	}{
+		{n: "empty", v: viper.New(), succeed: false},
+		{
+			n:       "novals",
+			v:       setDefault(viper.New(), versionMapping, "novals"),
+			succeed: false,
+		},
+		{
+			n:       "good",
+			v:       viperWithData,
+			succeed: true,
+		},
+	}
+	for _, c := range cases {
+		rv, err := loadVersionMapping(c.v)
+		if c.succeed {
+			if err != nil {
+				t.Errorf("[%q]-Unexpected error: %v", c.n, err)
+			}
+
+			if len(rv) == 0 {
+				t.Errorf("[%q]-missing mapping value", c.n)
+			}
+		} else {
+			if err == nil {
+				t.Errorf("[%q]-Expected error but got none", c.n)
+			}
+		}
+	}
+}
+
+func loadConfigForTest() (*viper.Viper, error) {
+	viperWithData := viper.New()
+	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
+	if err := viperWithData.ReadInConfig(); err != nil {
+		return nil, err
+	}
+
+	return viperWithData, nil
 }

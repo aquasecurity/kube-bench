@@ -27,15 +27,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var kubeToCISMap = map[string]string{
-	"1.11": "cis-1.3.0",
-	"1.12": "cis-1.3.0",
-	"1.13": "cis-1.4.1",
-	"1.14": "cis-1.4.1",
-	"1.15": "cis-1.4.1",
-	"1.16": "cis-1.4.1",
-	"1.17": "cis-1.4.1",
-}
+// VERSION_MAPPING section of config.yaml file
+const versionMapping = "version_mapping"
+const kubersionCISMapping = "kubeversion_to_cis"
 
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
 func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
@@ -219,23 +213,32 @@ func loadConfig(nodetype check.NodeType) string {
 		file = nodeFile
 	}
 
-	specificBenchmarkVersion := isNotEmpty(benchmarkVersion)
-	if !specificBenchmarkVersion {
+	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
+		exitWithError(fmt.Errorf("It is an error to specify both --version and --benchmark flags"))
+	}
+
+	if isEmpty(benchmarkVersion) {
 		if isEmpty(kubeVersion) {
 			kubeVersion, err = getKubeVersion()
 			if err != nil {
 				exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
 			}
 		}
-		benchmarkVersion = mapToCISVersion(kubeVersion)
+
+		kubeToCISMap, err := loadVersionMapping(viper.GetViper())
+		if err != nil {
+			exitWithError(err)
+		}
+
+		benchmarkVersion = mapToCISVersion(kubeToCISMap, kubeVersion)
 		if isEmpty(benchmarkVersion) {
 			// unable to find a match for kubeVersion
-			exitWithError(fmt.Errorf("unable to find a matching CIS Version match for kubernetes version: %s", kubeVersion))
+			exitWithError(fmt.Errorf("Unable to find a matching CIS Version match for kubernetes version: %s", kubeVersion))
 		}
 		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to CIS version: %s", kubeVersion, benchmarkVersion))
 	}
 
-	path, err := getConfigFilePath(benchmarkVersion, specificBenchmarkVersion, file)
+	path, err := getConfigFilePath(benchmarkVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
@@ -255,14 +258,34 @@ func loadConfig(nodetype check.NodeType) string {
 	return filepath.Join(path, file)
 }
 
-func mapToCISVersion(kv string) string {
+func mapToCISVersion(kubeToCISMap map[string]string, kv string) string {
 	cisVersion, found := kubeToCISMap[kv]
+	for !found && (kv != defaultKubeVersion && !isEmpty(kv)) {
+		kv = decrementVersion(kv)
+		cisVersion, found = kubeToCISMap[kv]
+		glog.V(2).Info(fmt.Sprintf("mapToCISVersion for cisVersion: %q found: %t\n", cisVersion, found))
+	}
+
 	if !found {
-		glog.V(2).Info(fmt.Sprintf("mapToCISVersion unable to find match for: %q", kv))
+		glog.V(2).Info(fmt.Sprintf("mapToCISVersion unable to find a match for: %q", kv))
 		glog.V(2).Info(fmt.Sprintf("mapToCISVersion kubeToCISMap: %#v", kubeToCISMap))
 		return ""
 	}
+
 	return cisVersion
+}
+
+func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
+	versionMappingConf := v.Sub(string(versionMapping))
+	if versionMappingConf == nil {
+		return nil, fmt.Errorf("config file is missing %s section", versionMapping)
+	}
+	kubeToCISMap := versionMappingConf.GetStringMapString(kubersionCISMapping)
+	if kubeToCISMap == nil || (len(kubeToCISMap) == 0) {
+		return nil, fmt.Errorf("config file is missing %s.%s section", versionMapping, kubersionCISMapping)
+	}
+
+	return kubeToCISMap, nil
 }
 
 // isMaster verify if master components are running on the node.

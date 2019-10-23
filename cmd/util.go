@@ -120,54 +120,29 @@ func getBinaries(v *viper.Viper) (map[string]string, error) {
 	return binmap, nil
 }
 
-// getConfigFilePath locates the config files we should be using based on either the specified CIS
-// version, or the running version of kubernetes converted to a CIS version
-func getConfigFilePath(benchmarkVersion string, specifiedVersion bool, filename string) (path string, err error) {
-	if specifiedVersion {
-		glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %s", benchmarkVersion))
-	} else {
-		glog.V(2).Info(fmt.Sprintf("Looking for config for Mapped CIS version %s", benchmarkVersion))
+// getConfigFilePath locates the config files we should be using CIS version
+func getConfigFilePath(benchmarkVersion string, filename string) (path string, err error) {
+	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
+
+	path = filepath.Join(cfgDir, benchmarkVersion)
+	file := filepath.Join(path, string(filename))
+	glog.V(2).Info(fmt.Sprintf("Looking for config file: %s", file))
+
+	if _, err = os.Stat(file); os.IsNotExist(err) {
+		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
+		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
-
-	fileVersion := benchmarkVersion
-
-	for {
-		path = filepath.Join(cfgDir, fileVersion)
-		file := filepath.Join(path, string(filename))
-		glog.V(2).Info(fmt.Sprintf("Looking for config file: %s\n", file))
-
-		if _, err = os.Stat(file); !os.IsNotExist(err) {
-			if !specifiedVersion && fileVersion != benchmarkVersion {
-				glog.V(1).Info(fmt.Sprintf("No test file found for %s - using tests for %s\n", benchmarkVersion, fileVersion))
-			}
-			return path, nil
-		}
-
-		// If we were given an explicit version to look for, don't look for any others
-		if specifiedVersion {
-			return "", err
-		}
-
-		glog.V(1).Info(fmt.Sprintf("No test file found for %s - Decrementing benchmark version", fileVersion))
-		fileVersion = decrementVersion(fileVersion)
-		if isEmpty(fileVersion) {
-			return "", fmt.Errorf("no test files found <= benchmark version")
-		}
-	}
+	return path, nil
 }
 
 // decrementVersion decrements the version number
 // We want to decrement individually even through versions where we don't supply test files
 // just in case someone wants to specify their own test files for that version
 func decrementVersion(version string) string {
-	glog.V(2).Info(fmt.Sprintf("decrementVersion: %s\n", version))
 	split := strings.Split(version, ".")
-	// Expect version to be like 'cis-x.y.z'
-	if len(split) != 3 {
-		glog.V(2).Info(fmt.Sprintf("decrementVersion invalid: %s\n", version))
+	if len(split) < 2 {
 		return ""
 	}
-
 	minor, err := strconv.Atoi(split[1])
 	if err != nil {
 		return ""
@@ -175,29 +150,8 @@ func decrementVersion(version string) string {
 	if minor <= 1 {
 		return ""
 	}
-
-	patch, err := strconv.Atoi(split[2])
-	if err != nil {
-		return ""
-	}
-
-	if patch == 0 {
-		minor--
-		patch = 1
-	} else {
-		patch = 0
-	}
-
-	if minor == 1 && patch == 1 {
-		patch = 0
-	}
-
-	split[1] = strconv.Itoa(minor)
-	split[2] = strconv.Itoa(patch)
-
-	retVal := strings.Join(split, ".")
-	glog.V(2).Info(fmt.Sprintf("decrementVersion return: %s", retVal))
-	return retVal
+	split[1] = strconv.Itoa(minor - 1)
+	return strings.Join(split, ".")
 }
 
 // getFiles finds which of the set of candidate files exist
@@ -370,10 +324,6 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
-}
-
-func isNotEmpty(str string) bool {
-	return !isEmpty(str)
 }
 
 func isEmpty(str string) bool {

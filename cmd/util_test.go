@@ -422,18 +422,24 @@ func TestGetConfigFilePath(t *testing.T) {
 		exp              string
 	}{
 		{benchmarkVersion: "cis-1.4.1", specifiedVersion: true, succeed: true, exp: d},
-		{benchmarkVersion: "cis-1.5.0", specifiedVersion: false, succeed: true, exp: d},
-		{benchmarkVersion: "1.1", succeed: false},
+		{benchmarkVersion: "cis-1.5.0", specifiedVersion: false, succeed: false, exp: ""},
+		{benchmarkVersion: "1.1", succeed: false, exp: ""},
 	}
 
 	for _, c := range cases {
 		t.Run(c.benchmarkVersion, func(t *testing.T) {
-			path, err := getConfigFilePath(c.benchmarkVersion, c.specifiedVersion, "/master.yaml")
-			if err != nil && c.succeed {
-				t.Fatalf("Error %v", err)
-			}
-			if path != c.exp {
-				t.Fatalf("Got %s expected %s", path, c.exp)
+			path, err := getConfigFilePath(c.benchmarkVersion, "/master.yaml")
+			if c.succeed {
+				if err != nil {
+					t.Fatalf("Error %v", err)
+				}
+				if path != c.exp {
+					t.Fatalf("Got %s expected %s", path, c.exp)
+				}
+			} else {
+				if err == nil {
+					t.Fatalf("Expected Error, but none")
+				}
 			}
 		})
 	}
@@ -442,24 +448,25 @@ func TestGetConfigFilePath(t *testing.T) {
 func TestDecrementVersion(t *testing.T) {
 
 	cases := []struct {
-		benchmarkVersion string
-		succeed          bool
-		exp              string
+		kubeVersion string
+		succeed     bool
+		exp         string
 	}{
-		{benchmarkVersion: "cis-1.5.0", succeed: true, exp: "cis-1.4.1"},
-		{benchmarkVersion: "cis-1.4.1", succeed: true, exp: "cis-1.4.0"},
-		{benchmarkVersion: "cis-1.2.0", succeed: true, exp: "cis-1.1.0"},
-		{benchmarkVersion: "cis-1.20", succeed: false, exp: "cis-1.1.0"},
+		{kubeVersion: "1.13", succeed: true, exp: "1.12"},
+		{kubeVersion: "1.15", succeed: true, exp: "1.14"},
+		{kubeVersion: "1.11", succeed: true, exp: "1.10"},
+		{kubeVersion: "1.1", succeed: true, exp: ""},
+		{kubeVersion: "invalid", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
-		rv := decrementVersion(c.benchmarkVersion)
+		rv := decrementVersion(c.kubeVersion)
 		if c.succeed {
 			if c.exp != rv {
-				t.Fatalf("Got %s expected %s", rv, c.exp)
+				t.Fatalf("decrementVersion(%q) - Got %q expected %s", c.kubeVersion, rv, c.exp)
 			}
 		} else {
 			if len(rv) > 0 {
-				t.Fatalf("Expected empty string but Got %s", rv)
+				t.Fatalf("decrementVersion(%q) - Expected empty string but Got %s", c.kubeVersion, rv)
 			}
 		}
 	}
