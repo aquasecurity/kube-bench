@@ -16,6 +16,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
 
+
 ## CIS Kubernetes Benchmark support
 
 kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.0 respectively. 
@@ -29,6 +30,7 @@ By default kube-bench will determine the test set to run based on the Kubernetes
 
 There is also preliminary support for Red Hat's Openshift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect Openshift - see below. 
 
+
 ## Installation
 
 You can choose to
@@ -36,6 +38,7 @@ You can choose to
 * run a container that installs kube-bench on the host, and then run kube-bench directly on the host
 * install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
 * compile it from source.
+
 
 ## Running kube-bench
 
@@ -67,6 +70,7 @@ with same name as the kubernetes versions under `cfg/`, for example `cfg/1.13`.
 `controls` are also organized by distribution under the `cfg` directory for
 example `cfg/ocp-3.10`.
 
+
 ### Running inside a container
 
 You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions. 
@@ -86,6 +90,7 @@ You can use your own configs by mounting them over the default ones in `/opt/kub
 ```
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
 ```
+
 
 ### Running in a kubernetes cluster
 
@@ -122,6 +127,7 @@ To run the tests on the master node, the pod needs to be scheduled on that node.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
+
 ### Running in an EKS cluster
 
 There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you must update the image reference in `job-eks.yaml`.** Typically you will push the container image for kube-bench to ECR and refer to it there in the YAML file.
@@ -130,6 +136,7 @@ There are two significant differences on EKS:
 
 * It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
 * It's not possible to schedule jobs onto the master node, so master checks can't be performed
+
 
 ### Installing from a container
 
@@ -140,6 +147,7 @@ docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
 You can then run `./kube-bench [master|node]`.
+
 
 ### Installing from sources
 
@@ -159,9 +167,12 @@ go build -o kube-bench .
 ./kube-bench
 
 ```
+
+
 ## Running on OpenShift 
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
+
 
 ## Output
 
@@ -176,6 +187,7 @@ Note:
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
 - If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
 
+
 ## Configuration
 
 Kubernetes configuration and binary file locations and names can vary from installation to installation, so these are configurable in the `cfg/config.yaml` file.
@@ -184,9 +196,11 @@ Any settings in the version-specific config file `cfg/<version>/config.yaml` tak
 
 You can read more about `kube-bench` configuration in our [documentation](docs/README.md#configuration-and-variables).
 
+
 ## Test config YAML representation
 
 The tests (or "controls") are represented as YAML documents (installed by default into ./cfg). There are different versions of these test YAML files reflecting different versions of the CIS Kubernetes Benchmark. You will find more information about the test file YAML definitions in our [documentation](docs/README.md).
+
 
 ### Omitting checks
 
@@ -202,10 +216,13 @@ If you decide that a recommendation is not appropriate for your environment, you
 
 No tests will be run for this check and the output will be marked [INFO].
 
+
 # Roadmap
+
 Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
 
 We welcome PRs and issue reports.
+
 
 # Testing locally with kind
 
