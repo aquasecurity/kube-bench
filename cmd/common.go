@@ -258,7 +258,7 @@ func loadConfig(nodetype check.NodeType) string {
 func mapToCISVersion(kv string) string {
 	cisVersion, found := kubeToCISMap[kv]
 	if !found {
-		glog.V(2).Info(fmt.Sprintf("mapToCISVersion unable to find matching for: %q", kv))
+		glog.V(2).Info(fmt.Sprintf("mapToCISVersion unable to find match for: %q", kv))
 		glog.V(2).Info(fmt.Sprintf("mapToCISVersion kubeToCISMap: %#v", kubeToCISMap))
 		return ""
 	}
