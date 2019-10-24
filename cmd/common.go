@@ -213,29 +213,9 @@ func loadConfig(nodetype check.NodeType) string {
 		file = nodeFile
 	}
 
-	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
-		exitWithError(fmt.Errorf("It is an error to specify both --version and --benchmark flags"))
-	}
-
-	if isEmpty(benchmarkVersion) {
-		if isEmpty(kubeVersion) {
-			kubeVersion, err = getKubeVersion()
-			if err != nil {
-				exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
-			}
-		}
-
-		kubeToCISMap, err := loadVersionMapping(viper.GetViper())
-		if err != nil {
-			exitWithError(err)
-		}
-
-		benchmarkVersion = mapToCISVersion(kubeToCISMap, kubeVersion)
-		if isEmpty(benchmarkVersion) {
-			// unable to find a match for kubeVersion
-			exitWithError(fmt.Errorf("Unable to find a matching CIS Version match for kubernetes version: %s", kubeVersion))
-		}
-		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to CIS version: %s", kubeVersion, benchmarkVersion))
+	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+	if err != nil {
+		exitWithError(err)
 	}
 
 	path, err := getConfigFilePath(benchmarkVersion, file)
@@ -286,6 +266,34 @@ func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
 	}
 
 	return kubeToCISMap, nil
+}
+
+func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (bv string, err error) {
+	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
+		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
+	}
+
+	if isEmpty(benchmarkVersion) {
+		if isEmpty(kubeVersion) {
+			kubeVersion, err = getKubeVersion()
+			if err != nil {
+				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
+			}
+		}
+
+		kubeToCISMap, err := loadVersionMapping(v)
+		if err != nil {
+			return "", err
+		}
+
+		benchmarkVersion = mapToCISVersion(kubeToCISMap, kubeVersion)
+		if isEmpty(benchmarkVersion) {
+			// unable to find a match for kubeVersion
+			return "", fmt.Errorf("Unable to find a matching CIS Version match for kubernetes version: %s", kubeVersion)
+		}
+		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to CIS version: %s", kubeVersion, benchmarkVersion))
+	}
+	return benchmarkVersion, nil
 }
 
 // isMaster verify if master components are running on the node.

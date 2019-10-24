@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -235,6 +236,49 @@ func TestLoadVersionMapping(t *testing.T) {
 
 			if len(rv) == 0 {
 				t.Errorf("[%q]-missing mapping value", c.n)
+			}
+		} else {
+			if err == nil {
+				t.Errorf("[%q]-Expected error but got none", c.n)
+			}
+		}
+	}
+}
+
+func TestGetBenchmarkVersion(t *testing.T) {
+	viperWithData, err := loadConfigForTest()
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
+
+	cases := []struct {
+		n                string
+		kubeVersion      string
+		benchmarkVersion string
+		v                *viper.Viper
+		exp              string
+		succeed          bool
+	}{
+		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", v: viper.New(), succeed: false},
+		{n: "no version", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", succeed: true},
+		{n: "kubeVersion", kubeVersion: "1.11", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", succeed: true},
+		{n: "kubeVersion", kubeVersion: "", benchmarkVersion: "cis-1.3", v: viperWithData, exp: "cis-1.3", succeed: true},
+	}
+	for _, c := range cases {
+		rv, err := getBenchmarkVersion(c.kubeVersion, c.benchmarkVersion, c.v)
+		fmt.Printf("rv: %#v  error: %v \n", rv, err)
+
+		if c.succeed {
+			if err != nil {
+				t.Errorf("[%q]-Unexpected error: %v", c.n, err)
+			}
+
+			if len(rv) == 0 {
+				t.Errorf("[%q]-missing return value", c.n)
+			}
+
+			if c.exp != rv {
+				t.Errorf("[%q]- expected %q but Got %q", c.n, c.exp, rv)
 			}
 		} else {
 			if err == nil {
