@@ -6,7 +6,7 @@ master:
     bins:
       - openshift start master api
       - hypershift openshift-kube-apiserver
-     
+
   scheduler:
     bins:
       - "openshift start master controllers"

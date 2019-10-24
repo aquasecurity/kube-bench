@@ -2,7 +2,7 @@
 language: go
 
 services:
-  - docker 
+  - docker
 
 notifications:
   email: false
@@ -18,17 +18,18 @@ script:
   - yamllint -c ./.yamllint.yaml .
   - GO111MODULE=on go test ./...
   - docker build --tag kube-bench .
-  - docker run -v `pwd`:/host kube-bench install 
+  - docker run -v `pwd`:/host kube-bench install
   - test -d cfg
   - test -f kube-bench
   - make tests
-  
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
 deploy:
   - provider: script
     skip_cleanup: true
-    script: curl -sL https://git.io/goreleaser | bash
+    script: "curl -sL https://git.io/goreleaser | bash"
     on:
       tags: true
       condition: "$TRAVIS_OS_NAME = linux"

@@ -1,3 +1,4 @@
+---
 env:
   - GO111MODULE=on
 builds:
@@ -12,7 +13,9 @@ archive:
   format: tar.gz
 nfpm:
   vendor: Aqua Security
-  description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
+  description: >
+    The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to
+    security best practices
   license: Apache-2.0
   homepage: https://github.com/aquasecurity/kube-bench
   formats:
