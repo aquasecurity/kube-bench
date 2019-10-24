@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -266,7 +265,6 @@ func TestGetBenchmarkVersion(t *testing.T) {
 	}
 	for _, c := range cases {
 		rv, err := getBenchmarkVersion(c.kubeVersion, c.benchmarkVersion, c.v)
-		fmt.Printf("rv: %#v  error: %v \n", rv, err)
 
 		if c.succeed {
 			if err != nil {
