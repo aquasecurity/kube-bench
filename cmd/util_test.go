@@ -408,7 +408,7 @@ func TestGetConfigFilePath(t *testing.T) {
 		t.Fatalf("Failed to create temp directory")
 	}
 	defer os.RemoveAll(cfgDir)
-	d := filepath.Join(cfgDir, "cis-1.4.1")
+	d := filepath.Join(cfgDir, "cis-1.4")
 	err = os.Mkdir(d, 0666)
 	if err != nil {
 		t.Fatalf("Failed to create temp file")
@@ -421,8 +421,8 @@ func TestGetConfigFilePath(t *testing.T) {
 		succeed          bool
 		exp              string
 	}{
-		{benchmarkVersion: "cis-1.4.1", specifiedVersion: true, succeed: true, exp: d},
-		{benchmarkVersion: "cis-1.5.0", specifiedVersion: false, succeed: false, exp: ""},
+		{benchmarkVersion: "cis-1.4", specifiedVersion: true, succeed: true, exp: d},
+		{benchmarkVersion: "cis-1.5", specifiedVersion: false, succeed: false, exp: ""},
 		{benchmarkVersion: "1.1", succeed: false, exp: ""},
 	}
 

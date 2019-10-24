@@ -134,7 +134,6 @@ node:
     defaultkubeconfig: "/etc/kubernetes/proxy.conf"
 
 version_mapping:
-  defaultKubeVersion: "1.11"
   kubeversion_to_cis:
     "1.11": "cis-1.3"
     "1.12": "cis-1.3"
