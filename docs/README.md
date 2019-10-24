@@ -145,7 +145,7 @@ and `scored` fields.
 as a comma-delimited list on the command line with the `--check` flag.
 
 The `audit` field specifies the command to run for a check. The output of this
-a command is then evaluated for conformance with the CIS Kubernetes Benchmark
+command is then evaluated for conformance with the CIS Kubernetes Benchmark
 recommendation.
 
 The audit is evaluated against criteria specified by the `tests`
