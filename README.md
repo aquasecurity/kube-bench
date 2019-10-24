@@ -171,7 +171,7 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 There are three output states
 - [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed
 - [WARN] means this test needs further attention, for example, it is a test that needs to be run manually 
-- [INFO] is an informational output that needs no further action.
+- [INFO] is informational output that needs no further action.
 
 ## Configuration
 
