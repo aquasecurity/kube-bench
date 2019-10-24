@@ -10,10 +10,12 @@ notifications:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y rpm
+  - pip install --user yamllint==1.18.0
   - gem install --no-ri --no-rdoc fpm
   - go get -t -v ./...
 
 script:
+  - yamllint -c ./.yamllint.yaml .
   - GO111MODULE=on go test ./...
   - docker build --tag kube-bench .
   - docker run -v `pwd`:/host kube-bench install 
