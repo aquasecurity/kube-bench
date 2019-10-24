@@ -38,7 +38,7 @@ You can choose to
 * run kube-bench from inside a container (sharing PID namespace with the host)
 * run a container that installs kube-bench on the host, and then run kube-bench directly on the host
 * install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
-* compile it from the source.
+* compile it from source.
 
 ## Running kube-bench
 
