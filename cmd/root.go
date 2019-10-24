@@ -34,7 +34,7 @@ type FilterOpts struct {
 
 var (
 	envVarsPrefix      = "KUBE_BENCH"
-	defaultKubeVersion = "1.6"
+	defaultKubeVersion = "1.11"
 	kubeVersion        string
 	cfgFile            string
 	cfgDir             string
