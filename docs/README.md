@@ -156,7 +156,7 @@ pass a check. This criterion is made up of keywords extracted from the output of
 the `audit` command and operations that compare these keywords against
 values expected by the CIS Kubernetes Benchmark. 
 
-They are two ways to extract keywords from the output of the `audit` command,
+There are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
 `flag` is used when the keyword is a command-line flag. The associated `audit`
