@@ -150,7 +150,7 @@ There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS 
 
 ##### Getting Started with EKS
 1. To create an EKS Cluster refer to [Getting Started with Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) in the *Amazon EKS User Guide*
-  * Information on configured eksctl, kubectl and the AWS CLI is within
+  - Information on configuring `eksctl`, `kubectl` and the AWS CLI is within
 2. Create an [Amazon Elastic Contaier Registry (ECR)](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) repository to host the kube-bench container image
 ```
 aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutability MUTABLE
@@ -166,10 +166,10 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 ```
 4. Copy the URI of your pushed image, the URI format is like this: `<AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest`
 5. Replace the `image` value in `job-eks.yaml` with the URI from Step 4
-6. Run the kube-bench job: `kubectl apply -f job-eks.yaml`
+6. Run the kube-bench job on a Pod in your Cluster: `kubectl apply -f job-eks.yaml`
 7. Find the Pod that was created, it *should* be in the `default` namespace: `kubectl get pods --all-namespaces`
 8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
-  * You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
+  - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
 ### Installing from a container
 
