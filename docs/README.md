@@ -160,7 +160,7 @@ They are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
 `flag` is used when the keyword is a command-line flag. The associated `audit`
-a command is usually a `ps` command and a `grep` for the binary whose flag we are
+command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
 ```
