@@ -316,7 +316,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	for k, v := range m {
 		subst := "$" + k + ext
 		if v == "" {
-			glog.V(2).Info(fmt.Sprintf("No subsitution for '%s'\n", subst))
+			glog.V(2).Info(fmt.Sprintf("No substitution for '%s'\n", subst))
 			continue
 		}
 		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
