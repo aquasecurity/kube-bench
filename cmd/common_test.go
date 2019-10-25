@@ -16,6 +16,9 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -174,7 +177,7 @@ func TestMapToCISVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to load config file %v", err)
 	}
-	kubeToCISMap, err := loadVersionMapping(viperWithData)
+	kubeToBenchmarkMap, err := loadVersionMapping(viperWithData)
 	if err != nil {
 		t.Fatalf("Unable to load config file %v", err)
 	}
@@ -184,16 +187,33 @@ func TestMapToCISVersion(t *testing.T) {
 		succeed     bool
 		exp         string
 	}{
+		{kubeVersion: "1.9", succeed: false, exp: ""},
 		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
 		{kubeVersion: "1.16", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
+		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "unknown", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
-		rv := mapToCISVersion(kubeToCISMap, c.kubeVersion)
-		if c.exp != rv {
-			t.Errorf("mapToCISVersion kubeversion: %q Got %q expected %s", c.kubeVersion, rv, c.exp)
+		rv, err := mapToBenchmarkVersion(kubeToBenchmarkMap, c.kubeVersion)
+		if c.succeed {
+			if err != nil {
+				t.Errorf("[%q]-Unexpected error: %v", c.kubeVersion, err)
+			}
+
+			if len(rv) == 0 {
+				t.Errorf("[%q]-missing return value", c.kubeVersion)
+			}
+
+			if c.exp != rv {
+				t.Errorf("[%q]- expected %q but Got %q", c.kubeVersion, c.exp, rv)
+			}
+		} else {
+			if c.exp != rv {
+				t.Errorf("mapToBenchmarkVersion kubeversion: %q Got %q expected %s", c.kubeVersion, rv, c.exp)
+			}
 		}
 	}
 }
@@ -217,7 +237,7 @@ func TestLoadVersionMapping(t *testing.T) {
 		{n: "empty", v: viper.New(), succeed: false},
 		{
 			n:       "novals",
-			v:       setDefault(viper.New(), versionMapping, "novals"),
+			v:       setDefault(viper.New(), "version_mapping", "novals"),
 			succeed: false,
 		},
 		{
@@ -250,22 +270,50 @@ func TestGetBenchmarkVersion(t *testing.T) {
 		t.Fatalf("Unable to load config file %v", err)
 	}
 
+	type getBenchmarkVersionFnToTest func(kubeVersion, benchmarkVersion string, v *viper.Viper) (string, error)
+
+	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
+		execCode := `#!/bin/sh
+		echo "Server Version: v1.13.10"
+		`
+		restore, err := fakeExecutableInPath("kubectl", execCode)
+		if err != nil {
+			t.Fatal("Failed when calling fakeExecutableInPath ", err)
+		}
+		defer restore()
+
+		return fn(kubeVersion, benchmarkVersion, v)
+	}
+
+	withNoPath := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
+		restore, err := prunePath()
+		if err != nil {
+			t.Fatal("Failed when calling prunePath ", err)
+		}
+		defer restore()
+
+		return fn(kubeVersion, benchmarkVersion, v)
+	}
+
+	type getBenchmarkVersionFn func(string, string, *viper.Viper, getBenchmarkVersionFnToTest) (string, error)
 	cases := []struct {
 		n                string
 		kubeVersion      string
 		benchmarkVersion string
 		v                *viper.Viper
+		callFn           getBenchmarkVersionFn
 		exp              string
 		succeed          bool
 	}{
-		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", v: viper.New(), succeed: false},
-		{n: "no version", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", succeed: true},
-		{n: "kubeVersion", kubeVersion: "1.11", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", succeed: true},
-		{n: "kubeVersion", kubeVersion: "", benchmarkVersion: "cis-1.3", v: viperWithData, exp: "cis-1.3", succeed: true},
+		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", callFn: withNoPath, v: viper.New(), succeed: false},
+		{n: "no version-missing-kubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "", callFn: withNoPath, succeed: false},
+		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.4", callFn: withFakeKubectl, succeed: true},
+		{n: "kubeVersion", kubeVersion: "1.11", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", callFn: withNoPath, succeed: true},
+		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
+		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 	}
 	for _, c := range cases {
-		rv, err := getBenchmarkVersion(c.kubeVersion, c.benchmarkVersion, c.v)
-
+		rv, err := c.callFn(c.kubeVersion, c.benchmarkVersion, c.v, getBenchmarkVersion)
 		if c.succeed {
 			if err != nil {
 				t.Errorf("[%q]-Unexpected error: %v", c.n, err)
@@ -294,4 +342,62 @@ func loadConfigForTest() (*viper.Viper, error) {
 	}
 
 	return viperWithData, nil
+}
+
+type restoreFn func()
+
+func fakeExecutableInPath(execFile, execCode string) (restoreFn, error) {
+	pathenv := os.Getenv("PATH")
+	tmp, err := ioutil.TempDir("", "TestfakeExecutableInPath")
+	if err != nil {
+		return nil, err
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Chdir(tmp)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(execCode) > 0 {
+		ioutil.WriteFile(filepath.Join(tmp, execFile), []byte(execCode), 0700)
+	} else {
+		f, err := os.OpenFile(execFile, os.O_CREATE|os.O_EXCL, 0700)
+		if err != nil {
+			return nil, err
+		}
+		err = f.Close()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = os.Setenv("PATH", fmt.Sprintf("%s:%s", tmp, pathenv))
+	if err != nil {
+		return nil, err
+	}
+
+	restorePath := func() {
+		os.RemoveAll(tmp)
+		os.Chdir(wd)
+		os.Setenv("PATH", pathenv)
+	}
+
+	return restorePath, nil
+}
+
+func prunePath() (restoreFn, error) {
+	pathenv := os.Getenv("PATH")
+	err := os.Setenv("PATH", "")
+	if err != nil {
+		return nil, err
+	}
+	restorePath := func() {
+		os.Setenv("PATH", pathenv)
+	}
+	return restorePath, nil
 }
