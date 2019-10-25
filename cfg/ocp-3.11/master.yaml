@@ -171,7 +171,7 @@ groups:
         set: false
     remediation: |
       Edit the kubernetes master config file /etc/origin/master/master-config.yaml
-      and remove the the entry below.
+      and remove the entry below.
 
       AlwaysAdmit:
         configuration:
@@ -192,7 +192,7 @@ groups:
         set: true
     remediation: |
       Edit the kubernetes master config file /etc/origin/master/master-config.yaml
-      and add the the entry below.
+      and add the entry below.
 
       admissionConfig:
         pluginConfig:
