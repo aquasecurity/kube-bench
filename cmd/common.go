@@ -243,8 +243,8 @@ func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (str
 	}
 
 	if !found {
-		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kv))
-		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
+		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kv))
+		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
 		return "", fmt.Errorf("Unable to find a matching Benchmark Version match for kubernetes version: %s", kubeVersion)
 	}
 

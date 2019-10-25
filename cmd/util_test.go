@@ -417,12 +417,11 @@ func TestGetConfigFilePath(t *testing.T) {
 
 	cases := []struct {
 		benchmarkVersion string
-		specifiedVersion bool
 		succeed          bool
 		exp              string
 	}{
-		{benchmarkVersion: "cis-1.4", specifiedVersion: true, succeed: true, exp: d},
-		{benchmarkVersion: "cis-1.5", specifiedVersion: false, succeed: false, exp: ""},
+		{benchmarkVersion: "cis-1.4", succeed: true, exp: d},
+		{benchmarkVersion: "cis-1.5", succeed: false, exp: ""},
 		{benchmarkVersion: "1.1", succeed: false, exp: ""},
 	}
 
