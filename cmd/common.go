@@ -216,6 +216,7 @@ func loadConfig(nodetype check.NodeType) string {
 			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
 		}
 	}
+
 	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
@@ -240,7 +241,11 @@ func loadConfig(nodetype check.NodeType) string {
 func isMaster() bool {
 	glog.V(2).Info("Checking if the current node is running master components")
 	masterConf := viper.Sub(string(check.MASTER))
-	components, err := getBinaries(masterConf)
+	if masterConf == nil {
+		glog.V(2).Info("No master components found to be running")
+		return false
+	}
+	components, err := getBinariesFunc(masterConf)
 
 	if err != nil {
 		glog.V(2).Info(err)
