@@ -24,6 +24,7 @@ Table of Contents
 * [Running kube-bench](#running-kube-bench)
   * [Running inside a container](#running-inside-a-container)
   * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
+  * [Running in an Azure Kubernetes Service(AKS) cluster](#running-in-an-aks-cluster)
   * [Running in an EKS cluster](#running-in-an-eks-cluster)
   * [Installing from a container](#installing-from-a-container)
   * [Installing from sources](#installing-from-sources)
@@ -143,6 +144,31 @@ You can still force to run specific master or node checks using respectively `jo
 To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+
+
+### Running in an AKS cluster
+
+1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures
+
+1. Use the [kubectl-enter plugin] (https://github.com/kvaps/kubectl-enter) to shell into a node 
+`
+kubectl-enter {node-name}
+` 
+or ssh to one agent node
+could open nsg 22 port and assign a public ip for one agent node (only for testing purpose)
+
+1. config KUBECONFIG on the agent node:
+```
+sudo chmod a+r /etc/kubernetes/certs/client.key
+export KUBECONFIG=/var/lib/kubelet/kubeconfig
+kubectl get no  # to check whether kubeconfig works
+```
+4. Run CIS benchmark to view results:
+```
+docker run --rm -v `pwd`:/host andyzhangx/kube-bench:latest install
+./kube-bench node
+```
+kube-bench cannot be run on AKS master nodes 
 
 ### Running in an EKS cluster
 
