@@ -28,6 +28,7 @@ master:
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
+      - /var/snap/kube-apiserver/current/args
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -39,6 +40,7 @@ master:
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
       - /etc/kubernetes/manifests/kube-scheduler.manifest
+      - /var/snap/kube-scheduler/current/args
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
 
   controllermanager:
@@ -51,6 +53,7 @@ master:
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
+      - /var/snap/kube-controller-manager/current/args
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
 
   etcd:
@@ -61,6 +64,7 @@ master:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.manifest
       - /etc/etcd/etcd.conf
+      - /var/snap/etcd/common/etcd.conf.yml
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
@@ -90,6 +94,7 @@ node:
       - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
       - "/etc/systemd/system/kubelet.service"
       - "/lib/systemd/system/kubelet.service"
+      - "/etc/systemd/system/snap.kubelet.daemon.service"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
@@ -103,6 +108,7 @@ node:
       - "/home/kubernetes/kubelet-config.yaml"
       - "/etc/default/kubelet"
       - "/var/lib/kubelet/kubeconfig"
+      - "/var/snap/kubelet/current/args"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around
       ## of pointing to the systemd service file (which can also
@@ -111,6 +117,7 @@ node:
       - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
       - "/etc/systemd/system/kubelet.service"
       - "/lib/systemd/system/kubelet.service"
+      - "/etc/systemd/system/snap.kubelet.daemon.service"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
@@ -126,6 +133,7 @@ node:
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+      - /var/snap/kube-proxy/current/args
     kubeconfig:
       - /etc/kubernetes/kubelet-kubeconfig
     svc:
