@@ -48,10 +48,7 @@ endif
 
 # pushses the current dev version to the kind cluster.
 kind-push:
-	docker save $(IMAGE_NAME) -o kube-bench.tar.gz; \
-	docker cp kube-bench.tar.gz $(KIND_CONTAINER_NAME):/kube-bench.tar.gz; \
-	docker exec $(KIND_CONTAINER_NAME) docker load -i /kube-bench.tar.gz;
-	-rm -f kube-bench.tar.gz
+	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
 # runs the current version on kind using a job and follow logs
 kind-run: KUBECONFIG = "$(shell kind get kubeconfig-path --name="$(KIND_PROFILE)")"
