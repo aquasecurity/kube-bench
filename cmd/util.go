@@ -27,7 +27,7 @@ var (
 
 var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
-var getBinariesFunc func(*viper.Viper) (map[string]string, error)
+var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 var TypeMap = map[string][]string{
 	"ca":         []string{"cafile", "defaultcafile"},
 	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
@@ -89,7 +89,7 @@ func ps(proc string) string {
 
 // getBinaries finds which of the set of candidate executables are running.
 // It returns an error if one mandatory executable is not running.
-func getBinaries(v *viper.Viper) (map[string]string, error) {
+func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, error) {
 	binmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -103,7 +103,7 @@ func getBinaries(v *viper.Viper) (map[string]string, error) {
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				return nil, fmt.Errorf("need %s executable but none of the candidates are running", component)
+				return nil, buildComponentMissingErrorMessage(nodetype, component, bins)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
@@ -347,4 +347,31 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
+}
+
+func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) error {
+
+	errTemplate := `
+Unable to find %s programs (%s, etc...)
+These program names are provided in the config.yaml, section %s.%s.bins
+The following %s programs for the component '%s' have been search, 
+but none of them have been found:
+  %s`
+
+	componentRoleName := "control plane"
+	componentPrograms := "apiserver, controllermanager"
+	componentType := "master"
+
+	if nodetype == check.NODE {
+		componentRoleName = "worker node"
+		componentPrograms = "kubelet, kube-proxy"
+		componentType = "node"
+	}
+
+	binList := ""
+	for _, bin := range bins {
+		binList = fmt.Sprintf("\t- %s\n", bin)
+	}
+
+	return fmt.Errorf(errTemplate, componentRoleName, componentPrograms, componentType, component, componentRoleName, component, binList)
 }
