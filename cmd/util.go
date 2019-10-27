@@ -282,7 +282,11 @@ func getKubeVersion() (string, error) {
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
-			return "", fmt.Errorf("need kubectl or kubelet binaries to get kubernetes version")
+			return "", fmt.Errorf(`Unable to find the programs (kubectl/kubelet) in the PATH.
+			These programs are used to determine version of kubernetes.
+			Take a look at our troubleshooting document for help:
+				<TROUBLESHOOT_DOC_LINK> 
+			`)
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
