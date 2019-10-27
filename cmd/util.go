@@ -356,7 +356,7 @@ Unable to find %s programs (%s, etc...)
 These program names are provided in the config.yaml, section %s.%s.bins
 The following %s programs for the component '%s' have been search, 
 but none of them have been found:
-  %s`
+%s`
 
 	componentRoleName := "control plane"
 	componentPrograms := "apiserver, controllermanager"
@@ -370,7 +370,7 @@ but none of them have been found:
 
 	binList := ""
 	for _, bin := range bins {
-		binList = fmt.Sprintf("\t- %s\n", bin)
+		binList = fmt.Sprintf("%s\t- %s\n", binList, bin)
 	}
 
 	return fmt.Errorf(errTemplate, componentRoleName, componentPrograms, componentType, component, componentRoleName, component, binList)
