@@ -35,6 +35,24 @@ var TypeMap = map[string][]string{
 	"config":     []string{"confs", "defaultconf"},
 }
 
+var errMissingKubectlKubelet = fmt.Errorf(`Unable to find the programs kubectl or kubelet in the PATH.
+These programs are used to determine version of kubernetes.
+Make sure the /usr/bin directory is mapped to the container, 
+either using the job.yaml file used, or docker command.
+
+For job.yaml:
+...
+- name: usr-bin
+  mountPath: /usr/bin
+...
+
+For docker command:
+   docker -v $(which kubectl):/usr/bin/kubectl ....
+
+Alternatively, you can specify the version with --version
+   kube-bench --version <VERSION> ...
+`)
+
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
@@ -282,11 +300,7 @@ func getKubeVersion() (string, error) {
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
-			return "", fmt.Errorf(`Unable to find the programs (kubectl/kubelet) in the PATH.
-			These programs are used to determine version of kubernetes.
-			Take a look at our troubleshooting document for help:
-				<TROUBLESHOOT_DOC_LINK> 
-			`)
+			return "", errMissingKubectlKubelet
 		}
 		return getKubeVersionFromKubelet(), nil
 	}

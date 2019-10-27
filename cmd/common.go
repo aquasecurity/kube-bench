@@ -213,7 +213,7 @@ func loadConfig(nodetype check.NodeType) string {
 	if kubeVersion == "" {
 		runningVersion, err = getKubeVersion()
 		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+			exitWithError(fmt.Errorf("Version check failed: \n%s", err))
 		}
 	}
 
