@@ -28,9 +28,9 @@ $(BINARY): $(SOURCES)
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-             --build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
-			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-             -t $(IMAGE_NAME) .
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+		--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+		-t $(IMAGE_NAME) .
 
 tests:
 	GO111MODULE=on go test -v -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
@@ -41,9 +41,9 @@ kind-test-cluster:
 ifndef HAS_KIND
 	go get -u sigs.k8s.io/kind
 endif
-	@if [ -z $$(kind get clusters | grep $(KIND_PROFILE)) ]; then\
-		echo "Could not find $(KIND_PROFILE) cluster. Creating...";\
-		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
+	@if [ -z $$(kind get clusters | grep $(KIND_PROFILE)) ]; then \
+		echo "Could not find $(KIND_PROFILE) cluster. Creating..."; \
+		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m; \
 	fi
 
 # pushses the current dev version to the kind cluster.
@@ -55,7 +55,7 @@ kind-run: KUBECONFIG = "$(shell kind get kubeconfig-path --name="$(KIND_PROFILE)
 kind-run: ensure-stern
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind.yaml > ./hack/kind.test.yaml
 	-KUBECONFIG=$(KUBECONFIG) \
-		kubectl delete job kube-bench 
+		kubectl delete job kube-bench
 	KUBECONFIG=$(KUBECONFIG) \
 		kubectl apply -f ./hack/kind.test.yaml
 	KUBECONFIG=$(KUBECONFIG) \
@@ -67,5 +67,5 @@ ensure-stern:
 ifndef HAS_STERN
 	curl -LO https://github.com/wercker/stern/releases/download/1.10.0/stern_$(BUILD_OS)_amd64 && \
 		chmod +rx ./stern_$(BUILD_OS)_amd64 && \
-    	mv ./stern_$(BUILD_OS)_amd64 /usr/local/bin/stern
+		mv ./stern_$(BUILD_OS)_amd64 /usr/local/bin/stern
 endif
