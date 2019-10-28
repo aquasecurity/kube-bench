@@ -156,9 +156,12 @@ There are two significant differences on EKS:
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
-** binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows) **
+> **Note:**
+> - Binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows).
+> - To install, the container must be run as root user.
+
 ```
-docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+docker run --rm -v `pwd`:/host -u 0:0 aquasec/kube-bench:latest install
 ```
 
 You can then run `./kube-bench [master|node]`.

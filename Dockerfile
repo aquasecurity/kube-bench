@@ -1,20 +1,23 @@
 FROM golang:1.12 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
-ADD go.mod go.sum ./
-ADD main.go .
-ADD check/ check/
-ADD cmd/ cmd/
+COPY go.mod go.sum ./
+COPY main.go .
+COPY check/ check/
+COPY cmd/ cmd/
 ARG KUBEBENCH_VERSION
 RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
 FROM alpine:3.10 AS run
-WORKDIR /opt/kube-bench/
+ARG user=kube_bench
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
 RUN apk --no-cache add procps
-COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
-ADD entrypoint.sh .
-ADD cfg/ cfg/
+RUN addgroup -g 99 -S $user && adduser -u 99 -G $user -S $user
+USER $user
+WORKDIR /opt/kube-bench/
+COPY --chown=99:99 --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
+COPY --chown=99:99 entrypoint.sh .
+COPY --chown=99:99 cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["install"]
 

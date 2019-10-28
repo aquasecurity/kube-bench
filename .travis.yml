@@ -2,7 +2,7 @@
 language: go
 
 services:
-  - docker 
+  - docker
 
 notifications:
   email: false
@@ -15,12 +15,12 @@ before_install:
 
 script:
   - GO111MODULE=on go test ./...
-  - docker build --tag kube-bench .
-  - docker run -v `pwd`:/host kube-bench install 
+  - docker build  --tag kube-bench .
+  - docker run -v `pwd`:/host -u 0:0 kube-bench install
   - test -d cfg
   - test -f kube-bench
   - make tests
-  
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 deploy:
