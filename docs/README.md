@@ -5,7 +5,7 @@ representation of the CIS Kubernetes Benchmark checks. There is a
 `controls` file per Kubernetes version and node type.
 
 `controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
+with the same name as the kubernetes versions under `cfg/`, for example, `cfg/1.12`.
 `controls` are also organized by distribution under the `cfg` directory, for
 example `cfg/ocp-3.10`.
 
@@ -161,7 +161,7 @@ There are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
 `flag` is used when the keyword is a command line flag. The associated `audit`
-command is usually a `ps` command and a `grep` for the binary whose flag we are
+a command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
 ```sh
@@ -205,7 +205,7 @@ tests:
     set: true
 ```
 
-`set` checks if a keyword is present in the output of the audit command or in
+`set` checks if a keyword is present in the output of the audit command or 
 a config file. The possible values for `set` are true and false.
 
 If `set` is true, the check passes only if the keyword is present in the output
@@ -298,7 +298,7 @@ Every node type has a subsection that specifies the main configuration items.
   of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
-  variable in the form `$<component>conf`. In the example below we reference the 
+  variable in the form `$<component>conf`. In the example below, we reference the 
   selected API server config file with the variable `$apiserverconf` in an `audit`
   command.
   
