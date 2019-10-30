@@ -36,7 +36,7 @@ tests:
 	GO111MODULE=on go test -v -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
 
 integration-tests: build-docker
-	GO111MODULE=on go test ./integration/... -v -tags integration -timeout 600s -args -kubebenchImg=$(IMAGE_NAME) 
+	GO111MODULE=on go test ./integration/... -v -tags integration -timeout 600s -args -kubebenchImg=$(IMAGE_NAME)
 
 # creates a kind cluster to be used for development.
 HAS_KIND := $(shell command -v kind;)
@@ -58,7 +58,7 @@ kind-run: KUBECONFIG = "$(shell kind get kubeconfig-path --name="$(KIND_PROFILE)
 kind-run: ensure-stern
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind.yaml > ./hack/kind.test.yaml
 	-KUBECONFIG=$(KUBECONFIG) \
-		kubectl delete job kube-bench 
+		kubectl delete job kube-bench
 	KUBECONFIG=$(KUBECONFIG) \
 		kubectl apply -f ./hack/kind.test.yaml
 	KUBECONFIG=$(KUBECONFIG) \
@@ -70,5 +70,13 @@ ensure-stern:
 ifndef HAS_STERN
 	curl -LO https://github.com/wercker/stern/releases/download/1.10.0/stern_$(BUILD_OS)_amd64 && \
 		chmod +rx ./stern_$(BUILD_OS)_amd64 && \
-    	mv ./stern_$(BUILD_OS)_amd64 /usr/local/bin/stern
+		mv ./stern_$(BUILD_OS)_amd64 /usr/local/bin/stern
 endif
+
+deploy-test-helm:
+	helm install --dry-run --debug kube-bench deploy/kube-bench \
+		--set image.repository=$(DOCKER_REGISTRY),image.name=$(BINARY),image.tag=$(VERSION)
+
+deploy-helm:
+	helm install --debug kube-bench deploy/kube-bench \
+		--set image.repository=$(DOCKER_REGISTRY),image.name=$(BINARY),image.tag=$(VERSION)

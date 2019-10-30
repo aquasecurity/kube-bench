@@ -15,5 +15,13 @@ if [ "$1" == "install" ]; then
     exit
   fi
 else
-  exec kube-bench "$@"
+  if [ -n "$SCHEDULE" ]; then
+    echo "$SCHEDULE" "cd $PWD && date && kube-bench" "$@" | crontab -c . -
+    crond -c . -f
+  else
+    kube-bench "$@"
+    # If the SCHEDULE variable is not set, the container exits.
+    # If set, the container sleeps.
+    [ -n "${SCHEDULE+set}" ] && while :; do sleep 1d; done
+  fi
 fi

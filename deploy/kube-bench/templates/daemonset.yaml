@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kube-bench.fullname" . }}
+  labels:
+{{ include "kube-bench.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: kube-bench
+  template:
+    metadata:
+      labels:
+        app: kube-bench
+      name: kube-bench
+    spec:
+      hostPID: true
+      containers:
+        - name: kube-bench
+          image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+          args: [ {{- range .Values.runConfig.args -}}
+                    {{ . | toString | printf "\"%s\", " }}
+                  {{- end -}}
+                  "--version", {{ quote .Values.runConfig.version -}} ]
+          env:
+          - name: SCHEDULE
+            value: {{ quote .Values.runConfig.schedule }}
+          volumeMounts:
+            - name: var
+              mountPath: /var
+              readOnly: true
+            - name: etc
+              mountPath: /etc
+              readOnly: true
+      volumes:
+        - name: var
+          hostPath:
+            path: "/var"
+        - name: etc
+          hostPath:
+            path: "/etc"
