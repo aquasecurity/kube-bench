@@ -35,6 +35,21 @@ var TypeMap = map[string][]string{
 	"config":     []string{"confs", "defaultconf"},
 }
 
+/*
+  Related to https://github.com/aquasecurity/kube-bench/issues/501
+
+  The location of the core executables can be modified
+  in the config.yaml with a section like this:
+
+  core_executables:
+	ps: '/bin/ps'
+	cat: '/bin/cat'
+*/
+var defaultCoreExecutables = map[string]string{
+	"ps":  "/bin/ps",
+	"cat": "/bin/cat",
+}
+
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
@@ -78,7 +93,7 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
-	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
+	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
@@ -204,6 +219,21 @@ func getFiles(v *viper.Viper, fileType string) map[string]string {
 	}
 
 	return filemap
+}
+
+// collectCoreExecutables
+// This functions makes sure important core executable variables are set.
+// The location of the executable can be modified.
+func collectCoreExecutables(v *viper.Viper) map[string]string {
+	coreExecsToReplaceMap := v.GetStringMapString("core_executables")
+	for k, v := range defaultCoreExecutables {
+		exec, found := coreExecsToReplaceMap[k]
+		if !found || len(exec) == 0 {
+			coreExecsToReplaceMap[k] = v
+		}
+	}
+
+	return coreExecsToReplaceMap
 }
 
 // verifyBin checks that the binary specified is running
