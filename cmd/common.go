@@ -92,7 +92,6 @@ func runChecks(nodetype check.NodeType) {
 	svcmap := getFiles(typeConf, "service")
 	kubeconfmap := getFiles(typeConf, "kubeconfig")
 	cafilemap := getFiles(typeConf, "ca")
-	coreExecsMap := collectCoreExecutables(viper.GetViper())
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
@@ -101,7 +100,6 @@ func runChecks(nodetype check.NodeType) {
 	s = makeSubstitutions(s, "svc", svcmap)
 	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 	s = makeSubstitutions(s, "cafile", cafilemap)
-	s = makeSubstitutions(s, "bin", coreExecsMap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
