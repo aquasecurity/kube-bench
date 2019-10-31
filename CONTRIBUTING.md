@@ -21,3 +21,4 @@ Thank you for taking an interest in contributing to kube-bench !
 1. If a reviewer commented on your code or asked for changes, please remember to mark the discussion as resolved after you address it. PRs with unresolved issues should not be merged (even if the comment is unclear or requires no action from your side).
 1. Please include a comment with the results before and after your change.
 1. Your PR is more likely to be accepted if it includes tests (We have not historically been very strict about tests, but we would like to improve this!).
+1. Happy Coding !
