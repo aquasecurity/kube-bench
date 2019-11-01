@@ -366,7 +366,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) error {
 
 	errTemplate := `
-Unable to find %s programs (%s, etc...)
+Unable to detect running executable for component %s
 These program names are provided in the config.yaml, section %s.%s.bins
 The following %s programs for the component '%s' have been searched, 
 but none of them have been found:
