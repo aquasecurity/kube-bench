@@ -36,7 +36,7 @@ var TypeMap = map[string][]string{
 }
 
 var errMissingKubectlKubelet = fmt.Errorf(`Unable to find the programs kubectl or kubelet in the PATH.
-These programs are used to determine version of kubernetes.
+These programs are used to determine which version of Kubernetes is running.
 Make sure the /usr/bin directory is mapped to the container, 
 either using the job.yaml file used, or docker command.
 
