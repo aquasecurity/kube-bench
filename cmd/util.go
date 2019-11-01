@@ -372,7 +372,7 @@ The following %s programs for the component '%s' have been searched,
 but none of them have been found:
 %s`
 
-	componentRoleName := "control plane"
+	componentRoleName := "master node"
 	componentPrograms := "apiserver, controllermanager"
 	componentType := "master"
 
