@@ -35,23 +35,7 @@ var TypeMap = map[string][]string{
 	"config":     []string{"confs", "defaultconf"},
 }
 
-var errMissingKubectlKubelet = fmt.Errorf(`Unable to find the programs kubectl or kubelet in the PATH.
-These programs are used to determine which version of Kubernetes is running.
-Make sure the /usr/bin directory is mapped to the container, 
-either in the job.yaml file, or Docker command.
-
-For job.yaml:
-...
-- name: usr-bin
-  mountPath: /usr/bin
-...
-
-For docker command:
-   docker -v $(which kubectl):/usr/bin/kubectl ....
-
-Alternatively, you can specify the version with --version
-   kube-bench --version <VERSION> ...
-`)
+var errMissingKubectlKubelet = fmt.Errorf(`unable to find the programs kubectl or kubelet in the PATH`)
 
 func init() {
 	psFunc = ps
@@ -121,7 +105,8 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				return nil, buildComponentMissingErrorMessage(nodetype, component, bins)
+				glog.Warning(buildComponentMissingErrorMessage(nodetype, component, bins))
+				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
@@ -287,6 +272,25 @@ func multiWordReplace(s string, subname string, sub string) string {
 	return strings.Replace(s, subname, sub, -1)
 }
 
+const missingKubectlKubeletMessage = `
+Unable to find the programs kubectl or kubelet in the PATH.
+These programs are used to determine which version of Kubernetes is running.
+Make sure the /usr/bin directory is mapped to the container, 
+either in the job.yaml file, or Docker command.
+
+For job.yaml:
+...
+- name: usr-bin
+  mountPath: /usr/bin
+...
+
+For docker command:
+   docker -v $(which kubectl):/usr/bin/kubectl ....
+
+Alternatively, you can specify the version with --version
+   kube-bench --version <VERSION> ...
+`
+
 func getKubeVersion() (string, error) {
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
@@ -300,6 +304,8 @@ func getKubeVersion() (string, error) {
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
+
+			glog.Warning(missingKubectlKubeletMessage)
 			return "", errMissingKubectlKubelet
 		}
 		return getKubeVersionFromKubelet(), nil
@@ -363,22 +369,21 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	return s
 }
 
-func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) error {
+func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
 
-	errTemplate := `
-Unable to detect running executable for component %s
-These program names are provided in the config.yaml, section %s.%s.bins
-The following %s programs for the component '%s' have been searched, 
-but none of them have been found:
-%s`
+	errMessageTemplate := `
+Unable to detect running programs for component %q
+The following %q programs have been searched, but none of them have been found:
+%s
+
+These program names are provided in the config.yaml, section '%s.%s.bins'
+`
 
 	componentRoleName := "master node"
-	componentPrograms := "apiserver, controllermanager"
 	componentType := "master"
 
 	if nodetype == check.NODE {
 		componentRoleName = "worker node"
-		componentPrograms = "kubelet, kube-proxy"
 		componentType = "node"
 	}
 
@@ -387,5 +392,5 @@ but none of them have been found:
 		binList = fmt.Sprintf("%s\t- %s\n", binList, bin)
 	}
 
-	return fmt.Errorf(errTemplate, componentRoleName, componentPrograms, componentType, component, componentRoleName, component, binList)
+	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
 }
