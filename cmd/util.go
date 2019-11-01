@@ -80,7 +80,7 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
-	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
+	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
