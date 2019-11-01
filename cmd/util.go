@@ -368,7 +368,7 @@ func buildComponentMissingErrorMessage(nodetype check.NodeType, component string
 	errTemplate := `
 Unable to find %s programs (%s, etc...)
 These program names are provided in the config.yaml, section %s.%s.bins
-The following %s programs for the component '%s' have been search, 
+The following %s programs for the component '%s' have been searched, 
 but none of them have been found:
 %s`
 
