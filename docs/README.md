@@ -4,9 +4,9 @@
 representation of the CIS Kubernetes Benchmark checks. There is a 
 `controls` file per Kubernetes version and node type.
 
-`controls` for the various versions of Kubernetes can be found in directories
-with same name as the Kubernetes versions under `cfg/`, for example `cfg/1.12`.
-`controls` are also organized by distribution under the `cfg` directory for
+`controls` for the various versions of kubernetes can be found in directories
+with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
+`controls` are also organized by distribution under the `cfg` directory, for
 example `cfg/ocp-3.10`.
 
 ## Controls
@@ -62,7 +62,7 @@ groups:
 the `controls` components have an id and a text description which are displayed 
 in the `kube-bench` output.
 
-`type` specifies what Kubernetes node type a `controls` is for. Possible  values
+`type` specifies what kubernetes node type a `controls` is for. Possible values
 for `type` are `master` and `node`.
 
 ## Groups
@@ -154,10 +154,10 @@ object. `tests` contain `bin_op` and `test_items`.
 
 `test_items` specify the criteria(s) the `audit` command's output should meet to
 pass a check. This criteria is made up of keywords extracted from the output of
-the `audit` command and operations that compare the these keywords against
+the `audit` command and operations that compare these keywords against
 values expected by the CIS Kubernetes Benchmark. 
 
-The are two ways to extract keywords from the output of the `audit` command,
+There are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
 `flag` is used when the keyword is a command line flag. The associated `audit`
@@ -213,7 +213,7 @@ of the audit command, or config file. If `set` is false, the check passes only
 if the keyword is not present in the output of the audit command, or config file.
 
 `compare` has two fields `op` and `value` to compare keywords with expected
-value. `op` specifies which operation is used for the comparison , and `value`
+value. `op` specifies which operation is used for the comparison, and `value`
 specifies the value to compare against.
 
 > To use `compare`, `set` must true. The comparison will be ignored if `set` is
@@ -266,7 +266,7 @@ nodetype
     |-- defaultkubeconfig (optional)
 ```
 
-Every node type has a subsection that specifies the main configurations items.
+Every node type has a subsection that specifies the main configuration items.
 
 - `components`: A list of components for the node type. For example master 
   will have an entry for **apiserver**, **scheduler** and **controllermanager**.
@@ -293,8 +293,8 @@ Every node type has a subsection that specifies the main configurations items.
    ```
    
 - `confs`: A list of candidate configuration files for a component. `kube-bench`
-  checks this list and selects the first config file that is found on the node,
-  if none of the config files exists, `kube-bench` defaults conf to the value
+  checks this list and selects the first config file that is found on the node.
+  If none of the config files exists, `kube-bench` defaults conf to the value
   of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
@@ -309,8 +309,8 @@ Every node type has a subsection that specifies the main configurations items.
     audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
   ```
   
-- `svcs`:  A list of candidates unitfiles for a component. `kube-bench` checks this 
-  list and selects the first unitfile that is found on the node, if none of the
+- `svcs`:  A list of candidate unitfiles for a component. `kube-bench` checks this 
+  list and selects the first unitfile that is found on the node. If none of the
   unitfiles exists, `kube-bench` defaults unitfile to the value of `defaultsvc`.
   
   The selected unitfile for a component can be referenced in `controls` via a
@@ -332,7 +332,7 @@ Every node type has a subsection that specifies the main configurations items.
   ```
   
   - `kubeconfig`: A list of candidate kubeconfig files for a component. `kube-bench`
-    checks this list and selects the first file that is found on the node, if none
+    checks this list and selects the first file that is found on the node. If none
     of the files exists, `kube-bench` defaults kubeconfig to the value of 
     `defaultkubeconfig`.
     
