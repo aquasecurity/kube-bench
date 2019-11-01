@@ -113,7 +113,7 @@ docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.ya
 
 ### Running in a Kubernetes cluster
 
-You can run kube-bench inside a pod, but it will need access to the host's PID namespace to check the running processes, as well as access to some directories on the host where config files and other files are stored.
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
 The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
