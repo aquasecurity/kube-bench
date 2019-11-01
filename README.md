@@ -85,7 +85,7 @@ version 1.13:
 kube-bench node --version 1.13
 ```
 
-`controls` for the various versions of kubernetes can be found in directories
+`controls` for the various versions of Kubernetes can be found in directories
 with same name as the Kubernetes versions under `cfg/`, for example, `cfg/1.13`.
 
 `controls` are also organized by distribution under the `cfg` directory for
