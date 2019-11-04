@@ -202,7 +202,7 @@ go build -o kube-bench .
 
 ## Running on OpenShift 
 
-| OpenShift CIS Benchmark | kube-bench config |
+| OpenShift Hardening Guide | kube-bench config |
 |---|---|---|
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
@@ -210,31 +210,6 @@ go build -o kube-bench .
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
 
 when you run the `kube-bench` command (either directly or through YAML). 
-
-
-`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicate by the mapping table above.
-
-For example, if you specific:
-
-```
-kube-bench node --version ocp-3.10
-```
-`kube-bench` will map the `ocp-3.10` to CIS Bechmark version `rh-0.7`
-
-Also, you can specify `--benchmark` to run a specific CIS Benchmark version:
-
-```
-kube-bench node --benchmark rh-0.7
-```
-
-
-`controls` are also organized by Red Hat's OpenShift hardening guide version under the `cfg` directory for
-example `cfg/rh-0.7`.
-
-
-
-**Note:**  **`It is an error to specify both --version and --benchmark flags together`**
-
 
 
 ## Output
