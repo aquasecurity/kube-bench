@@ -35,8 +35,6 @@ var TypeMap = map[string][]string{
 	"config":     []string{"confs", "defaultconf"},
 }
 
-var errMissingKubectlKubelet = fmt.Errorf(`unable to find the programs kubectl or kubelet in the PATH`)
-
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
@@ -306,7 +304,7 @@ func getKubeVersion() (string, error) {
 			}
 
 			glog.Warning(missingKubectlKubeletMessage)
-			return "", errMissingKubectlKubelet
+			return "", fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
