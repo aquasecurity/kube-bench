@@ -209,7 +209,7 @@ go build -o kube-bench .
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10`. 
 
-When you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
+when you run the `kube-bench` command (either directly or through YAML). 
 
 
 `kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicate by the mapping table above.
