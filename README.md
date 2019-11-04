@@ -207,7 +207,7 @@ go build -o kube-bench .
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
 
-kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10`. 
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
 
 when you run the `kube-bench` command (either directly or through YAML). 
 
