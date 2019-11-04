@@ -90,7 +90,7 @@ kube-bench node --version 1.13
 
 `kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the version mapping table above.
 
-For example, if you specific:
+For example, if you specify:
 
 ```
 kube-bench node --version 1.13
