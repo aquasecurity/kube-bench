@@ -81,7 +81,7 @@ func runChecks(nodetype check.NodeType) {
 
 	// Get the set of executables and config files we care about on this type of node.
 	typeConf := viper.Sub(string(nodetype))
-	binmap, err := getBinaries(typeConf)
+	binmap, err := getBinaries(typeConf, nodetype)
 
 	// Checks that the executables we need for the node type are running.
 	if err != nil {
@@ -207,17 +207,16 @@ func loadConfig(nodetype check.NodeType) string {
 		file = masterFile
 	case check.NODE:
 		file = nodeFile
-	case check.FEDERATED:
-		file = federatedFile
 	}
 
 	runningVersion := ""
 	if kubeVersion == "" {
 		runningVersion, err = getKubeVersion()
 		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
+			exitWithError(fmt.Errorf("Version check failed: \n%s", err))
 		}
 	}
+
 	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
@@ -242,7 +241,11 @@ func loadConfig(nodetype check.NodeType) string {
 func isMaster() bool {
 	glog.V(2).Info("Checking if the current node is running master components")
 	masterConf := viper.Sub(string(check.MASTER))
-	components, err := getBinaries(masterConf)
+	if masterConf == nil {
+		glog.V(2).Info("No master components found to be running")
+		return false
+	}
+	components, err := getBinariesFunc(masterConf, check.MASTER)
 
 	if err != nil {
 		glog.V(2).Info(err)

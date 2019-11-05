@@ -27,16 +27,18 @@ var (
 
 var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
+var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 var TypeMap = map[string][]string{
-	"ca": []string{"cafile", "defaultcafile"},
+	"ca":         []string{"cafile", "defaultcafile"},
 	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
-	"service": []string{"svc", "defaultsvc"},
-	"config": []string{"confs", "defaultconf"},
+	"service":    []string{"svc", "defaultsvc"},
+	"config":     []string{"confs", "defaultconf"},
 }
 
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
+	getBinariesFunc = getBinaries
 }
 
 func exitWithError(err error) {
@@ -76,7 +78,7 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
-	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
+	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
@@ -87,7 +89,7 @@ func ps(proc string) string {
 
 // getBinaries finds which of the set of candidate executables are running.
 // It returns an error if one mandatory executable is not running.
-func getBinaries(v *viper.Viper) (map[string]string, error) {
+func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, error) {
 	binmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -101,7 +103,8 @@ func getBinaries(v *viper.Viper) (map[string]string, error) {
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				return nil, fmt.Errorf("need %s executable but none of the candidates are running", component)
+				glog.Warning(buildComponentMissingErrorMessage(nodetype, component, bins))
+				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
@@ -267,6 +270,25 @@ func multiWordReplace(s string, subname string, sub string) string {
 	return strings.Replace(s, subname, sub, -1)
 }
 
+const missingKubectlKubeletMessage = `
+Unable to find the programs kubectl or kubelet in the PATH.
+These programs are used to determine which version of Kubernetes is running.
+Make sure the /usr/bin directory is mapped to the container, 
+either in the job.yaml file, or Docker command.
+
+For job.yaml:
+...
+- name: usr-bin
+  mountPath: /usr/bin
+...
+
+For docker command:
+   docker -v $(which kubectl):/usr/bin/kubectl ....
+
+Alternatively, you can specify the version with --version
+   kube-bench --version <VERSION> ...
+`
+
 func getKubeVersion() (string, error) {
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
@@ -280,7 +302,9 @@ func getKubeVersion() (string, error) {
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
-			return "", fmt.Errorf("need kubectl or kubelet binaries to get kubernetes version")
+
+			glog.Warning(missingKubectlKubeletMessage)
+			return "", fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
@@ -333,7 +357,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	for k, v := range m {
 		subst := "$" + k + ext
 		if v == "" {
-			glog.V(2).Info(fmt.Sprintf("No subsitution for '%s'\n", subst))
+			glog.V(2).Info(fmt.Sprintf("No substitution for '%s'\n", subst))
 			continue
 		}
 		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
@@ -341,4 +365,30 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
+}
+
+func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
+
+	errMessageTemplate := `
+Unable to detect running programs for component %q
+The following %q programs have been searched, but none of them have been found:
+%s
+
+These program names are provided in the config.yaml, section '%s.%s.bins'
+`
+
+	componentRoleName := "master node"
+	componentType := "master"
+
+	if nodetype == check.NODE {
+		componentRoleName = "worker node"
+		componentType = "node"
+	}
+
+	binList := ""
+	for _, bin := range bins {
+		binList = fmt.Sprintf("%s\t- %s\n", binList, bin)
+	}
+
+	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
 }

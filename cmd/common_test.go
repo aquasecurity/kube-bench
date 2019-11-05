@@ -15,9 +15,12 @@
 package cmd
 
 import (
-	"github.com/aquasecurity/kube-bench/check"
-	"github.com/stretchr/testify/assert"
+	"errors"
 	"testing"
+
+	"github.com/aquasecurity/kube-bench/check"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRunFilter(t *testing.T) {
@@ -109,4 +112,57 @@ func TestNewRunFilter(t *testing.T) {
 		assert.EqualError(t, err, "group option and check option can't be used together")
 	})
 
+}
+
+func TestIsMaster(t *testing.T) {
+	testCases := []struct {
+		name            string
+		cfgFile         string
+		getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
+		isMaster        bool
+	}{
+		{
+			name:    "valid config, is master and all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{"apiserver": "kube-apiserver"}, nil
+			},
+			isMaster: true,
+		},
+		{
+			name:    "valid config, is master and but not all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, nil
+			},
+			isMaster: false,
+		},
+		{
+			name:    "valid config, is master, not all components are running and fails to find all binaries",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, errors.New("failed to find binaries")
+			},
+			isMaster: false,
+		},
+		{
+			name:     "valid config, does not include master",
+			cfgFile:  "../cfg/node_only.yaml",
+			isMaster: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		cfgFile = tc.cfgFile
+		initConfig()
+
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = tc.getBinariesFunc
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+			cfgFile = ""
+		}()
+
+		assert.Equal(t, tc.isMaster, isMaster(), tc.name)
+	}
 }

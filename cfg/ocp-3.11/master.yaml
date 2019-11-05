@@ -50,17 +50,17 @@ groups:
           op: eq
           value: "kubeletClientInfo:"
         set: true
-      - flag: "ca: ca-bundle.crt"
+      - flag: "ca"
         compare:
           op: has
           value: "ca-bundle.crt"
         set: true
-      - flag: "certFile: master.kubelet-client.crt"
+      - flag: "certFile"
         compare:
           op: has
           value: "master.kubelet-client.crt"
         set: true
-      - flag: "keyFile: master.kubelet-client.key"
+      - flag: "keyFile"
         compare:
           op: has
           value: "master.kubelet-client.key"
@@ -171,7 +171,7 @@ groups:
         set: false
     remediation: |
       Edit the kubernetes master config file /etc/origin/master/master-config.yaml
-      and remove the the entry below.
+      and remove the entry below.
 
       AlwaysAdmit:
         configuration:
@@ -185,14 +185,14 @@ groups:
     audit: "grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
           value: "false"
         set: true
     remediation: |
       Edit the kubernetes master config file /etc/origin/master/master-config.yaml
-      and add the the entry below.
+      and add the entry below.
 
       admissionConfig:
         pluginConfig:
@@ -236,7 +236,7 @@ groups:
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "enabled: true"
+      - flag: "enabled"
         compare:
           op: has
           value: "true"
@@ -387,15 +387,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "keyFile: master.kubelet-client.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.kubelet-client.key"
+          value: "master.kubelet-client.key"
         set: true
-      - flag: "certFile: master.kubelet-client.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.kubelet-client.crt"
+          value: "master.kubelet-client.crt"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and add the following
@@ -410,7 +410,7 @@ groups:
 
   - id: 1.23
     text: "Verify that the service account lookup flag is not set"
-    type: skip
+    type: "skip"
     scored: true
 
   - id: 1.24
@@ -424,10 +424,10 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "privateKeyFile: serviceaccounts.private.key"
+      - flag: "privateKeyFile"
         compare:
           op: has
-          value: "privateKeyFile: serviceaccounts.private.key"
+          value: "serviceaccounts.private.key"
         set: true
       - flag: "serviceaccounts.public.key"
         compare:
@@ -464,15 +464,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "certFile: master.etcd-client.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.etcd-client.crt"
+          value: "master.etcd-client.crt"
         set: true
-      - flag: "keyFile: master.etcd-client.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.etcd-client.key"
+          value: "master.etcd-client.key"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile 
@@ -492,10 +492,10 @@ groups:
       test_items:
       - flag: "ServiceAccount"
         set: false
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable ServiceAccount
@@ -514,15 +514,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "certFile: master.server.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.server.crt"
+          value: "master.server.crt"
         set: true
-      - flag: "keyFile: master.server.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.server.key"
+          value: "master.server.key"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile under servingInfo.
@@ -562,10 +562,10 @@ groups:
     audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "ca: master.etcd-ca.crt"
+      - flag: "ca"
         compare:
           op: has
-          value: "ca: master.etcd-ca.crt"
+          value: "master.etcd-ca.crt"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set ca under etcdClientInfo.
@@ -589,10 +589,10 @@ groups:
       test_items:
       - flag: "NodeRestriction"
         set: false
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable NodeRestriction ca under etcdClientInfo.
@@ -639,10 +639,10 @@ groups:
     audit: "grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Follow the documentation to enable the EventRateLimit plugin.
@@ -675,8 +675,9 @@ groups:
   - id: 1.37
     text: "Adjust the request timeout argument for your cluster resources"
     audit: "grep request-timeout /etc/origin/master/master-config.yaml"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       change the request-timeout value in the  /etc/origin/master/master-config.yaml
     scored: true
 
@@ -774,7 +775,7 @@ groups:
             value: "/etc/origin/master/ca-bundle.crt"
           set: true
       test_items:
-        - flag: "masterCA: ca-bundle.crt"
+        - flag: "masterCA"
           compare:
             op: has
             value: "ca-bundle.crt"
@@ -1313,6 +1314,7 @@ groups:
     text: "Ensure that the cluster-admin role is only used where required"
     type: "manual"
     remediation: |
+      [Manual test]
       Review users, groups, serviceaccounts bound to cluster-admin:
       oc get clusterrolebindings | grep cluster-admin
 
@@ -1324,6 +1326,7 @@ groups:
     text: "Verify Security Context Constraints as in use"
     type: "manual"
     remediation: |
+      [Manual test]
       Review Security Context Constraints:
       oc get scc
 
@@ -1341,6 +1344,7 @@ groups:
     text: "Use OpenShift projects to maintain boundaries between resources"
     type: "manual"
     remediation: |
+      [Manual test]
       Review projects:
       oc get projects
     scored: false
@@ -1349,6 +1353,7 @@ groups:
     text: "Create network segmentation using the Multi-tenant plugin or Network Policies"
     type: "manual"
     remediation: |
+      [Manual test]
       Verify on masters the plugin being used:
       grep networkPluginName /etc/origin/master/master-config.yaml
 
@@ -1372,6 +1377,7 @@ groups:
     text: "Enable seccomp and configure custom Security Context Constraints"
     type: "manual"
     remediation: |
+      [Manual test]
       Verify SCCs that have been configured with seccomp:
       oc get scc -ocustom-columns=NAME:.metadata.name,SECCOMP-PROFILES:.seccompProfiles
 
@@ -1386,6 +1392,7 @@ groups:
     text: "Review Security Context Constraints"
     type: "manual"
     remediation: |
+      [Manual test]
       Review SCCs:
       oc describe scc
 
@@ -1410,6 +1417,7 @@ groups:
     text: "Manage Image Provenance using ImagePolicyWebhook admission controller"
     type: "manual"
     remediation: |
+      [Manual test]
       Review imagePolicyConfig in /etc/origin/master/master-config.yaml.
     scored: false
 
@@ -1417,6 +1425,7 @@ groups:
     text: "Configure Network policies as appropriate"
     type: "manual"
     remediation: |
+      [Manual test]
       If ovs-networkplugin is used, review network policies:
       oc get networkpolicies
 
@@ -1429,6 +1438,7 @@ groups:
     text: "Use Security Context Constraints as compensating controls for privileged containers"
     type: "manual"
     remediation: |
+      [Manual test]
       1) Determine all sccs allowing privileged containers:
          oc get scc -ocustom-columns=NAME:.metadata.name,ALLOWS_PRIVILEGED:.allowPrivilegedContainer
       2) Review users and groups assigned to sccs allowing priviliged containers:

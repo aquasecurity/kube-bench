@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
 )
 
@@ -166,7 +167,7 @@ func TestGetBinaries(t *testing.T) {
 			for k, val := range c.config {
 				v.Set(k, val)
 			}
-			m, err := getBinaries(v)
+			m, err := getBinaries(v, check.MASTER)
 			if c.expectErr {
 				if err == nil {
 					t.Fatal("Got nil Expected error")
@@ -209,8 +210,8 @@ func TestKubeVersionRegex(t *testing.T) {
 	}
 
 	ver = getVersionFromKubectlOutput("Something completely different")
-	if ver != "1.6" {
-		t.Fatalf("Expected 1.6 got %s", ver)
+	if ver != defaultKubeVersion {
+		t.Fatalf("Expected %s got %s", defaultKubeVersion, ver)
 	}
 }
 

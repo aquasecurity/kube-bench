@@ -10,7 +10,7 @@ spec:
       - name: kube-bench
         # Push the image to your ECR and then refer to it here
         image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
-        command: ["kube-bench", "--version", "1.11-json"]
+        command: ["kube-bench", "--version", "1.11"]
         volumeMounts:
         - name: var-lib-kubelet
           mountPath: /var/lib/kubelet
@@ -29,6 +29,4 @@ spec:
       - name: etc-kubernetes
         hostPath:
           path: "/etc/kubernetes"
-      - name: usr-bin
-        hostPath:
-          path: "/usr/bin"
+
