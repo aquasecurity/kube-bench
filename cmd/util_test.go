@@ -409,7 +409,7 @@ func TestGetConfigFilePath(t *testing.T) {
 		t.Fatalf("Failed to create temp directory")
 	}
 	defer os.RemoveAll(cfgDir)
-	d := filepath.Join(cfgDir, "1.8")
+	d := filepath.Join(cfgDir, "cis-1.4")
 	err = os.Mkdir(d, 0666)
 	if err != nil {
 		t.Fatalf("Failed to create temp file")
@@ -417,29 +417,57 @@ func TestGetConfigFilePath(t *testing.T) {
 	ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
 
 	cases := []struct {
-		specifiedVersion string
-		runningVersion   string
+		benchmarkVersion string
 		succeed          bool
 		exp              string
 	}{
-		{runningVersion: "1.8", succeed: true, exp: d},
-		{runningVersion: "1.9", succeed: true, exp: d},
-		{runningVersion: "1.10", succeed: true, exp: d},
-		{runningVersion: "1.1", succeed: false},
-		{specifiedVersion: "1.8", succeed: true, exp: d},
-		{specifiedVersion: "1.9", succeed: false},
-		{specifiedVersion: "1.10", succeed: false},
+		{benchmarkVersion: "cis-1.4", succeed: true, exp: d},
+		{benchmarkVersion: "cis-1.5", succeed: false, exp: ""},
+		{benchmarkVersion: "1.1", succeed: false, exp: ""},
 	}
 
 	for _, c := range cases {
-		t.Run(c.specifiedVersion+"-"+c.runningVersion, func(t *testing.T) {
-			path, err := getConfigFilePath(c.specifiedVersion, c.runningVersion, "/master.yaml")
-			if err != nil && c.succeed {
-				t.Fatalf("Error %v", err)
-			}
-			if path != c.exp {
-				t.Fatalf("Got %s expected %s", path, c.exp)
+		t.Run(c.benchmarkVersion, func(t *testing.T) {
+			path, err := getConfigFilePath(c.benchmarkVersion, "/master.yaml")
+			if c.succeed {
+				if err != nil {
+					t.Fatalf("Error %v", err)
+				}
+				if path != c.exp {
+					t.Fatalf("Got %s expected %s", path, c.exp)
+				}
+			} else {
+				if err == nil {
+					t.Fatalf("Expected Error, but none")
+				}
 			}
 		})
+	}
+}
+
+func TestDecrementVersion(t *testing.T) {
+
+	cases := []struct {
+		kubeVersion string
+		succeed     bool
+		exp         string
+	}{
+		{kubeVersion: "1.13", succeed: true, exp: "1.12"},
+		{kubeVersion: "1.15", succeed: true, exp: "1.14"},
+		{kubeVersion: "1.11", succeed: true, exp: "1.10"},
+		{kubeVersion: "1.1", succeed: true, exp: ""},
+		{kubeVersion: "invalid", succeed: false, exp: ""},
+	}
+	for _, c := range cases {
+		rv := decrementVersion(c.kubeVersion)
+		if c.succeed {
+			if c.exp != rv {
+				t.Fatalf("decrementVersion(%q) - Got %q expected %s", c.kubeVersion, rv, c.exp)
+			}
+		} else {
+			if len(rv) > 0 {
+				t.Fatalf("decrementVersion(%q) - Expected empty string but Got %s", c.kubeVersion, rv)
+			}
+		}
 	}
 }

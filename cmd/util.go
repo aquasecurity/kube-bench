@@ -121,41 +121,19 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 	return binmap, nil
 }
 
-// getConfigFilePath locates the config files we should be using based on either the specified
-// version, or the running version of kubernetes if not specified
-func getConfigFilePath(specifiedVersion string, runningVersion string, filename string) (path string, err error) {
-	var fileVersion string
+// getConfigFilePath locates the config files we should be using CIS version
+func getConfigFilePath(benchmarkVersion string, filename string) (path string, err error) {
+	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
-	if specifiedVersion != "" {
-		fileVersion = specifiedVersion
-	} else {
-		fileVersion = runningVersion
+	path = filepath.Join(cfgDir, benchmarkVersion)
+	file := filepath.Join(path, string(filename))
+	glog.V(2).Info(fmt.Sprintf("Looking for config file: %s", file))
+
+	if _, err = os.Stat(file); os.IsNotExist(err) {
+		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
+		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
-
-	glog.V(2).Info(fmt.Sprintf("Looking for config for version %s", fileVersion))
-
-	for {
-		path = filepath.Join(cfgDir, fileVersion)
-		file := filepath.Join(path, string(filename))
-		glog.V(2).Info(fmt.Sprintf("Looking for config file: %s\n", file))
-
-		if _, err = os.Stat(file); !os.IsNotExist(err) {
-			if specifiedVersion == "" && fileVersion != runningVersion {
-				glog.V(1).Info(fmt.Sprintf("No test file found for %s - using tests for Kubernetes %s\n", runningVersion, fileVersion))
-			}
-			return path, nil
-		}
-
-		// If we were given an explicit version to look for, don't look for any others
-		if specifiedVersion != "" {
-			return "", err
-		}
-
-		fileVersion = decrementVersion(fileVersion)
-		if fileVersion == "" {
-			return "", fmt.Errorf("no test files found <= runningVersion")
-		}
-	}
+	return path, nil
 }
 
 // decrementVersion decrements the version number
@@ -163,6 +141,9 @@ func getConfigFilePath(specifiedVersion string, runningVersion string, filename 
 // just in case someone wants to specify their own test files for that version
 func decrementVersion(version string) string {
 	split := strings.Split(version, ".")
+	if len(split) < 2 {
+		return ""
+	}
 	minor, err := strconv.Atoi(split[1])
 	if err != nil {
 		return ""
@@ -365,6 +346,11 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 	}
 
 	return s
+}
+
+func isEmpty(str string) bool {
+	return len(strings.TrimSpace(str)) == 0
+
 }
 
 func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
