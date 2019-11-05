@@ -19,38 +19,42 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 Table of Contents
 =================
 
-* [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
-* [Installation](#installation)
-* [Running kube-bench](#running-kube-bench)
-  * [Running inside a container](#running-inside-a-container)
-  * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
-  * [Running in an EKS cluster](#running-in-an-eks-cluster)
-  * [Installing from a container](#installing-from-a-container)
-  * [Installing from sources](#installing-from-sources)
-* [Running on OpenShift](#running-on-openshift)
-* [Output](#output)
-* [Configuration](#configuration)
-* [Test config YAML representation](#test-config-yaml-representation)
-  * [Omitting checks](#omitting-checks)
-* [Roadmap](#roadmap)
-* [Testing locally with kind](#testing-locally-with-kind)
-* [Contributing](#contributing)
-  * [Bugs](#bugs)
-  * [Features](#features)
-  * [Pull Requests](#pull-requests)
+- [Table of Contents](#table-of-contents)
+  - [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
+  - [Installation](#installation)
+  - [Running kube-bench](#running-kube-bench)
+    - [Running inside a container](#running-inside-a-container)
+    - [Running in a Kubernetes cluster](#running-in-a-kubernetes-cluster)
+    - [Running in an EKS cluster](#running-in-an-eks-cluster)
+    - [Installing from a container](#installing-from-a-container)
+    - [Installing from sources](#installing-from-sources)
+  - [Running on OpenShift](#running-on-openshift)
+  - [Output](#output)
+  - [Configuration](#configuration)
+  - [Test config YAML representation](#test-config-yaml-representation)
+    - [Omitting checks](#omitting-checks)
+  - [Roadmap](#roadmap)
+  - [Testing locally with kind](#testing-locally-with-kind)
+  - [Contributing](#contributing)
+    - [Bugs](#bugs)
+    - [Features](#features)
+    - [Pull Requests](#pull-requests)
       
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.0 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.1 respectively. 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| 1.3.0| 1.11 | 1.11-1.12 |
-| 1.4.1| 1.13 | 1.13- |
+| 1.3.0| cis-1.3 | 1.11-1.12 |
+| 1.4.1| cis-1.4 | 1.13- |
+
 
 By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
 There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
+
+
 
 ## Installation
 
@@ -78,16 +82,31 @@ For example, run kube-bench against a master with version auto-detection:
 kube-bench master
 ```
 
-Or run kube-bench against a node with the node `controls` for Kubernetes  version 1.13:
+Or run kube-bench against a node with the node `controls` for Kubernetes version 1.13:
 
 ```
 kube-bench node --version 1.13
 ```
 
-`controls` for the various versions of Kubernetes can be found in directories
-with same name as the Kubernetes versions under `cfg/`, for example `cfg/1.13`.
-`controls` are also organized by distribution under the `cfg` directory for
-example `cfg/ocp-3.10`.
+`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the version mapping table above.
+
+For example, if you specify:
+
+```
+kube-bench node --version 1.13
+```
+`kube-bench` will map the `1.13` to CIS Bechmark version `cis-1.14`
+
+Also, you can specify `--benchmark` to run a specific CIS Benchmark version:
+
+```
+kube-bench node --benchmark cis-1.4
+```
+
+`controls` for the various versions of CIS Benchmark can be found in directories
+with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
+
+**Note:**  **`It is an error to specify both --version and --benchmark flags together`**
 
 ### Running inside a container
 
@@ -183,7 +202,15 @@ go build -o kube-bench .
 
 ## Running on OpenShift 
 
-kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
+| OpenShift Hardening Guide | kube-bench config |
+|---|---|---|
+| ocp-3.10| rh-0.7 |
+| ocp-3.11| rh-0.7 |
+
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
+
+when you run the `kube-bench` command (either directly or through YAML). 
+
 
 ## Output
 

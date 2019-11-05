@@ -50,17 +50,17 @@ groups:
           op: eq
           value: "kubeletClientInfo:"
         set: true
-      - flag: "ca: ca-bundle.crt"
+      - flag: "ca"
         compare:
           op: has
           value: "ca-bundle.crt"
         set: true
-      - flag: "certFile: master.kubelet-client.crt"
+      - flag: "certFile"
         compare:
           op: has
           value: "master.kubelet-client.crt"
         set: true
-      - flag: "keyFile: master.kubelet-client.key"
+      - flag: "keyFile"
         compare:
           op: has
           value: "master.kubelet-client.key"
@@ -185,7 +185,7 @@ groups:
     audit: "grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
           value: "false"
@@ -236,7 +236,7 @@ groups:
     audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "enabled: true"
+      - flag: "enabled"
         compare:
           op: has
           value: "true"
@@ -387,15 +387,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "keyFile: master.kubelet-client.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.kubelet-client.key"
+          value: "master.kubelet-client.key"
         set: true
-      - flag: "certFile: master.kubelet-client.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.kubelet-client.crt"
+          value: "master.kubelet-client.crt"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and add the following
@@ -424,10 +424,10 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "privateKeyFile: serviceaccounts.private.key"
+      - flag: "privateKeyFile"
         compare:
           op: has
-          value: "privateKeyFile: serviceaccounts.private.key"
+          value: "serviceaccounts.private.key"
         set: true
       - flag: "serviceaccounts.public.key"
         compare:
@@ -464,15 +464,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "certFile: master.etcd-client.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.etcd-client.crt"
+          value: "master.etcd-client.crt"
         set: true
-      - flag: "keyFile: master.etcd-client.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.etcd-client.key"
+          value: "master.etcd-client.key"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile 
@@ -492,10 +492,10 @@ groups:
       test_items:
       - flag: "ServiceAccount"
         set: false
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable ServiceAccount
@@ -514,15 +514,15 @@ groups:
     tests:
       bin_op: and
       test_items:
-      - flag: "certFile: master.server.crt"
+      - flag: "certFile"
         compare:
           op: has
-          value: "certFile: master.server.crt"
+          value: "master.server.crt"
         set: true
-      - flag: "keyFile: master.server.key"
+      - flag: "keyFile"
         compare:
           op: has
-          value: "keyFile: master.server.key"
+          value: "master.server.key"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile under servingInfo.
@@ -562,10 +562,10 @@ groups:
     audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "ca: master.etcd-ca.crt"
+      - flag: "ca"
         compare:
           op: has
-          value: "ca: master.etcd-ca.crt"
+          value: "master.etcd-ca.crt"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and set ca under etcdClientInfo.
@@ -589,10 +589,10 @@ groups:
       test_items:
       - flag: "NodeRestriction"
         set: false
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable NodeRestriction ca under etcdClientInfo.
@@ -639,10 +639,10 @@ groups:
     audit: "grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
     tests:
       test_items:
-      - flag: "disable: false"
+      - flag: "disable"
         compare:
           op: has
-          value: "disable: false"
+          value: "false"
         set: true
     remediation: |
       Follow the documentation to enable the EventRateLimit plugin.
@@ -775,7 +775,7 @@ groups:
             value: "/etc/origin/master/ca-bundle.crt"
           set: true
       test_items:
-        - flag: "masterCA: ca-bundle.crt"
+        - flag: "masterCA"
           compare:
             op: has
             value: "ca-bundle.crt"
