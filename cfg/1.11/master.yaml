@@ -759,8 +759,8 @@ groups:
       test_items:
       - flag: "--use-service-account-credentials"
         compare:
-          op: eq
-          value: true
+          op: noteq
+          value: false
         set: true
     remediation: |
       Edit the Controller Manager pod specification file $controllermanagerconf
