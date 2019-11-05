@@ -50,7 +50,7 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | 1.4.1| cis-1.4 | 1.13- |
 
 
-By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
+By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
 There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
 
@@ -66,12 +66,13 @@ You can choose to
 
 ## Running kube-bench
 
-If you run kube-bench directly from the command line you may need to be root/sudo in order to have access to all the config files.
+If you run kube-bench directly from the command line you may need to be root / sudo to have access to all the config files.
 
 kube-bench automatically selects which `controls` to use based on the detected
 node type and the version of Kubernetes a cluster is running. This behavior
 can be overridden by specifying the `master` or `node` subcommand and the
 `--version` flag on the command line. 
+
 
 The Kubernetes version can also be set with the `KUBE_BENCH_VERSION` environment variable.
 The value of `--version` takes precedence over the value of `KUBE_BENCH_VERSION`.
@@ -82,22 +83,15 @@ For example, run kube-bench against a master with version auto-detection:
 kube-bench master
 ```
 
-Or run kube-bench against a node with the node `controls` for Kubernetes version 1.13:
+Or run kube-bench against a worker node using the tests for Kubernetes version 1.13:
 
 ```
 kube-bench node --version 1.13
 ```
 
-`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the version mapping table above.
+`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.13`, this is mapped to CIS Benchmark version `cis-1.14`.
 
-For example, if you specify:
-
-```
-kube-bench node --version 1.13
-```
-`kube-bench` will map the `1.13` to CIS Bechmark version `cis-1.14`
-
-Also, you can specify `--benchmark` to run a specific CIS Benchmark version:
+Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark version:
 
 ```
 kube-bench node --benchmark cis-1.4
@@ -110,7 +104,7 @@ with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-
 
 ### Running inside a container
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions. 
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host so that kube-bench can check their existence and permissions. 
 
 ```
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node] --version 1.13
@@ -196,7 +190,7 @@ go build -o kube-bench .
 # See all supported options
 ./kube-bench --help
 
-# Run the all checks
+# Run all checks
 ./kube-bench
 ```
 
@@ -259,17 +253,17 @@ We welcome PRs and issue reports.
 
 ## Testing locally with kind
 
-Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purpose.
+Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purposes.
 
-First you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
+First, you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
 *If kind cannot be found on your system the target will try to install it using `go get`*
 
-Next you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
+Next, you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
 
-Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
+Finally, we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
-Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 ## Contributing
 
@@ -290,7 +284,7 @@ We also use the GitHub issue tracker to track feature requests. If you have an i
 
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
-- Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
+- Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
 
 ### Pull Requests 
