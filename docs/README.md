@@ -1,13 +1,7 @@
 # Test and config files
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
-representation of the CIS Kubernetes Benchmark checks. There is a 
-`controls` file per Kubernetes version and node type.
-
-`controls` for the various versions of Kubernetes can be found in directories
-with the same name as the Kubernetes versions under `cfg/`, for example, `cfg/1.12`.
-`controls` are also organized by distribution under the `cfg` directory for
-example `cfg/ocp-3.10`.
+representation of the CIS Kubernetes Benchmark checks (or other distribution-specific hardening guides). 
 
 ## Controls
 
@@ -62,7 +56,7 @@ groups:
 the `controls` components have an id and a text description which are displayed 
 in the `kube-bench` output.
 
-`type` specifies what Kubernetes node type a `controls` is for. Possible  values
+`type` specifies what kubernetes node type a `controls` is for. Possible values
 for `type` are `master` and `node`.
 
 ## Groups
@@ -152,7 +146,7 @@ The audit is evaluated against criteria specified by the `tests`
 object. `tests` contain `bin_op` and `test_items`.
 
 `test_items` specify the criteria(s) the `audit` command's output should meet to
-pass a check. This criterion is made up of keywords extracted from the output of
+pass a check. This criteria is made up of keywords extracted from the output of
 the `audit` command and operations that compare these keywords against
 values expected by the CIS Kubernetes Benchmark. 
 
@@ -264,7 +258,7 @@ nodetype
     |-- defaultkubeconfig (optional)
 ```
 
-Every node type has a subsection that specifies the main configurations items.
+Every node type has a subsection that specifies the main configuration items.
 
 - `components`: A list of components for the node type. For example master 
   will have an entry for **apiserver**, **scheduler** and **controllermanager**.
@@ -291,8 +285,8 @@ Every node type has a subsection that specifies the main configurations items.
    ```
    
 - `confs`: A list of candidate configuration files for a component. `kube-bench`
-  checks this list and selects the first config file that is found on the node,
-  if none of the config files exists, `kube-bench` defaults conf to the value
+  checks this list and selects the first config file that is found on the node.
+  If none of the config files exists, `kube-bench` defaults conf to the value
   of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
@@ -307,8 +301,8 @@ Every node type has a subsection that specifies the main configurations items.
     audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
   ```
   
-- `svcs`:  A list of candidates unitfiles for a component. `kube-bench` checks this 
-  list and selects the first unitfile that is found on the node, if none of the
+- `svcs`:  A list of candidate unitfiles for a component. `kube-bench` checks this 
+  list and selects the first unitfile that is found on the node. If none of the
   unitfiles exists, `kube-bench` defaults unitfile to the value of `defaultsvc`.
   
   The selected unitfile for a component can be referenced in `controls` via a
@@ -330,7 +324,7 @@ Every node type has a subsection that specifies the main configurations items.
   ```
   
   - `kubeconfig`: A list of candidate kubeconfig files for a component. `kube-bench`
-    checks this list and selects the first file that is found on the node, if none
+    checks this list and selects the first file that is found on the node. If none
     of the files exists, `kube-bench` defaults kubeconfig to the value of 
     `defaultkubeconfig`.
     
