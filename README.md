@@ -146,7 +146,7 @@ The default labels applied to master nodes has changed since Kubernetes 1.11, so
 
 ### Running in an EKS cluster
 
-There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant differences on EKS: Is it's not possible to schedule jobs onto the master node, so master checks can't be performed
+There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
 
 ##### Getting Started with EKS
 1. To create an EKS Cluster refer to [Getting Started with Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) in the *Amazon EKS User Guide*
