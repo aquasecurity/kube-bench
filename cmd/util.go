@@ -27,7 +27,7 @@ var (
 
 var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
-var getBinariesFunc func(*viper.Viper) (map[string]string, error)
+var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 var TypeMap = map[string][]string{
 	"ca":         []string{"cafile", "defaultcafile"},
 	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
@@ -78,7 +78,7 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
-	cmd := exec.Command("ps", "-C", proc, "-o", "cmd", "--no-headers")
+	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
@@ -89,7 +89,7 @@ func ps(proc string) string {
 
 // getBinaries finds which of the set of candidate executables are running.
 // It returns an error if one mandatory executable is not running.
-func getBinaries(v *viper.Viper) (map[string]string, error) {
+func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, error) {
 	binmap := make(map[string]string)
 
 	for _, component := range v.GetStringSlice("components") {
@@ -103,7 +103,8 @@ func getBinaries(v *viper.Viper) (map[string]string, error) {
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				return nil, fmt.Errorf("need %s executable but none of the candidates are running", component)
+				glog.Warning(buildComponentMissingErrorMessage(nodetype, component, bins))
+				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
@@ -250,6 +251,25 @@ func multiWordReplace(s string, subname string, sub string) string {
 	return strings.Replace(s, subname, sub, -1)
 }
 
+const missingKubectlKubeletMessage = `
+Unable to find the programs kubectl or kubelet in the PATH.
+These programs are used to determine which version of Kubernetes is running.
+Make sure the /usr/bin directory is mapped to the container, 
+either in the job.yaml file, or Docker command.
+
+For job.yaml:
+...
+- name: usr-bin
+  mountPath: /usr/bin
+...
+
+For docker command:
+   docker -v $(which kubectl):/usr/bin/kubectl ....
+
+Alternatively, you can specify the version with --version
+   kube-bench --version <VERSION> ...
+`
+
 func getKubeVersion() (string, error) {
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
@@ -263,7 +283,9 @@ func getKubeVersion() (string, error) {
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
-			return "", fmt.Errorf("need kubectl or kubelet binaries to get kubernetes version")
+
+			glog.Warning(missingKubectlKubeletMessage)
+			return "", fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
@@ -328,4 +350,31 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 
 func isEmpty(str string) bool {
 	return len(strings.TrimSpace(str)) == 0
+
+}
+
+func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
+
+	errMessageTemplate := `
+Unable to detect running programs for component %q
+The following %q programs have been searched, but none of them have been found:
+%s
+
+These program names are provided in the config.yaml, section '%s.%s.bins'
+`
+
+	componentRoleName := "master node"
+	componentType := "master"
+
+	if nodetype == check.NODE {
+		componentRoleName = "worker node"
+		componentType = "node"
+	}
+
+	binList := ""
+	for _, bin := range bins {
+		binList = fmt.Sprintf("%s\t- %s\n", binList, bin)
+	}
+
+	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
 }

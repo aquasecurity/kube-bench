@@ -122,13 +122,13 @@ func TestIsMaster(t *testing.T) {
 	testCases := []struct {
 		name            string
 		cfgFile         string
-		getBinariesFunc func(*viper.Viper) (map[string]string, error)
+		getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 		isMaster        bool
 	}{
 		{
 			name:    "valid config, is master and all components are running",
 			cfgFile: "../cfg/config.yaml",
-			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
 				return map[string]string{"apiserver": "kube-apiserver"}, nil
 			},
 			isMaster: true,
@@ -136,7 +136,7 @@ func TestIsMaster(t *testing.T) {
 		{
 			name:    "valid config, is master and but not all components are running",
 			cfgFile: "../cfg/config.yaml",
-			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
 				return map[string]string{}, nil
 			},
 			isMaster: false,
@@ -144,7 +144,7 @@ func TestIsMaster(t *testing.T) {
 		{
 			name:    "valid config, is master, not all components are running and fails to find all binaries",
 			cfgFile: "../cfg/config.yaml",
-			getBinariesFunc: func(viper *viper.Viper) (strings map[string]string, i error) {
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
 				return map[string]string{}, errors.New("failed to find binaries")
 			},
 			isMaster: false,
