@@ -239,7 +239,7 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	jsonpathResult := fmt.Sprintf("%s", buf)
+	jsonpathResult := buf.String()
 	return jsonpathResult, nil
 }
 
