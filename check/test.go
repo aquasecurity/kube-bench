@@ -244,8 +244,8 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 }
 
 func allElementsValid(s, t []string) bool {
-	sourceEmpty := s == nil || len(s) == 0
-	targetEmpty := t == nil || len(t) == 0
+	sourceEmpty := len(s) == 0
+	targetEmpty := len(t) == 0
 
 	if sourceEmpty && targetEmpty {
 		return true
