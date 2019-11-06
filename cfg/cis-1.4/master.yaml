@@ -565,7 +565,6 @@ groups:
   - id: 1.1.34
     text: "Ensure that the --encryption-provider-config argument is set as appropriate (Scored)"
     audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-    type: "manual"
     tests:
       test_items:
       - flag: "--encryption-provider-config"
