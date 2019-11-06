@@ -1,13 +1,7 @@
 # Test and config files
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
-representation of the CIS Kubernetes Benchmark checks. There is a 
-`controls` file per Kubernetes version and node type.
-
-`controls` for the various versions of kubernetes can be found in directories
-with same name as the kubernetes versions under `cfg/`, for example `cfg/1.12`.
-`controls` are also organized by distribution under the `cfg` directory, for
-example `cfg/ocp-3.10`.
+representation of the CIS Kubernetes Benchmark checks (or other distribution-specific hardening guides). 
 
 ## Controls
 
@@ -67,10 +61,10 @@ for `type` are `master` and `node`.
 
 ## Groups
 
-`groups` is list of subgroups which test the various Kubernetes components
+`groups` is a list of subgroups that test the various Kubernetes components
 that run on the node type specified in the `controls`. 
 
-For example one subgroup checks parameters passed to the apiserver binary, while 
+For example, one subgroup checks parameters passed to the API server binary, while 
 another subgroup checks parameters passed to the controller-manager binary.
 
 ```yml
@@ -110,8 +104,7 @@ command line, with the flag `--group` or `-g`.
 
 ## Check
 
-The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes 
-components. These recommendations are usually configuration options, and can be 
+The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
 specified by flags to Kubernetes binaries, or in configuration files.
 
 The Benchmark also provides commands to audit a Kubernetes installation, identify
@@ -149,7 +142,7 @@ The `audit` field specifies the command to run for a check. The output of this
 command is then evaluated for conformance with the CIS Kubernetes Benchmark
 recommendation.
 
-The audit is evaluated against a criteria specified by the `tests`
+The audit is evaluated against criteria specified by the `tests`
 object. `tests` contain `bin_op` and `test_items`.
 
 `test_items` specify the criteria(s) the `audit` command's output should meet to
@@ -160,7 +153,7 @@ values expected by the CIS Kubernetes Benchmark.
 There are two ways to extract keywords from the output of the `audit` command,
 `flag` and `path`.
 
-`flag` is used when the keyword is a command line flag. The associated `audit`
+`flag` is used when the keyword is a command-line flag. The associated `audit`
 command is usually a `ps` command and a `grep` for the binary whose flag we are
 checking:
 
@@ -205,8 +198,7 @@ tests:
     set: true
 ```
 
-`set` checks if a keyword is present in the output of the audit command or in
-a config file. The possible values for `set` are true and false.
+`set` checks if a keyword is present in the output of the audit command or a config file. The possible values for `set` are true and false.
 
 If `set` is true, the check passes only if the keyword is present in the output
 of the audit command, or config file. If `set` is false, the check passes only
@@ -242,7 +234,7 @@ referenced in a `controls` file via variables.
 
 The `cfg/config.yaml` file is a global configuration file. Configuration files
 can be created for specific Kubernetes versions (distributions). Values in the
-version specific config overwrite similar values in `cfg/config.yaml`.
+version-specific config overwrite similar values in `cfg/config.yaml`.
 
 For example, the kube-apiserver in Red Hat OCP distribution is run as 
 `hypershift openshift-kube-apiserver` instead of the default `kube-apiserver`.
@@ -298,7 +290,7 @@ Every node type has a subsection that specifies the main configuration items.
   of `defaultconf`.
   
   The selected config for a component can be referenced in `controls` using a
-  variable in the form `$<component>conf`. In the example below we reference the 
+  variable in the form `$<component>conf`. In the example below, we reference the 
   selected API server config file with the variable `$apiserverconf` in an `audit`
   command.
   
@@ -336,8 +328,7 @@ Every node type has a subsection that specifies the main configuration items.
     of the files exists, `kube-bench` defaults kubeconfig to the value of 
     `defaultkubeconfig`.
     
-    The selected kubeconfig for a component can be referenced in `controls` with
-    a variable in the form `$<component>kubeconfig`. In the example below, the
+    The selected kubeconfig for a component can be referenced in `controls` with a variable in the form `$<component>kubeconfig`. In the example below, the
     selected kubelet kubeconfig is referenced with `$kubeletkubeconfig` in the
     `audit` command.
     
