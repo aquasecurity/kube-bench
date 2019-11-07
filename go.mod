@@ -16,6 +16,7 @@ require (
 	github.com/mattn/go-colorable v0.0.0-20170210172801-5411d3eea597 // indirect
 	github.com/mattn/go-isatty v0.0.0-20170307163044-57fdcb988a5c // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+	github.com/onsi/ginkgo v1.7.0
 	github.com/spf13/cobra v0.0.1
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.3.0
