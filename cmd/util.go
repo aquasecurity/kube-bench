@@ -271,6 +271,11 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (string, error) {
+
+	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
+		return k8sVer, nil
+	}
+
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 
