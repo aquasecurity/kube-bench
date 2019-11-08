@@ -133,7 +133,8 @@ func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
 
 	token = strings.TrimSpace(token)
 
-	authToken := fmt.Sprintf("'Bearer %s'", token)
+	authToken := fmt.Sprintf("Bearer %s", token)
+	glog.V(2).Info(fmt.Sprintf("getWebData AUTH TOKEN --[%q]--\n", authToken))
 	req.Header.Set("Authorization", authToken)
 
 	resp, err := client.Do(req)
@@ -144,9 +145,8 @@ func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		glog.V(2).Info(fmt.Sprintf("URL:[%s], StatusCode:[%d]", srvURL, resp.StatusCode))
-		b, _ := ioutil.ReadAll(resp.Body)
-		err = fmt.Errorf("URL:[%s], StatusCode:[%d], [%s]", srvURL, resp.StatusCode, string(b))
+		glog.V(2).Info(fmt.Sprintf("URL:[%s], StatusCode:[%d] \n Headers: %#v\n", srvURL, resp.StatusCode, resp.Header))
+		err = fmt.Errorf("URL:[%s], StatusCode:[%d]", srvURL, resp.StatusCode)
 		return nil, err
 
 	}
@@ -162,6 +162,7 @@ func loadCertficate(raw []byte) (*tls.Certificate, error) {
 		return nil, fmt.Errorf("unable to Decode certificate")
 	}
 
+	glog.V(2).Info(fmt.Sprintf("Loading CA certificate"))
 	cert.Certificate = append(cert.Certificate, block.Bytes)
 	return &cert, nil
 }

@@ -273,6 +273,7 @@ Alternatively, you can specify the version with --version
 func getKubeVersion() (string, error) {
 
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
+		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
 		return k8sVer, nil
 	}
 
