@@ -14,25 +14,23 @@ import (
 )
 
 func getKubeVersionFromRESTAPI() (string, error) {
-	apiSrv, err := getKubernetesURL()
+	k8sVersionURL := "https://kubernetes.default.svc/version"
+	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
+
+	token, cacertfile, err := readTokenAndCertfile(serviceaccount)
 	if err != nil {
 		return "", err
 	}
 
-	glog.V(2).Info(fmt.Sprintf("apiSrv: %s\n", apiSrv))
-	token, cacertfile, err := readTokenAndCertfile()
-	if err != nil {
-		return "", err
-	}
-
-	k8sVersion, err := getK8SVersion(apiSrv, string(token), cacertfile)
+	k8sVersion, err := getK8SVersion(k8sVersionURL, string(token), cacertfile)
 	if err != nil {
 		return "", err
 	}
 	return k8sVersion, nil
 }
 
-func getK8SVersion(apiSrv, token string, cacert []byte) (string, error) {
+func getK8SVersion(k8sVersionURL, token string, cacert []byte) (string, error) {
+	glog.V(2).Info(fmt.Sprintf("getK8SVersion URL: %s\n", k8sVersionURL))
 	/*
 		{
 		  "major": "1",
@@ -58,7 +56,7 @@ func getK8SVersion(apiSrv, token string, cacert []byte) (string, error) {
 		Platform     string
 	}
 
-	vd, err := getWebData(apiSrv, token, cacert)
+	vd, err := getWebData(k8sVersionURL, token, cacert)
 	if err != nil {
 		return "", err
 	}
@@ -77,20 +75,19 @@ func getK8SVersion(apiSrv, token string, cacert []byte) (string, error) {
 	return ver, nil
 }
 
-func readTokenAndCertfile() ([]byte, []byte, error) {
-	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
-	_, err := os.Stat(serviceaccount)
+func readTokenAndCertfile(saDir string) ([]byte, []byte, error) {
+	_, err := os.Stat(saDir)
 	if os.IsNotExist(err) {
-		return nil, nil, fmt.Errorf("missing service account file: %q", serviceaccount)
+		return nil, nil, fmt.Errorf("missing service account directory: %q", saDir)
 	}
 
-	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
+	cacertfile := fmt.Sprintf("%s/ca.crt", saDir)
 	cacertdata, err := ioutil.ReadFile(cacertfile)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	tfile := fmt.Sprintf("%s/token", serviceaccount)
+	tfile := fmt.Sprintf("%s/token", saDir)
 	token, err := ioutil.ReadFile(tfile)
 
 	if err != nil {
@@ -98,17 +95,6 @@ func readTokenAndCertfile() ([]byte, []byte, error) {
 	}
 
 	return token, cacertdata, nil
-}
-
-func getKubernetesURL() (string, error) {
-	k8sHost := os.Getenv("KUBERNETES_SERVICE_HOST")
-	k8sPort := os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")
-	if isEmpty(k8sHost) || isEmpty(k8sPort) {
-		// not running inside k8s?
-		return "", fmt.Errorf("environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are missing")
-	}
-
-	return fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort), nil
 }
 
 func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
