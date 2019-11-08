@@ -288,6 +288,8 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion))
 	}
+
+	glog.V(1).Info(fmt.Sprintf("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion))
 	return benchmarkVersion, nil
 }
 

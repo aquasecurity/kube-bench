@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/golang/glog"
@@ -16,21 +15,33 @@ import (
 func getKubeVersionFromRESTAPI() (string, error) {
 	k8sVersionURL := "https://kubernetes.default.svc/version"
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
+	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
+	tokenfile := fmt.Sprintf("%s/token", serviceaccount)
 
-	token, cacertfile, err := readTokenAndCertfile(serviceaccount)
+	tlsCert, err := loadCertficate(cacertfile)
 	if err != nil {
 		return "", err
 	}
 
-	k8sVersion, err := getK8SVersion(k8sVersionURL, string(token), cacertfile)
+	tb, err := ioutil.ReadFile(tokenfile)
+	if err != nil {
+		return "", err
+	}
+	token := strings.TrimSpace(string(tb))
+
+	data, err := getWebData(k8sVersionURL, token, tlsCert)
+	if err != nil {
+		return "", err
+	}
+
+	k8sVersion, err := extractVersion(data)
 	if err != nil {
 		return "", err
 	}
 	return k8sVersion, nil
 }
 
-func getK8SVersion(k8sVersionURL, token string, cacert []byte) (string, error) {
-	glog.V(2).Info(fmt.Sprintf("getK8SVersion URL: %s\n", k8sVersionURL))
+func extractVersion(data []byte) (string, error) {
 	/*
 		{
 		  "major": "1",
@@ -56,14 +67,9 @@ func getK8SVersion(k8sVersionURL, token string, cacert []byte) (string, error) {
 		Platform     string
 	}
 
-	vd, err := getWebData(k8sVersionURL, token, cacert)
-	if err != nil {
-		return "", err
-	}
-
 	vrObj := &versionResponse{}
-	glog.V(2).Info(fmt.Sprintf("vd: %s\n", string(vd)))
-	err = json.Unmarshal(vd, vrObj)
+	glog.V(2).Info(fmt.Sprintf("vd: %s\n", string(data)))
+	err := json.Unmarshal(data, vrObj)
 	if err != nil {
 		return "", err
 	}
@@ -75,37 +81,11 @@ func getK8SVersion(k8sVersionURL, token string, cacert []byte) (string, error) {
 	return ver, nil
 }
 
-func readTokenAndCertfile(saDir string) ([]byte, []byte, error) {
-	_, err := os.Stat(saDir)
-	if os.IsNotExist(err) {
-		return nil, nil, fmt.Errorf("missing service account directory: %q", saDir)
-	}
-
-	cacertfile := fmt.Sprintf("%s/ca.crt", saDir)
-	cacertdata, err := ioutil.ReadFile(cacertfile)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	tfile := fmt.Sprintf("%s/token", saDir)
-	token, err := ioutil.ReadFile(tfile)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return token, cacertdata, nil
-}
-
-func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
+func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	glog.V(2).Info(fmt.Sprintf("getWebData srvURL: %s\n", srvURL))
-	cert, err := loadCertficate(cacert)
-	if err != nil {
-		return nil, err
-	}
 
 	tlsConf := &tls.Config{
-		Certificates:       []tls.Certificate{*cert},
+		Certificates:       []tls.Certificate{*cacert},
 		InsecureSkipVerify: true,
 	}
 	tr := &http.Transport{
@@ -116,8 +96,6 @@ func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	token = strings.TrimSpace(token)
 
 	authToken := fmt.Sprintf("Bearer %s", token)
 	glog.V(2).Info(fmt.Sprintf("getWebData AUTH TOKEN --[%q]--\n", authToken))
@@ -134,21 +112,24 @@ func getWebData(srvURL, token string, cacert []byte) ([]byte, error) {
 		glog.V(2).Info(fmt.Sprintf("URL:[%s], StatusCode:[%d] \n Headers: %#v\n", srvURL, resp.StatusCode, resp.Header))
 		err = fmt.Errorf("URL:[%s], StatusCode:[%d]", srvURL, resp.StatusCode)
 		return nil, err
-
 	}
 
 	return ioutil.ReadAll(resp.Body)
 }
 
-func loadCertficate(raw []byte) (*tls.Certificate, error) {
-	var cert tls.Certificate
+func loadCertficate(certFile string) (*tls.Certificate, error) {
+	cacert, err := ioutil.ReadFile(certFile)
+	if err != nil {
+		return nil, err
+	}
 
-	block, _ := pem.Decode(raw)
+	var tlsCert tls.Certificate
+	block, _ := pem.Decode(cacert)
 	if block == nil {
 		return nil, fmt.Errorf("unable to Decode certificate")
 	}
 
 	glog.V(2).Info(fmt.Sprintf("Loading CA certificate"))
-	cert.Certificate = append(cert.Certificate, block.Bytes)
-	return &cert, nil
+	tlsCert.Certificate = append(tlsCert.Certificate, block.Bytes)
+	return &tlsCert, nil
 }
