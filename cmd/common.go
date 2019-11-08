@@ -269,11 +269,10 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 	if isEmpty(benchmarkVersion) {
 		if isEmpty(kubeVersion) {
-			kv, err := getKubeVersion()
+			kubeVersion, err = getKubeVersion()
 			if err != nil {
 				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
 			}
-			kubeVersion = kv
 		}
 
 		kubeToBenchmarkMap, err := loadVersionMapping(v)
