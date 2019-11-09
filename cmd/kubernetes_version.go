@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/golang/glog"
 )
 
 func getKubeVersionFromRESTAPI() (string, error) {
-	k8sVersionURL := "https://kubernetes.default.svc/version"
+	k8sVersionURL := getKubernetesURL()
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
 	tokenfile := fmt.Sprintf("%s/token", serviceaccount)
@@ -132,4 +133,23 @@ func loadCertficate(certFile string) (*tls.Certificate, error) {
 	glog.V(2).Info(fmt.Sprintf("Loading CA certificate"))
 	tlsCert.Certificate = append(tlsCert.Certificate, block.Bytes)
 	return &tlsCert, nil
+}
+
+func getKubernetesURL() string {
+	k8sVersionURL := "https://kubernetes.default.svc/version"
+
+	// The following provides flexibility to use
+	// K8S provided variables is situations where
+	// hostNetwork: true
+	if !isEmpty(os.Getenv("KUBE_BENCH_K8S_ENV")) {
+		k8sHost := os.Getenv("KUBERNETES_SERVICE_HOST")
+		k8sPort := os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")
+		if !isEmpty(k8sHost) && !isEmpty(k8sPort) {
+			k8sVersionURL = fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
+		} else {
+			glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
+		}
+	}
+
+	return k8sVersionURL
 }

@@ -78,12 +78,14 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
+	glog.V(2).Info(fmt.Sprintf("ps - proc: %q", proc))
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
 	}
 
+	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
 
@@ -206,7 +208,9 @@ func verifyBin(bin string) bool {
 	// but apiserver is not a match for kube-apiserver
 	reFirstWord := regexp.MustCompile(`^(\S*\/)*` + bin)
 	lines := strings.Split(out, "\n")
+	glog.V(2).Info(fmt.Sprintf("verifyBin - lines(%d)", len(lines)))
 	for _, l := range lines {
+		glog.V(2).Info(fmt.Sprintf("reFirstWord.Match(%s)\n\n\n\n", l))
 		if reFirstWord.Match([]byte(l)) {
 			return true
 		}

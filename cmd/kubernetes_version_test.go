@@ -180,3 +180,53 @@ func TestExtractVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestGetKubernetesURL(t *testing.T) {
+
+	resetEnvs := func() {
+		os.Unsetenv("KUBE_BENCH_K8S_ENV")
+		os.Unsetenv("KUBERNETES_SERVICE_HOST")
+		os.Unsetenv("KUBERNETES_SERVICE_PORT_HTTPS")
+	}
+
+	setEnvs := func() {
+		os.Setenv("KUBE_BENCH_K8S_ENV", "1")
+		os.Setenv("KUBERNETES_SERVICE_HOST", "testHostServer")
+		os.Setenv("KUBERNETES_SERVICE_PORT_HTTPS", "443")
+	}
+
+	cases := []struct {
+		useDefault bool
+		expected   string
+	}{
+		{
+			useDefault: true,
+			expected:   "https://kubernetes.default.svc/version",
+		},
+		{
+			useDefault: false,
+			expected:   "https://testHostServer:443/version",
+		},
+	}
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			resetEnvs()
+			defer resetEnvs()
+			if !c.useDefault {
+				setEnvs()
+			}
+			k8sURL := getKubernetesURL()
+
+			if !c.useDefault {
+				if k8sURL != c.expected {
+					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
+				}
+			} else {
+				if k8sURL != c.expected {
+					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
+				}
+			}
+		})
+	}
+
+}
