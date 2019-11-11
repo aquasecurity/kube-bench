@@ -79,7 +79,7 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 
 func TestGetWebData(t *testing.T) {
 	okfn := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, `{
+		_, _ = fmt.Fprintln(w, `{
 			"major": "1",
 			"minor": "15"}`)
 	}
@@ -106,8 +106,7 @@ func TestGetWebData(t *testing.T) {
 
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
-			hf := http.HandlerFunc(c.fn)
-			ts := httptest.NewServer(hf)
+			ts := httptest.NewServer(c.fn)
 			defer ts.Close()
 			data, err := getWebData(ts.URL, token, &tlsCert)
 			if !c.fail {
