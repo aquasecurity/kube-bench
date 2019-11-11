@@ -43,19 +43,6 @@ func getKubeVersionFromRESTAPI() (string, error) {
 }
 
 func extractVersion(data []byte) (string, error) {
-	/*
-		{
-		  "major": "1",
-		  "minor": "15",
-		  "gitVersion": "v1.15.3",
-		  "gitCommit": "2d3c76f9091b6bec110a5e63777c332469e0cba2",
-		  "gitTreeState": "clean",
-		  "buildDate": "2019-08-20T18:57:36Z",
-		  "goVersion": "go1.12.9",
-		  "compiler": "gc",
-		  "platform": "linux/amd64"
-		}
-	*/
 	type versionResponse struct {
 		Major        string
 		Minor        string
@@ -93,7 +80,7 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 		TLSClientConfig: tlsConf,
 	}
 	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("GET", srvURL, nil)
+	req, err := http.NewRequest(http.MethodGet, srvURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +91,7 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("HTTP ERROR: %v\n", err)
+		glog.V(2).Info(fmt.Sprintf("HTTP ERROR: %v\n", err))
 		return nil, err
 	}
 	defer resp.Body.Close()
