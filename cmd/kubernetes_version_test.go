@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"strconv"
 	"testing"
 )
@@ -19,8 +18,8 @@ func TestLoadCertficate(t *testing.T) {
 	}
 	defer os.RemoveAll(tmp)
 
-	certfilename := "goodfile"
-	certdata := []byte(`-----BEGIN CERTIFICATE-----
+	goodCertFile, _ := ioutil.TempFile(tmp, "good-cert-*")
+	_, _ = goodCertFile.Write([]byte(`-----BEGIN CERTIFICATE-----
 MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
 cm5ldGVzMB4XDTE5MTEwODAxNDAwMFoXDTI5MTEwNTAxNDAwMFowFTETMBEGA1UE
 AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMn6
@@ -36,20 +35,23 @@ gzuCRRDMGu25NtG3m67w4e2RzW8Z/lzvbfyJZGoV2c6dN+yP9/Pw2MXlrnMWugd1
 jLv3UYZRHMpuNS8BJU74BuVzVPHd55RAl+bV8yemdZJ7pPzMvGbZ7zRXWODTDlge
 CQb9lY+jYErisH8Sq7uABFPvi7RaTh8SS7V7OxqHZvmttNTdZs4TIkk45JK7Y+Xq
 FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
------END CERTIFICATE-----`)
-	goodfile := filepath.Join(tmp, certfilename)
-	ioutil.WriteFile(goodfile, certdata, 0640)
+-----END CERTIFICATE-----`))
+	badCertFile, _ := ioutil.TempFile(tmp, "bad-cert-*")
 
 	cases := []struct {
 		file string
 		fail bool
 	}{
 		{
-			file: "badfile",
+			file: "missing cert file",
 			fail: true,
 		},
 		{
-			file: goodfile,
+			file: badCertFile.Name(),
+			fail: true,
+		},
+		{
+			file: goodCertFile.Name(),
 			fail: false,
 		},
 	}
