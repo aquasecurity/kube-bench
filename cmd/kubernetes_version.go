@@ -132,10 +132,10 @@ func getKubernetesURL() string {
 		k8sHost := os.Getenv("KUBERNETES_SERVICE_HOST")
 		k8sPort := os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")
 		if !isEmpty(k8sHost) && !isEmpty(k8sPort) {
-			k8sVersionURL = fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
-		} else {
-			glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
+			return fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
 		}
+
+		glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
 	}
 
 	return k8sVersionURL
