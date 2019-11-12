@@ -186,15 +186,16 @@ func TestMapToCISVersion(t *testing.T) {
 		kubeVersion string
 		succeed     bool
 		exp         string
+		expErr      string
 	}{
-		{kubeVersion: "1.9", succeed: false, exp: ""},
+		{kubeVersion: "1.9", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.9"},
 		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
 		{kubeVersion: "1.16", succeed: true, exp: "cis-1.4"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
-		{kubeVersion: "unknown", succeed: false, exp: ""},
+		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
 	}
 	for _, c := range cases {
 		rv, err := mapToBenchmarkVersion(kubeToBenchmarkMap, c.kubeVersion)
@@ -210,9 +211,14 @@ func TestMapToCISVersion(t *testing.T) {
 			if c.exp != rv {
 				t.Errorf("[%q]- expected %q but Got %q", c.kubeVersion, c.exp, rv)
 			}
+
 		} else {
 			if c.exp != rv {
-				t.Errorf("mapToBenchmarkVersion kubeversion: %q Got %q expected %s", c.kubeVersion, rv, c.exp)
+				t.Errorf("[%q]-mapToBenchmarkVersion kubeversion: %q Got %q expected %s", c.kubeVersion, c.kubeVersion, rv, c.exp)
+			}
+
+			if c.expErr != err.Error() {
+				t.Errorf("[%q]-mapToBenchmarkVersion expected Error: %q instead Got %q", c.kubeVersion, c.expErr, err.Error())
 			}
 		}
 	}
