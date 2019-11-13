@@ -114,8 +114,15 @@ func runChecks(nodetype check.NodeType) {
 
 	summary = controls.RunChecks(runner, filter)
 
-	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && junitFmt {
+		out, err := controls.JUnit()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
+		}
+
+		PrintOutput(string(out), outputFile)
+		// if we successfully ran some tests and it's json format, ignore the warnings
+	} else if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
