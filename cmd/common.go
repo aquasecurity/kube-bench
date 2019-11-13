@@ -242,17 +242,19 @@ func loadConfig(nodetype check.NodeType) string {
 }
 
 func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (string, error) {
+	kvOriginal := kv
 	cisVersion, found := kubeToBenchmarkMap[kv]
+	glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
 	for !found && (kv != defaultKubeVersion && !isEmpty(kv)) {
 		kv = decrementVersion(kv)
 		cisVersion, found = kubeToBenchmarkMap[kv]
-		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for cisVersion: %q found: %t\n", cisVersion, found))
+		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
 	}
 
 	if !found {
-		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kv))
+		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
 		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
-		return "", fmt.Errorf("Unable to find a matching Benchmark Version match for kubernetes version: %s", kubeVersion)
+		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
 	}
 
 	return cisVersion, nil
@@ -292,6 +294,8 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion))
 	}
+
+	glog.V(1).Info(fmt.Sprintf("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion))
 	return benchmarkVersion, nil
 }
 
