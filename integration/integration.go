@@ -48,8 +48,12 @@ func runWithKind(clusterName, kindCfg, kubebenchYAML, kubebenchImg string, timeo
 	if err := decoder.Decode(job); err != nil {
 		return "", err
 	}
-
 	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
+
+	if err := loadImageFromDocker(kubebenchImg, ctx); err != nil {
+		return "", err
+	}
+	
 
 	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
 	if err != nil {
@@ -87,6 +91,7 @@ func int32Ptr(i int32) *int32 { return &i }
 
 func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer time.Duration) (*apiv1.Pod, error) {
 	timeout := time.After(tout)
+	failedPods := make(map[string]struct{})
 	for {
 	podfailed:
 		select {
@@ -99,6 +104,10 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 			}
 			fmt.Printf("Found (%d) pods\n", len(pods.Items))
 			for _, cp := range pods.Items {
+				if _, found := failedPods[cp.Name]; found {
+					continue
+				}
+
 				if strings.HasPrefix(cp.Name, name) {
 					fmt.Printf("pod (%s) - %#v\n", cp.Name, cp.Status.Phase)
 					if cp.Status.Phase == apiv1.PodSucceeded {
@@ -107,6 +116,7 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 
 					if cp.Status.Phase == apiv1.PodFailed {
 						fmt.Printf("pod (%s) - %s - retrying...\n", cp.Name, cp.Status.Phase)
+						failedPods[cp.Name] = struct{}{}
 						break podfailed
 					}
 
@@ -121,16 +131,25 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 							if err != nil {
 								return nil, err
 							}
-							fmt.Printf("pod (%s) - %#v\n", thePod.Name, thePod.Status.Phase)
+							fmt.Printf("thePod (%s) - status:%#v reason:%s message:%s\n", thePod.Name, thePod.Status.Phase, thePod.Status.Reason, thePod.Status.Message)
 							if thePod.Status.Phase == apiv1.PodSucceeded {
 								return thePod, nil
 							}
 
 							if thePod.Status.Phase == apiv1.PodFailed {
-								fmt.Printf("pod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Phase)
+								fmt.Printf("thePod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Phase)
+								failedPods[thePod.Name] = struct{}{}
 								ticker.Stop()
 								break podfailed
 							}
+
+							if thePod.Status.Phase == apiv1.PodPending && strings.Contains(thePod.Status.Reason, "Failed") {
+								fmt.Printf("thePod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Reason)
+								failedPods[thePod.Name] = struct{}{}
+								ticker.Stop()
+								break podfailed
+							}
+
 						case <-timeout:
 							ticker.Stop()
 							return nil, fmt.Errorf("getPod time out: no Pod with %s", name)
