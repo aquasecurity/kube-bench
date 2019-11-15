@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(clusterName, kindCfg, kubebenchYAML string, timeout, ticker time.Duration) (string, error) {
+func runWithKind(clusterName, kindCfg, kubebenchYAML, kubebenchImg string, timeout, ticker time.Duration) (string, error) {
 	options := create.WithConfigFile(kindCfg)
 	ctx := cluster.NewContext(clusterName)
 	if err := ctx.Create(options); err != nil {
@@ -48,6 +48,8 @@ func runWithKind(clusterName, kindCfg, kubebenchYAML string, timeout, ticker tim
 	if err := decoder.Decode(job); err != nil {
 		return "", err
 	}
+
+	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
 
 	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
 	if err != nil {
@@ -86,6 +88,7 @@ func int32Ptr(i int32) *int32 { return &i }
 func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer time.Duration) (*apiv1.Pod, error) {
 	timeout := time.After(tout)
 	for {
+	podfailed:
 		select {
 		case <-timeout:
 			return nil, fmt.Errorf("podList - time out: no Pod with %s", name)
@@ -104,7 +107,7 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 
 					if cp.Status.Phase == apiv1.PodFailed {
 						fmt.Printf("pod (%s) - %s - retrying...\n", cp.Name, cp.Status.Phase)
-						continue
+						break podfailed
 					}
 
 					// Pod still working
@@ -121,6 +124,12 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 							fmt.Printf("pod (%s) - %#v\n", thePod.Name, thePod.Status.Phase)
 							if thePod.Status.Phase == apiv1.PodSucceeded {
 								return thePod, nil
+							}
+
+							if thePod.Status.Phase == apiv1.PodFailed {
+								fmt.Printf("pod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Phase)
+								ticker.Stop()
+								break podfailed
 							}
 						case <-timeout:
 							ticker.Stop()

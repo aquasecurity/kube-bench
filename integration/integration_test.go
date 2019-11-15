@@ -3,12 +3,17 @@
 package integration
 
 import (
+	"flag"
 	"fmt"
 	"testing"
 	"time"
 )
 
+var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
+
 func TestRunWithKind(t *testing.T) {
+	flag.Parse()
+	fmt.Printf("kube-bench Container Image: %s\n", *kubebenchImg)
 	timeout := time.Duration(10 * time.Minute)
 	ticker := time.Duration(2 * time.Second)
 
@@ -39,7 +44,7 @@ func TestRunWithKind(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
-			output, err := runWithKind(c.TestName, c.KindCfg, c.KubebenchYAML, timeout, ticker)
+			output, err := runWithKind(c.TestName, c.KindCfg, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
 			fmt.Printf("CLUSTER %s \n\n %s", c.TestName, output)
 			if err != nil {
 				if !c.ExpectError {
