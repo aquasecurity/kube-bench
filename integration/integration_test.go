@@ -43,39 +43,28 @@ func TestRunWithKind(t *testing.T) {
 			KindCfg:       "./testdata/add-tls-kind.yaml",
 			KubebenchYAML: "../job.yaml",
 			ExpectedFile:  "./testdata/job.data",
-			ExpectError:   false,
 		},
 		{
 			TestName:      "job-node",
 			KindCfg:       "./testdata/add-tls-kind.yaml",
 			KubebenchYAML: "../job-node.yaml",
 			ExpectedFile:  "./testdata/job-node.data",
-			ExpectError:   false,
 		},
 		{
 			TestName:      "job-master",
 			KindCfg:       "./testdata/add-tls-kind.yaml",
 			KubebenchYAML: "../job-master.yaml",
 			ExpectedFile:  "./testdata/job-master.data",
-			ExpectError:   false,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
 			data, err := runWithKind(c.TestName, c.KindCfg, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
-			fmt.Printf("CLUSTER %s \n\n %s", c.TestName, data)
 			if err != nil {
-				if !c.ExpectError {
-					t.Fatalf("unexpected error: %v", err)
-				}
+				t.Fatalf("unexpected error: %v", err)
 				return
 			}
-
-			if c.ExpectError {
-				t.Fatalf("unexpected lack or error while Loading config")
-			} else {
-				mustMatch(c.ExpectedFile, data)
-			}
+			mustMatch(c.ExpectedFile, data)
 		})
 	}
 }
