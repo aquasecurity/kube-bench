@@ -53,7 +53,6 @@ func runWithKind(clusterName, kindCfg, kubebenchYAML, kubebenchImg string, timeo
 	if err := loadImageFromDocker(kubebenchImg, ctx); err != nil {
 		return "", err
 	}
-	
 
 	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
 	if err != nil {
@@ -86,8 +85,6 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 
 	return clientset, nil
 }
-
-func int32Ptr(i int32) *int32 { return &i }
 
 func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer time.Duration) (*apiv1.Pod, error) {
 	timeout := time.After(tout)
@@ -131,7 +128,7 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 							if err != nil {
 								return nil, err
 							}
-							fmt.Printf("thePod (%s) - status:%#v reason:%s message:%s\n", thePod.Name, thePod.Status.Phase, thePod.Status.Reason, thePod.Status.Message)
+							fmt.Printf("thePod (%s) - status:%#v \n", thePod.Name, thePod.Status.Phase)
 							if thePod.Status.Phase == apiv1.PodSucceeded {
 								return thePod, nil
 							}
@@ -169,16 +166,15 @@ func getPodLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod) string {
 	req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
-		return "error in opening stream"
+		return "getPodLogs - error in opening stream"
 	}
 	defer podLogs.Close()
 
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
 	if err != nil {
-		return "error in copy information from podLogs to buf"
+		return "getPodLogs - error in copy information from podLogs to buf"
 	}
-	str := buf.String()
 
-	return str
+	return buf.String()
 }
