@@ -10,7 +10,7 @@ groups:
   checks:
   - id: 1.1.1
     text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--anonymous-auth"
@@ -26,7 +26,7 @@ groups:
 
   - id: 1.1.2
     text: "Ensure that the --basic-auth-file argument is not set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--basic-auth-file"
@@ -40,7 +40,7 @@ groups:
 
   - id: 1.1.3
     text: "Ensure that the --insecure-allow-any-token argument is not set (Not Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag:  "--insecure-allow-any-token"
@@ -53,7 +53,7 @@ groups:
 
   - id: 1.1.4
     text: "Ensure that the --kubelet-https argument is set to true (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -71,7 +71,7 @@ groups:
 
   - id: 1.1.5
     text: "Ensure that the --insecure-bind-address argument is not set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--insecure-bind-address"
@@ -84,7 +84,7 @@ groups:
 
   - id: 1.1.6
     text: "Ensure that the --insecure-port argument is set to 0 (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--insecure-port"
@@ -100,7 +100,7 @@ groups:
 
   - id: 1.1.7
     text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -119,7 +119,7 @@ groups:
 
   - id: 1.1.8
     text: "Ensure that the --profiling argument is set to false (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--profiling"
@@ -135,7 +135,7 @@ groups:
 
   - id: 1.1.9
     text: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--repair-malformed-updates"
@@ -151,7 +151,7 @@ groups:
 
   - id: 1.1.10
     text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -170,7 +170,7 @@ groups:
 
   - id: 1.1.11
     text: "Ensure that the admission control plugin AlwaysPullImages is set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -187,8 +187,8 @@ groups:
 
   - id: 1.1.12
     text: "[DEPRECATED] Ensure that the admission control plugin DenyEscalatingExec is set (Not Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    type: skip
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+    type: "skip"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -205,7 +205,7 @@ groups:
 
   - id: 1.1.13
     text: "Ensure that the admission control plugin SecurityContextDeny is set (Not Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -222,7 +222,7 @@ groups:
 
   - id: 1.1.14
     text: "Ensure that the admission control plugin NamespaceLifecycle is set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -242,7 +242,7 @@ groups:
 
   - id: 1.1.15
     text: "Ensure that the --audit-log-path argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--audit-log-path"
@@ -256,7 +256,7 @@ groups:
 
   - id: 1.1.16
     text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--audit-log-maxage"
@@ -272,7 +272,7 @@ groups:
 
   - id: 1.1.17
     text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--audit-log-maxbackup"
@@ -289,7 +289,7 @@ groups:
 
   - id: 1.1.18
     text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--audit-log-maxsize"
@@ -306,7 +306,7 @@ groups:
 
   - id: 1.1.19
     text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--authorization-mode"
@@ -323,7 +323,7 @@ groups:
 
   - id: 1.1.20
     text: "Ensure that the --token-auth-file parameter is not set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--token-auth-file"
@@ -337,7 +337,7 @@ groups:
 
   - id: 1.1.21
     text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--kubelet-certificate-authority"
@@ -352,7 +352,7 @@ groups:
 
   - id: 1.1.22
     text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: and
       test_items:
@@ -371,7 +371,7 @@ groups:
 
   - id: 1.1.23
     text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -390,7 +390,7 @@ groups:
 
   - id: 1.1.24
     text: "Ensure that the admission control plugin PodSecurityPolicy is set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -409,7 +409,7 @@ groups:
 
   - id: 1.1.25
     text: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--service-account-key-file"
@@ -424,7 +424,7 @@ groups:
   - id: 1.1.26
     text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as
       appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: and
       test_items:
@@ -443,7 +443,7 @@ groups:
 
   - id: 1.1.27
     text: "Ensure that the admission control plugin ServiceAccount is set(Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -465,7 +465,7 @@ groups:
   - id: 1.1.28
     text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
     as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: and
       test_items:
@@ -484,7 +484,7 @@ groups:
 
   - id: 1.1.29
     text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--client-ca-file"
@@ -498,7 +498,7 @@ groups:
 
   - id: 1.1.30
     text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--tls-cipher-suites"
@@ -514,7 +514,7 @@ groups:
 
   - id: 1.1.31
     text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--etcd-cafile"
@@ -529,7 +529,7 @@ groups:
 
   - id: 1.1.32
     text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--authorization-mode"
@@ -546,7 +546,7 @@ groups:
 
   - id: 1.1.33
     text: "Ensure that the admission control plugin NodeRestriction is set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -564,13 +564,13 @@ groups:
 
   - id: 1.1.34
     text: "Ensure that the --encryption-provider-config argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
-    type: "manual"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--encryption-provider-config"
         set: true
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and configure a EncryptionConfig file.
       Then, edit the API server pod specification file $apiserverconf on the
       master node and set the --encryption-provider-config parameter
@@ -580,9 +580,10 @@ groups:
 
   - id: 1.1.35
     text: "Ensure that the encryption provider is set to aescbc (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and configure a EncryptionConfig file. In this file,
       choose aescbc as the encryption provider.
       For example,
@@ -600,7 +601,7 @@ groups:
 
   - id: 1.1.36
     text: "Ensure that the admission control plugin EventRateLimit is set (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--enable-admission-plugins"
@@ -616,9 +617,9 @@ groups:
       --admission-control-config-file=<path/to/configuration/file>
     scored: true
 
-  - id: 1.1.37
+  - id: 1.1.37a
     text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -636,9 +637,26 @@ groups:
       --audit-policy-file=/etc/kubernetes/audit-policy.yaml
     scored: true
 
+  - id: 1.1.37b
+    text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+    tests:
+      test_items:
+      - flag: "--audit-policy-file"
+        compare:
+          op: eq
+          value: "/etc/kubernetes/audit-policy.yaml"
+        set: true
+    remediation: |
+      Follow the Kubernetes documentation and set the desired audit policy in the
+      /etc/kubernetes/audit-policy.yaml file. Then, edit the API server pod specification file $apiserverconf
+      and set the below parameters.
+      --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+    scored: true
+
   - id: 1.1.38
     text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -654,7 +672,7 @@ groups:
 
   - id: 1.1.39
     text: "Ensure that the --authorization-mode argument includes RBAC (Scored)"
-    audit: "ps -ef | grep $apiserverbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
     tests:
       test_items:
       - flag: "--authorization-mode"
@@ -671,7 +689,7 @@ groups:
   checks:
   - id: 1.2.1
     text: "Ensure that the --profiling argument is set to false (Scored)"
-    audit: "ps -ef | grep $schedulerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--profiling"
@@ -687,7 +705,7 @@ groups:
 
   - id: 1.2.2
     text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
-    audit: "ps -ef | grep $schedulerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -709,7 +727,7 @@ groups:
   checks:
   - id: 1.3.1
     text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--terminated-pod-gc-threshold"
@@ -722,7 +740,7 @@ groups:
 
   - id: 1.3.2
     text: "Ensure that the --profiling argument is set to false (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--profiling"
@@ -738,13 +756,13 @@ groups:
 
   - id: 1.3.3
     text: "Ensure that the --use-service-account-credentials argument is set to true (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--use-service-account-credentials"
         compare:
-          op: eq
-          value: true
+          op: noteq
+          value: false
         set: true
     remediation: |
       Edit the Controller Manager pod specification file $controllermanagerconf
@@ -754,7 +772,7 @@ groups:
 
   - id: 1.3.4
     text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--service-account-private-key-file"
@@ -768,7 +786,7 @@ groups:
 
   - id: 1.3.5
     text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--root-ca-file"
@@ -782,7 +800,7 @@ groups:
 
   - id: 1.3.6
     text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       test_items:
       - flag: "--feature-gates"
@@ -799,7 +817,7 @@ groups:
 
   - id: 1.3.7
     text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
-    audit: "ps -ef | grep $controllermanagerbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -1003,8 +1021,9 @@ groups:
     text: "Ensure that the Container Network Interface file permissions are
     set to 644 or more restrictive (Not Scored)"
     audit: "stat -c %a <path/to/cni/files>"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node.
       For example,
       chmod 644 <path/to/cni/files>
@@ -1014,8 +1033,9 @@ groups:
     text: "Ensure that the Container Network Interface file ownership is set
     to root:root (Not Scored)"
     audit: "stat -c %U:%G <path/to/cni/files>"
-    type: manual
+    type: "manual"
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node.
       For example,
       chown root:root <path/to/cni/files>
@@ -1194,6 +1214,7 @@ groups:
           value: "root root"
         set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chown -R root:root /etc/kubernetes/pki/
     scored: true
@@ -1221,6 +1242,7 @@ groups:
             value: "600"
           set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chmod -R 644 /etc/kubernetes/pki/*.crt
     scored: true
@@ -1237,6 +1259,7 @@ groups:
             value: "600"
           set: true
     remediation: |
+      [Manual test]
       Run the below command (based on the file location on your system) on the master node. 
       For example, chmod -R 600 /etc/kubernetes/pki/*.key
     scored: true
@@ -1246,7 +1269,7 @@ groups:
   checks:
   - id: 1.5.1
     text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
       - flag: "--cert-file"
@@ -1263,7 +1286,7 @@ groups:
 
   - id: 1.5.2
     text: "Ensure that the --client-cert-auth argument is set to true (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
       - flag: "--client-cert-auth"
@@ -1279,7 +1302,7 @@ groups:
 
   - id: 1.5.3
     text: "Ensure that the --auto-tls argument is not set to true (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -1298,7 +1321,7 @@ groups:
   - id: 1.5.4
     text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
     set as appropriate (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       bin_op: and
       test_items:
@@ -1316,7 +1339,7 @@ groups:
 
   - id: 1.5.5
     text: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       test_items:
       - flag: "--peer-client-cert-auth"
@@ -1332,7 +1355,7 @@ groups:
 
   - id: 1.5.6
     text: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     tests:
       bin_op: or
       test_items:
@@ -1351,13 +1374,14 @@ groups:
 
   - id: 1.5.7
     text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
-    audit: "ps -ef | grep $etcdbin | grep -v grep"
+    audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
     type: "manual"
     tests:
       test_items:
       - flag: "--trusted-ca-file"
         set: true
     remediation: |
+      [Manual test]
       Follow the etcd documentation and create a dedicated certificate authority setup for the
       etcd service.
       Then, edit the etcd pod specification file $etcdconf on the
@@ -1372,6 +1396,7 @@ groups:
     text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Remove any unneeded clusterrolebindings :
       kubectl delete clusterrolebinding [name]
     scored: false
@@ -1380,6 +1405,7 @@ groups:
     text: "Create administrative boundaries between resources using namespaces (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the documentation and create namespaces for objects in your deployment as you
       need them.
     scored: false
@@ -1388,6 +1414,7 @@ groups:
     text: "Create network segmentation using Network Policies (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the documentation and create NetworkPolicy objects as you need them.
     scored: false
 
@@ -1396,6 +1423,7 @@ groups:
     definitions (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
       would need to enable alpha features in the apiserver by passing "--feature-
       gates=AllAlpha=true" argument.
@@ -1422,6 +1450,7 @@ groups:
     text: "Apply Security Context to Your Pods and Containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and apply security contexts to your pods. For a
       suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
       Containers.
@@ -1431,6 +1460,7 @@ groups:
     text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and setup image provenance.
     scored: false
 
@@ -1438,6 +1468,7 @@ groups:
     text: "Configure Network policies as appropriate (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow the Kubernetes documentation and setup network policies as appropriate.
       For example, you could create a "default" isolation policy for a Namespace by creating a
       NetworkPolicy that selects all pods but does not allow any traffic:
@@ -1454,6 +1485,7 @@ groups:
     privileged containers usage (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Follow Kubernetes documentation and setup PSP and RBAC authorization for your cluster.
     scored: false
 
@@ -1464,6 +1496,7 @@ groups:
     text: "Do not admit privileged containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.privileged field is omitted or set to false.
     scored: false
 
@@ -1471,6 +1504,7 @@ groups:
     text: "Do not admit containers wishing to share the host process ID namespace (Not Scored)"
     type: "manual"
     remediation: |
+     [Manual test]
      Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostPID field is omitted or set to false.
     scored: false
 
@@ -1478,6 +1512,7 @@ groups:
     text: "Do not admit containers wishing to share the host IPC namespace (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostIPC field is omitted or set to false.
     scored: false
 
@@ -1485,6 +1520,7 @@ groups:
     text: "Do not admit containers wishing to share the host network namespace (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostNetwork field is omitted or set to false.
     scored: false
 
@@ -1492,6 +1528,7 @@ groups:
     text: " Do not admit containers with allowPrivilegeEscalation (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.allowPrivilegeEscalation field is omitted or set to false.
     scored: false
 
@@ -1499,6 +1536,7 @@ groups:
     text: "Do not admit root containers (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of UIDs not including 0.
     scored: false
 
@@ -1506,5 +1544,6 @@ groups:
     text: "Do not admit containers with dangerous capabilities (Not Scored)"
     type: "manual"
     remediation: |
+      [Manual test]
       Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
     scored: false

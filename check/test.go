@@ -162,25 +162,29 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 			testResult = !(flagVal == tCompareValue)
 		}
 
-	case "gt":
-		expectedResultPattern = "%s is greater than %s"
-		a, b := toNumeric(flagVal, tCompareValue)
-		testResult = a > b
+	case "gt", "gte", "lt", "lte":
+		a, b, err := toNumeric(flagVal, tCompareValue)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		switch tCompareOp {
+		case "gt":
+			expectedResultPattern = "%s is greater than %s"
+			testResult = a > b
 
-	case "gte":
-		expectedResultPattern = "%s is greater or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue)
-		testResult = a >= b
+		case "gte":
+			expectedResultPattern = "%s is greater or equal to %s"
+			testResult = a >= b
 
-	case "lt":
-		expectedResultPattern = "%s is lower than %s"
-		a, b := toNumeric(flagVal, tCompareValue)
-		testResult = a < b
+		case "lt":
+			expectedResultPattern = "%s is lower than %s"
+			testResult = a < b
 
-	case "lte":
-		expectedResultPattern = "%s is lower or equal to %s"
-		a, b := toNumeric(flagVal, tCompareValue)
-		testResult = a <= b
+		case "lte":
+			expectedResultPattern = "%s is lower or equal to %s"
+			testResult = a <= b
+		}
 
 	case "has":
 		expectedResultPattern = "'%s' has '%s'"
@@ -235,13 +239,13 @@ func executeJSONPath(path string, jsonInterface interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	jsonpathResult := fmt.Sprintf("%s", buf)
+	jsonpathResult := buf.String()
 	return jsonpathResult, nil
 }
 
 func allElementsValid(s, t []string) bool {
-	sourceEmpty := s == nil || len(s) == 0
-	targetEmpty := t == nil || len(t) == 0
+	sourceEmpty := len(s) == 0
+	targetEmpty := len(t) == 0
 
 	if sourceEmpty && targetEmpty {
 		return true
@@ -342,18 +346,15 @@ func (ts *tests) execute(s string) *testOutput {
 	return finalOutput
 }
 
-func toNumeric(a, b string) (c, d int) {
-	var err error
-	c, err = strconv.Atoi(a)
+func toNumeric(a, b string) (c, d int, err error) {
+	c, err = strconv.Atoi(strings.TrimSpace(a))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error converting %s: %s\n", a, err)
-		os.Exit(1)
+		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", a, err)
 	}
-	d, err = strconv.Atoi(b)
+	d, err = strconv.Atoi(strings.TrimSpace(b))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error converting %s: %s\n", b, err)
-		os.Exit(1)
+		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", b, err)
 	}
 
-	return c, d
+	return c, d, nil
 }

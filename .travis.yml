@@ -1,8 +1,6 @@
 ---
 language: go
 
-sudo: required
-
 services:
   - docker 
 
@@ -17,11 +15,12 @@ before_install:
 
 script:
   - GO111MODULE=on go test ./...
-  - docker build --tag kube-bench .
+  - IMAGE_NAME=kube-bench make build-docker
   - docker run -v `pwd`:/host kube-bench install 
   - test -d cfg
   - test -f kube-bench
   - make tests
+  - make integration-tests
   
 after_success:
   - bash <(curl -s https://codecov.io/bash)

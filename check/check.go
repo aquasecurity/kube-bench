@@ -26,7 +26,7 @@ import (
 	"github.com/golang/glog"
 )
 
-// NodeType indicates the type of node (master, node, federated).
+// NodeType indicates the type of node (master, node).
 type NodeType string
 
 // State is the state of a control check.
@@ -48,23 +48,21 @@ const (
 	NODE NodeType = "node"
 	// FEDERATED a federated deployment.
 	FEDERATED NodeType = "federated"
+
+	// MANUAL Check Type
+	MANUAL string = "manual"
 )
 
-func handleError(err error, context string) (errmsg string) {
-	if err != nil {
-		errmsg = fmt.Sprintf("%s, error: %s\n", context, err)
-	}
-	return
-}
-
 // Check contains information about a recommendation in the
-// CIS Kubernetes 1.6+ document.
+// CIS Kubernetes document.
 type Check struct {
 	ID             string      `yaml:"id" json:"test_number"`
 	Text           string      `json:"test_desc"`
 	Audit          string      `json:"audit"`
+	AuditConfig    string      `yaml:"audit_config"`
 	Type           string      `json:"type"`
 	Commands       []*exec.Cmd `json:"omit"`
+	ConfigCommands []*exec.Cmd `json:"omit"`
 	Tests          *tests      `json:"omit"`
 	Set            bool        `json:"omit"`
 	Remediation    string      `json:"remediation"`
@@ -96,6 +94,14 @@ func (r *defaultRunner) Run(c *Check) State {
 // the results.
 func (c *Check) run() State {
 
+	// Since this is an Scored check
+	// without tests return a 'WARN' to alert
+	// the user that this check needs attention
+	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
+		c.State = WARN
+		return c.State
+	}
+
 	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
 		c.State = INFO
@@ -103,109 +109,72 @@ func (c *Check) run() State {
 	}
 
 	// If check type is manual force result to WARN
-	if c.Type == "manual" {
+	if c.Type == MANUAL {
 		c.State = WARN
 		return c.State
 	}
 
-	var out bytes.Buffer
-	var errmsgs string
+	lastCommand := c.Audit
+	hasAuditConfig := c.ConfigCommands != nil
 
-	// Check if command exists or exit with WARN.
-	for _, cmd := range c.Commands {
-		if !isShellCommand(cmd.Path) {
-			c.State = WARN
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, c.Tests)
+	if len(state) > 0 {
+		c.State = state
+		return c.State
+	}
+	errmsgs := retErrmsgs
+
+	// If something went wrong with the 'Audit' command
+	// and an 'AuditConfig' command was provided, use it to
+	// execute tests
+	if (finalOutput == nil || !finalOutput.testResult) && hasAuditConfig {
+		lastCommand = c.AuditConfig
+
+		nItems := len(c.Tests.TestItems)
+		// The reason we're creating a copy of the "tests"
+		// is so that tests can executed
+		// with the AuditConfig command
+		// against the Path only
+		currentTests := &tests{
+			BinOp:     c.Tests.BinOp,
+			TestItems: make([]*testItem, nItems),
+		}
+
+		for i := 0; i < nItems; i++ {
+			ti := c.Tests.TestItems[i]
+			nti := &testItem{
+				// Path is used to test Command Param values
+				// AuditConfig ==> Path
+				Path:    ti.Path,
+				Set:     ti.Set,
+				Compare: ti.Compare,
+			}
+			currentTests.TestItems[i] = nti
+		}
+
+		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, c.ConfigCommands, currentTests)
+		if len(state) > 0 {
+			c.State = state
 			return c.State
 		}
+		errmsgs += retErrmsgs
 	}
 
-	// Run commands.
-	n := len(c.Commands)
-	if n == 0 {
-		// Likely a warning message.
-		c.State = WARN
-		return c.State
-	}
-
-	// Each command runs,
-	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
-	//   cmd0 err should terminate chain
-	cs := c.Commands
-
-	// Initialize command pipeline
-	cs[n-1].Stdout = &out
-	i := 1
-
-	var err error
-	errmsgs = ""
-
-	for i < n {
-		cs[i-1].Stdout, err = cs[i].StdinPipe()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-		i++
-	}
-
-	// Start command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Start()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command: %s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-		i++
-	}
-
-	// Complete command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Wait()
-		errmsgs += handleError(
-			err,
-			fmt.Sprintf("failed to run: %s\nfailed command:%s",
-				c.Audit,
-				cs[i].Args,
-			),
-		)
-
-		if i < n-1 {
-			cs[i].Stdout.(io.Closer).Close()
-		}
-
-		i++
-	}
-
-	glog.V(3).Info(out.String())
-
-	finalOutput := c.Tests.execute(out.String())
-	if finalOutput != nil {
+	if finalOutput != nil && finalOutput.testResult {
+		c.State = PASS
 		c.ActualValue = finalOutput.actualResult
 		c.ExpectedResult = finalOutput.ExpectedResult
-		if finalOutput.testResult {
-			c.State = PASS
-		} else {
-			if c.Scored {
-				c.State = FAIL
-			} else {
-				c.State = WARN
-			}
-		}
+		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t Score: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
 	} else {
-		errmsgs += handleError(
-			fmt.Errorf("final output is nil"),
-			fmt.Sprintf("failed to run: %s\n",
-				c.Audit,
-			),
-		)
+		if c.Scored {
+			c.State = FAIL
+		} else {
+			c.State = WARN
+		}
+	}
+
+	if finalOutput == nil {
+		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
 	}
 
 	if errmsgs != "" {
@@ -218,6 +187,7 @@ func (c *Check) run() State {
 // run into a slice of commands.
 // TODO: Make this more robust.
 func textToCommand(s string) []*exec.Cmd {
+	glog.V(3).Infof("textToCommand: %q\n", s)
 	cmds := []*exec.Cmd{}
 
 	cp := strings.Split(s, "|")
@@ -273,4 +243,87 @@ func isShellCommand(s string) bool {
 		return true
 	}
 	return false
+}
+
+func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
+	if len(strings.TrimSpace(audit)) == 0 {
+		return "", failTestItem("missing command"), ""
+	}
+
+	var out bytes.Buffer
+	state, retErrmsgs := runExecCommands(audit, commands, &out)
+	if len(state) > 0 {
+		return state, nil, ""
+	}
+	errmsgs := retErrmsgs
+
+	finalOutput := tests.execute(out.String())
+	if finalOutput == nil {
+		errmsgs += fmt.Sprintf("Final output is <<EMPTY>>. Failed to run: %s\n", audit)
+	}
+
+	return "", finalOutput, errmsgs
+}
+
+func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (State, string) {
+	var err error
+	errmsgs := ""
+
+	// Check if command exists or exit with WARN.
+	for _, cmd := range commands {
+		if !isShellCommand(cmd.Path) {
+			return WARN, errmsgs
+		}
+	}
+
+	// Run commands.
+	n := len(commands)
+	if n == 0 {
+		// Likely a warning message.
+		return WARN, errmsgs
+	}
+
+	// Each command runs,
+	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
+	//   cmd0 err should terminate chain
+	cs := commands
+
+	// Initialize command pipeline
+	cs[n-1].Stdout = out
+	i := 1
+
+	for i < n {
+		cs[i-1].Stdout, err = cs[i].StdinPipe()
+		if err != nil {
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
+		}
+		i++
+	}
+
+	// Start command pipeline
+	i = 0
+	for i < n {
+		err := cs[i].Start()
+		if err != nil {
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
+		}
+		i++
+	}
+
+	// Complete command pipeline
+	i = 0
+	for i < n {
+		err := cs[i].Wait()
+		if err != nil {
+			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
+		}
+
+		if i < n-1 {
+			cs[i].Stdout.(io.Closer).Close()
+		}
+		i++
+	}
+
+	glog.V(3).Infof("Command %q - Output:\n\n %s\n", audit, out.String())
+	return "", errmsgs
 }

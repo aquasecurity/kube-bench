@@ -49,11 +49,11 @@ func savePgsql(jsonInfo string) {
 	}
 
 	db, err := gorm.Open("postgres", connInfo)
-	defer db.Close()
 	if err != nil {
 		exitWithError(fmt.Errorf("received error connecting to database: %s", err))
 	}
-
+	defer db.Close()
+	
 	db.Debug().AutoMigrate(&ScanResult{})
 	db.Save(&ScanResult{ScanHost: hostname, ScanTime: timestamp, ScanInfo: jsonInfo})
 	glog.V(2).Info(fmt.Sprintf("successfully stored result to: %s", envVars["PGSQL_HOST"]))

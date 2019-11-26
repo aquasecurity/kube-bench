@@ -25,7 +25,7 @@ groups:
       test_items:
       - flag: "authorization-mode"
         set: false
-      - flag: "authorization-mode: Webhook"
+      - flag: "authorization-mode"
         compare:
           op: has
           value: "Webhook"
@@ -59,7 +59,7 @@ groups:
       test_items:
       - flag: "read-only-port"
         set: false
-      - flag: "read-only-port: 0"
+      - flag: "read-only-port"
         compare:
           op: has
           value: "0"
@@ -100,7 +100,7 @@ groups:
       test_items:
       - flag: "make-iptables-util-chains"
         set: false
-      - flag: "make-iptables-util-chains: true"
+      - flag: "make-iptables-util-chains"
         compare:
           op: has
           value: "true"
@@ -115,7 +115,7 @@ groups:
     audit: "grep -A1 keep-terminated-pod-volumes /etc/origin/node/node-config.yaml"
     tests:
       test_items:
-      - flag: "keep-terminated-pod-volumes: false"
+      - flag: "keep-terminated-pod-volumes"
         compare:
           op: has
           value: "false"
@@ -137,7 +137,7 @@ groups:
       test_items:
       - flag: "event-qps"
         set: false
-      - flag: "event-qps: 0"
+      - flag: "event-qps"
         compare:
           op: has
           value: "0"
@@ -169,7 +169,7 @@ groups:
       test_items:
       - flag: "cadvisor-port"
         set: false
-      - flag: "cadvisor-port: 0"
+      - flag: "cadvisor-port"
         compare:
           op: has
           value: "0"
