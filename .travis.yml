@@ -15,7 +15,7 @@ before_install:
 
 script:
   - GO111MODULE=on go test ./...
-  - IMAGE_NAME=kube-bench KUBEBENCH_VERSION=$TRAVIS_BRANCH make build-docker
+  - IMAGE_NAME=kube-bench KUBEBENCH_VERSION=$TRAVIS_TAG make build-docker
   - docker run -v `pwd`:/host kube-bench install 
   - test -d cfg
   - test -f kube-bench
