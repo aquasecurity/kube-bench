@@ -304,15 +304,15 @@ Run the below command (based on the etcd data directory found above). For exampl
 chown etcd:etcd /var/lib/etcd
 
 1.4.19 [Manual test]
-Run the below command (based on the file location on your system) on the master node. 
+Run the below command (based on the file location on your system) on the master node.
 For example, chown -R root:root /etc/kubernetes/pki/
 
 1.4.20 [Manual test]
-Run the below command (based on the file location on your system) on the master node. 
+Run the below command (based on the file location on your system) on the master node.
 For example, chmod -R 644 /etc/kubernetes/pki/*.crt
 
 1.4.21 [Manual test]
-Run the below command (based on the file location on your system) on the master node. 
+Run the below command (based on the file location on your system) on the master node.
 For example, chmod -R 600 /etc/kubernetes/pki/*.key
 
 1.5.1 Follow the etcd service documentation and configure TLS encryption.
@@ -447,7 +447,7 @@ Create a PSP as described in the Kubernetes documentation, ensuring that the .sp
 [PASS] 2.2.4 Ensure that the kubelet service file ownership is set to root:root (Scored)
 [FAIL] 2.2.5 Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)
 [FAIL] 2.2.6 Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)
-[WARN] 2.2.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
+[PASS] 2.2.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
 [PASS] 2.2.8 Ensure that the client certificate authorities file ownership is set to root:root (Scored)
 [PASS] 2.2.9 Ensure that the kubelet configuration file ownership is set to root:root (Scored)
 [PASS] 2.2.10 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
@@ -507,12 +507,9 @@ chmod 644 /etc/kubernetes/proxy.conf
 node. For example,
 chown root:root /etc/kubernetes/proxy.conf
 
-2.2.7 Run the following command to modify the file permissions of the --client-ca-file
-chmod 644 <filename>
-
 
 == Summary ==
-15 checks PASS
+16 checks PASS
 7 checks FAIL
-1 checks WARN
+0 checks WARN
 1 checks INFO
