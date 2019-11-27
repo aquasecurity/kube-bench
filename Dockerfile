@@ -1,9 +1,9 @@
 FROM golang:1.12 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
-ADD go.mod go.sum ./
-ADD main.go .
-ADD check/ check/
-ADD cmd/ cmd/
+COPY go.mod go.sum ./
+COPY main.go .
+COPY check/ check/
+COPY cmd/ cmd/
 ARG KUBEBENCH_VERSION
 RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
@@ -13,8 +13,8 @@ WORKDIR /opt/kube-bench/
 # https://github.com/aquasecurity/kube-bench/issues/109
 RUN apk --no-cache add procps
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
-ADD entrypoint.sh .
-ADD cfg/ cfg/
+COPY entrypoint.sh .
+COPY cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["install"]
 
