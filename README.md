@@ -19,38 +19,42 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 Table of Contents
 =================
 
-* [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
-* [Installation](#installation)
-* [Running kube-bench](#running-kube-bench)
-  * [Running inside a container](#running-inside-a-container)
-  * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
-  * [Running in an EKS cluster](#running-in-an-eks-cluster)
-  * [Installing from a container](#installing-from-a-container)
-  * [Installing from sources](#installing-from-sources)
-* [Running on OpenShift](#running-on-openshift)
-* [Output](#output)
-* [Configuration](#configuration)
-* [Test config YAML representation](#test-config-yaml-representation)
-  * [Omitting checks](#omitting-checks)
-* [Roadmap](#roadmap)
-* [Testing locally with kind](#testing-locally-with-kind)
-* [Contributing](#contributing)
-  * [Bugs](#bugs)
-  * [Features](#features)
-  * [Pull Requests](#pull-requests)
+- [Table of Contents](#table-of-contents)
+  - [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
+  - [Installation](#installation)
+  - [Running kube-bench](#running-kube-bench)
+    - [Running inside a container](#running-inside-a-container)
+    - [Running in a Kubernetes cluster](#running-in-a-kubernetes-cluster)
+    - [Running in an EKS cluster](#running-in-an-eks-cluster)
+    - [Installing from a container](#installing-from-a-container)
+    - [Installing from sources](#installing-from-sources)
+  - [Running on OpenShift](#running-on-openshift)
+  - [Output](#output)
+  - [Configuration](#configuration)
+  - [Test config YAML representation](#test-config-yaml-representation)
+    - [Omitting checks](#omitting-checks)
+  - [Roadmap](#roadmap)
+  - [Testing locally with kind](#testing-locally-with-kind)
+  - [Contributing](#contributing)
+    - [Bugs](#bugs)
+    - [Features](#features)
+    - [Pull Requests](#pull-requests)
       
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.0 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.1 respectively. 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| 1.3.0| 1.11 | 1.11-1.12 |
-| 1.4.1| 1.13 | 1.13- |
+| 1.3.0| cis-1.3 | 1.11-1.12 |
+| 1.4.1| cis-1.4 | 1.13- |
 
-By default kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
+
+By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
 There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
+
+
 
 ## Installation
 
@@ -62,12 +66,13 @@ You can choose to
 
 ## Running kube-bench
 
-If you run kube-bench directly from the command line you may need to be root/sudo in order to have access to all the config files.
+If you run kube-bench directly from the command line you may need to be root / sudo to have access to all the config files.
 
 kube-bench automatically selects which `controls` to use based on the detected
 node type and the version of Kubernetes a cluster is running. This behavior
 can be overridden by specifying the `master` or `node` subcommand and the
 `--version` flag on the command line. 
+
 
 The Kubernetes version can also be set with the `KUBE_BENCH_VERSION` environment variable.
 The value of `--version` takes precedence over the value of `KUBE_BENCH_VERSION`.
@@ -78,20 +83,28 @@ For example, run kube-bench against a master with version auto-detection:
 kube-bench master
 ```
 
-Or run kube-bench against a node with the node `controls` for Kubernetes  version 1.13:
+Or run kube-bench against a worker node using the tests for Kubernetes version 1.13:
 
 ```
 kube-bench node --version 1.13
 ```
 
-`controls` for the various versions of Kubernetes can be found in directories
-with same name as the Kubernetes versions under `cfg/`, for example `cfg/1.13`.
-`controls` are also organized by distribution under the `cfg` directory for
-example `cfg/ocp-3.10`.
+`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.13`, this is mapped to CIS Benchmark version `cis-1.14`.
+
+Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark version:
+
+```
+kube-bench node --benchmark cis-1.4
+```
+
+`controls` for the various versions of CIS Benchmark can be found in directories
+with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
+
+**Note:**  **`It is an error to specify both --version and --benchmark flags together`**
 
 ### Running inside a container
 
-You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host, so that kube-bench can check their existence and permissions. 
+You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host so that kube-bench can check their existence and permissions. 
 
 ```
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node] --version 1.13
@@ -146,12 +159,29 @@ The default labels applied to master nodes has changed since Kubernetes 1.11, so
 
 ### Running in an EKS cluster
 
-There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. **Note that you must update the image reference in `job-eks.yaml`.** Typically you will push the container image for kube-bench to ECR and refer to it there in the YAML file.
+There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
 
-There are two significant differences on EKS:
-
-* It uses [config files in JSON format](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
-* It's not possible to schedule jobs onto the master node, so master checks can't be performed
+1. To create an EKS Cluster refer to [Getting Started with Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) in the *Amazon EKS User Guide*
+  - Information on configuring `eksctl`, `kubectl` and the AWS CLI is within
+2. Create an [Amazon Elastic Container Registry (ECR)](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) repository to host the kube-bench container image
+```
+aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutability MUTABLE
+```
+3. Download, build and push the kube-bench container image to your ECR repo
+```
+git clone https://github.com/aquasecurity/kube-bench.git
+$(aws ecr get-login --no-include-email --region <AWS_REGION>)
+docker build -t k8s/kube-bench .
+docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
+docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
+docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
+```
+4. Copy the URI of your pushed image, the URI format is like this: `<AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest`
+5. Replace the `image` value in `job-eks.yaml` with the URI from Step 4
+6. Run the kube-bench job on a Pod in your Cluster: `kubectl apply -f job-eks.yaml`
+7. Find the Pod that was created, it *should* be in the `default` namespace: `kubectl get pods --all-namespaces`
+8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
+  - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
 ### Installing from a container
 
@@ -177,13 +207,21 @@ go build -o kube-bench .
 # See all supported options
 ./kube-bench --help
 
-# Run the all checks
+# Run all checks
 ./kube-bench
 ```
 
 ## Running on OpenShift 
 
-kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--version ocp-3.10` when you run the `kube-bench` command (either directly or through YAML). This config version is valid for OCP 3.10 and 3.11. 
+| OpenShift Hardening Guide | kube-bench config |
+|---|---|---|
+| ocp-3.10| rh-0.7 |
+| ocp-3.11| rh-0.7 |
+
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
+
+when you run the `kube-bench` command (either directly or through YAML). 
+
 
 ## Output
 
@@ -232,17 +270,17 @@ We welcome PRs and issue reports.
 
 ## Testing locally with kind
 
-Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purpose.
+Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purposes.
 
-First you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
+First, you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
 *If kind cannot be found on your system the target will try to install it using `go get`*
 
-Next you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
+Next, you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
 
-Finally we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
+Finally, we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
 
-Everytime you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 ## Contributing
 
@@ -263,7 +301,7 @@ We also use the GitHub issue tracker to track feature requests. If you have an i
 
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
-- Clearly define the use case, using concrete examples. For example: I type `this` and kube-bench does `that`.
+- Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
 
 ### Pull Requests 

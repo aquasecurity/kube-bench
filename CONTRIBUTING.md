@@ -14,6 +14,7 @@ Thank you for taking an interest in contributing to kube-bench !
 ## Pull Requests
 
 1. Every Pull Request should have an associated Issue, unless you are fixing a trivial documentation issue.
+1. We will not accept changes to LICENSE, NOTICE or CONTRIBUTING from outside the Aqua Security team. Please raise an Issue if you believe there is a problem with any of these files. 
 1. Your PR is more likely to be accepted if it focuses on just one change.
 1. Describe what the PR does. There's no convention enforced, but please try to be concise and descriptive. Treat the PR description as a commit message. Titles that start with "fix"/"add"/"improve"/"remove" are good examples.
 1. Please add the associated Issue in the PR description.

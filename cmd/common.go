@@ -81,7 +81,7 @@ func runChecks(nodetype check.NodeType) {
 
 	// Get the set of executables and config files we care about on this type of node.
 	typeConf := viper.Sub(string(nodetype))
-	binmap, err := getBinaries(typeConf)
+	binmap, err := getBinaries(typeConf, nodetype)
 
 	// Checks that the executables we need for the node type are running.
 	if err != nil {
@@ -114,8 +114,15 @@ func runChecks(nodetype check.NodeType) {
 
 	summary = controls.RunChecks(runner, filter)
 
-	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && junitFmt {
+		out, err := controls.JUnit()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
+		}
+
+		PrintOutput(string(out), outputFile)
+		// if we successfully ran some tests and it's json format, ignore the warnings
+	} else if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -209,15 +216,12 @@ func loadConfig(nodetype check.NodeType) string {
 		file = nodeFile
 	}
 
-	runningVersion := ""
-	if kubeVersion == "" {
-		runningVersion, err = getKubeVersion()
-		if err != nil {
-			exitWithError(fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err))
-		}
+	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+	if err != nil {
+		exitWithError(err)
 	}
 
-	path, err := getConfigFilePath(kubeVersion, runningVersion, file)
+	path, err := getConfigFilePath(benchmarkVersion, file)
 	if err != nil {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
@@ -237,6 +241,64 @@ func loadConfig(nodetype check.NodeType) string {
 	return filepath.Join(path, file)
 }
 
+func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (string, error) {
+	kvOriginal := kv
+	cisVersion, found := kubeToBenchmarkMap[kv]
+	glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
+	for !found && (kv != defaultKubeVersion && !isEmpty(kv)) {
+		kv = decrementVersion(kv)
+		cisVersion, found = kubeToBenchmarkMap[kv]
+		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
+	}
+
+	if !found {
+		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
+		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
+		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
+	}
+
+	return cisVersion, nil
+}
+
+func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
+	kubeToBenchmarkMap := v.GetStringMapString("version_mapping")
+	if kubeToBenchmarkMap == nil || (len(kubeToBenchmarkMap) == 0) {
+		return nil, fmt.Errorf("config file is missing 'version_mapping' section")
+	}
+
+	return kubeToBenchmarkMap, nil
+}
+
+func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (bv string, err error) {
+	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
+		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
+	}
+
+	if isEmpty(benchmarkVersion) {
+		if isEmpty(kubeVersion) {
+			kubeVersion, err = getKubeVersion()
+			if err != nil {
+				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
+			}
+		}
+
+		kubeToBenchmarkMap, err := loadVersionMapping(v)
+		if err != nil {
+			return "", err
+		}
+
+		benchmarkVersion, err = mapToBenchmarkVersion(kubeToBenchmarkMap, kubeVersion)
+		if err != nil {
+			return "", err
+		}
+
+		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion))
+	}
+
+	glog.V(1).Info(fmt.Sprintf("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion))
+	return benchmarkVersion, nil
+}
+
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
 	glog.V(2).Info("Checking if the current node is running master components")
@@ -245,7 +307,7 @@ func isMaster() bool {
 		glog.V(2).Info("No master components found to be running")
 		return false
 	}
-	components, err := getBinariesFunc(masterConf)
+	components, err := getBinariesFunc(masterConf, check.MASTER)
 
 	if err != nil {
 		glog.V(2).Info(err)

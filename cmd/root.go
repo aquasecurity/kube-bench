@@ -36,9 +36,11 @@ var (
 	envVarsPrefix      = "KUBE_BENCH"
 	defaultKubeVersion = "1.11"
 	kubeVersion        string
+	benchmarkVersion   string
 	cfgFile            string
 	cfgDir             string
 	jsonFmt            bool
+	junitFmt           bool
 	pgSQL              bool
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
@@ -90,6 +92,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
+	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
@@ -113,6 +116,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
 	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
+	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
