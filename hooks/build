@@ -3,4 +3,5 @@
 # $IMAGE_NAME var is injected into the build so the tag is correct. 
 docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
              --build-arg VCS_REF=`git rev-parse --short HEAD` \
+             --build-arg KUBEBENCH_VERSION=`git describe --tags --abbrev=0` \
              -t $IMAGE_NAME .
