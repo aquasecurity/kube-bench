@@ -21,7 +21,7 @@
 [PASS] 2.2.4 Ensure that the kubelet service file ownership is set to root:root (Scored)
 [FAIL] 2.2.5 Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)
 [FAIL] 2.2.6 Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)
-[WARN] 2.2.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
+[PASS] 2.2.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
 [PASS] 2.2.8 Ensure that the client certificate authorities file ownership is set to root:root (Scored)
 [PASS] 2.2.9 Ensure that the kubelet configuration file ownership is set to root:root (Scored)
 [PASS] 2.2.10 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
@@ -81,12 +81,9 @@ chmod 644 /etc/kubernetes/proxy.conf
 node. For example,
 chown root:root /etc/kubernetes/proxy.conf
 
-2.2.7 Run the following command to modify the file permissions of the --client-ca-file
-chmod 644 <filename>
-
 
 == Summary ==
-15 checks PASS
+16 checks PASS
 7 checks FAIL
-1 checks WARN
+0 checks WARN
 1 checks INFO
