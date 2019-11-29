@@ -25,7 +25,8 @@ var nodeCmd = &cobra.Command{
 	Short: "Run Kubernetes benchmark checks from the node.yaml file.",
 	Long:  `Run Kubernetes benchmark checks from the node.yaml file in cfg/<version>.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.NODE)
+		filename := loadConfig(check.NODE)
+		runChecks(check.NODE, filename)
 	},
 }
 

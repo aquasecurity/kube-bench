@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/aquasecurity/kube-bench/check"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,6 +37,10 @@ var runCmd = &cobra.Command{
 			exitWithError(err)
 		}
 
+		// Merge version-specific config if any.
+		path := filepath.Join(cfgDir, benchmarkVersion)
+		mergeConfig(path)
+
 		err = run(sections, benchmarkVersion)
 		if err != nil {
 			fmt.Printf("Error in run: %v\n", err)
@@ -51,6 +57,12 @@ func run(sections []string, benchmarkVersion string) (err error) {
 
 	glog.V(3).Infof("Running tests from files %v\n", yamlFiles)
 
+	for _, yamlFile := range yamlFiles {
+		_, name := filepath.Split(yamlFile)
+		testType := check.NodeType(strings.Split(name, ".")[0])
+		runChecks(testType, yamlFile)
+	}
+
 	return nil
 }
 
@@ -64,7 +76,7 @@ func getTestYamlFiles(sections []string, benchmarkVersion string) (yamlFiles []s
 		if _, err := os.Stat(file); err != nil {
 			return nil, fmt.Errorf("file %s not found for version %s", filename, benchmarkVersion)
 		}
-		yamlFiles = append(yamlFiles, filename)
+		yamlFiles = append(yamlFiles, file)
 	}
 
 	// If no sections were specified, we will run tests from all the files in the directory

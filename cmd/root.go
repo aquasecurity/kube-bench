@@ -61,10 +61,12 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==\n")
-			runChecks(check.MASTER)
+			filename := loadConfig(check.MASTER)
+			runChecks(check.MASTER, filename)
 		}
 		glog.V(1).Info("== Running node checks ==\n")
-		runChecks(check.NODE)
+		filename := loadConfig(check.NODE)
+		runChecks(check.NODE, filename)
 	},
 }
 
