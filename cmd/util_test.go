@@ -505,7 +505,7 @@ func TestGetYamlFilesFromDir(t *testing.T) {
 		t.Fatalf("Expected to find one file, found %d", len(files))
 	}
 
-	if files[0] != "something.yaml" {
+	if files[0] != filepath.Join(d, "something.yaml") {
 		t.Fatalf("Expected to find something.yaml, found %s", files[0])
 	}
 }

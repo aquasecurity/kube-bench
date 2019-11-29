@@ -148,7 +148,7 @@ func getYamlFilesFromDir(path string) (names []string, err error) {
 
 		_, name := filepath.Split(path)
 		if name != "" && name != "config.yaml" && filepath.Ext(name) == ".yaml" {
-			names = append(names, name)
+			names = append(names, path)
 		}
 
 		return nil
