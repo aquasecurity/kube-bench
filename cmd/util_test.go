@@ -474,3 +474,38 @@ func TestDecrementVersion(t *testing.T) {
 		}
 	}
 }
+
+func TestGetYamlFilesFromDir(t *testing.T) {
+	cfgDir, err := ioutil.TempDir("", "kube-bench-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory")
+	}
+	defer os.RemoveAll(cfgDir)
+
+	d := filepath.Join(cfgDir, "cis-1.4")
+	err = os.Mkdir(d, 0766)
+	if err != nil {
+		t.Fatalf("Failed to create temp dir")
+	}
+
+	err = ioutil.WriteFile(filepath.Join(d, "something.yaml"), []byte("hello world"), 0666)
+	if err != nil {
+		t.Fatalf("error writing file %v", err)
+	}
+	err = ioutil.WriteFile(filepath.Join(d, "config.yaml"), []byte("hello world"), 0666)
+	if err != nil {
+		t.Fatalf("error writing file %v", err)
+	}
+
+	files, err := getYamlFilesFromDir(d)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if len(files) != 1 {
+		t.Fatalf("Expected to find one file, found %d", len(files))
+	}
+
+	if files[0] != "something.yaml" {
+		t.Fatalf("Expected to find something.yaml, found %s", files[0])
+	}
+}

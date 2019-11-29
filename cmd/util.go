@@ -123,19 +123,37 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 	return binmap, nil
 }
 
-// getConfigFilePath locates the config files we should be using CIS version
+// getConfigFilePath locates the config files we should be using for CIS version
 func getConfigFilePath(benchmarkVersion string, filename string) (path string, err error) {
 	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
 	path = filepath.Join(cfgDir, benchmarkVersion)
 	file := filepath.Join(path, string(filename))
-	glog.V(2).Info(fmt.Sprintf("Looking for config file: %s", file))
+	glog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
 
 	if _, err := os.Stat(file); err != nil {
 		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
 		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
+
 	return path, nil
+}
+
+// getYamlFilesFromDir returns a list of yaml files in the specified directory, ignoring config.yaml
+func getYamlFilesFromDir(path string) (names []string, err error) {
+	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		_, name := filepath.Split(path)
+		if name != "" && name != "config.yaml" && filepath.Ext(name) == ".yaml" {
+			names = append(names, name)
+		}
+
+		return nil
+	})
+	return names, err
 }
 
 // decrementVersion decrements the version number
