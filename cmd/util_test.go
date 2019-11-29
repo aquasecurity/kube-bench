@@ -410,11 +410,14 @@ func TestGetConfigFilePath(t *testing.T) {
 	}
 	defer os.RemoveAll(cfgDir)
 	d := filepath.Join(cfgDir, "cis-1.4")
-	err = os.Mkdir(d, 0666)
+	err = os.Mkdir(d, 0766)
 	if err != nil {
-		t.Fatalf("Failed to create temp file")
+		t.Fatalf("Failed to create temp dir")
 	}
-	ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
+	err = ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
+	if err != nil {
+		t.Logf("Failed to create temp file")
+	}
 
 	cases := []struct {
 		benchmarkVersion string

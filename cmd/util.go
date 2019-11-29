@@ -131,7 +131,7 @@ func getConfigFilePath(benchmarkVersion string, filename string) (path string, e
 	file := filepath.Join(path, string(filename))
 	glog.V(2).Info(fmt.Sprintf("Looking for config file: %s", file))
 
-	if _, err = os.Stat(file); os.IsNotExist(err) {
+	if _, err := os.Stat(file); err != nil {
 		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
 		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
