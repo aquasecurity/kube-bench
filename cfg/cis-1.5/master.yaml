@@ -81,6 +81,7 @@ groups:
   - id: 1.1.4
     text: "Ensure that the controller manager pod specification file ownership is set to root:root (Scored)"
     audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
+    tests:
       test_items:
       - flag: "root:root"
         compare:
@@ -715,6 +716,7 @@ groups:
   - id: 1.2.20
     text: "Ensure that the --secure-port argument is not set to 0 (Scored) "
     audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+    tests:
       bin_op: or
       test_items:
         - flag:  "--secure-port"

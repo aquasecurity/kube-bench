@@ -74,8 +74,8 @@ groups:
     text: "Minimize the admission of containers wishing to share the host process ID namespace (Scored)"
     type: "manual"
     remediation: |
-	Create a PSP as described in the Kubernetes documentation, ensuring that the 
-	.spec.hostPID field is omitted or set to false. 
+      Create a PSP as described in the Kubernetes documentation, ensuring that the 
+      .spec.hostPID field is omitted or set to false. 
     scored: true
 
   - id: 5.2.3
