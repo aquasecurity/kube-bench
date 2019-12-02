@@ -1,4 +1,4 @@
-// Copyright © 2017 Aqua Security Software Ltd. <info@aquasec.com>
+// Copyright © 2017-2019 Aqua Security Software Ltd. <info@aquasec.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import (
 // nodeCmd represents the node command
 var nodeCmd = &cobra.Command{
 	Use:   "node",
-	Short: "Run benchmark checks for a Kubernetes node.",
-	Long:  `Run benchmark checks for a Kubernetes node.`,
+	Short: "Run Kubernetes benchmark checks from the node.yaml file.",
+	Long:  `Run Kubernetes benchmark checks from the node.yaml file in cfg/<version>.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.NODE)
+		filename := loadConfig(check.NODE)
+		runChecks(check.NODE, filename)
 	},
 }
 
