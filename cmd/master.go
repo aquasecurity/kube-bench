@@ -1,4 +1,4 @@
-// Copyright © 2017 Aqua Security Software Ltd. <info@aquasec.com>
+// Copyright © 2017-2019 Aqua Security Software Ltd. <info@aquasec.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import (
 // masterCmd represents the master command
 var masterCmd = &cobra.Command{
 	Use:   "master",
-	Short: "Run benchmark checks for a Kubernetes master node.",
-	Long:  `Run benchmark checks for a Kubernetes master node.`,
+	Short: "Run Kubernetes benchmark checks from the master.yaml file.",
+	Long:  `Run Kubernetes benchmark checks from the master.yaml file in cfg/<version>.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runChecks(check.MASTER)
+		filename := loadConfig(check.MASTER)
+		runChecks(check.MASTER, filename)
 	},
 }
 
