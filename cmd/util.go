@@ -78,12 +78,14 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
+	glog.V(2).Info(fmt.Sprintf("ps - proc: %q", proc))
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
 		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
 	}
 
+	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
 
@@ -121,19 +123,37 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 	return binmap, nil
 }
 
-// getConfigFilePath locates the config files we should be using CIS version
+// getConfigFilePath locates the config files we should be using for CIS version
 func getConfigFilePath(benchmarkVersion string, filename string) (path string, err error) {
 	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
 	path = filepath.Join(cfgDir, benchmarkVersion)
 	file := filepath.Join(path, string(filename))
-	glog.V(2).Info(fmt.Sprintf("Looking for config file: %s", file))
+	glog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
 
-	if _, err = os.Stat(file); os.IsNotExist(err) {
+	if _, err := os.Stat(file); err != nil {
 		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
 		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
+
 	return path, nil
+}
+
+// getYamlFilesFromDir returns a list of yaml files in the specified directory, ignoring config.yaml
+func getYamlFilesFromDir(path string) (names []string, err error) {
+	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		_, name := filepath.Split(path)
+		if name != "" && name != "config.yaml" && filepath.Ext(name) == ".yaml" {
+			names = append(names, path)
+		}
+
+		return nil
+	})
+	return names, err
 }
 
 // decrementVersion decrements the version number
@@ -206,7 +226,9 @@ func verifyBin(bin string) bool {
 	// but apiserver is not a match for kube-apiserver
 	reFirstWord := regexp.MustCompile(`^(\S*\/)*` + bin)
 	lines := strings.Split(out, "\n")
+	glog.V(2).Info(fmt.Sprintf("verifyBin - lines(%d)", len(lines)))
 	for _, l := range lines {
+		glog.V(2).Info(fmt.Sprintf("reFirstWord.Match(%s)\n\n\n\n", l))
 		if reFirstWord.Match([]byte(l)) {
 			return true
 		}
@@ -271,6 +293,12 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (string, error) {
+
+	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
+		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
+		return k8sVer, nil
+	}
+
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
 

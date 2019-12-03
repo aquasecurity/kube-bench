@@ -464,8 +464,25 @@ groups:
 
   - id: 2.2.7
     text: Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
-    type: manual
-    tests: {}
+    audit: "/bin/sh -c 'if test -e $kubeletcafile; then stat -c %a $kubeletcafile; fi'"
+    tests:
+      bin_op: or
+      test_items:
+      - flag: "644"
+        compare:
+          op: eq
+          value: "644"
+        set: true
+      - flag: "640"
+        compare:
+          op: eq
+          value: "640"
+        set: true
+      - flag: "600"
+        compare:
+          op: eq
+          value: "600"
+        set: true
     remediation: |
       Run the following command to modify the file permissions of the --client-ca-file
       chmod 644 <filename>

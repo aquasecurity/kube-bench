@@ -62,7 +62,7 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 	}, nil
 }
 
-func runChecks(nodetype check.NodeType) {
+func runChecks(nodetype check.NodeType, testYamlFile string) {
 	var summary check.Summary
 
 	// Verify config file was loaded into Viper during Cobra sub-command initialization.
@@ -71,19 +71,24 @@ func runChecks(nodetype check.NodeType) {
 		os.Exit(1)
 	}
 
-	def := loadConfig(nodetype)
-	in, err := ioutil.ReadFile(def)
+	in, err := ioutil.ReadFile(testYamlFile)
 	if err != nil {
-		exitWithError(fmt.Errorf("error opening %s controls file: %v", nodetype, err))
+		exitWithError(fmt.Errorf("error opening %s test file: %v", testYamlFile, err))
 	}
 
-	glog.V(1).Info(fmt.Sprintf("Using benchmark file: %s\n", def))
+	glog.V(1).Info(fmt.Sprintf("Using test file: %s\n", testYamlFile))
 
-	// Get the set of executables and config files we care about on this type of node.
+	// Get the viper config for this section of tests
 	typeConf := viper.Sub(string(nodetype))
+	if typeConf == nil {
+		colorPrint(check.FAIL, fmt.Sprintf("No config settings for %s\n", string(nodetype)))
+		os.Exit(1)
+	}
+
+	// Get the set of executables we need for this section of the tests
 	binmap, err := getBinaries(typeConf, nodetype)
 
-	// Checks that the executables we need for the node type are running.
+	// Checks that the executables we need for the section are running.
 	if err != nil {
 		exitWithError(err)
 	}
@@ -114,8 +119,15 @@ func runChecks(nodetype check.NodeType) {
 
 	summary = controls.RunChecks(runner, filter)
 
-	// if we successfully ran some tests and it's json format, ignore the warnings
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
+	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && junitFmt {
+		out, err := controls.JUnit()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
+		}
+
+		PrintOutput(string(out), outputFile)
+		// if we successfully ran some tests and it's json format, ignore the warnings
+	} else if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
 		out, err := controls.JSON()
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
@@ -219,33 +231,42 @@ func loadConfig(nodetype check.NodeType) string {
 		exitWithError(fmt.Errorf("can't find %s controls file in %s: %v", nodetype, cfgDir, err))
 	}
 
-	// Merge kubernetes version specific config if any.
+	// Merge version-specific config if any.
+	mergeConfig(path)
+
+	return filepath.Join(path, file)
+}
+
+func mergeConfig(path string) error {
 	viper.SetConfigFile(path + "/config.yaml")
-	err = viper.MergeInConfig()
+	err := viper.MergeInConfig()
 	if err != nil {
 		if os.IsNotExist(err) {
 			glog.V(2).Info(fmt.Sprintf("No version-specific config.yaml file in %s", path))
 		} else {
-			exitWithError(fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err))
+			return fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err)
 		}
-	} else {
-		glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
 	}
-	return filepath.Join(path, file)
+
+	glog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+
+	return nil
 }
 
 func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (string, error) {
+	kvOriginal := kv
 	cisVersion, found := kubeToBenchmarkMap[kv]
+	glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
 	for !found && (kv != defaultKubeVersion && !isEmpty(kv)) {
 		kv = decrementVersion(kv)
 		cisVersion, found = kubeToBenchmarkMap[kv]
-		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for cisVersion: %q found: %t\n", cisVersion, found))
+		glog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
 	}
 
 	if !found {
-		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kv))
+		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
 		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
-		return "", fmt.Errorf("Unable to find a matching Benchmark Version match for kubernetes version: %s", kubeVersion)
+		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
 	}
 
 	return cisVersion, nil
@@ -285,6 +306,8 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 		glog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion))
 	}
+
+	glog.V(1).Info(fmt.Sprintf("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion))
 	return benchmarkVersion, nil
 }
 

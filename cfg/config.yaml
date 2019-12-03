@@ -135,7 +135,8 @@ node:
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
       - /var/snap/kube-proxy/current/args
     kubeconfig:
-      - /etc/kubernetes/kubelet-kubeconfig
+      - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/var/lib/kubelet/kubeconfig"
     svc:
       - "/lib/systemd/system/kube-proxy.service"
     defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
