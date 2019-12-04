@@ -47,8 +47,8 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
 | 1.3.0| cis-1.3 | 1.11-1.12 |
-| 1.4.1| cis-1.4 | 1.13-1.15 |
-| 1.5| cis-1.5 | 1.16- |
+| 1.4.1| cis-1.4 | 1.13-1.14 |
+| 1.5| cis-1.5 | 1.15- |
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
@@ -97,6 +97,28 @@ Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark ver
 ```
 kube-bench node --benchmark cis-1.4
 ```
+
+If you want to target specific CIS Benchmark `target` (i.e master, node, etcd, etc...)
+you can use the `run --targets` subcommand.
+```
+kube-bench --benchmark cis-1.4 run --targets master,node
+```
+or
+```
+kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
+```
+
+The following table shows the valid targets based on the CIS Benchmark version.
+| CIS Benchmark | Targets |
+|---|---|
+| cis-1.3| master, node |
+| cis-1.4| master, node |
+| cis-1.5| master, controlplane, node, etcd, policies |
+
+If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
+
+**Note:**  **`It is an error to specify invalid targets `**
+
 
 `controls` for the various versions of CIS Benchmark can be found in directories
 with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
