@@ -6,7 +6,7 @@ text: "etcd"
 type: "etcd"
 groups:
 - id: 2
-  text: ""
+  text: "Etcd Node Configuration Files"
   checks:
   - id: 2.1
     text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
