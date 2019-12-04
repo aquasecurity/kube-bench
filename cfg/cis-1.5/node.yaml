@@ -2,7 +2,7 @@
 controls:
 version: 1.5
 id: 4
-text: "Worker Nodes"
+text: "Worker Node Security Configuration"
 type: "node"
 groups:
 - id: 4.1

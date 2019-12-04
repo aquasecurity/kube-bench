@@ -2,7 +2,7 @@
 controls:
 version: 1.15
 id: 2
-text: "etcd"
+text: "Etcd Node Configuration"
 type: "etcd"
 groups:
 - id: 2

@@ -2,7 +2,7 @@
 controls:
 version: 1.5
 id: 5
-text: "Policies"
+text: "Kubernetes Policies"
 type: "policies"
 groups:
 - id: 5.1
