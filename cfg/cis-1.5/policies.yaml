@@ -3,7 +3,7 @@ controls:
 version: 1.5
 id: 5
 text: "Policies"
-type: "master"
+type: "policies"
 groups:
 - id: 5.1
   text: "RBAC and Service Accounts"

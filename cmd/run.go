@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -38,8 +37,9 @@ var runCmd = &cobra.Command{
 			exitWithError(err)
 		}
 
-		if len(targets) > 0 && !providesTargets(benchmarkVersion) {
-			exitWithError(fmt.Errorf(`The specified --targets "%s" does not apply to the CIS Benchmark %s`, strings.Join(targets, ","), benchmarkVersion))
+		glog.V(2).Infof("Checking targets %v for %v", targets, benchmarkVersion)
+		if len(targets) > 0 && !validTargets(benchmarkVersion, targets) {
+			exitWithError(fmt.Errorf(fmt.Sprintf(`The specified --targets "%s" does not apply to the CIS Benchmark %s \n Valid targets %v`, strings.Join(targets, ","), benchmarkVersion, benchmarkVersionToTargetsMap[benchmarkVersion])))
 		}
 
 		// Merge version-specific config if any.
@@ -68,18 +68,6 @@ func run(targets []string, benchmarkVersion string) (err error) {
 	}
 
 	return nil
-}
-
-func providesTargets(benchmarkVersion string) bool {
-	bv := benchmarkVersion
-	bv = strings.Replace(bv, "cis-", "", -1)
-	f, err := strconv.ParseFloat(bv, 32)
-	if err != nil {
-		glog.V(3).Infof("Invalid CIS Benchmark version %q", benchmarkVersion)
-		return false
-	}
-
-	return f >= 1.5
 }
 
 func getTestYamlFiles(targets []string, benchmarkVersion string) (yamlFiles []string, err error) {

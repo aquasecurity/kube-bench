@@ -83,35 +83,6 @@ func TestGetTestYamlFiles(t *testing.T) {
 	}
 }
 
-func TestProvidesTargets(t *testing.T) {
-	cases := []struct {
-		benchmark string
-		expected  bool
-	}{
-		{
-			benchmark: "cis-1.3",
-			expected:  false,
-		},
-		{
-			benchmark: "cis-1.4",
-			expected:  false,
-		},
-		{
-			benchmark: "cis-1.5",
-			expected:  true,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.benchmark, func(t *testing.T) {
-			ret := providesTargets(c.benchmark)
-			if ret != c.expected {
-				t.Fatalf("Expected %t, got %t", c.expected, ret)
-			}
-		})
-	}
-}
-
 func TestTranslate(t *testing.T) {
 	cases := []struct {
 		name     string

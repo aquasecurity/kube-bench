@@ -3,7 +3,7 @@ controls:
 version: 1.5
 id: 3
 text: "Control Plane Configuration"
-type: "master"
+type: "controlplane"
 groups:
 - id: 3.1
   text: "Authentication and Authorization"

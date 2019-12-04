@@ -3,7 +3,7 @@ controls:
 version: 1.15
 id: 2
 text: "etcd"
-type: "master"
+type: "etcd"
 groups:
 - id: 2
   text: ""
