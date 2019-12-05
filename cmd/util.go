@@ -391,12 +391,18 @@ The following %q programs have been searched, but none of them have been found:
 These program names are provided in the config.yaml, section '%s.%s.bins'
 `
 
-	componentRoleName := "master node"
-	componentType := "master"
+	var componentRoleName, componentType string
+	switch nodetype {
 
-	if nodetype == check.NODE {
+	case check.NODE:
 		componentRoleName = "worker node"
 		componentType = "node"
+	case check.ETCD:
+		componentRoleName = "etcd node"
+		componentType = "etcd"
+	default:
+		componentRoleName = "master node"
+		componentType = "master"
 	}
 
 	binList := ""
