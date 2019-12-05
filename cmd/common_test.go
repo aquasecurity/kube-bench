@@ -192,7 +192,10 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
-		{kubeVersion: "1.16", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.14", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.15", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.16", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.17", succeed: true, exp: "cis-1.5"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
@@ -337,6 +340,49 @@ func TestGetBenchmarkVersion(t *testing.T) {
 				t.Errorf("[%q]-Expected error but got none", c.n)
 			}
 		}
+	}
+}
+
+func TestValidTargets(t *testing.T) {
+	cases := []struct {
+		name      string
+		benchmark string
+		targets   []string
+		expected  bool
+	}{
+		{
+			name:      "cis-1.3 no etcd",
+			benchmark: "cis-1.3",
+			targets:   []string{"master", "etcd"},
+			expected:  false,
+		},
+		{
+			name:      "cis-1.4 valid",
+			benchmark: "cis-1.4",
+			targets:   []string{"master", "node"},
+			expected:  true,
+		},
+		{
+			name:      "cis-1.5 no dummy",
+			benchmark: "cis-1.5",
+			targets:   []string{"master", "node", "controlplane", "etcd", "dummy"},
+			expected:  false,
+		},
+		{
+			name:      "cis-1.5 valid",
+			benchmark: "cis-1.5",
+			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
+			expected:  true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ret := validTargets(c.benchmark, c.targets)
+			if ret != c.expected {
+				t.Fatalf("Expected %t, got %t", c.expected, ret)
+			}
+		})
 	}
 }
 

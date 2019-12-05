@@ -44,6 +44,9 @@ var (
 	pgSQL              bool
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
+	etcdFile           = "etcd.yaml"
+	controlplaneFile   = "controlplane.yaml"
+	policiesFile       = "policies.yaml"
 	noResults          bool
 	noSummary          bool
 	noRemediations     bool
@@ -59,12 +62,40 @@ var RootCmd = &cobra.Command{
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 	Run: func(cmd *cobra.Command, args []string) {
+		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		if err != nil {
+			exitWithError(err)
+		}
+
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==\n")
-			runChecks(check.MASTER)
+			runChecks(check.MASTER, loadConfig(check.MASTER))
+
+			// Control Plane is only valid for CIS 1.5 and later,
+			// this a gatekeeper for previous versions
+			if validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}) {
+				glog.V(1).Info("== Running control plane checks ==\n")
+				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE))
+			}
 		}
+
+		// Etcd is only valid for CIS 1.5 and later,
+		// this a gatekeeper for previous versions.
+		if isEtcd() && validTargets(benchmarkVersion, []string{string(check.ETCD)}) {
+			glog.V(1).Info("== Running etcd checks ==\n")
+			runChecks(check.ETCD, loadConfig(check.ETCD))
+		}
+
 		glog.V(1).Info("== Running node checks ==\n")
-		runChecks(check.NODE)
+		runChecks(check.NODE, loadConfig(check.NODE))
+
+		// Policies is only valid for CIS 1.5 and later,
+		// this a gatekeeper for previous versions.
+		if validTargets(benchmarkVersion, []string{string(check.POLICIES)}) {
+			glog.V(1).Info("== Running policies checks ==\n")
+			runChecks(check.POLICIES, loadConfig(check.POLICIES))
+		}
+
 	},
 }
 
