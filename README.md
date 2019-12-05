@@ -117,9 +117,6 @@ The following table shows the valid targets based on the CIS Benchmark version.
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
-**Note:**  **`It is an error to specify invalid targets `**
-
-
 `controls` for the various versions of CIS Benchmark can be found in directories
 with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
 
