@@ -109,6 +109,7 @@ kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
 ```
 
 The following table shows the valid targets based on the CIS Benchmark version.
+
 | CIS Benchmark | Targets |
 |---|---|
 | cis-1.3| master, node |
