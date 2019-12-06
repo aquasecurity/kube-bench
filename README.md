@@ -165,7 +165,7 @@ kubectl get no  # to check whether kubeconfig works
 ```
 4. Run CIS benchmark to view results:
 ```
-docker run --rm -v `pwd`:/host andyzhangx/kube-bench:latest install
+docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ./kube-bench node
 ```
 kube-bench cannot be run on AKS master nodes 
