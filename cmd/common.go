@@ -219,6 +219,12 @@ func loadConfig(nodetype check.NodeType) string {
 		file = masterFile
 	case check.NODE:
 		file = nodeFile
+	case check.CONTROLPLANE:
+		file = controlplaneFile
+	case check.ETCD:
+		file = etcdFile
+	case check.POLICIES:
+		file = policiesFile
 	}
 
 	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
@@ -313,22 +319,32 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
-	glog.V(2).Info("Checking if the current node is running master components")
-	masterConf := viper.Sub(string(check.MASTER))
-	if masterConf == nil {
-		glog.V(2).Info("No master components found to be running")
+	return isThisNodeRunning(check.MASTER)
+}
+
+// isEtcd verify if etcd components are running on the node.
+func isEtcd() bool {
+	return isThisNodeRunning(check.ETCD)
+}
+
+func isThisNodeRunning(nodeType check.NodeType) bool {
+	glog.V(2).Infof("Checking if the current node is running %s components", nodeType)
+	etcdConf := viper.Sub(string(nodeType))
+	if etcdConf == nil {
+		glog.V(2).Infof("No %s components found to be running", nodeType)
 		return false
 	}
-	components, err := getBinariesFunc(masterConf, check.MASTER)
 
+	components, err := getBinariesFunc(etcdConf, nodeType)
 	if err != nil {
 		glog.V(2).Info(err)
 		return false
 	}
 	if len(components) == 0 {
-		glog.V(2).Info("No master binaries specified")
+		glog.V(2).Infof("No %s binaries specified", nodeType)
 		return false
 	}
+
 	return true
 }
 
@@ -359,4 +375,35 @@ func PrintOutput(output string, outputFile string) {
 			exitWithError(fmt.Errorf("Failed to write to output file %s: %v", outputFile, err))
 		}
 	}
+}
+
+var benchmarkVersionToTargetsMap = map[string][]string{
+	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
+	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
+	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
+}
+
+// validTargets helps determine if the targets
+// are legitimate for the benchmarkVersion.
+func validTargets(benchmarkVersion string, targets []string) bool {
+	providedTargets, found := benchmarkVersionToTargetsMap[benchmarkVersion]
+	if !found {
+		return false
+	}
+
+	for _, pt := range targets {
+		f := false
+		for _, t := range providedTargets {
+			if pt == strings.ToLower(t) {
+				f = true
+				break
+			}
+		}
+
+		if !f {
+			return false
+		}
+	}
+
+	return true
 }

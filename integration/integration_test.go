@@ -40,19 +40,19 @@ func TestRunWithKind(t *testing.T) {
 	}{
 		{
 			TestName:      "job",
-			KindCfg:       "./testdata/add-tls-kind.yaml",
+			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
 			KubebenchYAML: "../job.yaml",
 			ExpectedFile:  "./testdata/job.data",
 		},
 		{
 			TestName:      "job-node",
-			KindCfg:       "./testdata/add-tls-kind.yaml",
+			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
 			KubebenchYAML: "../job-node.yaml",
 			ExpectedFile:  "./testdata/job-node.data",
 		},
 		{
 			TestName:      "job-master",
-			KindCfg:       "./testdata/add-tls-kind.yaml",
+			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
 			KubebenchYAML: "../job-master.yaml",
 			ExpectedFile:  "./testdata/job-master.data",
 		},

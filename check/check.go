@@ -49,6 +49,13 @@ const (
 	// FEDERATED a federated deployment.
 	FEDERATED NodeType = "federated"
 
+	// ETCD an etcd node
+	ETCD NodeType = "etcd"
+	// CONTROLPLANE a control plane node
+	CONTROLPLANE NodeType = "controlplane"
+	// POLICIES a node to run policies from
+	POLICIES NodeType = "policies"
+
 	// MANUAL Check Type
 	MANUAL string = "manual"
 )

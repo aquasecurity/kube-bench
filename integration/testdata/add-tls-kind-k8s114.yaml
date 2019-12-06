@@ -11,3 +11,9 @@ kubeadmConfigPatchesJson6902:
     - op: add
       path: /tlsCipherSuites
       value: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]
+
+nodes:
+# the control plane node config
+- role: control-plane
+  image: "kindest/node:v1.14.6"
+  
