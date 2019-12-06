@@ -190,13 +190,7 @@ kubectl-enter {node-name}
 or ssh to one agent node
 could open nsg 22 port and assign a public ip for one agent node (only for testing purpose)
 
-1. config KUBECONFIG on the agent node:
-```
-sudo chmod a+r /etc/kubernetes/certs/client.key
-export KUBECONFIG=/var/lib/kubelet/kubeconfig
-kubectl get no  # to check whether kubeconfig works
-```
-4. Run CIS benchmark to view results:
+1. Run CIS benchmark to view results:
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ./kube-bench node
