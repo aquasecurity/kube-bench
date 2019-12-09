@@ -155,6 +155,11 @@ func TestIsMaster(t *testing.T) {
 			isMaster: false,
 		},
 	}
+	cfgDirOld := cfgDir
+	cfgDir = "../cfg"
+	defer func() {
+		cfgDir = cfgDirOld
+	}()
 
 	for _, tc := range testCases {
 		cfgFile = tc.cfgFile
