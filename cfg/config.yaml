@@ -25,7 +25,6 @@ master:
       - "hyperkube apiserver"
       - "hyperkube kube-apiserver"
       - "apiserver"
-      - "openshift start master api"
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
@@ -38,7 +37,6 @@ master:
       - "hyperkube scheduler"
       - "hyperkube kube-scheduler"
       - "scheduler"
-      - "openshift start master controllers"
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
       - /etc/kubernetes/manifests/kube-scheduler.manifest
@@ -52,7 +50,6 @@ master:
       - "hyperkube controller-manager"
       - "hyperkube kube-controller-manager"
       - "controller-manager"
-      - "openshift start master controllers"
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
       - /etc/kubernetes/manifests/kube-controller-manager.manifest

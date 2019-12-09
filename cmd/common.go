@@ -323,11 +323,16 @@ func isMaster() bool {
 }
 
 // isEtcd verify if etcd components are running on the node.
-func isEtcd() bool {
+func isEtcd(benchmarkVersion string) bool {
+	if _, found := benchmarkVersionToTargetsMap[benchmarkVersion]; !found {
+		return false
+	}
 	return isThisNodeRunning(check.ETCD)
 }
 
 func isThisNodeRunning(nodeType check.NodeType) bool {
+	loadConfig(nodeType)
+
 	glog.V(2).Infof("Checking if the current node is running %s components", nodeType)
 	etcdConf := viper.Sub(string(nodeType))
 	if etcdConf == nil {

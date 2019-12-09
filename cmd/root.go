@@ -81,7 +81,7 @@ var RootCmd = &cobra.Command{
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if isEtcd() && validTargets(benchmarkVersion, []string{string(check.ETCD)}) {
+		if isEtcd(benchmarkVersion) && validTargets(benchmarkVersion, []string{string(check.ETCD)}) {
 			glog.V(1).Info("== Running etcd checks ==\n")
 			runChecks(check.ETCD, loadConfig(check.ETCD))
 		}
