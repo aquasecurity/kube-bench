@@ -171,7 +171,6 @@ func (c *Check) run() State {
 		c.State = PASS
 		c.ActualValue = finalOutput.actualResult
 		c.ExpectedResult = finalOutput.ExpectedResult
-		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t Score: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
 	} else {
 		if c.Scored {
 			c.State = FAIL
@@ -180,7 +179,9 @@ func (c *Check) run() State {
 		}
 	}
 
-	if finalOutput == nil {
+	if finalOutput != nil {
+		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t Score: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
+	} else {
 		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
 	}
 
@@ -242,7 +243,7 @@ func isShellCommand(s string) bool {
 
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
+		fmt.Fprintf(os.Stderr, "failed to check if command: %q is valid %v\n", s, err)
 		os.Exit(1)
 	}
 
@@ -331,6 +332,6 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 		i++
 	}
 
-	glog.V(3).Infof("Command %q - Output:\n\n %s\n", audit, out.String())
+	glog.V(3).Infof("Command %q - Output:\n\n %q\n - Error Messages:%q \n", audit, out.String(), errmsgs)
 	return "", errmsgs
 }
