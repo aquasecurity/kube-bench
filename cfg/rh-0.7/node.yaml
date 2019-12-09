@@ -254,7 +254,7 @@ groups:
 
   - id: 8.3
     text: "Verify the kubelet service file permissions of 644"
-    audit: "stat -c %a /etc/systemd/system/atomic-openshift-node.service"
+    audit: "stat -c %a $nodesvc"
     tests:
       bin_op: or
       test_items:
@@ -275,12 +275,12 @@ groups:
           set: true
     remediation: |
       Run the below command on each worker node.
-      chmod 644 /etc/systemd/system/atomic-openshift-node.service
+      chmod 644 $nodesvc
     scored: true
 
   - id: 8.4
     text: "Verify the kubelet service file ownership of root:root"
-    audit: "stat -c %U:%G /etc/systemd/system/atomic-openshift-node.service"
+    audit: "stat -c %U:%G $nodesvc"
     tests:
       test_items:
         - flag: "root:root"
@@ -290,7 +290,7 @@ groups:
           set: true
       remediation: |
         Run the below command on each worker node.
-        chown root:root /etc/systemd/system/atomic-openshift-node.service
+        chown root:root $nodesvc
       scored: true
 
   - id: 8.5
