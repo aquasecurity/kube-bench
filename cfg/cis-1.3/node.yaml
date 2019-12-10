@@ -423,7 +423,7 @@ groups:
     remediation: |
       Run the below command (based on the file location on your system) on the each worker
       node. For example,
-      chmod 755 $kubeletsvc
+      chmod 644 $kubeletsvc
     scored: true
 
   - id: 2.2.4
