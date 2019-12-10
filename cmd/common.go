@@ -324,7 +324,7 @@ func isMaster() bool {
 }
 
 // isEtcd verify if etcd components are running on the node.
-func isEtcd(benchmarkVersion string) bool {
+func isEtcd() bool {
 	return isThisNodeRunning(check.ETCD)
 }
 
