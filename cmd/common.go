@@ -319,6 +319,7 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
+	loadConfig(check.MASTER)
 	return isThisNodeRunning(check.MASTER)
 }
 
@@ -328,8 +329,6 @@ func isEtcd(benchmarkVersion string) bool {
 }
 
 func isThisNodeRunning(nodeType check.NodeType) bool {
-	loadConfig(nodeType)
-
 	glog.V(2).Infof("Checking if the current node is running %s components", nodeType)
 	etcdConf := viper.Sub(string(nodeType))
 	if etcdConf == nil {

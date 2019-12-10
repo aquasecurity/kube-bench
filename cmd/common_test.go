@@ -161,6 +161,15 @@ func TestIsMaster(t *testing.T) {
 		cfgDir = cfgDirOld
 	}()
 
+	execCode := `#!/bin/sh
+	echo "Server Version: v1.13.10"
+	`
+	restore, err := fakeExecutableInPath("kubectl", execCode)
+	if err != nil {
+		t.Fatal("Failed when calling fakeExecutableInPath ", err)
+	}
+	defer restore()
+
 	for _, tc := range testCases {
 		cfgFile = tc.cfgFile
 		initConfig()
@@ -411,11 +420,6 @@ func fakeExecutableInPath(execFile, execCode string) (restoreFn, error) {
 	}
 
 	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.Chdir(tmp)
 	if err != nil {
 		return nil, err
 	}
