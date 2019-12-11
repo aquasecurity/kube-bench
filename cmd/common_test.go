@@ -400,6 +400,73 @@ func TestValidTargets(t *testing.T) {
 	}
 }
 
+func TestIsEtcd(t *testing.T) {
+	testCases := []struct {
+		name            string
+		cfgFile         string
+		getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
+		isEtcd          bool
+	}{
+		{
+			name:    "valid config, is etcd and all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{"etcd": "etcd"}, nil
+			},
+			isEtcd: true,
+		},
+		{
+			name:    "valid config, is etcd and but not all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, nil
+			},
+			isEtcd: false,
+		},
+		{
+			name:    "valid config, is etcd, not all components are running and fails to find all binaries",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, errors.New("failed to find binaries")
+			},
+			isEtcd: false,
+		},
+		{
+			name:    "valid config, does not include etcd",
+			cfgFile: "../cfg/node_only.yaml",
+			isEtcd:  false,
+		},
+	}
+	cfgDirOld := cfgDir
+	cfgDir = "../cfg"
+	defer func() {
+		cfgDir = cfgDirOld
+	}()
+
+	execCode := `#!/bin/sh
+	echo "Server Version: v1.15.03"
+	`
+	restore, err := fakeExecutableInPath("kubectl", execCode)
+	if err != nil {
+		t.Fatal("Failed when calling fakeExecutableInPath ", err)
+	}
+	defer restore()
+
+	for _, tc := range testCases {
+		cfgFile = tc.cfgFile
+		initConfig()
+
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = tc.getBinariesFunc
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+			cfgFile = ""
+		}()
+
+		assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
+	}
+}
+
 func loadConfigForTest() (*viper.Viper, error) {
 	viperWithData := viper.New()
 	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
