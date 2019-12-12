@@ -38,7 +38,7 @@ var (
 	kubeVersion        string
 	benchmarkVersion   string
 	cfgFile            string
-	cfgDir             string
+	cfgDir             = "./cfg/"
 	jsonFmt            bool
 	junitFmt           bool
 	pgSQL              bool
@@ -145,7 +145,7 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
-	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
+	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", cfgDir, "config directory")
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
