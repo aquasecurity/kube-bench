@@ -90,7 +90,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Checks that the executables we need for the section are running.
 	if err != nil {
-		exitWithError(err)
+		exitWithError(fmt.Errorf("failed to get a set of executables needed for tests: %v", err))
 	}
 
 	confmap := getFiles(typeConf, "config")
@@ -229,7 +229,7 @@ func loadConfig(nodetype check.NodeType) string {
 
 	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 	if err != nil {
-		exitWithError(err)
+		exitWithError(fmt.Errorf("failed to get benchMark version: %v", err))
 	}
 
 	path, err := getConfigFilePath(benchmarkVersion, file)
@@ -319,6 +319,7 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
+	loadConfig(check.MASTER)
 	return isThisNodeRunning(check.MASTER)
 }
 
