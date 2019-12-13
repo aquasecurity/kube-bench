@@ -64,7 +64,7 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
-			exitWithError(err)
+			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
 
 		if isMaster() {
@@ -81,7 +81,7 @@ var RootCmd = &cobra.Command{
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if isEtcd() && validTargets(benchmarkVersion, []string{string(check.ETCD)}) {
+		if validTargets(benchmarkVersion, []string{string(check.ETCD)}) && isEtcd() {
 			glog.V(1).Info("== Running etcd checks ==\n")
 			runChecks(check.ETCD, loadConfig(check.ETCD))
 		}

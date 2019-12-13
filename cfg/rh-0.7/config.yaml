@@ -10,12 +10,14 @@ master:
   scheduler:
     bins:
       - "openshift start master controllers"
+      - "hyperkube kube-scheduler"
     confs:
       - /etc/origin/master/scheduler.json
 
   controllermanager:
     bins:
       - "openshift start master controllers"
+      - "hypershift openshift-controller-manager"
 
   etcd:
     bins:
