@@ -319,6 +319,7 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
+	loadConfig(check.MASTER)
 	return isThisNodeRunning(check.MASTER)
 }
 
