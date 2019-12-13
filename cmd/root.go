@@ -64,11 +64,7 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
-<<<<<<< HEAD
-			exitWithError(fmt.Errorf("unable to get benchmark version. error: %v", err))
-=======
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
->>>>>>> master
 		}
 
 		if isMaster() {
