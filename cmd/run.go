@@ -29,12 +29,12 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		targets, err := cmd.Flags().GetStringSlice("targets")
 		if err != nil {
-			exitWithError(err)
+			exitWithError(fmt.Errorf("unable to get `targets` from command line :%v", err))
 		}
 
 		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
-			exitWithError(err)
+			exitWithError(fmt.Errorf("unable to get benchmark version. error: %v", err))
 		}
 
 		glog.V(2).Infof("Checking targets %v for %v", targets, benchmarkVersion)

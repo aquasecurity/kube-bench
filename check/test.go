@@ -165,7 +165,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 	case "gt", "gte", "lt", "lte":
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+			fmt.Fprintf(os.Stderr, "Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			os.Exit(1)
 		}
 		switch tCompareOp {
