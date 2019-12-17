@@ -25,7 +25,6 @@ master:
       - "hyperkube apiserver"
       - "hyperkube kube-apiserver"
       - "apiserver"
-      - "hypershift openshift-kube-apiserver"
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
@@ -51,7 +50,6 @@ master:
       - "hyperkube controller-manager"
       - "hyperkube kube-controller-manager"
       - "controller-manager"
-      - "hyperkube kube-controller-manager"
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
@@ -132,8 +130,6 @@ node:
       - "hyperkube proxy"
       - "hyperkube kube-proxy"
       - "proxy"
-      - "openshift start network"
-      - "hyperkube kube-proxy"
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
