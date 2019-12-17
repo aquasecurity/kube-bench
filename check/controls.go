@@ -15,10 +15,14 @@
 package check
 
 import (
+	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 
-	yaml "gopkg.in/yaml.v2"
+	"github.com/golang/glog"
+	"github.com/onsi/ginkgo/reporters"
+	"gopkg.in/yaml.v2"
 )
 
 // Controls holds all controls to check for master nodes.
@@ -50,6 +54,9 @@ type Summary struct {
 	Info int `json:"total_info"`
 }
 
+// Predicate a predicate on the given Group and Check arguments.
+type Predicate func(group *Group, check *Check) bool
+
 // NewControls instantiates a new master Controls object.
 func NewControls(t NodeType, in []byte) (*Controls, error) {
 	c := new(Controls)
@@ -66,83 +73,56 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 	// Prepare audit commands
 	for _, group := range c.Groups {
 		for _, check := range group.Checks {
+			glog.V(3).Infof("Check.ID %s", check.ID)
 			check.Commands = textToCommand(check.Audit)
+			if len(check.AuditConfig) > 0 {
+				glog.V(3).Infof("Check.ID has audit_config %s", check.ID)
+				check.ConfigCommands = textToCommand(check.AuditConfig)
+			}
 		}
 	}
 
 	return c, nil
 }
 
-// RunGroup runs all checks in a group.
-func (controls *Controls) RunGroup(gids ...string) Summary {
-	g := []*Group{}
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
-
-	// If no groupid is passed run all group checks.
-	if len(gids) == 0 {
-		gids = controls.getAllGroupIDs()
-	}
-
-	for _, group := range controls.Groups {
-
-		for _, gid := range gids {
-			if gid == group.ID {
-				for _, check := range group.Checks {
-					check.Run()
-					check.TestInfo = append(check.TestInfo, check.Remediation)
-					summarize(controls, check)
-					summarizeGroup(group, check)
-				}
-
-				g = append(g, group)
-			}
-		}
-	}
-
-	controls.Groups = g
-	return controls.Summary
-}
-
-// RunChecks runs the checks with the supplied IDs.
-func (controls *Controls) RunChecks(ids ...string) Summary {
-	g := []*Group{}
+// RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
+func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
+	var g []*Group
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
 
-	// If no groupid is passed run all group checks.
-	if len(ids) == 0 {
-		ids = controls.getAllCheckIDs()
-	}
-
 	for _, group := range controls.Groups {
 		for _, check := range group.Checks {
-			for _, id := range ids {
-				if id == check.ID {
-					check.Run()
-					check.TestInfo = append(check.TestInfo, check.Remediation)
-					summarize(controls, check)
 
-					// Check if we have already added this checks group.
-					if v, ok := m[group.ID]; !ok {
-						// Create a group with same info
-						w := &Group{
-							ID:     group.ID,
-							Text:   group.Text,
-							Checks: []*Check{},
-						}
-
-						// Add this check to the new group
-						w.Checks = append(w.Checks, check)
-
-						// Add to groups we have visited.
-						m[w.ID] = w
-						g = append(g, w)
-					} else {
-						v.Checks = append(v.Checks, check)
-					}
-
-				}
+			if !filter(group, check) {
+				continue
 			}
+
+			state := runner.Run(check)
+			check.TestInfo = append(check.TestInfo, check.Remediation)
+
+			// Check if we have already added this checks group.
+			if v, ok := m[group.ID]; !ok {
+				// Create a group with same info
+				w := &Group{
+					ID:     group.ID,
+					Text:   group.Text,
+					Checks: []*Check{},
+				}
+
+				// Add this check to the new group
+				w.Checks = append(w.Checks, check)
+				summarizeGroup(w, state)
+
+				// Add to groups we have visited.
+				m[w.ID] = w
+				g = append(g, w)
+			} else {
+				v.Checks = append(v.Checks, check)
+				summarizeGroup(v, state)
+			}
+
+			summarize(controls, state)
 		}
 	}
 
@@ -155,29 +135,60 @@ func (controls *Controls) JSON() ([]byte, error) {
 	return json.Marshal(controls)
 }
 
-func (controls *Controls) getAllGroupIDs() []string {
-	var ids []string
-
-	for _, group := range controls.Groups {
-		ids = append(ids, group.ID)
+// JUnit encodes the results of last run to JUnit.
+func (controls *Controls) JUnit() ([]byte, error) {
+	suite := reporters.JUnitTestSuite{
+		Name:      controls.Text,
+		TestCases: []reporters.JUnitTestCase{},
+		Tests:     controls.Summary.Pass + controls.Summary.Fail + controls.Summary.Info + controls.Summary.Warn,
+		Failures:  controls.Summary.Fail,
 	}
-	return ids
-}
+	for _, g := range controls.Groups {
+		for _, check := range g.Checks {
+			jsonCheck := ""
+			jsonBytes, err := json.Marshal(check)
+			if err != nil {
+				jsonCheck = fmt.Sprintf("Failed to marshal test into JSON: %v. Test as text: %#v", err, check)
+			} else {
+				jsonCheck = string(jsonBytes)
+			}
+			tc := reporters.JUnitTestCase{
+				Name:      fmt.Sprintf("%v %v", check.ID, check.Text),
+				ClassName: g.Text,
 
-func (controls *Controls) getAllCheckIDs() []string {
-	var ids []string
+				// Store the entire json serialization as system out so we don't lose data in cases where deeper debugging is necessary.
+				SystemOut: jsonCheck,
+			}
 
-	for _, group := range controls.Groups {
-		for _, check := range group.Checks {
-			ids = append(ids, check.ID)
+			switch check.State {
+			case FAIL:
+				tc.FailureMessage = &reporters.JUnitFailureMessage{Message: check.Remediation}
+			case WARN, INFO:
+				// WARN and INFO are two different versions of skipped tests. Either way it would be a false positive/negative to report
+				// it any other way.
+				tc.Skipped = &reporters.JUnitSkipped{}
+			case PASS:
+			default:
+				glog.Warningf("Unrecognized state %s", check.State)
+			}
+
+			suite.TestCases = append(suite.TestCases, tc)
 		}
 	}
-	return ids
 
+	var b bytes.Buffer
+	encoder := xml.NewEncoder(&b)
+	encoder.Indent("", "    ")
+	err := encoder.Encode(suite)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate JUnit report: %s", err.Error())
+	}
+
+	return b.Bytes(), nil
 }
 
-func summarize(controls *Controls, check *Check) {
-	switch check.State {
+func summarize(controls *Controls, state State) {
+	switch state {
 	case PASS:
 		controls.Summary.Pass++
 	case FAIL:
@@ -186,11 +197,13 @@ func summarize(controls *Controls, check *Check) {
 		controls.Summary.Warn++
 	case INFO:
 		controls.Summary.Info++
+	default:
+		glog.Warningf("Unrecognized state %s", state)
 	}
 }
 
-func summarizeGroup(group *Group, check *Check) {
-	switch check.State {
+func summarizeGroup(group *Group, state State) {
+	switch state {
 	case PASS:
 		group.Pass++
 	case FAIL:
@@ -199,5 +212,7 @@ func summarizeGroup(group *Group, check *Check) {
 		group.Warn++
 	case INFO:
 		group.Info++
+	default:
+		glog.Warningf("Unrecognized state %s", state)
 	}
 }

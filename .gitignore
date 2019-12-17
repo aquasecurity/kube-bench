@@ -2,3 +2,12 @@ kube-bench
 *.swp
 vendor
 dist
+.vscode/
+hack/kind.test.yaml
+coverage.txt
+
+.idea/
+
+# Directory junk file
+.DS_Store
+thumbs.db

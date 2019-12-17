@@ -1,20 +1,25 @@
-FROM golang:1.9 AS build
+FROM golang:1.12 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
-ADD Gopkg.toml Gopkg.lock ./
-RUN go get -v github.com/golang/dep/cmd/dep && dep ensure -v -vendor-only
-ADD main.go .
-ADD check/ check/
-ADD cmd/ cmd/
-RUN CGO_ENABLED=0 go install -a -ldflags '-w'
+COPY go.mod go.sum ./
+COPY main.go .
+COPY check/ check/
+COPY cmd/ cmd/
+ARG KUBEBENCH_VERSION
+RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
-FROM alpine:3.7 AS run
+FROM alpine:3.10 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
 RUN apk --no-cache add procps
+
+# Openssl is used by OpenShift tests
+# https://github.com/aquasecurity/kube-bench/issues/535
+RUN apk --no-cache add openssl
+
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
-ADD entrypoint.sh .
-ADD cfg/ cfg/
+COPY entrypoint.sh .
+COPY cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["install"]
 

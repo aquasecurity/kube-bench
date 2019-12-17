@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench
+spec:
+  template:
+    spec:
+      hostPID: true
+      containers:
+      - name: kube-bench
+        # Push the image to your ECR and then refer to it here
+        image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
+        command: ["kube-bench", "--version", "1.11"]
+        volumeMounts:
+        - name: var-lib-kubelet
+          mountPath: /var/lib/kubelet
+        - name: etc-systemd
+          mountPath: /etc/systemd
+        - name: etc-kubernetes
+          mountPath: /etc/kubernetes
+      restartPolicy: Never
+      volumes:
+      - name: var-lib-kubelet
+        hostPath:
+          path: "/var/lib/kubelet"
+      - name: etc-systemd
+        hostPath:
+          path: "/etc/systemd"
+      - name: etc-kubernetes
+        hostPath:
+          path: "/etc/kubernetes"
+
