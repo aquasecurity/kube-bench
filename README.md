@@ -190,9 +190,9 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 3. Download, build and push the kube-bench container image to your ECR repo
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
+cd kube-bench
 $(aws ecr get-login --no-include-email --region <AWS_REGION>)
 docker build -t k8s/kube-bench .
-docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 ```
