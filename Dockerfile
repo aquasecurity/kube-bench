@@ -12,6 +12,11 @@ WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
 RUN apk --no-cache add procps
+
+# Openssl is used by OpenShift tests
+# https://github.com/aquasecurity/kube-bench/issues/535
+RUN apk --no-cache add openssl
+
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
 COPY cfg/ cfg/
