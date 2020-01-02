@@ -12,17 +12,19 @@ builds:
      - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
      - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
 # Archive customization
-archive:
-  format: tar.gz
-  files:
-    - "cfg/**/*"
-nfpm:
-  vendor: Aqua Security
-  description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
-  license: Apache-2.0
-  homepage: https://github.com/aquasecurity/kube-bench
-  files:
-    "cfg/**/*": "/etc/kube-bench/cfg"
-  formats:
-    - deb
-    - rpm
+archives:
+  - id: default
+    format: tar.gz
+    files:
+      - "cfg/**/*"
+nfpms:
+  -
+    vendor: Aqua Security
+    description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
+    license: Apache-2.0
+    homepage: https://github.com/aquasecurity/kube-bench
+    files:
+      "cfg/**/*": "/etc/kube-bench/cfg"
+    formats:
+      - deb
+      - rpm
