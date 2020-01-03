@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -10,41 +11,41 @@ spec:
     spec:
       hostPID: true
       containers:
-      - name: kube-bench
-        image: aquasec/kube-bench:${VERSION}
-        command: ["kube-bench"]
-        volumeMounts:
-        - name: var-lib-etcd
-          mountPath: /var/lib/etcd
-        - name: var-lib-kubelet
-          mountPath: /var/lib/kubelet
-        - name: etc-systemd
-          mountPath: /etc/systemd
-        - name: etc-kubernetes
-          mountPath: /etc/kubernetes
-          # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version. 
-          # You can omit this mount if you specify --version as part of the command.           
-        - name: usr-bin
-          mountPath: /usr/bin
-        - name: kind-bin
-          mountPath: /kind/bin
+        - name: kube-bench
+          image: aquasec/kube-bench:${VERSION}
+          command: ["kube-bench"]
+          volumeMounts:
+            - name: var-lib-etcd
+              mountPath: /var/lib/etcd
+            - name: var-lib-kubelet
+              mountPath: /var/lib/kubelet
+            - name: etc-systemd
+              mountPath: /etc/systemd
+            - name: etc-kubernetes
+              mountPath: /etc/kubernetes
+              # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+              # You can omit this mount if you specify --version as part of the command.
+            - name: usr-bin
+              mountPath: /usr/bin
+            - name: kind-bin
+              mountPath: /kind/bin
       restartPolicy: Never
       volumes:
-      - name: var-lib-etcd
-        hostPath:
-          path: "/var/lib/etcd"
-      - name: var-lib-kubelet
-        hostPath:
-          path: "/var/lib/kubelet"
-      - name: etc-systemd
-        hostPath:
-          path: "/etc/systemd"
-      - name: etc-kubernetes
-        hostPath:
-          path: "/etc/kubernetes"
-      - name: usr-bin
-        hostPath:
-          path: "/usr/bin"
-      - name: kind-bin
-        hostPath:
-          path: "/kind/bin"
+        - name: var-lib-etcd
+          hostPath:
+            path: "/var/lib/etcd"
+        - name: var-lib-kubelet
+          hostPath:
+            path: "/var/lib/kubelet"
+        - name: etc-systemd
+          hostPath:
+            path: "/etc/systemd"
+        - name: etc-kubernetes
+          hostPath:
+            path: "/etc/kubernetes"
+        - name: usr-bin
+          hostPath:
+            path: "/usr/bin"
+        - name: kind-bin
+          hostPath:
+            path: "/kind/bin"
