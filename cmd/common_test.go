@@ -155,6 +155,20 @@ func TestIsMaster(t *testing.T) {
 			isMaster: false,
 		},
 	}
+	cfgDirOld := cfgDir
+	cfgDir = "../cfg"
+	defer func() {
+		cfgDir = cfgDirOld
+	}()
+
+	execCode := `#!/bin/sh
+	echo "Server Version: v1.13.10"
+	`
+	restore, err := fakeExecutableInPath("kubectl", execCode)
+	if err != nil {
+		t.Fatal("Failed when calling fakeExecutableInPath ", err)
+	}
+	defer restore()
 
 	for _, tc := range testCases {
 		cfgFile = tc.cfgFile
@@ -192,7 +206,10 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
 		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
-		{kubeVersion: "1.16", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.14", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.15", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.16", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.17", succeed: true, exp: "cis-1.5"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
@@ -340,6 +357,116 @@ func TestGetBenchmarkVersion(t *testing.T) {
 	}
 }
 
+func TestValidTargets(t *testing.T) {
+	cases := []struct {
+		name      string
+		benchmark string
+		targets   []string
+		expected  bool
+	}{
+		{
+			name:      "cis-1.3 no etcd",
+			benchmark: "cis-1.3",
+			targets:   []string{"master", "etcd"},
+			expected:  false,
+		},
+		{
+			name:      "cis-1.4 valid",
+			benchmark: "cis-1.4",
+			targets:   []string{"master", "node"},
+			expected:  true,
+		},
+		{
+			name:      "cis-1.5 no dummy",
+			benchmark: "cis-1.5",
+			targets:   []string{"master", "node", "controlplane", "etcd", "dummy"},
+			expected:  false,
+		},
+		{
+			name:      "cis-1.5 valid",
+			benchmark: "cis-1.5",
+			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
+			expected:  true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ret := validTargets(c.benchmark, c.targets)
+			if ret != c.expected {
+				t.Fatalf("Expected %t, got %t", c.expected, ret)
+			}
+		})
+	}
+}
+
+func TestIsEtcd(t *testing.T) {
+	testCases := []struct {
+		name            string
+		cfgFile         string
+		getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
+		isEtcd          bool
+	}{
+		{
+			name:    "valid config, is etcd and all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{"etcd": "etcd"}, nil
+			},
+			isEtcd: true,
+		},
+		{
+			name:    "valid config, is etcd and but not all components are running",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, nil
+			},
+			isEtcd: false,
+		},
+		{
+			name:    "valid config, is etcd, not all components are running and fails to find all binaries",
+			cfgFile: "../cfg/config.yaml",
+			getBinariesFunc: func(viper *viper.Viper, nt check.NodeType) (strings map[string]string, i error) {
+				return map[string]string{}, errors.New("failed to find binaries")
+			},
+			isEtcd: false,
+		},
+		{
+			name:    "valid config, does not include etcd",
+			cfgFile: "../cfg/node_only.yaml",
+			isEtcd:  false,
+		},
+	}
+	cfgDirOld := cfgDir
+	cfgDir = "../cfg"
+	defer func() {
+		cfgDir = cfgDirOld
+	}()
+
+	execCode := `#!/bin/sh
+	echo "Server Version: v1.15.03"
+	`
+	restore, err := fakeExecutableInPath("kubectl", execCode)
+	if err != nil {
+		t.Fatal("Failed when calling fakeExecutableInPath ", err)
+	}
+	defer restore()
+
+	for _, tc := range testCases {
+		cfgFile = tc.cfgFile
+		initConfig()
+
+		oldGetBinariesFunc := getBinariesFunc
+		getBinariesFunc = tc.getBinariesFunc
+		defer func() {
+			getBinariesFunc = oldGetBinariesFunc
+			cfgFile = ""
+		}()
+
+		assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
+	}
+}
+
 func loadConfigForTest() (*viper.Viper, error) {
 	viperWithData := viper.New()
 	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
@@ -360,11 +487,6 @@ func fakeExecutableInPath(execFile, execCode string) (restoreFn, error) {
 	}
 
 	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.Chdir(tmp)
 	if err != nil {
 		return nil, err
 	}

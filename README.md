@@ -19,35 +19,37 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 Table of Contents
 =================
 
-- [Table of Contents](#table-of-contents)
-  - [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
-  - [Installation](#installation)
-  - [Running kube-bench](#running-kube-bench)
-    - [Running inside a container](#running-inside-a-container)
-    - [Running in a Kubernetes cluster](#running-in-a-kubernetes-cluster)
-    - [Running in an EKS cluster](#running-in-an-eks-cluster)
-    - [Installing from a container](#installing-from-a-container)
-    - [Installing from sources](#installing-from-sources)
-  - [Running on OpenShift](#running-on-openshift)
-  - [Output](#output)
-  - [Configuration](#configuration)
-  - [Test config YAML representation](#test-config-yaml-representation)
-    - [Omitting checks](#omitting-checks)
-  - [Roadmap](#roadmap)
-  - [Testing locally with kind](#testing-locally-with-kind)
-  - [Contributing](#contributing)
-    - [Bugs](#bugs)
-    - [Features](#features)
-    - [Pull Requests](#pull-requests)
+* [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
+* [Installation](#installation)
+* [Running kube-bench](#running-kube-bench)
+  * [Running inside a container](#running-inside-a-container)
+  * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
+  * [Running in an Azure Kubernetes Service(AKS) cluster](#running-in-an-aks-cluster)
+  * [Running in an EKS cluster](#running-in-an-eks-cluster)
+  * [Installing from a container](#installing-from-a-container)
+  * [Installing from sources](#installing-from-sources)
+* [Running on OpenShift](#running-on-openshift)
+* [Output](#output)
+* [Configuration](#configuration)
+* [Test config YAML representation](#test-config-yaml-representation)
+  * [Omitting checks](#omitting-checks)
+* [Roadmap](#roadmap)
+* [Testing locally with kind](#testing-locally-with-kind)
+* [Contributing](#contributing)
+  * [Bugs](#bugs)
+  * [Features](#features)
+  * [Pull Requests](#pull-requests)
+
       
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.4.1 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.5.0 respectively. 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
 | 1.3.0| cis-1.3 | 1.11-1.12 |
-| 1.4.1| cis-1.4 | 1.13- |
+| 1.4.1| cis-1.4 | 1.13-1.14 |
+| 1.5.0 | cis-1.5 | 1.15- |
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
@@ -96,6 +98,25 @@ Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark ver
 ```
 kube-bench node --benchmark cis-1.4
 ```
+
+If you want to target specific CIS Benchmark `target` (i.e master, node, etcd, etc...)
+you can use the `run --targets` subcommand.
+```
+kube-bench --benchmark cis-1.4 run --targets master,node
+```
+or
+```
+kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
+```
+
+The following table shows the valid targets based on the CIS Benchmark version.
+| CIS Benchmark | Targets |
+|---|---|
+| cis-1.3| master, node |
+| cis-1.4| master, node |
+| cis-1.5| master, controlplane, node, etcd, policies |
+
+If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
 `controls` for the various versions of CIS Benchmark can be found in directories
 with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
@@ -157,6 +178,25 @@ To run the tests on the master node, the pod needs to be scheduled on that node.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
+
+### Running in an AKS cluster
+
+1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures
+
+1. Use the [kubectl-enter plugin] (https://github.com/kvaps/kubectl-enter) to shell into a node 
+`
+kubectl-enter {node-name}
+` 
+or ssh to one agent node
+could open nsg 22 port and assign a public ip for one agent node (only for testing purpose)
+
+1. Run CIS benchmark to view results:
+```
+docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+./kube-bench node
+```
+kube-bench cannot be run on AKS master nodes 
+
 ### Running in an EKS cluster
 
 There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
@@ -170,9 +210,9 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 3. Download, build and push the kube-bench container image to your ECR repo
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
+cd kube-bench
 $(aws ecr get-login --no-include-email --region <AWS_REGION>)
 docker build -t k8s/kube-bench .
-docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 ```

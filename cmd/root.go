@@ -38,12 +38,15 @@ var (
 	kubeVersion        string
 	benchmarkVersion   string
 	cfgFile            string
-	cfgDir             string
+	cfgDir             = "./cfg/"
 	jsonFmt            bool
 	junitFmt           bool
 	pgSQL              bool
 	masterFile         = "master.yaml"
 	nodeFile           = "node.yaml"
+	etcdFile           = "etcd.yaml"
+	controlplaneFile   = "controlplane.yaml"
+	policiesFile       = "policies.yaml"
 	noResults          bool
 	noSummary          bool
 	noRemediations     bool
@@ -59,12 +62,40 @@ var RootCmd = &cobra.Command{
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 	Run: func(cmd *cobra.Command, args []string) {
+		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
+		}
+
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==\n")
-			runChecks(check.MASTER)
+			runChecks(check.MASTER, loadConfig(check.MASTER))
+
+			// Control Plane is only valid for CIS 1.5 and later,
+			// this a gatekeeper for previous versions
+			if validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}) {
+				glog.V(1).Info("== Running control plane checks ==\n")
+				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE))
+			}
 		}
+
+		// Etcd is only valid for CIS 1.5 and later,
+		// this a gatekeeper for previous versions.
+		if validTargets(benchmarkVersion, []string{string(check.ETCD)}) && isEtcd() {
+			glog.V(1).Info("== Running etcd checks ==\n")
+			runChecks(check.ETCD, loadConfig(check.ETCD))
+		}
+
 		glog.V(1).Info("== Running node checks ==\n")
-		runChecks(check.NODE)
+		runChecks(check.NODE, loadConfig(check.NODE))
+
+		// Policies is only valid for CIS 1.5 and later,
+		// this a gatekeeper for previous versions.
+		if validTargets(benchmarkVersion, []string{string(check.POLICIES)}) {
+			glog.V(1).Info("== Running policies checks ==\n")
+			runChecks(check.POLICIES, loadConfig(check.POLICIES))
+		}
+
 	},
 }
 
@@ -114,7 +145,7 @@ func init() {
 		`Run all the checks under this comma-delimited list of groups. Example --group="1.1"`,
 	)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./cfg/config.yaml)")
-	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", "./cfg/", "config directory")
+	RootCmd.PersistentFlags().StringVarP(&cfgDir, "config-dir", "D", cfgDir, "config directory")
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
