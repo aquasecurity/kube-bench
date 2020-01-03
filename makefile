@@ -49,7 +49,7 @@ endif
 		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
 	fi
 
-# pushses the current dev version to the kind cluster.
+# pushes the current dev version to the kind cluster.
 kind-push:
 	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
