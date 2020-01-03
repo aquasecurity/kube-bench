@@ -15,6 +15,7 @@
 package check
 
 import (
+	"os/exec"
 	"testing"
 )
 
@@ -27,10 +28,27 @@ func TestCheck_Run(t *testing.T) {
 	testCases := []TestCase{
 		{check: Check{Type: MANUAL}, Expected: WARN},
 		{check: Check{Type: "skip"}, Expected: INFO},
-		{check: Check{Type: "", Scored: false}, Expected: WARN}, // Not scored checks with no type should be marked warn
-		{check: Check{Type: "", Scored: true}, Expected: WARN},  // If there are no tests in the check, warn
-		{check: Check{Type: MANUAL, Scored: false}, Expected: WARN},
-		{check: Check{Type: "skip", Scored: false}, Expected: INFO},
+
+		{check: Check{Scored: false}, Expected: WARN}, // Not scored checks with no type, or not scored failing tests are marked warn
+		{
+			check: Check{ // Not scored checks with passing tests are marked pass
+				Scored: false,
+				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
+				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+			},
+			Expected: PASS,
+		},
+
+		{check: Check{Scored: true}, Expected: WARN},                  // If there are no tests in the check, warn
+		{check: Check{Scored: true, Tests: &tests{}}, Expected: FAIL}, // If there are tests that are not passing, fail
+		{
+			check: Check{ // Scored checks with passing tests are marked pass
+				Scored: true,
+				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
+				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+			},
+			Expected: PASS,
+		},
 	}
 	for _, testCase := range testCases {
 
