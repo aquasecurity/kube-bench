@@ -33,7 +33,7 @@
 [FAIL] 1.1.31 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
 [FAIL] 1.1.32 Ensure that the --authorization-mode argument is set to Node (Scored)
 [FAIL] 1.1.33 Ensure that the admission control plugin NodeRestriction is set (Scored)
-[FAIL] 1.1.34 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
+[WARN] 1.1.34 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
 [WARN] 1.1.35 Ensure that the encryption provider is set to aescbc (Scored)
 [FAIL] 1.1.36 Ensure that the admission control plugin EventRateLimit is set (Scored)
 [PASS] 1.1.37a Ensure that the AdvancedAuditing argument is not set to false (Scored)
@@ -421,6 +421,6 @@ Create a PSP as described in the Kubernetes documentation, ensuring that the .sp
 
 == Summary ==
 30 checks PASS
-36 checks FAIL
-25 checks WARN
+35 checks FAIL
+26 checks WARN
 1 checks INFO
