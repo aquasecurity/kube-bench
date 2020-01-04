@@ -10,7 +10,7 @@ notifications:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y rpm
-  - pip install --user yamllint==1.18.0
+  - pip install --user yamllint==1.20.0
   - gem install --no-ri --no-rdoc fpm
   - go get -t -v ./...
 
