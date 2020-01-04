@@ -46,7 +46,7 @@ groups:
       Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove any configuration returned by the following:
       grep -A1 client-ca-file /etc/origin/node/node-config.yaml
 
-      Reset to the OpenShift default. 
+      Reset to the OpenShift default.
       See https://github.com/openshift/openshift-ansible/blob/release-3.10/roles/openshift_node_group/templates/node-config.yaml.j2#L65
       The config file does not have this defined in kubeletArgument, but in PodManifestConfig.
     scored: true
@@ -81,7 +81,7 @@ groups:
     remediation: |
       Edit the Openshift node config file /etc/origin/node/node-config.yaml and set the streaming-connection-timeout
       value like the following in node-config.yaml.
-      
+
       kubeletArguments:
         streaming-connection-idle-timeout:
            - "5m"
@@ -107,7 +107,7 @@ groups:
         set: true
     remediation: |
       Edit the Openshift node config file /etc/origin/node/node-config.yaml and reset make-iptables-util-chains to the OpenShift
-      default value of true. 
+      default value of true.
     scored: true
 
   - id: 7.9
@@ -175,7 +175,7 @@ groups:
           value: "0"
         set: true
     remediation: |
-      Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove the cadvisor-port flag 
+      Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove the cadvisor-port flag
       if it is set in the  kubeletArguments section.
     scored: true
 

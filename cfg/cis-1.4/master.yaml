@@ -1201,7 +1201,7 @@ groups:
       Run the below command (based on the file location on your system) on the
       master node. For example, chown root:root /etc/kubernetes/controller-manager.conf
     scored: true
-  
+
   - id: 1.4.19
     text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
     audit: "ls -laR /etc/kubernetes/pki/"
@@ -1218,7 +1218,7 @@ groups:
       Run the below command (based on the file location on your system) on the master node.
       For example, chown -R root:root /etc/kubernetes/pki/
     scored: true
-    
+
   - id: 1.4.20
     text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.crt"
@@ -1246,7 +1246,7 @@ groups:
       Run the below command (based on the file location on your system) on the master node.
       For example, chmod -R 644 /etc/kubernetes/pki/*.crt
     scored: true
-    
+
   - id: 1.4.21
     text: "Ensure that the Kubernetes PKI key file permissions are set to 600 or more restrictive (Scored)"
     audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"

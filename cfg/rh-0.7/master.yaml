@@ -224,7 +224,7 @@ groups:
       Edit the kubernetes master config file /etc/origin/master/master-config.yaml
       and remove the following entry.
 
-      NamespaceLifecycle: 
+      NamespaceLifecycle:
         configuration:
           kind: DefaultAdmissionConfig
           apiVersion: v1
@@ -435,13 +435,13 @@ groups:
           value: "serviceaccounts.public.key"
         set: true
     remediation: |
-      OpenShift API server does not use the service-account-key-file argument. 
-      Even if value is set in master-config.yaml, it will not be used to verify 
-      service account tokens, as it is in upstream Kubernetes. The ServiceAccount 
-      token authenticator is configured with serviceAccountConfig.publicKeyFiles in 
+      OpenShift API server does not use the service-account-key-file argument.
+      Even if value is set in master-config.yaml, it will not be used to verify
+      service account tokens, as it is in upstream Kubernetes. The ServiceAccount
+      token authenticator is configured with serviceAccountConfig.publicKeyFiles in
       the master-config.yaml. OpenShift does not reuse the apiserver TLS key.
 
-      Edit the Openshift master config file /etc/origin/master/master-config.yaml and set the privateKeyFile 
+      Edit the Openshift master config file /etc/origin/master/master-config.yaml and set the privateKeyFile
       and publicKeyFile configuration under serviceAccountConfig.
 
         serviceAccountConfig:
@@ -475,9 +475,9 @@ groups:
           value: "master.etcd-client.key"
         set: true
     remediation: |
-      Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile 
+      Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile
       under etcdClientInfo like below.
-      
+
         etcdClientInfo:
           ca: master.etcd-ca.crt
           certFile: master.etcd-client.crt
@@ -500,8 +500,8 @@ groups:
     remediation: |
       Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable ServiceAccount
       admission control policy.
-      
-        ServiceAccount: 
+
+        ServiceAccount:
           configuration:
             kind: DefaultAdmissionConfig
             apiVersion: v1
@@ -615,7 +615,7 @@ groups:
           value: "experimental-encryption-provider-config:"
         set: true
     remediation: |
-      Follow the instructions in the documentation to configure encryption. 
+      Follow the instructions in the documentation to configure encryption.
       https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html
     scored: true
 
@@ -646,7 +646,7 @@ groups:
         set: true
     remediation: |
       Follow the documentation to enable the EventRateLimit plugin.
-      https://docs.openshift.com/container-platform/3.10/architecture/additional_concepts/admission_controllers.html#admission-controllers-general-admission-rules 
+      https://docs.openshift.com/container-platform/3.10/architecture/additional_concepts/admission_controllers.html#admission-controllers-general-admission-rules
     scored: true
 
   - id: 1.36
@@ -817,7 +817,7 @@ groups:
   - id: 4.1
     text: "Verify the OpenShift default permissions for the API server pod specification file"
     audit: "stat -c %a /etc/origin/node/pods/apiserver.yaml"
-    tests:      
+    tests:
       test_items:
         - flag: "600"
           compare:
@@ -849,7 +849,7 @@ groups:
   - id: 4.3
     text: "Verify the OpenShift default file permissions for the controller manager pod specification file"
     audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
-    tests:      
+    tests:
       test_items:
         - flag: "600"
           compare:
@@ -881,7 +881,7 @@ groups:
   - id: 4.5
     text: "Verify the OpenShift default permissions for the scheduler pod specification file"
     audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
-    tests:      
+    tests:
       test_items:
         - flag: "600"
           compare:
@@ -913,7 +913,7 @@ groups:
   - id: 4.7
     text: "Verify the OpenShift default etcd pod specification file permissions"
     audit: "stat -c %a /etc/origin/node/pods/etcd.yaml"
-    tests:      
+    tests:
       test_items:
         - flag: "600"
           compare:

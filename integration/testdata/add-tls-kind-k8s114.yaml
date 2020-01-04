@@ -16,4 +16,3 @@ nodes:
 # the control plane node config
 - role: control-plane
   image: "kindest/node:v1.14.6"
-  
