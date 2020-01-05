@@ -16,7 +16,7 @@ groups:
           test_items:
             - flag: "--cert-file"
               set: true
-            - flag:  "--key-file"
+            - flag: "--key-file"
               set: true
         remediation: |
           Follow the etcd service documentation and configure TLS encryption.

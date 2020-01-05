@@ -719,7 +719,7 @@ groups:
         tests:
           bin_op: or
           test_items:
-            - flag:  "--secure-port"
+            - flag: "--secure-port"
               compare:
                 op: gt
                 value: 0
