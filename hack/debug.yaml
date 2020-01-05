@@ -8,40 +8,40 @@ metadata:
 spec:
   hostPID: true
   containers:
-  - name: ubuntu
-    image: ubuntu
-    command: ["/bin/bash", "-c", "--"]
-    args: ["while true; do sleep 30; done;"]
-    volumeMounts:
-    - name: var-lib-kubelet
-      mountPath: /var/lib/kubelet
-    - name: etc-systemd
-      mountPath: /etc/systemd
-    - name: etc-kubernetes
-      mountPath: /etc/kubernetes
-      # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
-      # You can omit this mount if you specify --version as part of the command.
-    - name: usr-bin
-      mountPath: /usr/bin
-    - name: kind-bin
-      mountPath: /kind/bin
-    resources:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
+    - name: ubuntu
+      image: ubuntu
+      command: ["/bin/bash", "-c", "--"]
+      args: ["while true; do sleep 30; done;"]
+      volumeMounts:
+        - name: var-lib-kubelet
+          mountPath: /var/lib/kubelet
+        - name: etc-systemd
+          mountPath: /etc/systemd
+        - name: etc-kubernetes
+          mountPath: /etc/kubernetes
+          # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+          # You can omit this mount if you specify --version as part of the command.
+        - name: usr-bin
+          mountPath: /usr/bin
+        - name: kind-bin
+          mountPath: /kind/bin
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
   volumes:
-  - name: var-lib-kubelet
-    hostPath:
-      path: "/var/lib/kubelet"
-  - name: etc-systemd
-    hostPath:
-      path: "/etc/systemd"
-  - name: etc-kubernetes
-    hostPath:
-      path: "/etc/kubernetes"
-  - name: usr-bin
-    hostPath:
-      path: "/usr/bin"
-  - name: kind-bin
-    hostPath:
-      path: "/kind/bin"
+    - name: var-lib-kubelet
+      hostPath:
+        path: "/var/lib/kubelet"
+    - name: etc-systemd
+      hostPath:
+        path: "/etc/systemd"
+    - name: etc-kubernetes
+      hostPath:
+        path: "/etc/kubernetes"
+    - name: usr-bin
+      hostPath:
+        path: "/usr/bin"
+    - name: kind-bin
+      hostPath:
+        path: "/kind/bin"
