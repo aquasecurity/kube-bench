@@ -10,8 +10,8 @@ spec:
   containers:
   - name: ubuntu
     image: ubuntu
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "while true; do sleep 30; done;" ]
+    command: ["/bin/bash", "-c", "--"]
+    args: ["while true; do sleep 30; done;"]
     volumeMounts:
     - name: var-lib-kubelet
       mountPath: /var/lib/kubelet
