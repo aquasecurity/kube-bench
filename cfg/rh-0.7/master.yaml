@@ -774,7 +774,6 @@ groups:
                 op: has
                 value: "/etc/origin/master/ca-bundle.crt"
               set: true
-          test_items:
             - flag: "masterCA"
               compare:
                 op: has
