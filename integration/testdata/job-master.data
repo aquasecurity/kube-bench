@@ -29,8 +29,8 @@
 [PASS] 1.1.27 Ensure that the admission control plugin ServiceAccount is set(Scored)
 [FAIL] 1.1.28 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
 [FAIL] 1.1.29 Ensure that the --client-ca-file argument is set as appropriate (Scored)
-[WARN] 1.1.30 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)
-[FAIL] 1.1.31 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
+[FAIL] 1.1.30 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
+[WARN] 1.1.31 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)
 [FAIL] 1.1.32 Ensure that the --authorization-mode argument is set to Node (Scored)
 [FAIL] 1.1.33 Ensure that the admission control plugin NodeRestriction is set (Scored)
 [FAIL] 1.1.34 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
@@ -92,10 +92,10 @@
 [WARN] 1.6.8 Place compensating controls in the form of PSP and RBAC for privileged containers usage (Not Scored)
 [INFO] 1.7 PodSecurityPolicies
 [WARN] 1.7.1 Do not admit privileged containers (Not Scored)
-[WARN] 1.7.2 Do not admit containers wishing to share the host process ID namespace (Not Scored)
-[WARN] 1.7.3 Do not admit containers wishing to share the host IPC namespace (Not Scored)
-[WARN] 1.7.4 Do not admit containers wishing to share the host network namespace (Not Scored)
-[WARN] 1.7.5  Do not admit containers with allowPrivilegeEscalation (Not Scored)
+[WARN] 1.7.2 Do not admit containers wishing to share the host process ID namespace (Scored)
+[WARN] 1.7.3 Do not admit containers wishing to share the host IPC namespace (Scored)
+[WARN] 1.7.4 Do not admit containers wishing to share the host network namespace (Scored)
+[WARN] 1.7.5  Do not admit containers with allowPrivilegeEscalation (Scored)
 [WARN] 1.7.6 Do not admit root containers (Not Scored)
 [WARN] 1.7.7 Do not admit containers with dangerous capabilities (Not Scored)
 
@@ -194,15 +194,15 @@ Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-
 on the master node and set the client certificate authority file.
 --client-ca-file=<path/to/client-ca-file>
 
-1.1.30 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the below parameter.
---tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
-
-1.1.31 Follow the Kubernetes documentation and set up the TLS connection between the
+1.1.30 Follow the Kubernetes documentation and set up the TLS connection between the
 apiserver and etcd. Then, edit the API server pod specification file
 /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the etcd
 certificate authority file parameter.
 --etcd-cafile=<path/to/ca-file>
+
+1.1.31 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+on the master node and set the below parameter.
+--tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
 
 1.1.32 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --authorization-mode parameter to a
