@@ -12,12 +12,11 @@ import (
 )
 
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
+var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
 
 func TestRunWithKind(t *testing.T) {
 	flag.Parse()
 	fmt.Printf("kube-bench Container Image: %s\n", *kubebenchImg)
-	timeout := time.Duration(10 * time.Minute)
-	ticker := time.Duration(2 * time.Second)
 
 	mustMatch := func(tc *testing.T, expFname, data string) {
 		d, err := ioutil.ReadFile(expFname)
@@ -54,7 +53,7 @@ func TestRunWithKind(t *testing.T) {
 			ExpectedFile:  "./testdata/job-master.data",
 		},
 	}
-	ctx, err := setupCluster("kube-bench", "./testdata/add-tls-kind-k8s114.yaml", timeout)
+	ctx, err := setupCluster("kube-bench", "./testdata/add-tls-kind-k8s114.yaml", *timeout)
 	if err != nil {
 		t.Fatalf("failed to setup KIND cluster error: %v", err)
 	}
@@ -68,7 +67,7 @@ func TestRunWithKind(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.TestName, func(tc *testing.T) {
-			data, err := runWithKind(ctx, c.TestName, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
+			data, err := runWithKind(ctx, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
 				tc.Errorf("unexpected error: %v", err)
 			}

@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(ctx *cluster.Context, jobName, kubebenchYAML, kubebenchImg string, timeout, ticker time.Duration) (string, error) {
+func runWithKind(ctx *cluster.Context, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
 	clientset, err := getClientSet(ctx.KubeConfigPath())
 	if err != nil {
 		return "", err
@@ -46,7 +46,7 @@ func runWithKind(ctx *cluster.Context, jobName, kubebenchYAML, kubebenchImg stri
 		return "", err
 	}
 
-	p, err := findPodForJob(clientset, jobName, timeout, ticker)
+	p, err := findPodForJob(clientset, jobName, timeout)
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +86,7 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
-func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer time.Duration) (*apiv1.Pod, error) {
+func findPodForJob(clientset *kubernetes.Clientset, name string, tout time.Duration) (*apiv1.Pod, error) {
 	timeout := time.After(tout)
 	failedPods := make(map[string]struct{})
 	for {
