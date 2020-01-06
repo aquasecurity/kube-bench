@@ -19,16 +19,7 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(clusterName, kindCfg, kubebenchYAML, kubebenchImg string, timeout, ticker time.Duration) (string, error) {
-	options := create.WithConfigFile(kindCfg)
-	ctx := cluster.NewContext(clusterName)
-	if err := ctx.Create(options); err != nil {
-		return "", err
-	}
-	defer func() {
-		ctx.Delete()
-	}()
-
+func runWithKind(ctx *cluster.Context, jobName, kubebenchYAML, kubebenchImg string, timeout, ticker time.Duration) (string, error) {
 	clientset, err := getClientSet(ctx.KubeConfigPath())
 	if err != nil {
 		return "", err
@@ -50,27 +41,36 @@ func runWithKind(clusterName, kindCfg, kubebenchYAML, kubebenchImg string, timeo
 	}
 	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
 
-	if err := loadImageFromDocker(kubebenchImg, ctx); err != nil {
-		return "", err
-	}
-
 	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
 	if err != nil {
 		return "", err
 	}
 
-	clientset, err = getClientSet(ctx.KubeConfigPath())
-	if err != nil {
-		return "", err
-	}
-
-	p, err := findPodForJob(clientset, "kube-bench", timeout, ticker)
+	p, err := findPodForJob(clientset, jobName, timeout, ticker)
 	if err != nil {
 		return "", err
 	}
 
 	output := getPodLogs(clientset, p)
+
+	err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Delete(jobName, nil)
+	if err != nil {
+		return "", err
+	}
+
 	return output, nil
+}
+
+func setupCluster(clusterName, kindCfg string, duration time.Duration) (*cluster.Context, error) {
+	options := create.WithConfigFile(kindCfg)
+	toptions := create.WaitForReady(duration)
+	ctx := cluster.NewContext(clusterName)
+	if err := ctx.Create(options, toptions); err != nil {
+		return nil, err
+	}
+
+	return ctx, nil
+
 }
 
 func getClientSet(configPath string) (*kubernetes.Clientset, error) {
@@ -117,41 +117,6 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout, timer tim
 						break podfailed
 					}
 
-					// Pod still working
-					// Wait and try again...
-					ticker := time.NewTicker(timer)
-					for {
-						fmt.Println("using ticker and an timer...")
-						select {
-						case <-ticker.C:
-							thePod, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).Get(cp.Name, metav1.GetOptions{})
-							if err != nil {
-								return nil, err
-							}
-							fmt.Printf("thePod (%s) - status:%#v \n", thePod.Name, thePod.Status.Phase)
-							if thePod.Status.Phase == apiv1.PodSucceeded {
-								return thePod, nil
-							}
-
-							if thePod.Status.Phase == apiv1.PodFailed {
-								fmt.Printf("thePod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Phase)
-								failedPods[thePod.Name] = struct{}{}
-								ticker.Stop()
-								break podfailed
-							}
-
-							if thePod.Status.Phase == apiv1.PodPending && strings.Contains(thePod.Status.Reason, "Failed") {
-								fmt.Printf("thePod (%s) - %s - retrying...\n", thePod.Name, thePod.Status.Reason)
-								failedPods[thePod.Name] = struct{}{}
-								ticker.Stop()
-								break podfailed
-							}
-
-						case <-timeout:
-							ticker.Stop()
-							return nil, fmt.Errorf("getPod time out: no Pod with %s", name)
-						}
-					}
 				}
 			}
 		}

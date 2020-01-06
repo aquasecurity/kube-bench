@@ -19,15 +19,15 @@ func TestRunWithKind(t *testing.T) {
 	timeout := time.Duration(10 * time.Minute)
 	ticker := time.Duration(2 * time.Second)
 
-	mustMatch := func(expFname, data string) {
+	mustMatch := func(tc *testing.T, expFname, data string) {
 		d, err := ioutil.ReadFile(expFname)
 		if err != nil {
-			t.Error(err)
+			tc.Error(err)
 		}
 		expectedData := strings.TrimSpace(string(d))
 		data = strings.TrimSpace(data)
 		if expectedData != data {
-			t.Errorf("expected: %q\n\n Got %q\n\n", expectedData, data)
+			tc.Errorf("expected: %q\n\n Got %q\n\n", expectedData, data)
 		}
 	}
 
@@ -39,32 +39,41 @@ func TestRunWithKind(t *testing.T) {
 		ExpectError   bool
 	}{
 		{
-			TestName:      "job",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench",
 			KubebenchYAML: "../job.yaml",
 			ExpectedFile:  "./testdata/job.data",
 		},
 		{
-			TestName:      "job-node",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench-node",
 			KubebenchYAML: "../job-node.yaml",
 			ExpectedFile:  "./testdata/job-node.data",
 		},
 		{
-			TestName:      "job-master",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench-master",
 			KubebenchYAML: "../job-master.yaml",
 			ExpectedFile:  "./testdata/job-master.data",
 		},
 	}
+	ctx, err := setupCluster("kube-bench", "./testdata/add-tls-kind-k8s114.yaml", timeout)
+	if err != nil {
+		t.Fatalf("failed to setup KIND cluster error: %v", err)
+	}
+	defer func() {
+		ctx.Delete()
+	}()
+
+	if err := loadImageFromDocker(*kubebenchImg, ctx); err != nil {
+		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
+	}
+
 	for _, c := range cases {
-		t.Run(c.TestName, func(t *testing.T) {
-			data, err := runWithKind(c.TestName, c.KindCfg, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
+		t.Run(c.TestName, func(tc *testing.T) {
+			data, err := runWithKind(ctx, c.TestName, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
 			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-				return
+				tc.Errorf("unexpected error: %v", err)
 			}
-			mustMatch(c.ExpectedFile, data)
+			mustMatch(tc, c.ExpectedFile, data)
 		})
 	}
+
 }
