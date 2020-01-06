@@ -88,7 +88,7 @@ node:
       - "/etc/kubernetes/pki/ca.crt"
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
-    svc: 
+    svc:
       # These paths must also be included
       #  in the 'confs' property below
       - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
@@ -145,7 +145,7 @@ node:
 etcd:
   components:
     - etcd
-   
+
   etcd:
     bins:
       - "etcd"

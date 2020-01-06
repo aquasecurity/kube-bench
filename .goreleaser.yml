@@ -1,3 +1,4 @@
+---
 env:
   - GO111MODULE=on
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
@@ -9,8 +10,8 @@ builds:
     goarch:
       - amd64
     ldflags:
-     - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
-     - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
+      - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
+      - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
 # Archive customization
 archives:
   - id: default
