@@ -86,14 +86,13 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
-func findPodForJob(clientset *kubernetes.Clientset, name string, tout time.Duration) (*apiv1.Pod, error) {
-	timeout := time.After(tout)
+func findPodForJob(clientset *kubernetes.Clientset, jobName string, timeout time.Duration) (*apiv1.Pod, error) {
 	failedPods := make(map[string]struct{})
 	for {
 	podfailed:
 		select {
-		case <-timeout:
-			return nil, fmt.Errorf("podList - time out: no Pod with %s", name)
+		case <-time.After(timeout):
+			return nil, fmt.Errorf("podList - timed out: no Pod found for Job %s", jobName)
 		default:
 			pods, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(metav1.ListOptions{})
 			if err != nil {
@@ -105,7 +104,7 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout time.Durat
 					continue
 				}
 
-				if strings.HasPrefix(cp.Name, name) {
+				if strings.HasPrefix(cp.Name, jobName) {
 					fmt.Printf("pod (%s) - %#v\n", cp.Name, cp.Status.Phase)
 					if cp.Status.Phase == apiv1.PodSucceeded {
 						return &cp, nil
@@ -123,7 +122,7 @@ func findPodForJob(clientset *kubernetes.Clientset, name string, tout time.Durat
 		time.Sleep(1 * time.Second)
 	}
 
-	return nil, fmt.Errorf("no Pod with %s", name)
+	return nil, fmt.Errorf("no Pod found for Job %q", jobName)
 }
 
 func getPodLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod) string {

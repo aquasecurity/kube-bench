@@ -32,7 +32,6 @@ func TestRunWithKind(t *testing.T) {
 
 	cases := []struct {
 		TestName      string
-		KindCfg       string
 		KubebenchYAML string
 		ExpectedFile  string
 		ExpectError   bool
