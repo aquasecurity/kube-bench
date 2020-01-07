@@ -70,7 +70,6 @@ func setupCluster(clusterName, kindCfg string, duration time.Duration) (*cluster
 	}
 
 	return ctx, nil
-
 }
 
 func getClientSet(configPath string) (*kubernetes.Clientset, error) {
@@ -86,15 +85,19 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
-func findPodForJob(clientset *kubernetes.Clientset, jobName string, timeout time.Duration) (*apiv1.Pod, error) {
+func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration time.Duration) (*apiv1.Pod, error) {
 	failedPods := make(map[string]struct{})
+	selector := fmt.Sprintf("job-name=%s", jobName)
+	timeout := time.After(duration)
 	for {
 	podfailed:
 		select {
-		case <-time.After(timeout):
+		case <-timeout:
 			return nil, fmt.Errorf("podList - timed out: no Pod found for Job %s", jobName)
 		default:
-			pods, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+			pods, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(metav1.ListOptions{
+				LabelSelector: selector,
+			})
 			if err != nil {
 				return nil, err
 			}
