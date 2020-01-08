@@ -64,14 +64,18 @@ func TestRunWithKind(t *testing.T) {
 		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
 	}
 
+	clientset, err := getClientSet(ctx.KubeConfigPath())
+	if err != nil {
+		t.Fatalf("failed to connect to Kuberntes cluster error: %v", err)
+	}
+
 	for _, c := range cases {
 		t.Run(c.TestName, func(tc *testing.T) {
-			data, err := runWithKind(ctx, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
+			data, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
 				tc.Errorf("unexpected error: %v", err)
 			}
 			mustMatch(tc, c.ExpectedFile, data)
 		})
 	}
-
 }

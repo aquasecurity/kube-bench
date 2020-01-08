@@ -19,29 +19,8 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(ctx *cluster.Context, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
-	clientset, err := getClientSet(ctx.KubeConfigPath())
-	if err != nil {
-		return "", err
-	}
-
-	jobYAML, err := ioutil.ReadFile(kubebenchYAML)
-	if err != nil {
-		return "", err
-	}
-
-	decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(jobYAML), len(jobYAML))
-	if err != nil {
-		return "", err
-	}
-
-	job := &batchv1.Job{}
-	if err := decoder.Decode(job); err != nil {
-		return "", err
-	}
-	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
-
-	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
+func runWithKind(ctx *cluster.Context, clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
+	err := deployJob(clientset, kubebenchYAML, kubebenchImg)
 	if err != nil {
 		return "", err
 	}
@@ -85,11 +64,30 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
+func deployJob(clientset *kubernetes.Clientset, kubebenchYAML, kubebenchImg string) error {
+	jobYAML, err := ioutil.ReadFile(kubebenchYAML)
+	if err != nil {
+		return err
+	}
+
+	decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(jobYAML), len(jobYAML))
+	job := &batchv1.Job{}
+	if err := decoder.Decode(job); err != nil {
+		return err
+	}
+	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
+
+	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
+
+	return err
+}
+
 func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration time.Duration) (*apiv1.Pod, error) {
 	failedPods := make(map[string]struct{})
 	selector := fmt.Sprintf("job-name=%s", jobName)
 	timeout := time.After(duration)
 	for {
+		time.Sleep(2 * time.Second)
 	podfailed:
 		select {
 		case <-timeout:
@@ -122,7 +120,6 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 				}
 			}
 		}
-		time.Sleep(1 * time.Second)
 	}
 
 	return nil, fmt.Errorf("no Pod found for Job %q", jobName)
