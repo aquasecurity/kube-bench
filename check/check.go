@@ -106,7 +106,7 @@ func (c *Check) run() State {
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
 	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
-		c.WarnReason += "There is no tests"
+		c.WarnReason += "There are no tests"
 		c.State = WARN
 		return c.State
 	}
