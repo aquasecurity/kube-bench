@@ -87,7 +87,7 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 	selector := fmt.Sprintf("job-name=%s", jobName)
 	timeout := time.After(duration)
 	for {
-		time.Sleep(2 * time.Second)
+		time.Sleep(3 * time.Second)
 	podfailed:
 		select {
 		case <-timeout:
