@@ -18,18 +18,6 @@ func TestRunWithKind(t *testing.T) {
 	flag.Parse()
 	fmt.Printf("kube-bench Container Image: %s\n", *kubebenchImg)
 
-	mustMatch := func(tc *testing.T, expFname, data string) {
-		d, err := ioutil.ReadFile(expFname)
-		if err != nil {
-			tc.Error(err)
-		}
-		expectedData := strings.TrimSpace(string(d))
-		data = strings.TrimSpace(data)
-		if expectedData != data {
-			tc.Errorf("expected: %q\n\n Got %q\n\n", expectedData, data)
-		}
-	}
-
 	cases := []struct {
 		TestName      string
 		KubebenchYAML string
@@ -70,12 +58,22 @@ func TestRunWithKind(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.TestName, func(tc *testing.T) {
-			data, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
+		t.Run(c.TestName, func(t *testing.T) {
+			resultData, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
-				tc.Errorf("unexpected error: %v", err)
+				t.Errorf("unexpected error: %v", err)
 			}
-			mustMatch(tc, c.ExpectedFile, data)
+
+			c, err := ioutil.ReadFile(c.ExpectedFile)
+			if err != nil {
+				t.Error(err)
+			}
+
+			expectedData := strings.TrimSpace(string(c))
+			resultData = strings.TrimSpace(resultData)
+			if expectedData != resultData {
+				t.Errorf("expected: %q\n\n Got %q\n\n", expectedData, resultData)
+			}
 		})
 	}
 }
