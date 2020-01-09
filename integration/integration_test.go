@@ -54,7 +54,7 @@ func TestRunWithKind(t *testing.T) {
 
 	clientset, err := getClientSet(ctx.KubeConfigPath())
 	if err != nil {
-		t.Fatalf("failed to connect to Kuberntes cluster error: %v", err)
+		t.Fatalf("failed to connect to Kubernetes cluster error: %v", err)
 	}
 
 	for _, c := range cases {
