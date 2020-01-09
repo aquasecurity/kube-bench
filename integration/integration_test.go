@@ -3,6 +3,8 @@
 package integration
 
 import (
+	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -72,8 +74,69 @@ func TestRunWithKind(t *testing.T) {
 			expectedData := strings.TrimSpace(string(c))
 			resultData = strings.TrimSpace(resultData)
 			if expectedData != resultData {
-				t.Errorf("expected: %q\n\n Got %q\n\n", expectedData, resultData)
+				t.Errorf("expected results\n\nExpected\t(<)\nResult\t(>)\n\n%s\n\n", generateDiff(expectedData, resultData))
 			}
 		})
 	}
+}
+
+func generateDiff(source, target string) string {
+	buf := new(bytes.Buffer)
+	ss := bufio.NewScanner(strings.NewReader(source))
+	ts := bufio.NewScanner(strings.NewReader(target))
+
+	emptySource := false
+	emptyTarget := false
+	dataFrom := ""
+	hasMoreData := func() bool {
+		sourceScan := ss.Scan()
+		targetScan := ts.Scan()
+		if sourceScan && targetScan {
+			dataFrom = "<>"
+		}
+		if !sourceScan {
+			dataFrom = ">"
+		}
+		if !targetScan {
+			dataFrom = "<"
+		}
+		return sourceScan || targetScan
+	}
+
+	for ln := 1; hasMoreData(); ln++ {
+		switch dataFrom {
+		case "<>":
+			ll := ss.Text()
+			rl := ts.Text()
+			if ll != rl {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+				fmt.Fprintf(buf, "< %s\n", ll)
+				fmt.Fprintf(buf, "> %s\n", rl)
+			}
+		case "<":
+			ll := ss.Text()
+			if !emptyTarget {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "< %s\n", ll)
+			emptyTarget = true
+		case ">":
+			rl := ts.Text()
+			if !emptySource {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "> %s\n", rl)
+			emptySource = true
+		}
+	}
+
+	if emptySource {
+		fmt.Fprintf(buf, "< [[NO MORE DATA]]")
+	}
+
+	if emptyTarget {
+		fmt.Fprintf(buf, "> [[NO MORE DATA]]")
+	}
+
+	return buf.String()
 }
