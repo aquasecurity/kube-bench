@@ -497,6 +497,21 @@ groups:
         scored: true
 
       - id: 1.1.30
+        text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
+        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        tests:
+          test_items:
+            - flag: "--etcd-cafile"
+              set: true
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection between the
+          apiserver and etcd. Then, edit the API server pod specification file
+          $apiserverconf on the master node and set the etcd
+          certificate authority file parameter.
+          --etcd-cafile=<path/to/ca-file>
+        scored: true
+
+      - id: 1.1.31
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -511,21 +526,6 @@ groups:
           on the master node and set the below parameter.
           --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         scored: false
-
-      - id: 1.1.31
-        text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        tests:
-          test_items:
-            - flag: "--etcd-cafile"
-              set: true
-        remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection between the
-          apiserver and etcd. Then, edit the API server pod specification file
-          $apiserverconf on the master node and set the etcd
-          certificate authority file parameter.
-          --etcd-cafile=<path/to/ca-file>
-        scored: true
 
       - id: 1.1.32
         text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
@@ -1501,7 +1501,7 @@ groups:
         scored: false
 
       - id: 1.7.2
-        text: "Do not admit containers wishing to share the host process ID namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host process ID namespace (Scored)"
         type: "manual"
         remediation: |
          [Manual test]
@@ -1509,7 +1509,7 @@ groups:
         scored: false
 
       - id: 1.7.3
-        text: "Do not admit containers wishing to share the host IPC namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host IPC namespace (Scored)"
         type: "manual"
         remediation: |
           [Manual test]
@@ -1517,7 +1517,7 @@ groups:
         scored: false
 
       - id: 1.7.4
-        text: "Do not admit containers wishing to share the host network namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host network namespace (Scored)"
         type: "manual"
         remediation: |
           [Manual test]
@@ -1525,7 +1525,7 @@ groups:
         scored: false
 
       - id: 1.7.5
-        text: " Do not admit containers with allowPrivilegeEscalation (Not Scored)"
+        text: " Do not admit containers with allowPrivilegeEscalation (Scored)"
         type: "manual"
         remediation: |
           [Manual test]

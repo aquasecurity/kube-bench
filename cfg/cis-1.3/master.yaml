@@ -1437,7 +1437,7 @@ groups:
         scored: false
 
       - id: 1.7.2
-        text: "Do not admit containers wishing to share the host process ID namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host process ID namespace (Scored)"
         type: "manual"
         remediation: |
          [Manual test]
@@ -1445,7 +1445,7 @@ groups:
         scored: false
 
       - id: 1.7.3
-        text: "Do not admit containers wishing to share the host IPC namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host IPC namespace (Scored)"
         type: "manual"
         remediation: |
           [Manual test]
@@ -1453,7 +1453,7 @@ groups:
         scored: false
 
       - id: 1.7.4
-        text: "Do not admit containers wishing to share the host network namespace (Not Scored)"
+        text: "Do not admit containers wishing to share the host network namespace (Scored)"
         type: "manual"
         remediation: |
           [Manual test]
@@ -1461,7 +1461,7 @@ groups:
         scored: false
 
       - id: 1.7.5
-        text: "Do not admit containers with allowPrivilegeEscalation (Not Scored)"
+        text: "Do not admit containers with allowPrivilegeEscalation (Scored)"
         type: "manual"
         remediation: |
           [Manual test]
