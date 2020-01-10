@@ -8,7 +8,9 @@ import (
 	"net/http/httptest"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestLoadCertficate(t *testing.T) {
@@ -78,10 +80,11 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 }
 
 func TestGetWebData(t *testing.T) {
+	json := `{
+		"major": "1",
+		"minor": "15"}`
 	okfn := func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprintln(w, `{
-			"major": "1",
-			"minor": "15"}`)
+		_, _ = fmt.Fprintln(w, json)
 	}
 	errfn := func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -91,12 +94,14 @@ func TestGetWebData(t *testing.T) {
 	var tlsCert tls.Certificate
 
 	cases := []struct {
-		fn   http.HandlerFunc
-		fail bool
+		fn       http.HandlerFunc
+		expected string
+		fail     bool
 	}{
 		{
-			fn:   okfn,
-			fail: false,
+			fn:       okfn,
+			expected: json,
+			fail:     false,
 		},
 		{
 			fn:   errfn,
@@ -116,6 +121,11 @@ func TestGetWebData(t *testing.T) {
 
 				if len(data) == 0 {
 					t.Errorf("missing data")
+				}
+
+				result := strings.TrimSpace(string(data))
+				if c.expected != result {
+					t.Errorf("expected (%s) got (%s)\n", c.expected, result)
 				}
 			} else {
 				if err == nil {
@@ -183,48 +193,117 @@ func TestExtractVersion(t *testing.T) {
 }
 
 func TestGetKubernetesURL(t *testing.T) {
-
 	resetEnvs := func() {
-		os.Unsetenv("KUBE_BENCH_K8S_ENV")
 		os.Unsetenv("KUBERNETES_SERVICE_HOST")
 		os.Unsetenv("KUBERNETES_SERVICE_PORT_HTTPS")
 	}
 
 	setEnvs := func() {
-		os.Setenv("KUBE_BENCH_K8S_ENV", "1")
 		os.Setenv("KUBERNETES_SERVICE_HOST", "testHostServer")
 		os.Setenv("KUBERNETES_SERVICE_PORT_HTTPS", "443")
 	}
 
 	cases := []struct {
-		useDefault bool
-		expected   string
+		withEnv  bool
+		expected []string
 	}{
 		{
-			useDefault: true,
-			expected:   "https://kubernetes.default.svc/version",
+			withEnv:  true,
+			expected: []string{"https://kubernetes.default.svc/version", "https://testHostServer:443/version"},
 		},
 		{
-			useDefault: false,
-			expected:   "https://testHostServer:443/version",
+			withEnv:  false,
+			expected: []string{"https://kubernetes.default.svc/version", "https://:/version"},
 		},
 	}
+
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			resetEnvs()
 			defer resetEnvs()
-			if !c.useDefault {
+			if c.withEnv {
 				setEnvs()
 			}
-			k8sURL := getKubernetesURL()
 
-			if !c.useDefault {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
+			k8sURLs := getKubernetesURLs()
+			if len(c.expected) != len(k8sURLs) {
+				t.Errorf("Expected %q but Got %q", c.expected, k8sURLs)
+			}
+
+			for i := 0; i < len(c.expected); i++ {
+				if c.expected[i] != k8sURLs[i] {
+					t.Errorf("Expected %q but Got %q", c.expected[i], k8sURLs[i])
+				}
+			}
+		})
+	}
+}
+
+func TestGetWebDataRetry(t *testing.T) {
+	json := `{
+		"major": "1",
+		"minor": "15"}`
+	okfn := func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintln(w, json)
+	}
+
+	errfn := func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+
+	token := "dummyToken"
+	var tlsCert tls.Certificate
+	waitDuration := 1 * time.Second
+
+	cases := []struct {
+		fns          []http.HandlerFunc
+		timeDuration time.Duration
+		expected     string
+		fail         bool
+	}{
+		{
+			fns:          []http.HandlerFunc{okfn, okfn},
+			timeDuration: 5 * time.Second,
+			expected:     json,
+			fail:         false,
+		},
+		{
+			fns:          []http.HandlerFunc{errfn, okfn},
+			timeDuration: 5 * time.Second,
+			expected:     json,
+			fail:         false,
+		},
+		{
+			fns:          []http.HandlerFunc{errfn, errfn},
+			timeDuration: 1 * time.Second,
+			fail:         true,
+		},
+	}
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			ts1 := httptest.NewServer(c.fns[0])
+			defer ts1.Close()
+			ts2 := httptest.NewServer(c.fns[1])
+			defer ts2.Close()
+			data, err := getWebDataRetry([]string{ts1.URL, ts2.URL}, token, &tlsCert, c.timeDuration, waitDuration)
+			if !c.fail {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+
+				if len(data) == 0 {
+					t.Errorf("missing data")
+				}
+
+				result := strings.TrimSpace(string(data))
+				if c.expected != result {
+					t.Errorf("expected (%s) got (%s)\n", c.expected, result)
 				}
 			} else {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
+				if err == nil {
+					t.Errorf("Expected error")
 				}
 			}
 		})

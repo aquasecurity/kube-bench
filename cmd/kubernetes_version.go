@@ -4,17 +4,18 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 )
 
 func getKubeVersionFromRESTAPI() (string, error) {
-	k8sVersionURL := getKubernetesURL()
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
 	tokenfile := fmt.Sprintf("%s/token", serviceaccount)
@@ -30,7 +31,9 @@ func getKubeVersionFromRESTAPI() (string, error) {
 	}
 	token := strings.TrimSpace(string(tb))
 
-	data, err := getWebData(k8sVersionURL, token, tlsCert)
+	timeDuration := 30 * time.Second
+	waitDuration := 1 * time.Second
+	data, err := getWebDataRetry(getKubernetesURLs(), token, tlsCert, timeDuration, waitDuration)
 	if err != nil {
 		return "", err
 	}
@@ -69,6 +72,30 @@ func extractVersion(data []byte) (string, error) {
 	return ver, nil
 }
 
+func getWebDataRetry(srvURLs []string, token string, cacert *tls.Certificate, timeoutDuration, waitDuration time.Duration) (data []byte, err error) {
+	timeout := time.After(timeoutDuration)
+	wait := time.Duration(waitDuration)
+	for {
+		select {
+		case <-timeout:
+			err = errors.New("timeout - getting Kubernetes version using REST API")
+			return
+		default:
+			for _, srvURL := range srvURLs {
+				data, err = getWebData(srvURL, token, cacert)
+				if err == nil {
+					return
+				}
+				glog.V(2).Info(fmt.Sprintf("HTTP ERROR: %v\n", err))
+				continue
+			}
+			glog.V(2).Info(fmt.Sprintf("Waiting (%s) to retry getting Kubernetes version using REST API", wait))
+			time.Sleep(wait)
+			continue
+		}
+	}
+}
+
 func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	glog.V(2).Info(fmt.Sprintf("getWebData srvURL: %s\n", srvURL))
 
@@ -91,7 +118,6 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		glog.V(2).Info(fmt.Sprintf("HTTP ERROR: %v\n", err))
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -122,21 +148,9 @@ func loadCertficate(certFile string) (*tls.Certificate, error) {
 	return &tlsCert, nil
 }
 
-func getKubernetesURL() string {
-	k8sVersionURL := "https://kubernetes.default.svc/version"
-
-	// The following provides flexibility to use
-	// K8S provided variables is situations where
-	// hostNetwork: true
-	if !isEmpty(os.Getenv("KUBE_BENCH_K8S_ENV")) {
-		k8sHost := os.Getenv("KUBERNETES_SERVICE_HOST")
-		k8sPort := os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")
-		if !isEmpty(k8sHost) && !isEmpty(k8sPort) {
-			return fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
-		}
-
-		glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
+func getKubernetesURLs() []string {
+	return []string{
+		"https://kubernetes.default.svc/version",
+		fmt.Sprintf("https://%s:%s/version", os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT_HTTPS")),
 	}
-
-	return k8sVersionURL
 }
