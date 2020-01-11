@@ -962,6 +962,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command.
 
@@ -1039,6 +1059,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command.
 
@@ -1082,6 +1122,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command.
 
@@ -1124,6 +1184,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command.

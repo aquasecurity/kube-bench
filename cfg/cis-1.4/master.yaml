@@ -859,6 +859,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -903,6 +923,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -949,6 +989,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -993,6 +1053,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -1096,6 +1176,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -1140,6 +1240,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the
           master node. For example, chmod 644 /etc/kubernetes/scheduler.conf
@@ -1181,6 +1301,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the
@@ -1240,6 +1380,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           [Manual test]
