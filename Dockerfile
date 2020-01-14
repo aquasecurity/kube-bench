@@ -1,4 +1,4 @@
-FROM golang:1.12 AS build
+FROM golang:1.13 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY go.mod go.sum ./
 COPY main.go .
@@ -7,7 +7,7 @@ COPY cmd/ cmd/
 ARG KUBEBENCH_VERSION
 RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
-FROM alpine:3.10 AS run
+FROM alpine:3.11 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
