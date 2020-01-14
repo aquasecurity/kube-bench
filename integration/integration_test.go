@@ -80,6 +80,9 @@ func TestRunWithKind(t *testing.T) {
 	}
 }
 
+// This is simple "diff" between 2 strings containing multiple lines.
+// It's not a comprehensive diff between the 2 strings.
+// It does not inditcate when lines are deleted.
 func generateDiff(source, target string) string {
 	buf := new(bytes.Buffer)
 	ss := bufio.NewScanner(strings.NewReader(source))
@@ -87,41 +90,38 @@ func generateDiff(source, target string) string {
 
 	emptySource := false
 	emptyTarget := false
-	dataFrom := ""
-	hasMoreData := func() bool {
-		sourceScan := ss.Scan()
-		targetScan := ts.Scan()
-		if sourceScan && targetScan {
-			dataFrom = "<>"
-		}
-		if !sourceScan {
-			dataFrom = ">"
-		}
-		if !targetScan {
-			dataFrom = "<"
-		}
-		return sourceScan || targetScan
-	}
 
-	for ln := 1; hasMoreData(); ln++ {
-		switch dataFrom {
-		case "<>":
-			ll := ss.Text()
-			rl := ts.Text()
+loop:
+	for ln := 1; ; ln++ {
+		var ll, rl string
+
+		sourceScan := ss.Scan()
+		if sourceScan {
+			ll = ss.Text()
+		}
+
+		targetScan := ts.Scan()
+		if targetScan {
+			rl = ts.Text()
+		}
+
+		switch {
+		case !sourceScan && !targetScan:
+			// no more lines
+			break loop
+		case sourceScan && targetScan:
 			if ll != rl {
 				fmt.Fprintf(buf, "line: %d\n", ln)
 				fmt.Fprintf(buf, "< %s\n", ll)
 				fmt.Fprintf(buf, "> %s\n", rl)
 			}
-		case "<":
-			ll := ss.Text()
+		case !targetScan:
 			if !emptyTarget {
 				fmt.Fprintf(buf, "line: %d\n", ln)
 			}
 			fmt.Fprintf(buf, "< %s\n", ll)
 			emptyTarget = true
-		case ">":
-			rl := ts.Text()
+		case !sourceScan:
 			if !emptySource {
 				fmt.Fprintf(buf, "line: %d\n", ln)
 			}
