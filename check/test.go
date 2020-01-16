@@ -25,7 +25,6 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/jsonpath"
-	"github.com/golang/glog" //tests for me
 )
 
 // test:
@@ -119,7 +118,6 @@ func (t *testItem) execute(s string) *testOutput {
 						flagVal = vals[1]
 					}
 				} else {
-					glog.V(1).Infof("Got here else\n")
 					fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
 					os.Exit(1)
 				}
