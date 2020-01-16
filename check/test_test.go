@@ -642,6 +642,19 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=valid_elements, valid_elements expectedResultPattern empty", op: "valid_elements", flagVal: "a,b",
 			compareValue: "", expectedResultPattern: "'a,b' contains valid elements from ''",
 			testResult: false},
+		// Test Op "bitmask"
+		{label: "op=bitmask, 644 AND 640", op: "bitmask", flagVal: "644",
+			compareValue: "640", expectedResultPattern: "bitmask '644' AND '640'",
+			testResult: true},
+		{label: "op=bitmask, 644 AND 777", op: "bitmask", flagVal: "644",
+			compareValue: "777", expectedResultPattern: "bitmask '644' AND '777'",
+			testResult: false},
+		{label: "op=bitmask, 644 AND 444", op: "bitmask", flagVal: "644",
+			compareValue: "444", expectedResultPattern: "bitmask '644' AND '444'",
+			testResult: true},
+		{label: "op=bitmask, 644 AND 211", op: "bitmask", flagVal: "644",
+			compareValue: "211", expectedResultPattern: "bitmask '644' AND '211'",
+			testResult: false},
 	}
 
 	for _, c := range cases {
@@ -682,6 +695,16 @@ func TestToNumeric(t *testing.T) {
 
 	for _, c := range cases {
 		f, s, err := toNumeric(c.firstValue, c.secondValue)
+		if c.expectedToFail && err == nil {
+			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
+		}
+
+		if !c.expectedToFail && (f != 5 || s != 6) {
+			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
+		}
+	}
+	for _, c := range cases {
+		f, s, err := toNumericOctal(c.firstValue, c.secondValue)
 		if c.expectedToFail && err == nil {
 			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
 		}

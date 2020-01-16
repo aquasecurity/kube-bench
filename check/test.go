@@ -25,6 +25,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/jsonpath"
+	"github.com/golang/glog" //tests for me
 )
 
 // test:
@@ -118,6 +119,7 @@ func (t *testItem) execute(s string) *testOutput {
 						flagVal = vals[1]
 					}
 				} else {
+					glog.V(1).Infof("Got here else\n")
 					fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
 					os.Exit(1)
 				}
@@ -205,8 +207,15 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		target := splitAndRemoveLastSeparator(tCompareValue, defaultArraySeparator)
 		testResult = allElementsValid(s, target)
 
+	case "bitmask":
+		expectedResultPattern = "bitmask '%s' AND '%s'"
+		max, requested, err := toNumericOctal(flagVal, tCompareValue)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
+			os.Exit(1)
+		}
+		testResult = (max & requested) == requested
 	}
-
 	if expectedResultPattern == "" {
 		return expectedResultPattern, testResult
 	}
@@ -354,6 +363,18 @@ func toNumeric(a, b string) (c, d int, err error) {
 	d, err = strconv.Atoi(strings.TrimSpace(b))
 	if err != nil {
 		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", b, err)
+	}
+
+	return c, d, nil
+}
+func toNumericOctal(a, b string) (c, d uint64, err error) {
+	c, err = strconv.ParseUint(a, 8, 64)
+	if err != nil {
+		return uint64(1), uint64(1), fmt.Errorf("toNumericOctal - error converting %s: %s", a, err)
+	}
+	d, err = strconv.ParseUint(b, 8, 64)
+	if err != nil {
+		return 1, 1, fmt.Errorf("toNumericOctal - error converting %s: %s", b, err)
 	}
 
 	return c, d, nil
