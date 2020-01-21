@@ -3,6 +3,8 @@
 package integration
 
 import (
+	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -72,8 +74,69 @@ func TestRunWithKind(t *testing.T) {
 			expectedData := strings.TrimSpace(string(c))
 			resultData = strings.TrimSpace(resultData)
 			if expectedData != resultData {
-				t.Errorf("expected: %q\n\n Got %q\n\n", expectedData, resultData)
+				t.Errorf("expected results\n\nExpected\t(<)\nResult\t(>)\n\n%s\n\n", generateDiff(expectedData, resultData))
 			}
 		})
 	}
+}
+
+// This is simple "diff" between 2 strings containing multiple lines.
+// It's not a comprehensive diff between the 2 strings.
+// It does not inditcate when lines are deleted.
+func generateDiff(source, target string) string {
+	buf := new(bytes.Buffer)
+	ss := bufio.NewScanner(strings.NewReader(source))
+	ts := bufio.NewScanner(strings.NewReader(target))
+
+	emptySource := false
+	emptyTarget := false
+
+loop:
+	for ln := 1; ; ln++ {
+		var ll, rl string
+
+		sourceScan := ss.Scan()
+		if sourceScan {
+			ll = ss.Text()
+		}
+
+		targetScan := ts.Scan()
+		if targetScan {
+			rl = ts.Text()
+		}
+
+		switch {
+		case !sourceScan && !targetScan:
+			// no more lines
+			break loop
+		case sourceScan && targetScan:
+			if ll != rl {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+				fmt.Fprintf(buf, "< %s\n", ll)
+				fmt.Fprintf(buf, "> %s\n", rl)
+			}
+		case !targetScan:
+			if !emptyTarget {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "< %s\n", ll)
+			emptyTarget = true
+		case !sourceScan:
+			if !emptySource {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "> %s\n", rl)
+			emptySource = true
+		}
+	}
+
+	if emptySource {
+		fmt.Fprintf(buf, "< [[NO MORE DATA]]")
+	}
+
+	if emptyTarget {
+		fmt.Fprintf(buf, "> [[NO MORE DATA]]")
+	}
+
+	return buf.String()
 }
