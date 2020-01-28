@@ -14,10 +14,13 @@ spec:
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
+              readOnly: true
             - name: etc-systemd
               mountPath: /etc/systemd
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
+              readOnly: true
       restartPolicy: Never
       volumes:
         - name: var-lib-kubelet
