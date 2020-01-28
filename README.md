@@ -19,26 +19,27 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 Table of Contents
 =================
 
-- [Table of Contents](#table-of-contents)
-  - [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
-  - [Installation](#installation)
-  - [Running kube-bench](#running-kube-bench)
-    - [Running inside a container](#running-inside-a-container)
-    - [Running in a Kubernetes cluster](#running-in-a-kubernetes-cluster)
-    - [Running in an EKS cluster](#running-in-an-eks-cluster)
-    - [Installing from a container](#installing-from-a-container)
-    - [Installing from sources](#installing-from-sources)
-  - [Running on OpenShift](#running-on-openshift)
-  - [Output](#output)
-  - [Configuration](#configuration)
-  - [Test config YAML representation](#test-config-yaml-representation)
-    - [Omitting checks](#omitting-checks)
-  - [Roadmap](#roadmap)
-  - [Testing locally with kind](#testing-locally-with-kind)
-  - [Contributing](#contributing)
-    - [Bugs](#bugs)
-    - [Features](#features)
-    - [Pull Requests](#pull-requests)
+* [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
+* [Installation](#installation)
+* [Running kube-bench](#running-kube-bench)
+  * [Running inside a container](#running-inside-a-container)
+  * [Running in a kubernetes cluster](#running-in-a-kubernetes-cluster)
+  * [Running in an Azure Kubernetes Service(AKS) cluster](#running-in-an-aks-cluster)
+  * [Running in an EKS cluster](#running-in-an-eks-cluster)
+  * [Installing from a container](#installing-from-a-container)
+  * [Installing from sources](#installing-from-sources)
+* [Running on OpenShift](#running-on-openshift)
+* [Output](#output)
+* [Configuration](#configuration)
+* [Test config YAML representation](#test-config-yaml-representation)
+  * [Omitting checks](#omitting-checks)
+* [Roadmap](#roadmap)
+* [Testing locally with kind](#testing-locally-with-kind)
+* [Contributing](#contributing)
+  * [Bugs](#bugs)
+  * [Features](#features)
+  * [Pull Requests](#pull-requests)
+
       
 ## CIS Kubernetes Benchmark support
 
@@ -177,6 +178,25 @@ To run the tests on the master node, the pod needs to be scheduled on that node.
 
 The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
+
+### Running in an AKS cluster
+
+1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures
+
+1. Use the [kubectl-enter plugin] (https://github.com/kvaps/kubectl-enter) to shell into a node 
+`
+kubectl-enter {node-name}
+` 
+or ssh to one agent node
+could open nsg 22 port and assign a public ip for one agent node (only for testing purpose)
+
+1. Run CIS benchmark to view results:
+```
+docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+./kube-bench node
+```
+kube-bench cannot be run on AKS master nodes 
+
 ### Running in an EKS cluster
 
 There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
@@ -190,9 +210,9 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 3. Download, build and push the kube-bench container image to your ECR repo
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
+cd kube-bench
 $(aws ecr get-login --no-include-email --region <AWS_REGION>)
 docker build -t k8s/kube-bench .
-docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 ```
@@ -312,7 +332,7 @@ If you think you have found a bug please follow the instructions below.
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
 - Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
 - Note the version of Kubernetes you are running (from `kubectl version` or `oc version` for OpenShift).
-- Set `-v 10` command line option and save the log output. Please paste this into your issue.
+- Set `-v 10 --logtostderr` command line options and save the log output. Please paste this into your issue.
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 
 ### Features

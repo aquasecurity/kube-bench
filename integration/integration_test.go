@@ -3,6 +3,8 @@
 package integration
 
 import (
+	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,59 +14,129 @@ import (
 )
 
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
+var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
 
 func TestRunWithKind(t *testing.T) {
 	flag.Parse()
 	fmt.Printf("kube-bench Container Image: %s\n", *kubebenchImg)
-	timeout := time.Duration(10 * time.Minute)
-	ticker := time.Duration(2 * time.Second)
-
-	mustMatch := func(expFname, data string) {
-		d, err := ioutil.ReadFile(expFname)
-		if err != nil {
-			t.Error(err)
-		}
-		expectedData := strings.TrimSpace(string(d))
-		data = strings.TrimSpace(data)
-		if expectedData != data {
-			t.Errorf("expected: %q\n\n Got %q\n\n", expectedData, data)
-		}
-	}
 
 	cases := []struct {
 		TestName      string
-		KindCfg       string
 		KubebenchYAML string
 		ExpectedFile  string
 		ExpectError   bool
 	}{
 		{
-			TestName:      "job",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench",
 			KubebenchYAML: "../job.yaml",
 			ExpectedFile:  "./testdata/job.data",
 		},
 		{
-			TestName:      "job-node",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench-node",
 			KubebenchYAML: "../job-node.yaml",
 			ExpectedFile:  "./testdata/job-node.data",
 		},
 		{
-			TestName:      "job-master",
-			KindCfg:       "./testdata/add-tls-kind-k8s114.yaml",
+			TestName:      "kube-bench-master",
 			KubebenchYAML: "../job-master.yaml",
 			ExpectedFile:  "./testdata/job-master.data",
 		},
 	}
+	ctx, err := setupCluster("kube-bench", "./testdata/add-tls-kind-k8s114.yaml", *timeout)
+	if err != nil {
+		t.Fatalf("failed to setup KIND cluster error: %v", err)
+	}
+	defer func() {
+		ctx.Delete()
+	}()
+
+	if err := loadImageFromDocker(*kubebenchImg, ctx); err != nil {
+		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
+	}
+
+	clientset, err := getClientSet(ctx.KubeConfigPath())
+	if err != nil {
+		t.Fatalf("failed to connect to Kubernetes cluster error: %v", err)
+	}
+
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
-			data, err := runWithKind(c.TestName, c.KindCfg, c.KubebenchYAML, *kubebenchImg, timeout, ticker)
+			resultData, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-				return
+				t.Errorf("unexpected error: %v", err)
 			}
-			mustMatch(c.ExpectedFile, data)
+
+			c, err := ioutil.ReadFile(c.ExpectedFile)
+			if err != nil {
+				t.Error(err)
+			}
+
+			expectedData := strings.TrimSpace(string(c))
+			resultData = strings.TrimSpace(resultData)
+			if expectedData != resultData {
+				t.Errorf("expected results\n\nExpected\t(<)\nResult\t(>)\n\n%s\n\n", generateDiff(expectedData, resultData))
+			}
 		})
 	}
+}
+
+// This is simple "diff" between 2 strings containing multiple lines.
+// It's not a comprehensive diff between the 2 strings.
+// It does not inditcate when lines are deleted.
+func generateDiff(source, target string) string {
+	buf := new(bytes.Buffer)
+	ss := bufio.NewScanner(strings.NewReader(source))
+	ts := bufio.NewScanner(strings.NewReader(target))
+
+	emptySource := false
+	emptyTarget := false
+
+loop:
+	for ln := 1; ; ln++ {
+		var ll, rl string
+
+		sourceScan := ss.Scan()
+		if sourceScan {
+			ll = ss.Text()
+		}
+
+		targetScan := ts.Scan()
+		if targetScan {
+			rl = ts.Text()
+		}
+
+		switch {
+		case !sourceScan && !targetScan:
+			// no more lines
+			break loop
+		case sourceScan && targetScan:
+			if ll != rl {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+				fmt.Fprintf(buf, "< %s\n", ll)
+				fmt.Fprintf(buf, "> %s\n", rl)
+			}
+		case !targetScan:
+			if !emptyTarget {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "< %s\n", ll)
+			emptyTarget = true
+		case !sourceScan:
+			if !emptySource {
+				fmt.Fprintf(buf, "line: %d\n", ln)
+			}
+			fmt.Fprintf(buf, "> %s\n", rl)
+			emptySource = true
+		}
+	}
+
+	if emptySource {
+		fmt.Fprintf(buf, "< [[NO MORE DATA]]")
+	}
+
+	if emptyTarget {
+		fmt.Fprintf(buf, "> [[NO MORE DATA]]")
+	}
+
+	return buf.String()
 }
