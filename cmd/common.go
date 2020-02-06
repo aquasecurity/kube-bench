@@ -287,6 +287,15 @@ func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
 	return kubeToBenchmarkMap, nil
 }
 
+func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
+	benchmarkVersionToTargetsMap := v.GetStringMapStringSlice("target_mapping")
+	if benchmarkVersionToTargetsMap == nil || (len(benchmarkVersionToTargetsMap) == 0) {
+		return nil, fmt.Errorf("config file is missing 'target_mapping' section")
+	}
+
+	return benchmarkVersionToTargetsMap, nil
+}
+
 func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (bv string, err error) {
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
@@ -378,18 +387,16 @@ func PrintOutput(output string, outputFile string) {
 	}
 }
 
-var benchmarkVersionToTargetsMap = map[string][]string{
-	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
-}
-
 // validTargets helps determine if the targets
 // are legitimate for the benchmarkVersion.
-func validTargets(benchmarkVersion string, targets []string) bool {
+func validTargets(benchmarkVersion string, targets []string, v *viper.Viper) (bool, error) {
+	benchmarkVersionToTargetsMap, err := loadTargetMapping(v)
+	if err != nil {
+		return false, err
+	}
 	providedTargets, found := benchmarkVersionToTargetsMap[benchmarkVersion]
 	if !found {
-		return false
+		return false, nil
 	}
 
 	for _, pt := range targets {
@@ -402,9 +409,9 @@ func validTargets(benchmarkVersion string, targets []string) bool {
 		}
 
 		if !f {
-			return false
+			return false, nil
 		}
 	}
 
-	return true
+	return true, nil
 }

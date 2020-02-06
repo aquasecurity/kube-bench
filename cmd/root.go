@@ -73,7 +73,11 @@ var RootCmd = &cobra.Command{
 
 			// Control Plane is only valid for CIS 1.5 and later,
 			// this a gatekeeper for previous versions
-			if validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}) {
+			valid, err := validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}, viper.GetViper())
+			if err != nil {
+				exitWithError(fmt.Errorf("error validating targets: %v", err))
+			}
+			if valid {
 				glog.V(1).Info("== Running control plane checks ==\n")
 				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE))
 			}
@@ -81,7 +85,11 @@ var RootCmd = &cobra.Command{
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(benchmarkVersion, []string{string(check.ETCD)}) && isEtcd() {
+		valid, err := validTargets(benchmarkVersion, []string{string(check.ETCD)}, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error validating targets: %v", err))
+		}
+		if valid && isEtcd() {
 			glog.V(1).Info("== Running etcd checks ==\n")
 			runChecks(check.ETCD, loadConfig(check.ETCD))
 		}
@@ -91,7 +99,11 @@ var RootCmd = &cobra.Command{
 
 		// Policies is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(benchmarkVersion, []string{string(check.POLICIES)}) {
+		valid, err = validTargets(benchmarkVersion, []string{string(check.POLICIES)}, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error validating targets: %v", err))
+		}
+		if valid {
 			glog.V(1).Info("== Running policies checks ==\n")
 			runChecks(check.POLICIES, loadConfig(check.POLICIES))
 		}

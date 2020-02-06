@@ -38,7 +38,15 @@ var runCmd = &cobra.Command{
 		}
 
 		glog.V(2).Infof("Checking targets %v for %v", targets, benchmarkVersion)
-		if len(targets) > 0 && !validTargets(benchmarkVersion, targets) {
+		benchmarkVersionToTargetsMap, err := loadTargetMapping(viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error loading targets: %v", err))
+		}
+		valid, err := validTargets(benchmarkVersion, targets, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error validating targets: %v", err))
+		}
+		if len(targets) > 0 && !valid {
 			exitWithError(fmt.Errorf(fmt.Sprintf(`The specified --targets "%s" does not apply to the CIS Benchmark %s \n Valid targets %v`, strings.Join(targets, ","), benchmarkVersion, benchmarkVersionToTargetsMap[benchmarkVersion])))
 		}
 
