@@ -100,9 +100,11 @@
 [WARN] 1.7.7 Do not admit containers with dangerous capabilities (Not Scored)
 
 == Remediations ==
-1.1.1 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the below parameter.
---anonymous-auth=false
+1.1.1 audit test did not run: failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [/bin/ps -ef], error: write |1: broken pipe
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: exec: not started
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: exec: not started
 
 1.1.6 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 apiserver.yaml on the master node and set the below parameter.
@@ -121,10 +123,11 @@ on the master node and set the --enable-admission-plugins to
 include AlwaysPullImages.
 --enable-admission-plugins=...,AlwaysPullImages,...
 
-1.1.13 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the --enable-admission-plugins parameter to
-include SecurityContextDeny.
---enable-admission-plugins=...,SecurityContextDeny,...
+1.1.13 audit test did not run: failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [/bin/ps -ef], error: write |1: file already closed
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: exec: not started
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: exec: not started
 
 1.1.15 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-path parameter to a suitable
@@ -200,9 +203,11 @@ apiserver and etcd. Then, edit the API server pod specification file
 certificate authority file parameter.
 --etcd-cafile=<path/to/ca-file>
 
-1.1.31 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the below parameter.
---tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+1.1.31 audit test did not run: failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: fork/exec /usr/bin/grep: no such file or directory
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [/bin/ps -ef], error: write |1: file already closed
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep kube-apiserver], error: exec: not started
+failed to run: /bin/ps -ef | grep kube-apiserver | grep -v grep, command: [grep -v grep], error: exec: not started
 
 1.1.32 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --authorization-mode parameter to a
@@ -222,21 +227,7 @@ master node and set the --encryption-provider-config parameter
 to the path of that file:
 --encryption-provider-config=</path/to/EncryptionConfig/File>
 
-1.1.35 [Manual test]
-Follow the Kubernetes documentation and configure a EncryptionConfig file. In this file,
-choose aescbc as the encryption provider.
-For example,
-kind: EncryptionConfig
-apiVersion: v1
-resources:
-  - resources:
-    - secrets
-      providers:
-      - aescbc:
-          keys:
-          - name: key1
-            secret: <32-byte base64-encoded secret>
-
+1.1.35 audit test did not run: Test marked as a manual test
 1.1.36 Follow the Kubernetes documentation and set the desired limits in a
 configuration file. Then, edit the API server pod specification file
 /etc/kubernetes/manifests/kube-apiserver.yaml and set the below parameters.
@@ -281,16 +272,8 @@ controller-manager.yaml on the master node and set the --feature-gates parameter
 include RotateKubeletServerCertificate=true.
 --feature-gates=RotateKubeletServerCertificate=true
 
-1.4.9 [Manual test]
-Run the below command (based on the file location on your system) on the master node.
-For example,
-chmod 644 <path/to/cni/files>
-
-1.4.10 [Manual test]
-Run the below command (based on the file location on your system) on the master node.
-For example,
-chown root:root <path/to/cni/files>
-
+1.4.9 audit test did not run: Test marked as a manual test
+1.4.10 audit test did not run: Test marked as a manual test
 1.4.11 On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
 from the below command:
 ps -ef | grep etcd
@@ -303,18 +286,9 @@ ps -ef | grep etcd
 Run the below command (based on the etcd data directory found above). For example,
 chown etcd:etcd /var/lib/etcd
 
-1.4.19 [Manual test]
-Run the below command (based on the file location on your system) on the master node.
-For example, chown -R root:root /etc/kubernetes/pki/
-
-1.4.20 [Manual test]
-Run the below command (based on the file location on your system) on the master node.
-For example, chmod -R 644 /etc/kubernetes/pki/*.crt
-
-1.4.21 [Manual test]
-Run the below command (based on the file location on your system) on the master node.
-For example, chmod -R 600 /etc/kubernetes/pki/*.key
-
+1.4.19 audit test did not run: Test marked as a manual test
+1.4.20 audit test did not run: Test marked as a manual test
+1.4.21 audit test did not run: Test marked as a manual test
 1.5.1 Follow the etcd service documentation and configure TLS encryption.
 Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the
 master node and set the below parameters.
@@ -323,7 +297,7 @@ master node and set the below parameters.
 
 1.5.2 Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master
 node and set the below parameter.
---client-cert-auth="true"
+--client-cert-auth=\"true\"
 
 1.5.4 Follow the etcd service documentation and configure peer TLS encryption as appropriate
 for your etcd cluster. Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the
@@ -335,89 +309,22 @@ master node and set the below parameters.
 node and set the below parameter.
 --peer-client-cert-auth=true
 
-1.5.7 [Manual test]
-Follow the etcd documentation and create a dedicated certificate authority setup for the
-etcd service.
-Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the
-master node and set the below parameter.
---trusted-ca-file=</path/to/ca-file>
-
-1.6.1 [Manual test]
-Remove any unneeded clusterrolebindings :
-kubectl delete clusterrolebinding [name]
-
-1.6.2 [Manual test]
-Follow the documentation and create namespaces for objects in your deployment as you
-need them.
-
-1.6.3 [Manual test]
-Follow the documentation and create NetworkPolicy objects as you need them.
-
-1.6.4 [Manual test]
-Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
-would need to enable alpha features in the apiserver by passing "--feature-
-gates=AllAlpha=true" argument.
-Edit the /etc/kubernetes/manifests/kube-apiserver.yaml file on the master node and set the KUBE_API_ARGS
-parameter to "--feature-gates=AllAlpha=true"
-KUBE_API_ARGS="--feature-gates=AllAlpha=true"
-Based on your system, restart the kube-apiserver service. For example:
-systemctl restart kube-apiserver.service
-Use annotations to enable the docker/default seccomp profile in your pod definitions. An
-example is as below:
-apiVersion: v1
-kind: Pod
-metadata:
-  name: trustworthy-pod
-  annotations:
-    seccomp.security.alpha.kubernetes.io/pod: docker/default
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
-
-1.6.5 [Manual test]
-Follow the Kubernetes documentation and apply security contexts to your pods. For a
-suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
-Containers.
-
-1.6.6 [Manual test]
-Follow the Kubernetes documentation and setup image provenance.
-
-1.6.7 [Manual test]
-Follow the Kubernetes documentation and setup network policies as appropriate.
-For example, you could create a "default" isolation policy for a Namespace by creating a
-NetworkPolicy that selects all pods but does not allow any traffic:
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny
-spec:
-  podSelector:
-
-1.6.8 [Manual test]
-Follow Kubernetes documentation and setup PSP and RBAC authorization for your cluster.
-
-1.7.1 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.privileged field is omitted or set to false.
-
-1.7.2 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostPID field is omitted or set to false.
-
-1.7.3 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostIPC field is omitted or set to false.
-
-1.7.4 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostNetwork field is omitted or set to false.
-
-1.7.5 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.allowPrivilegeEscalation field is omitted or set to false.
-
-1.7.6 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of UIDs not including 0.
-
-1.7.7 [Manual test]
-Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
-
+1.5.7 audit test did not run: Test marked as a manual test
+1.6.1 audit test did not run: Test marked as a manual test
+1.6.2 audit test did not run: Test marked as a manual test
+1.6.3 audit test did not run: Test marked as a manual test
+1.6.4 audit test did not run: Test marked as a manual test
+1.6.5 audit test did not run: Test marked as a manual test
+1.6.6 audit test did not run: Test marked as a manual test
+1.6.7 audit test did not run: Test marked as a manual test
+1.6.8 audit test did not run: Test marked as a manual test
+1.7.1 audit test did not run: Test marked as a manual test
+1.7.2 audit test did not run: Test marked as a manual test
+1.7.3 audit test did not run: Test marked as a manual test
+1.7.4 audit test did not run: Test marked as a manual test
+1.7.5 audit test did not run: Test marked as a manual test
+1.7.6 audit test did not run: Test marked as a manual test
+1.7.7 audit test did not run: Test marked as a manual test
 
 == Summary ==
 30 checks PASS
