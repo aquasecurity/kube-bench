@@ -232,6 +232,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command on each worker node.
           chmod 644 /etc/origin/node/node.kubeconfig
@@ -272,6 +292,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
@@ -314,6 +354,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command on each worker node.
           chmod 644 /etc/origin/node/node.kubeconfig
@@ -354,6 +414,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
