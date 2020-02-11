@@ -347,4 +347,5 @@ func exitWithError(err error) {
 	fmt.Fprintf(os.Stderr, "\n%v\n", err)
 	// flush before exit non-zero
 	glog.Flush()
+	os.Exit(1)
 }
