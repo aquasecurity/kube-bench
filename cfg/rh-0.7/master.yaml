@@ -621,7 +621,7 @@ groups:
 
       - id: 1.34
         text: "Set the encryption provider to aescbc for etcd data at rest"
-        audit: "/bin/grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs /bin/grep -A1 providers"
+        audit: "/bin/grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | /bin/sed -n '2p' | awk '{ print $2 }' | xargs /bin/grep -A1 providers"
         tests:
           test_items:
             - flag: "aescbc:"
@@ -1373,7 +1373,7 @@ groups:
 
       - id: 5.9
         text: "Verify the OpenShift default configuration for the etcd Certificate Authority"
-        audit: "openssl x509 -in /etc/origin/master/master.etcd-ca.crt -subject -issuer -noout | sed 's/@/ /'"
+        audit: "openssl x509 -in /etc/origin/master/master.etcd-ca.crt -subject -issuer -noout | /bin/sed 's/@/ /'"
         tests:
           test_items:
             - flag: "issuer= /CN=etcd-signer"
