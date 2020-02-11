@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 1.1.1
         text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -26,7 +26,7 @@ groups:
 
       - id: 1.1.2
         text: "Ensure that the --basic-auth-file argument is not set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--basic-auth-file"
@@ -40,7 +40,7 @@ groups:
 
       - id: 1.1.3
         text: "Ensure that the --insecure-allow-any-token argument is not set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--insecure-allow-any-token"
@@ -53,7 +53,7 @@ groups:
 
       - id: 1.1.4
         text: "Ensure that the --kubelet-https argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -71,7 +71,7 @@ groups:
 
       - id: 1.1.5
         text: "Ensure that the --insecure-bind-address argument is not set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--insecure-bind-address"
@@ -84,7 +84,7 @@ groups:
 
       - id: 1.1.6
         text: "Ensure that the --insecure-port argument is set to 0 (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--insecure-port"
@@ -100,7 +100,7 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -119,7 +119,7 @@ groups:
 
       - id: 1.1.8
         text: "Ensure that the --profiling argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--profiling"
@@ -135,7 +135,7 @@ groups:
 
       - id: 1.1.9
         text: "Ensure that the --repair-malformed-updates argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--repair-malformed-updates"
@@ -151,7 +151,7 @@ groups:
 
       - id: 1.1.10
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -170,7 +170,7 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the admission control plugin AlwaysPullImages is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -187,7 +187,7 @@ groups:
 
       - id: 1.1.12
         text: "Ensure that the admission control plugin DenyEscalatingExec is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -204,7 +204,7 @@ groups:
 
       - id: 1.1.13
         text: "Ensure that the admission control plugin SecurityContextDeny is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -221,7 +221,7 @@ groups:
 
       - id: 1.1.14
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -241,7 +241,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the --audit-log-path argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--audit-log-path"
@@ -255,7 +255,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--audit-log-maxage"
@@ -271,7 +271,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--audit-log-maxbackup"
@@ -288,7 +288,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--audit-log-maxsize"
@@ -305,7 +305,7 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -322,7 +322,7 @@ groups:
 
       - id: 1.1.20
         text: "Ensure that the --token-auth-file parameter is not set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--token-auth-file"
@@ -336,7 +336,7 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--kubelet-certificate-authority"
@@ -351,7 +351,7 @@ groups:
 
       - id: 1.1.22
         text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: and
           test_items:
@@ -370,7 +370,7 @@ groups:
 
       - id: 1.1.23
         text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--service-account-lookup"
@@ -386,7 +386,7 @@ groups:
 
       - id: 1.1.24
         text: "Ensure that the admission control plugin PodSecurityPolicy is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -405,7 +405,7 @@ groups:
 
       - id: 1.1.25
         text: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--service-account-key-file"
@@ -420,7 +420,7 @@ groups:
       - id: 1.1.26
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as
           appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: and
           test_items:
@@ -439,7 +439,7 @@ groups:
 
       - id: 1.1.27
         text: "Ensure that the admission control plugin ServiceAccount is set(Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -461,7 +461,7 @@ groups:
       - id: 1.1.28
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
         as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: and
           test_items:
@@ -480,7 +480,7 @@ groups:
 
       - id: 1.1.29
         text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--client-ca-file"
@@ -494,7 +494,7 @@ groups:
 
       - id: 1.1.30
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--tls-cipher-suites"
@@ -510,7 +510,7 @@ groups:
 
       - id: 1.1.31
         text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--etcd-cafile"
@@ -525,7 +525,7 @@ groups:
 
       - id: 1.1.32
         text: "Ensure that the --authorization-mode argument is set to Node (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -542,7 +542,7 @@ groups:
 
       - id: 1.1.33
         text: "Ensure that the admission control plugin NodeRestriction is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -561,7 +561,7 @@ groups:
       - id: 1.1.34
         text: "Ensure that the --experimental-encryption-provider-config argument is
         set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--experimental-encryption-provider-config"
@@ -576,7 +576,7 @@ groups:
 
       - id: 1.1.35
         text: "Ensure that the encryption provider is set to aescbc (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         type: "manual"
         remediation: |
           [Manual test]
@@ -597,7 +597,7 @@ groups:
 
       - id: 1.1.36
         text: "Ensure that the admission control plugin EventRateLimit is set (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -615,7 +615,7 @@ groups:
 
       - id: 1.1.37a
         text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -635,7 +635,7 @@ groups:
 
       - id: 1.1.37b
         text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--audit-policy-file"
@@ -652,7 +652,7 @@ groups:
 
       - id: 1.1.38
         text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -668,7 +668,7 @@ groups:
 
       - id: 1.1.39
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers ( Not Scored)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $apiserverbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--tls-cipher-suites"
@@ -687,7 +687,7 @@ groups:
     checks:
       - id: 1.2.1
         text: "Ensure that the --profiling argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $schedulerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--profiling"
@@ -703,7 +703,7 @@ groups:
 
       - id: 1.2.2
         text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
-        audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $schedulerbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -725,7 +725,7 @@ groups:
     checks:
       - id: 1.3.1
         text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--terminated-pod-gc-threshold"
@@ -738,7 +738,7 @@ groups:
 
       - id: 1.3.2
         text: "Ensure that the --profiling argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--profiling"
@@ -754,7 +754,7 @@ groups:
 
       - id: 1.3.3
         text: "Ensure that the --use-service-account-credentials argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--use-service-account-credentials"
@@ -770,7 +770,7 @@ groups:
 
       - id: 1.3.4
         text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--service-account-private-key-file"
@@ -784,7 +784,7 @@ groups:
 
       - id: 1.3.5
         text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--root-ca-file"
@@ -798,7 +798,7 @@ groups:
 
       - id: 1.3.6
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--feature-gates"
@@ -815,7 +815,7 @@ groups:
 
       - id: 1.3.7
         text: "Ensure that the --address argument is set to 127.0.0.1 (Scored)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $controllermanagerbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -1121,7 +1121,7 @@ groups:
 
       - id: 1.4.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-        audit: /bin/ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
+        audit: /bin/ps -ef | /bin/grep $etcdbin | /bin/grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
         tests:
           test_items:
             - flag: "700"
@@ -1139,7 +1139,7 @@ groups:
 
       - id: 1.4.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
-        audit: /bin/ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
+        audit: /bin/ps -ef | /bin/grep $etcdbin | /bin/grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
         tests:
           test_items:
             - flag: "etcd:etcd"
@@ -1345,7 +1345,7 @@ groups:
     checks:
       - id: 1.5.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--cert-file"
@@ -1362,7 +1362,7 @@ groups:
 
       - id: 1.5.2
         text: "Ensure that the --client-cert-auth argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--client-cert-auth"
@@ -1378,7 +1378,7 @@ groups:
 
       - id: 1.5.3
         text: "Ensure that the --auto-tls argument is not set to true (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -1397,7 +1397,7 @@ groups:
       - id: 1.5.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
         set as appropriate (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           bin_op: and
           test_items:
@@ -1415,7 +1415,7 @@ groups:
 
       - id: 1.5.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           test_items:
             - flag: "--peer-client-cert-auth"
@@ -1431,7 +1431,7 @@ groups:
 
       - id: 1.5.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
           bin_op: or
           test_items:
@@ -1450,7 +1450,7 @@ groups:
 
       - id: 1.5.7
         text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
-        audit: "/bin/ps -ef | grep $etcdbin | grep -v grep"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         type: "manual"
         tests:
           test_items:

@@ -19,7 +19,7 @@ groups:
 
       - id: 7.3
         text: "Verify that the --authorization-mode argument is set to WebHook"
-        audit: "grep -A1 authorization-mode /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 authorization-mode /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -37,7 +37,7 @@ groups:
 
       - id: 7.4
         text: "Verify the OpenShift default for the client-ca-file argument"
-        audit: "grep -A1 client-ca-file /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 client-ca-file /etc/origin/node/node-config.yaml"
         tests:
           test_items:
             - flag: "client-ca-file"
@@ -53,7 +53,7 @@ groups:
 
       - id: 7.5
         text: "Verify the OpenShift default setting for the read-only-port argument"
-        audit: "grep -A1 read-only-port /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 read-only-port /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -70,7 +70,7 @@ groups:
 
       - id: 7.6
         text: "Adjust the streaming-connection-idle-timeout argument"
-        audit: "grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -94,7 +94,7 @@ groups:
 
       - id: 7.8
         text: "Verify the OpenShift default value of true for the make-iptables-util-chains argument"
-        audit: "grep -A1 make-iptables-util-chains /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 make-iptables-util-chains /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -112,7 +112,7 @@ groups:
 
       - id: 7.9
         text: "Verify that the --keep-terminated-pod-volumes argument is set to false"
-        audit: "grep -A1 keep-terminated-pod-volumes /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 keep-terminated-pod-volumes /etc/origin/node/node-config.yaml"
         tests:
           test_items:
             - flag: "keep-terminated-pod-volumes"
@@ -131,7 +131,7 @@ groups:
 
       - id: 7.11
         text: "Set the --event-qps argument to 0"
-        audit: "grep -A1 event-qps /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 event-qps /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -149,7 +149,7 @@ groups:
 
       - id: 7.12
         text: "Verify the OpenShift cert-dir flag for HTTPS traffic"
-        audit: "grep -A1 cert-dir /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 cert-dir /etc/origin/node/node-config.yaml"
         tests:
           test_items:
             - flag: "/etc/origin/node/certificates"
@@ -163,7 +163,7 @@ groups:
 
       - id: 7.13
         text: "Verify the OpenShift default of 0 for the cadvisor-port argument"
-        audit: "grep -A1 cadvisor-port /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -A1 cadvisor-port /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -181,7 +181,7 @@ groups:
 
       - id: 7.14
         text: "Verify that the RotateKubeletClientCertificate argument is set to true"
-        audit: "grep -B1 RotateKubeletClientCertificate=true /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -B1 RotateKubeletClientCertificate=true /etc/origin/node/node-config.yaml"
         tests:
           test_items:
             - flag: "RotateKubeletClientCertificate=true"
@@ -195,7 +195,7 @@ groups:
 
       - id: 7.15
         text: "Verify that the RotateKubeletServerCertificate argument is set to true"
-        audit: "grep -B1 RotateKubeletServerCertificate=true /etc/origin/node/node-config.yaml"
+        audit: "/bin/grep -B1 RotateKubeletServerCertificate=true /etc/origin/node/node-config.yaml"
         tests:
           test_items:
             - flag: "RotateKubeletServerCertificate=true"

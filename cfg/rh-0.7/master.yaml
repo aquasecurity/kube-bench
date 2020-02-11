@@ -16,7 +16,7 @@ groups:
 
       - id: 1.2
         text: "Verify that the basic-auth-file method is not enabled"
-        audit: "grep -A2 basic-auth-file /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 basic-auth-file /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "--basic-auth-file"
@@ -41,7 +41,7 @@ groups:
 
       - id: 1.4
         text: "Secure communications between the API server and master nodes"
-        audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
@@ -83,7 +83,7 @@ groups:
 
       - id: 1.5
         text: "Prevent insecure bindings"
-        audit: "grep -A2 insecure-bind-address /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 insecure-bind-address /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "insecure-bind-address"
@@ -100,7 +100,7 @@ groups:
 
       - id: 1.6
         text: "Prevent insecure port access"
-        audit: "grep -A2 insecure-port /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 insecure-port /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "insecure-port"
@@ -117,7 +117,7 @@ groups:
 
       - id: 1.7
         text: "Use Secure Ports for API Server Traffic"
-        audit: "grep -A2 secure-port /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 secure-port /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -146,7 +146,7 @@ groups:
 
       - id: 1.9
         text: "Verify repair-malformed-updates argument for API compatibility"
-        audit: "grep -A2 repair-malformed-updates /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 repair-malformed-updates /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -164,7 +164,7 @@ groups:
 
       - id: 1.10
         text: "Verify that the AlwaysAdmit admission controller is disabled"
-        audit: "grep -A4 AlwaysAdmit /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 AlwaysAdmit /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "AlwaysAdmit"
@@ -182,7 +182,7 @@ groups:
 
       - id: 1.11
         text: "Manage the AlwaysPullImages admission controller"
-        audit: "grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "disable"
@@ -215,7 +215,7 @@ groups:
 
       - id: 1.14
         text: "Manage the NamespaceLifecycle admission controller"
-        audit: "grep -A4 NamespaceLifecycle /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 NamespaceLifecycle /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "NamespaceLifecycle"
@@ -233,7 +233,7 @@ groups:
 
       - id: 1.15
         text: "Configure API server auditing - audit log file path"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A5 auditConfig /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "enabled"
@@ -257,7 +257,7 @@ groups:
 
       - id: 1.16
         text: "Configure API server auditing - audit log retention"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A5 auditConfig /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "maximumFileRetentionDays: 30"
@@ -282,7 +282,7 @@ groups:
 
       - id: 1.17
         text: "Configure API server auditing - audit log backup retention"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A5 auditConfig /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "maximumRetainedFiles: 10"
@@ -307,7 +307,7 @@ groups:
 
       - id: 1.18
         text: "Configure audit log file size"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A5 auditConfig /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "maximumFileSizeMegabytes: 30"
@@ -332,7 +332,7 @@ groups:
 
       - id: 1.19
         text: "Verify that authorization-mode is not set to AlwaysAllow"
-        audit: "grep -A1 authorization-mode /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A1 authorization-mode /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "authorization-mode"
@@ -349,7 +349,7 @@ groups:
 
       - id: 1.20
         text: "Verify that the token-auth-file flag is not set"
-        audit: "grep token-auth-file /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep token-auth-file /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "token-auth-file"
@@ -366,7 +366,7 @@ groups:
 
       - id: 1.21
         text: "Verify the API server certificate authority"
-        audit: "grep -A1 kubelet-certificate-authority /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A1 kubelet-certificate-authority /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "kubelet-certificate-authority"
@@ -383,7 +383,7 @@ groups:
 
       - id: 1.22
         text: "Verify the API server client certificate and client key"
-        audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
@@ -420,7 +420,7 @@ groups:
 
       - id: 1.25
         text: "Verify that the service account key file argument is not set"
-        audit: "grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
@@ -460,7 +460,7 @@ groups:
 
       - id: 1.26
         text: "Verify the certificate and key used for communication with etcd"
-        audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
@@ -486,7 +486,7 @@ groups:
 
       - id: 1.27
         text: "Verify that the ServiceAccount admission controller is enabled"
-        audit: "grep -A4 ServiceAccount /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 ServiceAccount /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -510,7 +510,7 @@ groups:
 
       - id: 1.28
         text: "Verify the certificate and key used to encrypt API server traffic"
-        audit: "grep -A7 servingInfo /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A7 servingInfo /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
@@ -539,7 +539,7 @@ groups:
 
       - id: 1.29
         text: "Verify that the --client-ca-file argument is not set"
-        audit: "grep client-ca-file /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep client-ca-file /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "clientCA: ca.crt"
@@ -559,7 +559,7 @@ groups:
 
       - id: 1.30
         text: "Verify the CA used for communication with etcd"
-        audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "ca"
@@ -583,7 +583,7 @@ groups:
 
       - id: 1.32
         text: "Verify that the NodeRestriction admission controller is enabled"
-        audit: "grep -A4 NodeRestriction /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 NodeRestriction /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -606,7 +606,7 @@ groups:
 
       - id: 1.33
         text: "Configure encryption of data at rest in etcd datastore"
-        audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "experimental-encryption-provider-config:"
@@ -621,7 +621,7 @@ groups:
 
       - id: 1.34
         text: "Set the encryption provider to aescbc for etcd data at rest"
-        audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs grep -A1 providers"
+        audit: "/bin/grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs /bin/grep -A1 providers"
         tests:
           test_items:
             - flag: "aescbc:"
@@ -636,7 +636,7 @@ groups:
 
       - id: 1.35
         text: "Enable the EventRateLimit plugin"
-        audit: "grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "disable"
@@ -651,7 +651,7 @@ groups:
 
       - id: 1.36
         text: "Configure advanced auditing"
-        audit: "grep AdvancedAuditing /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep AdvancedAuditing /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -674,7 +674,7 @@ groups:
       # Review 1.1.37 in Aquasec shared doc, the tests are net zero.
       - id: 1.37
         text: "Adjust the request timeout argument for your cluster resources"
-        audit: "grep request-timeout /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep request-timeout /etc/origin/master/master-config.yaml"
         type: "manual"
         remediation: |
           [Manual test]
@@ -696,7 +696,7 @@ groups:
     checks:
       - id: 3.1
         text: "Adjust the terminated-pod-gc-threshold argument as needed"
-        audit: "grep terminated-pod-gc-threshold -A1 /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep terminated-pod-gc-threshold -A1 /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "terminated-pod-gc-threshold:"
@@ -722,7 +722,7 @@ groups:
 
       - id: 3.3
         text: "Verify that the --use-service-account-credentials argument is set to true"
-        audit: "grep -A2 use-service-account-credentials /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -A2 use-service-account-credentials /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
@@ -747,8 +747,8 @@ groups:
       - id: 3.4
         text: "Verify that the --service-account-private-key-file argument is set as appropriate"
         audit: |
-          grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml | grep privateKeyFile;
-          grep -A2 service-account-private-key-file /etc/origin/master/master-config.yaml
+          /bin/grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml | /bin/grep privateKeyFile;
+          /bin/grep -A2 service-account-private-key-file /etc/origin/master/master-config.yaml
         tests:
           bin_op: and
           test_items:
@@ -765,7 +765,7 @@ groups:
       # Review 3.5
       - id: 3.5
         text: "Verify that the --root-ca-file argument is set as appropriate"
-        audit: "/bin/sh -c 'grep root-ca-file /etc/origin/master/master-config.yaml; grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml'"
+        audit: "/bin/sh -c '/bin/grep root-ca-file /etc/origin/master/master-config.yaml; /bin/grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml'"
         tests:
           bin_op: and
           test_items:
@@ -795,7 +795,7 @@ groups:
 
       - id: 3.7
         text: "Manage certificate rotation"
-        audit: "grep -B3 RotateKubeletServerCertificate=true /etc/origin/master/master-config.yaml"
+        audit: "/bin/grep -B3 RotateKubeletServerCertificate=true /etc/origin/master/master-config.yaml"
         tests:
           test_items:
             - flag: "RotateKubeletServerCertificate"
@@ -1233,7 +1233,7 @@ groups:
     checks:
       - id: 5.1
         text: "Verify the default OpenShift cert-file and key-file configuration"
-        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_CERT_FILE=/etc/etcd/server.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep etcd_key_file=/etc/etcd/server.key /proc/1/environ; grep ETCD_CERT_FILE=/etc/etcd/server.crt /etc/etcd/etcd.conf; grep ETCD_KEY_FILE=/etc/etcd/server.key /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_CERT_FILE=/etc/etcd/server.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd /bin/grep etcd_key_file=/etc/etcd/server.key /proc/1/environ; /bin/grep ETCD_CERT_FILE=/etc/etcd/server.crt /etc/etcd/etcd.conf; /bin/grep ETCD_KEY_FILE=/etc/etcd/server.key /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
@@ -1258,7 +1258,7 @@ groups:
 
       - id: 5.2
         text: "Verify the default OpenShift setting for the client-cert-auth argument"
-        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_CLIENT_CERT_AUTH=true /proc/1/environ; /bin/grep ETCD_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
@@ -1278,7 +1278,7 @@ groups:
 
       - id: 5.3
         text: "Verify the OpenShift default values for etcd_auto_tls"
-        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_AUTO_TLS /proc/1/environ; grep ETCD_AUTO_TLS /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_AUTO_TLS /proc/1/environ; /bin/grep ETCD_AUTO_TLS /etc/etcd/etcd.conf'"
         tests:
           bin_op: or
           test_items:
@@ -1298,7 +1298,7 @@ groups:
 
       - id: 5.4
         text: "Verify the OpenShift default peer-cert-file and peer-key-file arguments for etcd"
-        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep ETCD_PEER_KEY_FILE=/etc/etcd/peer.key /proc/1/environ; grep ETCD_PEER_CERT_FILE /etc/etcd/etcd.conf; grep ETCD_PEER_KEY_FILE /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd /bin/grep ETCD_PEER_KEY_FILE=/etc/etcd/peer.key /proc/1/environ; /bin/grep ETCD_PEER_CERT_FILE /etc/etcd/etcd.conf; /bin/grep ETCD_PEER_KEY_FILE /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
@@ -1323,7 +1323,7 @@ groups:
 
       - id: 5.5
         text: "Verify the OpenShift default configuration for the peer-client-cert-auth"
-        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_PEER_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_PEER_CLIENT_CERT_AUTH=true /proc/1/environ; /bin/grep ETCD_PEER_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
@@ -1343,7 +1343,7 @@ groups:
 
       - id: 5.6
         text: "Verify the OpenShift default configuration for the peer-auto-tls argument"
-        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_AUTO_TLS /proc/1/environ; grep ETCD_PEER_AUTO_TLS /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd /bin/grep ETCD_PEER_AUTO_TLS /proc/1/environ; /bin/grep ETCD_PEER_AUTO_TLS /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:

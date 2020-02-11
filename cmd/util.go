@@ -306,7 +306,7 @@ func getKubeVersion() (string, error) {
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
 			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
-			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
+			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | /bin/grep -m1 .` --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
 				return getVersionFromKubeletOutput(string(out)), nil
