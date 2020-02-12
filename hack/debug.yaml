@@ -12,6 +12,9 @@ spec:
       image: ubuntu
       command: ["/bin/bash", "-c", "--"]
       args: ["while true; do sleep 30; done;"]
+      env:
+        - name: PATH
+          value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/mount-from-host/bin"
       volumeMounts:
         - name: var-lib-kubelet
           mountPath: /var/lib/kubelet
@@ -19,10 +22,10 @@ spec:
           mountPath: /etc/systemd
         - name: etc-kubernetes
           mountPath: /etc/kubernetes
-          # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+          # /usr/local/mount-from-host/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
           # You can omit this mount if you specify --version as part of the command.
         - name: usr-bin
-          mountPath: /usr/bin
+          mountPath: /usr/local/mount-from-host/bin
         - name: kind-bin
           mountPath: /kind/bin
       resources:
