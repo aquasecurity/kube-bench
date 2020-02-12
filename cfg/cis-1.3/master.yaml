@@ -260,8 +260,8 @@ groups:
           test_items:
             - flag: "--audit-log-maxage"
               compare:
-                op: gte
-                value: 30
+                op: gt
+                value: 0
               set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
