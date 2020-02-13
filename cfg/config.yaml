@@ -27,6 +27,7 @@ master:
       - "apiserver"
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
+      - /etc/kubernetes/manifests/kube-apiserver.yml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
       - /var/snap/kube-apiserver/current/args
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -39,6 +40,7 @@ master:
       - "scheduler"
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
+      - /etc/kubernetes/manifests/kube-scheduler.yml
       - /etc/kubernetes/manifests/kube-scheduler.manifest
       - /var/snap/kube-scheduler/current/args
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
@@ -52,6 +54,7 @@ master:
       - "controller-manager"
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
+      - /etc/kubernetes/manifests/kube-controller-manager.yml
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
       - /var/snap/kube-controller-manager/current/args
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
@@ -62,9 +65,11 @@ master:
       - "etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
+      - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
       - /etc/etcd/etcd.conf
       - /var/snap/etcd/common/etcd.conf.yml
+      - /var/snap/etcd/common/etcd.conf.yaml
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
@@ -104,8 +109,10 @@ node:
       - "/etc/kubernetes/kubelet-kubeconfig"
     confs:
       - "/var/lib/kubelet/config.yaml"
+      - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
+      - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/kubelet/current/args"
@@ -133,6 +140,7 @@ node:
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+      - /etc/kubernetes/addons/kube-proxy-daemonset.yml
       - /var/snap/kube-proxy/current/args
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
@@ -151,9 +159,11 @@ etcd:
       - "etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
+      - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
       - /etc/etcd/etcd.conf
       - /var/snap/etcd/common/etcd.conf.yml
+      - /var/snap/etcd/common/etcd.conf.yaml
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 controlplane:
