@@ -365,7 +365,7 @@ groups:
               gcloud beta container clusters update [CLUSTER_NAME] \
                 --enable-intra-node-visibility
         scored: false
-        
+
       - id: 6.6.2
         text: "Ensure use of VPC-native clusters (Scored)"
         type: "manual"
@@ -397,7 +397,7 @@ groups:
               }
 
             if Master Authorized Networks is enabled.
-            
+
             If Master Authorized Networks is disabled, the
             above command will return null ( { } ).
         scored: true
@@ -427,7 +427,7 @@ groups:
 
               gcloud container clusters create [CLUSTER_NAME] \
                 --enable-private-nodes
-      
+
             Setting this flag also requires the setting of --enable-ip-alias and --master-ipv4-
             cidr=[MASTER_CIDR_RANGE] .
         scored: true
@@ -605,7 +605,7 @@ groups:
                 --disk-type [DISK_TYPE] \
                 --boot-disk-kms-key \
                 projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
-                
+
             Create a cluster using customer-managed encryption keys for the node boot disk, of
             [DISK_TYPE] either pd-standard or pd-ssd :
 

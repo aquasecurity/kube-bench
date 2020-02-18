@@ -30,4 +30,3 @@ groups:
         text: "Ensure that the audit policy covers key security concerns (Not Scored) "
         remediation: "This control cannot be modified in GKE."
         scored: false
-
