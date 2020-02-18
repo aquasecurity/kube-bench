@@ -1,6 +1,6 @@
 ---
 controls:
-version: "GKE 1.0"
+version: "gke-1.0"
 id: 2
 text: "Etcd Node Configuration"
 type: "etcd"
