@@ -185,7 +185,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 					}
 					if c.State == check.WARN {
 						// Print the error if test failed due to problem with the audit command
-						if c.Reason != "" {
+						if c.Reason != "" && c.Type != "manual"{
 							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
 						} else {
 							fmt.Printf("%s %s\n", c.ID, c.Remediation)
