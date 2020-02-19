@@ -176,6 +176,10 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[27],
 			"--abc --peer-client-cert-auth=true --efg",
 		},
+		{
+			controls.Groups[0].Checks[28],
+			"--abc --peer-client-cert-auth=false --efg",
+		},
 	}
 
 	for _, c := range cases {
