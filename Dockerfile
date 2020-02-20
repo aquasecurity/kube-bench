@@ -17,6 +17,8 @@ RUN apk --no-cache add procps
 # https://github.com/aquasecurity/kube-bench/issues/535
 RUN apk --no-cache add openssl
 
+ENV PATH=$PATH:/usr/local/mount-from-host/bin
+
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
 COPY cfg/ cfg/

@@ -23,10 +23,10 @@ spec:
               mountPath: /etc/systemd
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
-              # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+              # /usr/local/mount-from-host/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
               # You can omit this mount if you specify --version as part of the command.
             - name: usr-bin
-              mountPath: /usr/bin
+              mountPath: /usr/local/mount-from-host/bin
             - name: kind-bin
               mountPath: /kind/bin
       restartPolicy: Never
