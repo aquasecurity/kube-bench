@@ -17,16 +17,21 @@ spec:
           volumeMounts:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
+              readOnly: true
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
+              readOnly: true
             - name: etc-systemd
               mountPath: /etc/systemd
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
-              # /usr/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+              readOnly: true
+              # /usr/local/mount-from-host/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
               # You can omit this mount if you specify --version as part of the command.
             - name: usr-bin
-              mountPath: /usr/bin
+              mountPath: /usr/local/mount-from-host/bin
+              readOnly: true
       restartPolicy: Never
       volumes:
         - name: var-lib-etcd

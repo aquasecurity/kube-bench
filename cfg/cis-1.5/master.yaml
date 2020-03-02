@@ -29,6 +29,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the
           master node.
@@ -71,6 +91,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -115,6 +155,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -157,6 +217,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -253,6 +333,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -296,6 +396,26 @@ groups:
                 op: eq
                 value: "600"
               set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -338,6 +458,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -615,12 +755,12 @@ groups:
         tests:
           bin_op: or
           test_items:
-            - flag: "--enable-admission-plugins"
+            - flag: "--disable-admission-plugins"
               compare:
-                op: has
+                op: nothave
                 value: "ServiceAccount"
               set: true
-            - flag: "--enable-admission-plugins"
+            - flag: "--disable-admission-plugins"
               set: false
         remediation: |
           Follow the documentation and create ServiceAccount objects as per your environment.
@@ -734,7 +874,7 @@ groups:
 
       - id: 1.2.21
         text: "Ensure that the --profiling argument is set to false (Scored)"
-        audit: "/bin/ps -ef | grep $apiserver | grep -v grep"
+        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--profiling"
@@ -963,7 +1103,7 @@ groups:
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the below parameter.
-          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         scored: false
 
   - id: 1.3

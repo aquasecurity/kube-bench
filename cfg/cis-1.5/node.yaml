@@ -14,20 +14,40 @@ groups:
         tests:
           test_items:
             - flag: "644"
-              set: true
               compare:
                 op: eq
                 value: "644"
-            - flag: "640"
               set: true
+            - flag: "640"
               compare:
                 op: eq
                 value: "640"
-            - flag: "600"
               set: true
+            - flag: "600"
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
           bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
@@ -54,25 +74,45 @@ groups:
         tests:
           test_items:
             - flag: "644"
-              set: true
               compare:
                 op: eq
                 value: "644"
-            - flag: "640"
               set: true
+            - flag: "640"
               compare:
                 op: eq
                 value: "640"
-            - flag: "600"
               set: true
+            - flag: "600"
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
           bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
-          chmod 644 $proykubeconfig
+          chmod 644 $proxykubeconfig
         scored: true
 
       - id: 4.1.4
@@ -93,20 +133,40 @@ groups:
         tests:
           test_items:
             - flag: "644"
-              set: true
               compare:
                 op: eq
                 value: "644"
-            - flag: "640"
               set: true
+            - flag: "640"
               compare:
                 op: eq
                 value: "640"
-            - flag: "600"
               set: true
+            - flag: "600"
               compare:
                 op: eq
                 value: "600"
+              set: true
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
           bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
@@ -173,6 +233,26 @@ groups:
               compare:
                 op: eq
                 value: "600"
+            - flag: "444"
+              compare:
+                op: eq
+                value: "444"
+              set: true
+            - flag: "440"
+              compare:
+                op: eq
+                value: "440"
+              set: true
+            - flag: "400"
+              compare:
+                op: eq
+                value: "400"
+              set: true
+            - flag: "000"
+              compare:
+                op: eq
+                value: "000"
+              set: true
           bin_op: or
         remediation: |
           Run the following command (using the config file location identied in the Audit step)
