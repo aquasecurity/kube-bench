@@ -276,17 +276,17 @@ func multiWordReplace(s string, subname string, sub string) string {
 const missingKubectlKubeletMessage = `
 Unable to find the programs kubectl or kubelet in the PATH.
 These programs are used to determine which version of Kubernetes is running.
-Make sure the /usr/bin directory is mapped to the container, 
+Make sure the /usr/local/mount-from-host/bin directory is mapped to the container, 
 either in the job.yaml file, or Docker command.
 
 For job.yaml:
 ...
 - name: usr-bin
-  mountPath: /usr/bin
+  mountPath: /usr/local/mount-from-host/bin
 ...
 
 For docker command:
-   docker -v $(which kubectl):/usr/bin/kubectl ....
+   docker -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl ....
 
 Alternatively, you can specify the version with --version
    kube-bench --version <VERSION> ...
