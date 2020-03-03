@@ -233,6 +233,8 @@ func loadConfig(nodetype check.NodeType) string {
 		file = etcdFile
 	case check.POLICIES:
 		file = policiesFile
+	case check.MANAGEDSERVICES:
+		file = managedservicesFile
 	}
 
 	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
@@ -390,6 +392,7 @@ var benchmarkVersionToTargetsMap = map[string][]string{
 	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
 	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
 	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
+	"gke-1.0": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES), string(check.MANAGEDSERVICES)},
 }
 
 // validTargets helps determine if the targets
