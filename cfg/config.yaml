@@ -162,6 +162,8 @@ controlplane:
 policies:
   components: []
 
+managedservices:
+  components: []
 
 version_mapping:
   "1.11": "cis-1.3"
@@ -171,5 +173,6 @@ version_mapping:
   "1.15": "cis-1.5"
   "1.16": "cis-1.5"
   "1.17": "cis-1.5"
+  "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
