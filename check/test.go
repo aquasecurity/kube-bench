@@ -207,7 +207,8 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 
 	case "bitmask":
 		expectedResultPattern = "bitmask '%s' AND '%s'"
-		max, requested, err := toNumericOctal(flagVal, tCompareValue)
+		max, err := strconv.ParseInt(flagVal, 8, 64)
+		requested, err := strconv.ParseInt(tCompareValue, 8, 64)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			os.Exit(1)
