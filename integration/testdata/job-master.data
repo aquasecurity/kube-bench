@@ -5,7 +5,7 @@
 [PASS] 1.1.3 Ensure that the --insecure-allow-any-token argument is not set (Not Scored)
 [PASS] 1.1.4 Ensure that the --kubelet-https argument is set to true (Scored)
 [PASS] 1.1.5 Ensure that the --insecure-bind-address argument is not set (Scored)
-[FAIL] 1.1.6 Ensure that the --insecure-port argument is set to 0 (Scored)
+[PASS] 1.1.6 Ensure that the --insecure-port argument is set to 0 (Scored)
 [PASS] 1.1.7 Ensure that the --secure-port argument is not set to 0 (Scored)
 [FAIL] 1.1.8 Ensure that the --profiling argument is set to false (Scored)
 [FAIL] 1.1.9 Ensure that the --repair-malformed-updates argument is set to false (Scored)
@@ -18,37 +18,37 @@
 [FAIL] 1.1.16 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)
 [FAIL] 1.1.17 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)
 [FAIL] 1.1.18 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)
-[FAIL] 1.1.19 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
+[PASS] 1.1.19 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
 [PASS] 1.1.20 Ensure that the --token-auth-file parameter is not set (Scored)
 [FAIL] 1.1.21 Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)
-[FAIL] 1.1.22 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)
+[PASS] 1.1.22 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)
 [PASS] 1.1.23 Ensure that the --service-account-lookup argument is set to true (Scored)
 [FAIL] 1.1.24 Ensure that the admission control plugin PodSecurityPolicy is set (Scored)
-[FAIL] 1.1.25 Ensure that the --service-account-key-file argument is set as appropriate (Scored)
-[FAIL] 1.1.26 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored)
+[PASS] 1.1.25 Ensure that the --service-account-key-file argument is set as appropriate (Scored)
+[PASS] 1.1.26 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored)
 [PASS] 1.1.27 Ensure that the admission control plugin ServiceAccount is set(Scored)
-[FAIL] 1.1.28 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
-[FAIL] 1.1.29 Ensure that the --client-ca-file argument is set as appropriate (Scored)
-[FAIL] 1.1.30 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
+[PASS] 1.1.28 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
+[PASS] 1.1.29 Ensure that the --client-ca-file argument is set as appropriate (Scored)
+[PASS] 1.1.30 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
 [WARN] 1.1.31 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)
-[FAIL] 1.1.32 Ensure that the --authorization-mode argument is set to Node (Scored)
-[FAIL] 1.1.33 Ensure that the admission control plugin NodeRestriction is set (Scored)
+[PASS] 1.1.32 Ensure that the --authorization-mode argument is set to Node (Scored)
+[PASS] 1.1.33 Ensure that the admission control plugin NodeRestriction is set (Scored)
 [FAIL] 1.1.34 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
 [WARN] 1.1.35 Ensure that the encryption provider is set to aescbc (Scored)
 [FAIL] 1.1.36 Ensure that the admission control plugin EventRateLimit is set (Scored)
 [PASS] 1.1.37a Ensure that the AdvancedAuditing argument is not set to false (Scored)
 [FAIL] 1.1.37b Ensure that the AdvancedAuditing argument is not set to false (Scored)
 [PASS] 1.1.38 Ensure that the --request-timeout argument is set as appropriate (Scored)
-[FAIL] 1.1.39 Ensure that the --authorization-mode argument includes RBAC (Scored)
+[PASS] 1.1.39 Ensure that the --authorization-mode argument includes RBAC (Scored)
 [INFO] 1.2 Scheduler
 [FAIL] 1.2.1 Ensure that the --profiling argument is set to false (Scored)
 [PASS] 1.2.2 Ensure that the --address argument is set to 127.0.0.1 (Scored)
 [INFO] 1.3 Controller Manager
 [FAIL] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)
 [FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Scored)
-[FAIL] 1.3.3 Ensure that the --use-service-account-credentials argument is set to true (Scored)
-[FAIL] 1.3.4 Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)
-[FAIL] 1.3.5 Ensure that the --root-ca-file argument is set as appropriate (Scored)
+[PASS] 1.3.3 Ensure that the --use-service-account-credentials argument is set to true (Scored)
+[PASS] 1.3.4 Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)
+[PASS] 1.3.5 Ensure that the --root-ca-file argument is set as appropriate (Scored)
 [FAIL] 1.3.6 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
 [PASS] 1.3.7 Ensure that the --address argument is set to 127.0.0.1 (Scored)
 [INFO] 1.4 Configuration Files
@@ -62,7 +62,7 @@
 [PASS] 1.4.8 Ensure that the etcd pod specification file ownership is set to root:root (Scored)
 [WARN] 1.4.9 Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Not Scored)
 [WARN] 1.4.10 Ensure that the Container Network Interface file ownership is set to root:root (Not Scored)
-[FAIL] 1.4.11 Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)
+[PASS] 1.4.11 Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)
 [FAIL] 1.4.12 Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)
 [PASS] 1.4.13 Ensure that the admin.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 1.4.14 Ensure that the admin.conf file ownership is set to root:root (Scored)
@@ -74,11 +74,11 @@
 [WARN] 1.4.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)
 [WARN] 1.4.21 Ensure that the Kubernetes PKI key file permissions are set to 600 or more restrictive (Scored)
 [INFO] 1.5 etcd
-[FAIL] 1.5.1 Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)
-[FAIL] 1.5.2 Ensure that the --client-cert-auth argument is set to true (Scored)
+[PASS] 1.5.1 Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)
+[PASS] 1.5.2 Ensure that the --client-cert-auth argument is set to true (Scored)
 [PASS] 1.5.3 Ensure that the --auto-tls argument is not set to true (Scored)
-[FAIL] 1.5.4 Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Scored)
-[FAIL] 1.5.5 Ensure that the --peer-client-cert-auth argument is set to true (Scored)
+[PASS] 1.5.4 Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Scored)
+[PASS] 1.5.5 Ensure that the --peer-client-cert-auth argument is set to true (Scored)
 [PASS] 1.5.6 Ensure that the --peer-auto-tls argument is not set to true (Scored)
 [WARN] 1.5.7 Ensure that a unique Certificate Authority is used for etcd (Not Scored)
 [INFO] 1.6 General Security Primitives
@@ -103,10 +103,6 @@
 1.1.1 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --anonymous-auth=false
-
-1.1.6 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-apiserver.yaml on the master node and set the below parameter.
---insecure-port=0
 
 1.1.8 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
@@ -145,23 +141,11 @@ on the master node and set the --audit-log-maxsize parameter to an
 appropriate size in MB. For example, to set it as 100 MB:
 --audit-log-maxsize=100
 
-1.1.19 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the --authorization-mode parameter to
-values other than AlwaysAllow. One such example could be as below.
---authorization-mode=RBAC
-
 1.1.21 Follow the Kubernetes documentation and setup the TLS connection between the
 apiserver and kubelets. Then, edit the API server pod specification file
 /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the --kubelet-certificate-authority
 parameter to the path to the cert file for the certificate authority.
 --kubelet-certificate-authority=<ca-string>
-
-1.1.22 Follow the Kubernetes documentation and set up the TLS connection between the
-apiserver and kubelets. Then, edit API server pod specification file
-/etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the
-kubelet client certificate and key parameters as below.
---kubelet-client-certificate=<path/to/client-certificate-file>
---kubelet-client-key=<path/to/client-key-file>
 
 1.1.24 Follow the documentation and create Pod Security Policy objects as per your environment.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -170,50 +154,9 @@ value that includes PodSecurityPolicy :
 --enable-admission-plugins=...,PodSecurityPolicy,...
 Then restart the API Server.
 
-1.1.25 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the --service-account-key-file parameter
-to the public key file for service accounts:
---service-account-key-file=<filename>
-
-1.1.26 Follow the Kubernetes documentation and set up the TLS connection between the
-apiserver and etcd. Then, edit the API server pod specification file
-/etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the etcd
-certificate and key file parameters.
---etcd-certfile=<path/to/client-certificate-file>
---etcd-keyfile=<path/to/client-key-file>
-
-1.1.28 Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the TLS certificate and private key file
-parameters.
---tls-cert-file=<path/to/tls-certificate-file>
---tls-private-key-file=<path/to/tls-key-file>
-
-1.1.29 Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the client certificate authority file.
---client-ca-file=<path/to/client-ca-file>
-
-1.1.30 Follow the Kubernetes documentation and set up the TLS connection between the
-apiserver and etcd. Then, edit the API server pod specification file
-/etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the etcd
-certificate authority file parameter.
---etcd-cafile=<path/to/ca-file>
-
 1.1.31 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
-
-1.1.32 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the --authorization-mode parameter to a
-value that includes Node.
---authorization-mode=Node,RBAC
-
-1.1.33 Follow the Kubernetes documentation and configure NodeRestriction plug-in on
-kubelets. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-on the master node and set the --enable-admission-plugins parameter to a
-value that includes NodeRestriction.
---enable-admission-plugins=...,NodeRestriction,...
 
 1.1.34 [Manual test]
 Follow the Kubernetes documentation and configure a EncryptionConfig file.
@@ -248,8 +191,6 @@ configuration file. Then, edit the API server pod specification file
 and set the below parameters.
 --audit-policy-file=/etc/kubernetes/audit-policy.yaml
 
-1.1.39 Edit the API server pod specification file kube-apiserver on the master node and set the --authorization-mode parameter to a value that includes RBAC, for example: --authorization-mode=Node,RBAC
-
 1.2.1 Edit the Scheduler pod specification file /etc/kubernetes/manifests/kube-scheduler.yaml
 file on the master node and set the below parameter.
 --profiling=false
@@ -261,20 +202,6 @@ on the master node and set the --terminated-pod-gc-threshold to an appropriate t
 1.3.2 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
 on the master node and set the below parameter.
 --profiling=false
-
-1.3.3 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
-on the master node to set the below parameter.
---use-service-account-credentials=true
-
-1.3.4 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
-on the master node and set the --service-account-private-
-key-file parameter to the private key file for service accounts.
---service-account-private-key-file=<filename>
-
-1.3.5 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
-on the master node and set the --root-ca-file parameter to
-the certificate bundle file.
---root-ca-file=<path/to/file>
 
 1.3.6 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
 controller-manager.yaml on the master node and set the --feature-gates parameter to
@@ -290,12 +217,6 @@ chmod 644 <path/to/cni/files>
 Run the below command (based on the file location on your system) on the master node.
 For example,
 chown root:root <path/to/cni/files>
-
-1.4.11 On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
-from the below command:
-ps -ef | grep etcd
-Run the below command (based on the etcd data directory found above). For example,
-chmod 700 /var/lib/etcd
 
 1.4.12 On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
 from the below command:
@@ -314,26 +235,6 @@ For example, chmod -R 644 /etc/kubernetes/pki/*.crt
 1.4.21 [Manual test]
 Run the below command (based on the file location on your system) on the master node.
 For example, chmod -R 600 /etc/kubernetes/pki/*.key
-
-1.5.1 Follow the etcd service documentation and configure TLS encryption.
-Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the
-master node and set the below parameters.
---ca-file=</path/to/ca-file>
---key-file=</path/to/key-file>
-
-1.5.2 Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master
-node and set the below parameter.
---client-cert-auth="true"
-
-1.5.4 Follow the etcd service documentation and configure peer TLS encryption as appropriate
-for your etcd cluster. Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the
-master node and set the below parameters.
---peer-client-file=</path/to/peer-cert-file>
---peer-key-file=</path/to/peer-key-file>
-
-1.5.5 Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master
-node and set the below parameter.
---peer-client-cert-auth=true
 
 1.5.7 [Manual test]
 Follow the etcd documentation and create a dedicated certificate authority setup for the
@@ -420,7 +321,7 @@ Create a PSP as described in the Kubernetes documentation, ensuring that the .sp
 
 
 == Summary ==
-30 checks PASS
-36 checks FAIL
+49 checks PASS
+17 checks FAIL
 25 checks WARN
 1 checks INFO

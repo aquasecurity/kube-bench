@@ -447,12 +447,12 @@ groups:
         tests:
           bin_op: or
           test_items:
-            - flag: "--enable-admission-plugins"
+            - flag: "--disable-admission-plugins"
               compare:
-                op: has
+                op: nothave
                 value: "ServiceAccount"
               set: true
-            - flag: "--enable-admission-plugins"
+            - flag: "--disable-admission-plugins"
               set: false
         remediation: |
           Follow the documentation and create ServiceAccount objects as per your environment.

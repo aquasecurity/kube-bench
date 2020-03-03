@@ -115,7 +115,12 @@ func (t *testItem) execute(s string) *testOutput {
 					if vals[3] != "" {
 						flagVal = vals[3]
 					} else {
-						flagVal = vals[1]
+						// --bool-flag
+						if strings.HasPrefix(t.Flag, "--") {
+							flagVal = "true"
+						} else {
+							flagVal = vals[1]
+						}
 					}
 				} else {
 					fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")

@@ -10,17 +10,14 @@ spec:
       containers:
         - name: kube-bench
           image: aquasec/kube-bench:latest
-          command: ["kube-bench", "--version", "1.13", "node"]
+          command: ["kube-bench", "--benchmark", "gke-1.0", "run", "--targets", "node,policies,managedservices"]
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
-              readOnly: true
             - name: etc-systemd
               mountPath: /etc/systemd
-              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
-              readOnly: true
       restartPolicy: Never
       volumes:
         - name: var-lib-kubelet
@@ -28,10 +25,7 @@ spec:
             path: "/var/lib/kubelet"
         - name: etc-systemd
           hostPath:
-            path: "/lib/systemd"
+            path: "/etc/systemd"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"
-        - name: usr-bin
-          hostPath:
-            path: "/usr/bin"

@@ -54,8 +54,9 @@ kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 
-There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
-
+kube-bench has preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11.
+There is also preliminary support for Google's Kubernetes Engine starting from Kubernetes 1.15.
+Please note that kube-bench does not automatically detect OpenShift and GKE - see below. 
 
 
 ## Installation
@@ -115,6 +116,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.3| master, node |
 | cis-1.4| master, node |
 | cis-1.5| master, controlplane, node, etcd, policies |
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
@@ -131,16 +133,16 @@ You can avoid installing kube-bench on the host by running it inside a container
 docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest [master|node] --version 1.13
 ```
 
-> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/bin/kubectl` to resolve this. You will also need to pass in kubeconfig credentials. For example:
+> Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/local/mount-from-host/bin/kubectl` to resolve this. You will also need to pass in kubeconfig credentials. For example:
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t aquasec/kube-bench:latest [master|node] 
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t aquasec/kube-bench:latest [master|node] 
 ```
 
 You can use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yam -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest [master|node]
 ```
 
 ### Running in a Kubernetes cluster
@@ -262,6 +264,18 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML). 
 
+### Running in an GKE cluster
+| CIS Benchmark | Targets |
+|---|---|
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
+
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
+
+```
+kubectl apply -f job-gke.yaml
+```
 
 ## Output
 
