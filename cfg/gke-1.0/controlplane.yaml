@@ -1,0 +1,32 @@
+---
+controls:
+version: "gke-1.0"
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Client certificate authentication should not be used for users (Not Scored)"
+        type: "manual"
+        remediation: |
+          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+          implemented in place of client certificates.
+          You can remediate the availability of client certificates in your GKE cluster. See
+          Recommendation 6.8.2.
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns (Not Scored) "
+        remediation: "This control cannot be modified in GKE."
+        scored: false

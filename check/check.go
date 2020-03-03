@@ -55,6 +55,8 @@ const (
 	CONTROLPLANE NodeType = "controlplane"
 	// POLICIES a node to run policies from
 	POLICIES NodeType = "policies"
+	// MANAGEDSERVICES a node to run managedservices from
+	MANAGEDSERVICES = "managedservices"
 
 	// MANUAL Check Type
 	MANUAL string = "manual"
