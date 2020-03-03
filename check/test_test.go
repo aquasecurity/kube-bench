@@ -156,6 +156,30 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[0].Checks[26],
 			"currentMasterVersion: 1.12.7",
 		},
+		{
+			controls.Groups[0].Checks[27],
+			"--peer-client-cert-auth",
+		},
+		{
+			controls.Groups[0].Checks[27],
+			"--abc=true --peer-client-cert-auth --efg=false",
+		},
+		{
+			controls.Groups[0].Checks[27],
+			"--abc --peer-client-cert-auth --efg",
+		},
+		{
+			controls.Groups[0].Checks[27],
+			"--peer-client-cert-auth=true",
+		},
+		{
+			controls.Groups[0].Checks[27],
+			"--abc --peer-client-cert-auth=true --efg",
+		},
+		{
+			controls.Groups[0].Checks[28],
+			"--abc --peer-client-cert-auth=false --efg",
+		},
 	}
 
 	for _, c := range cases {
