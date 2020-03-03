@@ -126,7 +126,55 @@ func TestGetWebData(t *testing.T) {
 	}
 
 }
+func TestGetWebDataWithRetry(t *testing.T) {
+	okfn := func(w http.ResponseWriter, r *http.Request) {
+		_, _ = fmt.Fprintln(w, `{
+			"major": "1",
+			"minor": "15"}`)
+	}
+	errfn := func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+	token := "dummyToken"
+	var tlsCert tls.Certificate
 
+	cases := []struct {
+		fn   http.HandlerFunc
+		fail bool
+	}{
+		{
+			fn:   okfn,
+			fail: false,
+		},
+		{
+			fn:   errfn,
+			fail: true,
+		},
+	}
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			ts := httptest.NewServer(c.fn)
+			defer ts.Close()
+			data, err := getWebDataWithRetry(ts.URL, token, &tlsCert)
+			if !c.fail {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+
+				if len(data) == 0 {
+					t.Errorf("missing data")
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Expected error")
+				}
+			}
+		})
+	}
+
+}
 func TestExtractVersion(t *testing.T) {
 	okJSON := []byte(`{
 	"major": "1",
