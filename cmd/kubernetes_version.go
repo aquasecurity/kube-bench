@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 )
@@ -30,7 +31,7 @@ func getKubeVersionFromRESTAPI() (string, error) {
 	}
 	token := strings.TrimSpace(string(tb))
 
-	data, err := getWebData(k8sVersionURL, token, tlsCert)
+	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
 	if err != nil {
 		return "", err
 	}
@@ -40,6 +41,20 @@ func getKubeVersionFromRESTAPI() (string, error) {
 		return "", err
 	}
 	return k8sVersion, nil
+}
+
+func getWebDataWithRetry(k8sVersionURL, token string, cacert *tls.Certificate) (data []byte, err error) {
+	tries := 0
+	for tries < 10 {
+		data, err = getWebData(k8sVersionURL, token, cacert)
+		if err == nil {
+			return
+		}
+		tries++
+		time.Sleep(1 * time.Second)
+	}
+
+	return
 }
 
 func extractVersion(data []byte) (string, error) {
