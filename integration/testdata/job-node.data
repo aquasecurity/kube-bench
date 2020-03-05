@@ -1,4 +1,4 @@
- [INFO] 2 Worker Node Security Configuration
+[INFO] 2 Worker Node Security Configuration
 [INFO] 2.1 Kubelet
 [PASS] 2.1.1 Ensure that the --anonymous-auth argument is set to false (Scored)
 [PASS] 2.1.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
