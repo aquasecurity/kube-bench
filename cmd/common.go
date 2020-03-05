@@ -180,8 +180,16 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colors[check.WARN].Printf("== Remediations ==\n")
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State == check.FAIL || c.State == check.WARN {
+					if c.State == check.FAIL {
 						fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					}
+					if c.State == check.WARN {
+						// Print the error if test failed due to problem with the audit command
+						if c.Reason != "" && c.Type != "manual"{
+							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
+						} else {
+							fmt.Printf("%s %s\n", c.ID, c.Remediation)
+						}
 					}
 				}
 			}
