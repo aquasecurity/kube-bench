@@ -97,7 +97,7 @@ node:
       - "/etc/kubernetes/pki/ca.crt"
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
-      - "/var/snap/microk8s/current/certs/ca.crt" 
+      - "/var/snap/microk8s/current/certs/ca.crt"
     svc:
       # These paths must also be included
       #  in the 'confs' property below
@@ -147,11 +147,11 @@ node:
       - "hyperkube kube-proxy"
       - "proxy"
     confs:
-      - /var/snap/microk8s/current/args/kube-proxy
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
       - /etc/kubernetes/addons/kube-proxy-daemonset.yml
       - /var/snap/kube-proxy/current/args
+      - /var/snap/microk8s/current/args/kube-proxy
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/var/lib/kubelet/kubeconfig"
