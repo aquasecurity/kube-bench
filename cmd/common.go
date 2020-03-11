@@ -180,8 +180,16 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			colors[check.WARN].Printf("== Remediations ==\n")
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State == check.FAIL || c.State == check.WARN {
+					if c.State == check.FAIL {
 						fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					}
+					if c.State == check.WARN {
+						// Print the error if test failed due to problem with the audit command
+						if c.Reason != "" && c.Type != "manual"{
+							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
+						} else {
+							fmt.Printf("%s %s\n", c.ID, c.Remediation)
+						}
 					}
 				}
 			}
@@ -225,6 +233,8 @@ func loadConfig(nodetype check.NodeType) string {
 		file = etcdFile
 	case check.POLICIES:
 		file = policiesFile
+	case check.MANAGEDSERVICES:
+		file = managedservicesFile
 	}
 
 	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
@@ -382,6 +392,7 @@ var benchmarkVersionToTargetsMap = map[string][]string{
 	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
 	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
 	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
+	"gke-1.0": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES), string(check.MANAGEDSERVICES)},
 }
 
 // validTargets helps determine if the targets

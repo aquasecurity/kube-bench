@@ -55,6 +55,8 @@ const (
 	CONTROLPLANE NodeType = "controlplane"
 	// POLICIES a node to run policies from
 	POLICIES NodeType = "policies"
+	// MANAGEDSERVICES a node to run managedservices from
+	MANAGEDSERVICES = "managedservices"
 
 	// MANUAL Check Type
 	MANUAL string = "manual"
@@ -78,6 +80,7 @@ type Check struct {
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
+	Reason     string `json:"reason,omitempty"`
 }
 
 // Runner wraps the basic Run method.
@@ -105,18 +108,21 @@ func (c *Check) run() State {
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
 	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
+		c.Reason = "There are no tests"
 		c.State = WARN
 		return c.State
 	}
 
 	// If check type is skip, force result to INFO
 	if c.Type == "skip" {
+		c.Reason = "Test marked as skip"
 		c.State = INFO
 		return c.State
 	}
 
 	// If check type is manual force result to WARN
 	if c.Type == MANUAL {
+		c.Reason = "Test marked as a manual test"
 		c.State = WARN
 		return c.State
 	}
@@ -126,6 +132,7 @@ func (c *Check) run() State {
 
 	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, c.Tests)
 	if len(state) > 0 {
+		c.Reason = retErrmsgs
 		c.State = state
 		return c.State
 	}
@@ -161,6 +168,7 @@ func (c *Check) run() State {
 
 		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, c.ConfigCommands, currentTests)
 		if len(state) > 0 {
+			c.Reason = retErrmsgs
 			c.State = state
 			return c.State
 		}
@@ -175,6 +183,7 @@ func (c *Check) run() State {
 		if c.Scored {
 			c.State = FAIL
 		} else {
+			c.Reason = errmsgs
 			c.State = WARN
 		}
 	}
@@ -254,13 +263,13 @@ func isShellCommand(s string) bool {
 
 func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
 	if len(strings.TrimSpace(audit)) == 0 {
-		return "", failTestItem("missing command"), ""
+		return "", failTestItem("missing command"), "missing audit command"
 	}
 
 	var out bytes.Buffer
 	state, retErrmsgs := runExecCommands(audit, commands, &out)
 	if len(state) > 0 {
-		return state, nil, ""
+		return state, nil, retErrmsgs
 	}
 	errmsgs := retErrmsgs
 
@@ -279,6 +288,7 @@ func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (Sta
 	// Check if command exists or exit with WARN.
 	for _, cmd := range commands {
 		if !isShellCommand(cmd.Path) {
+			errmsgs += fmt.Sprintf("Command '%s' not found\n", cmd.Path)
 			return WARN, errmsgs
 		}
 	}

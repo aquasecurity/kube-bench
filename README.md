@@ -43,20 +43,17 @@ Table of Contents
       
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.5.0 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/). 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| 1.3.0| cis-1.3 | 1.11-1.12 |
-| 1.4.1| cis-1.4 | 1.13-1.14 |
-| 1.5.0 | cis-1.5 | 1.15- |
+| [1.3.0](https://workbench.cisecurity.org/benchmarks/602) | cis-1.3 | 1.11-1.12 |
+| [1.4.1](https://workbench.cisecurity.org/benchmarks/2351) | cis-1.4 | 1.13-1.14 |
+| [1.5.0](https://workbench.cisecurity.org/benchmarks/1370) | cis-1.5 | 1.15- |
+| [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
+| Red Hat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 | 
 
-
-By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
-
-There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
-
-
+By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine, but please note that kube-bench does not automatically detect OpenShift and GKE - see the section below on [Running kube-bench](https://github.com/aquasecurity/kube-bench#running-kube-bench). 
 
 ## Installation
 
@@ -115,6 +112,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.3| master, node |
 | cis-1.4| master, node |
 | cis-1.5| master, controlplane, node, etcd, policies |
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
@@ -262,6 +260,18 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML). 
 
+### Running in an GKE cluster
+| CIS Benchmark | Targets |
+|---|---|
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
+
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
+
+```
+kubectl apply -f job-gke.yaml
+```
 
 ## Output
 
