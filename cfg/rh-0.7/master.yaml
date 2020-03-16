@@ -815,12 +815,12 @@ groups:
     checks:
       - id: 4.1
         text: "Verify the OpenShift default permissions for the API server pod specification file"
-        audit: "stat -c %a /etc/origin/node/pods/apiserver.yaml"
+        audit: "stat -c permissions=%a /etc/origin/node/pods/apiserver.yaml"
         tests:
           test_items:
-            - flag: "600"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "600"
               set: true
         remediation: |
@@ -847,12 +847,12 @@ groups:
 
       - id: 4.3
         text: "Verify the OpenShift default file permissions for the controller manager pod specification file"
-        audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
+        audit: "stat -c permissions=%a /etc/origin/node/pods/controller.yaml"
         tests:
           test_items:
-            - flag: "600"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "600"
               set: true
         remediation: |
@@ -879,18 +879,18 @@ groups:
 
       - id: 4.5
         text: "Verify the OpenShift default permissions for the scheduler pod specification file"
-        audit: "stat -c %a /etc/origin/node/pods/controller.yaml"
+        audit: "stat -c permissions=%a /etc/origin/node/pods/controller.yaml"
         tests:
           test_items:
-            - flag: "600"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "600"
               set: true
         remediation: |
           Run the below command.
 
-          chmod 600 stat -c %a /etc/origin/node/pods/controller.yaml
+          chmod 600 stat -c permissions=%a /etc/origin/node/pods/controller.yaml
         scored: true
 
       - id: 4.6
@@ -911,12 +911,12 @@ groups:
 
       - id: 4.7
         text: "Verify the OpenShift default etcd pod specification file permissions"
-        audit: "stat -c %a /etc/origin/node/pods/etcd.yaml"
+        audit: "stat -c permissions=%a /etc/origin/node/pods/etcd.yaml"
         tests:
           test_items:
-            - flag: "600"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "600"
               set: true
         remediation: |
@@ -943,44 +943,13 @@ groups:
 
       - id: 4.9
         text: "Verify the default OpenShift Container Network Interface file permissions"
-        audit: "stat -c %a /etc/origin/openvswitch/ /etc/cni/net.d/"
+        audit: "stat -c permissions=%a /etc/origin/openvswitch/ /etc/cni/net.d/"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command.
@@ -1006,12 +975,12 @@ groups:
 
       - id: 4.11
         text: "Verify the default OpenShift etcd data directory permissions"
-        audit: "stat -c %a /var/lib/etcd"
+        audit: "stat -c permissions=%a /var/lib/etcd"
         tests:
           test_items:
-            - flag: "700"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "700"
               set: true
         remediation: |
@@ -1040,44 +1009,13 @@ groups:
 
       - id: 4.13
         text: "Verify the default OpenShift admin.conf file permissions"
-        audit: "stat -c %a /etc/origin/master/admin.kubeconfig"
+        audit: "stat -c permissions=%a /etc/origin/master/admin.kubeconfig"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command.
@@ -1103,44 +1041,13 @@ groups:
 
       - id: 4.15
         text: "Verify the default OpenShift scheduler.conf file permissions"
-        audit: "stat -c %a /etc/origin/master/openshift-master.kubeconfig"
+        audit: "stat -c permissions=%a /etc/origin/master/openshift-master.kubeconfig"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command.
@@ -1166,44 +1073,13 @@ groups:
 
       - id: 4.17
         text: "Verify the default Openshift controller-manager.conf file permissions"
-        audit: "stat -c %a /etc/origin/master/openshift-master.kubeconfig"
+        audit: "stat -c permissions=%a /etc/origin/master/openshift-master.kubeconfig"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command.
