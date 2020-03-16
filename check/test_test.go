@@ -727,14 +727,4 @@ func TestToNumeric(t *testing.T) {
 			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
 		}
 	}
-	for _, c := range cases {
-		f, s, err := toNumericOctal(c.firstValue, c.secondValue)
-		if c.expectedToFail && err == nil {
-			t.Errorf("TestToNumericOctal - Expected error while converting %s and %s", c.firstValue, c.secondValue)
-		}
-
-		if !c.expectedToFail && (f != 5 || s != 6) {
-			t.Errorf("TestToNumericOctal - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
-		}
-	}
 }
