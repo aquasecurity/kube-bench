@@ -212,8 +212,8 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 
 	case "bitmask":
 		expectedResultPattern = "bitmask '%s' AND '%s'"
-		max, err := strconv.ParseInt(flagVal, 8, 64)
-		requested, err := strconv.ParseInt(tCompareValue, 8, 64)
+		requested, err := strconv.ParseInt(flagVal, 8, 64)
+		max, err := strconv.ParseInt(tCompareValue, 8, 64)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			os.Exit(1)
@@ -367,18 +367,6 @@ func toNumeric(a, b string) (c, d int, err error) {
 	d, err = strconv.Atoi(strings.TrimSpace(b))
 	if err != nil {
 		return -1, -1, fmt.Errorf("toNumeric - error converting %s: %s", b, err)
-	}
-
-	return c, d, nil
-}
-func toNumericOctal(a, b string) (c, d uint64, err error) {
-	c, err = strconv.ParseUint(a, 8, 64)
-	if err != nil {
-		return uint64(1), uint64(1), fmt.Errorf("toNumericOctal - error converting %s: %s", a, err)
-	}
-	d, err = strconv.ParseUint(b, 8, 64)
-	if err != nil {
-		return 1, 1, fmt.Errorf("toNumericOctal - error converting %s: %s", b, err)
 	}
 
 	return c, d, nil
