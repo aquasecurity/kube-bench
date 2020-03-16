@@ -666,6 +666,19 @@ func TestCompareOp(t *testing.T) {
 		{label: "op=valid_elements, valid_elements expectedResultPattern empty", op: "valid_elements", flagVal: "a,b",
 			compareValue: "", expectedResultPattern: "'a,b' contains valid elements from ''",
 			testResult: false},
+		// Test Op "bitmask"
+		{label: "op=bitmask, 644 AND 640", op: "bitmask", flagVal: "640",
+			compareValue: "644", expectedResultPattern: "bitmask '640' AND '644'",
+			testResult: true},
+		{label: "op=bitmask, 644 AND 777", op: "bitmask", flagVal: "777",
+			compareValue: "644", expectedResultPattern: "bitmask '777' AND '644'",
+			testResult: false},
+		{label: "op=bitmask, 644 AND 444", op: "bitmask", flagVal: "444",
+			compareValue: "644", expectedResultPattern: "bitmask '444' AND '644'",
+			testResult: true},
+		{label: "op=bitmask, 644 AND 211", op: "bitmask", flagVal: "211",
+			compareValue: "644", expectedResultPattern: "bitmask '211' AND '644'",
+			testResult: false},
 	}
 
 	for _, c := range cases {

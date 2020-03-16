@@ -213,44 +213,13 @@ groups:
     checks:
       - id: 8.1
         text: "Verify the OpenShift default permissions for the kubelet.conf file"
-        audit: "stat -c %a  /etc/origin/node/node.kubeconfig"
+        audit: "stat -c permissions=%a  /etc/origin/node/node.kubeconfig"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
@@ -274,44 +243,13 @@ groups:
 
       - id: 8.3
         text: "Verify the kubelet service file permissions of 644"
-        audit: "stat -c %a $nodesvc"
+        audit: "stat -c permissions=%a $nodesvc"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
@@ -335,44 +273,13 @@ groups:
 
       - id: 8.5
         text: "Verify the OpenShift default permissions for the proxy kubeconfig file"
-        audit: "stat -c %a /etc/origin/node/node.kubeconfig"
+        audit: "stat -c permissions=%a /etc/origin/node/node.kubeconfig"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
@@ -396,44 +303,13 @@ groups:
 
       - id: 8.7
         text: "Verify the OpenShift default permissions for the certificate authorities file."
-        audit: "stat -c %a /etc/origin/node/client-ca.crt"
+        audit: "stat -c permissions=%a /etc/origin/node/client-ca.crt"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command on each worker node.
