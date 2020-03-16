@@ -637,11 +637,17 @@ groups:
         text: "Ensure that the AdvancedAuditing argument is not set to false (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
+          bin_op: or
           test_items:
             - flag: "--audit-policy-file"
               compare:
                 op: eq
                 value: "/etc/kubernetes/audit-policy.yaml"
+              set: true
+            - flag: "--audit-policy-file"
+              compare:
+                op: eq
+                value: "/etc/kubernetes/audit-policy.yml"
               set: true
         remediation: |
           Follow the Kubernetes documentation and set the desired audit policy in the

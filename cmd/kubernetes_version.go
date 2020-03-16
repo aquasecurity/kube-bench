@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 )
@@ -30,7 +31,7 @@ func getKubeVersionFromRESTAPI() (string, error) {
 	}
 	token := strings.TrimSpace(string(tb))
 
-	data, err := getWebData(k8sVersionURL, token, tlsCert)
+	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
 	if err != nil {
 		return "", err
 	}
@@ -40,6 +41,24 @@ func getKubeVersionFromRESTAPI() (string, error) {
 		return "", err
 	}
 	return k8sVersion, nil
+}
+
+// The idea of this function is so if Kubernetes DNS is not completely seetup and the
+// Container where kube-bench is running needs time for DNS configure.
+// Basically try 10 times, waiting 1 second until either it is successful or it fails.
+func getWebDataWithRetry(k8sVersionURL, token string, cacert *tls.Certificate) (data []byte, err error) {
+	tries := 0
+	// We retry a few times in case the DNS service has not had time to come up
+	for tries < 10 {
+		data, err = getWebData(k8sVersionURL, token, cacert)
+		if err == nil {
+			return
+		}
+		tries++
+		time.Sleep(1 * time.Second)
+	}
+
+	return
 }
 
 func extractVersion(data []byte) (string, error) {
