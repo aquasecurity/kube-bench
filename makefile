@@ -4,8 +4,7 @@ DOCKER_REGISTRY ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_REGISTRY)/$(BINARY):$(VERSION)
-TARGET_OS ?= linux
-BUILD_OS := linux
+BUILD_OS ?= linux
 uname := $(shell uname -s)
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
@@ -23,7 +22,7 @@ KIND_CONTAINER_NAME=$(KIND_PROFILE)-control-plane
 build: kube-bench
 
 $(BINARY): $(SOURCES)
-	GOOS=$(TARGET_OS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+	GOOS=$(BUILD_OS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
 # builds the current dev docker version
 build-docker:
@@ -49,7 +48,7 @@ endif
 		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
 	fi
 
-# pushses the current dev version to the kind cluster.
+# pushes the current dev version to the kind cluster.
 kind-push:
 	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
