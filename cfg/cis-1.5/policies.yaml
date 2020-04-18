@@ -37,7 +37,7 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Not Scored)"
         type: "manual"
-        Remediation: |
+        remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
 
