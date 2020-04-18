@@ -293,7 +293,7 @@ groups:
         scored: true
 
       - id: 4.2.7
-        text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored) "
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
