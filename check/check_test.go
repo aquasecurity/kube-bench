@@ -15,6 +15,7 @@
 package check
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -108,5 +109,50 @@ func TestCheckAuditConfig(t *testing.T) {
 		if c.State != c.expected {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, c.expected, c.State)
 		}
+	}
+}
+
+func Test_runAudit(t *testing.T) {
+	type args struct {
+		audit  string
+		out    *bytes.Buffer
+		output string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		errMsg string
+		output string
+	}{
+		{
+			name: "run success",
+			args: args{
+				audit: "echo 'hello world'",
+				out:   &bytes.Buffer{},
+			},
+			errMsg: "",
+			output: "hello world\n",
+		},
+		{
+			name: "run failed",
+			args: args{
+				audit: "unknown_command",
+				out:   &bytes.Buffer{},
+			},
+			errMsg: "failed to run: \"unknown_command\", output: \"/bin/sh: line 1: unknown_command: command not found\\n\", error: exit status 127\n",
+			output: "/bin/sh: line 1: unknown_command: command not found\n",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			errMsg := runAudit(tt.args.audit, tt.args.out)
+			if errMsg != tt.errMsg {
+				t.Errorf("runAudit() errMsg = %q, want %q", errMsg, tt.errMsg)
+			}
+			output := tt.args.out.String()
+			if output != tt.output {
+				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+			}
+		})
 	}
 }

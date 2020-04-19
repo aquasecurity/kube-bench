@@ -201,11 +201,7 @@ func performTest(audit string, tests *tests) (State, *testOutput, string) {
 	}
 
 	var out bytes.Buffer
-	state, retErrmsgs := runExecCommands(audit, &out)
-	if len(state) > 0 {
-		return state, nil, retErrmsgs
-	}
-	errmsgs := retErrmsgs
+	errmsgs := runAudit(audit, &out)
 
 	finalOutput := tests.execute(out.String())
 	if finalOutput == nil {
@@ -215,16 +211,17 @@ func performTest(audit string, tests *tests) (State, *testOutput, string) {
 	return "", finalOutput, errmsgs
 }
 
-func runExecCommands(audit string, out *bytes.Buffer) (State, string) {
+func runAudit(audit string, out *bytes.Buffer) string {
 	errmsgs := ""
 
 	cmd := exec.Command("/bin/sh")
 	cmd.Stdin = strings.NewReader(audit)
 	cmd.Stdout = out
+	cmd.Stderr = out
 	if err := cmd.Run(); err != nil {
-		errmsgs += fmt.Sprintf("failed to run: %q, error: %s\n", audit, err)
+		errmsgs += fmt.Sprintf("failed to run: %q, output: %q, error: %s\n", audit, out.String(), err)
 	}
 
 	glog.V(3).Infof("Command %q - Output:\n\n %q\n - Error Messages:%q \n", audit, out.String(), errmsgs)
-	return "", errmsgs
+	return errmsgs
 }
