@@ -15,7 +15,6 @@
 package check
 
 import (
-	"os/exec"
 	"testing"
 )
 
@@ -33,8 +32,8 @@ func TestCheck_Run(t *testing.T) {
 		{
 			check: Check{ // Not scored checks with passing tests are marked pass
 				Scored: false,
-				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
-				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  ":",
+				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
 			},
 			Expected: PASS,
 		},
@@ -44,8 +43,8 @@ func TestCheck_Run(t *testing.T) {
 		{
 			check: Check{ // Scored checks with passing tests are marked pass
 				Scored: true,
-				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
-				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  ":",
+				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
 			},
 			Expected: PASS,
 		},
