@@ -257,7 +257,7 @@ go build -o kube-bench .
 ## Running on OpenShift 
 
 | OpenShift Hardening Guide | kube-bench config |
-|---|---|---|
+|---|---|
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
 
