@@ -244,9 +244,7 @@ If Go is installed on the target machines, you can simply clone this repository 
 
 ```shell
 go get github.com/aquasecurity/kube-bench
-go get github.com/golang/dep/cmd/dep
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
-$GOPATH/bin/dep ensure -vendor-only
 go build -o kube-bench .
 
 # See all supported options
