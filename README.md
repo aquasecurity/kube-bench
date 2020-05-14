@@ -319,7 +319,7 @@ No tests will be run for this check and the output will be marked [INFO].
 
 ## Roadmap
 
-Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
+Going forward we plan to release updates to kube-bench to add support for new releases of the CIS Benchmark. Note that these are not released as frequently as Kubernetes releases. 
 
 We welcome PRs and issue reports.
 
