@@ -244,9 +244,7 @@ If Go is installed on the target machines, you can simply clone this repository 
 
 ```shell
 go get github.com/aquasecurity/kube-bench
-go get github.com/golang/dep/cmd/dep
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
-$GOPATH/bin/dep ensure -vendor-only
 go build -o kube-bench .
 
 # See all supported options
@@ -259,7 +257,7 @@ go build -o kube-bench .
 ## Running on OpenShift 
 
 | OpenShift Hardening Guide | kube-bench config |
-|---|---|---|
+|---|---|
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
 
