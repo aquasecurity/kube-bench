@@ -169,7 +169,8 @@ groups:
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the below command:
-          ps -ef | grep etcd Run the below command (based on the etcd data directory found above). For example,
+          ps -ef | grep etcd
+          Run the below command (based on the etcd data directory found above). For example,
           chmod 700 /var/lib/etcd
         scored: true
 

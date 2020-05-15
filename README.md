@@ -216,7 +216,7 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
-$(aws ecr get-login --no-include-email --region <AWS_REGION>)
+aws ecr get-login-password --region <AWS_REGION> | docker login --username <AWS_USERNAME> --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
 docker build -t k8s/kube-bench .
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
@@ -244,9 +244,7 @@ If Go is installed on the target machines, you can simply clone this repository 
 
 ```shell
 go get github.com/aquasecurity/kube-bench
-go get github.com/golang/dep/cmd/dep
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
-$GOPATH/bin/dep ensure -vendor-only
 go build -o kube-bench .
 
 # See all supported options
@@ -259,7 +257,7 @@ go build -o kube-bench .
 ## Running on OpenShift 
 
 | OpenShift Hardening Guide | kube-bench config |
-|---|---|---|
+|---|---|
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
 
@@ -321,7 +319,7 @@ No tests will be run for this check and the output will be marked [INFO].
 
 ## Roadmap
 
-Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
+Going forward we plan to release updates to kube-bench to add support for new releases of the CIS Benchmark. Note that these are not released as frequently as Kubernetes releases. 
 
 We welcome PRs and issue reports.
 
