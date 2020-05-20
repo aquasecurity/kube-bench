@@ -37,7 +37,7 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Not Scored)"
         type: "manual"
-        Remediation: |
+        remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
 
@@ -128,7 +128,7 @@ groups:
         scored: false
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Not Scored) "
+        text: "Minimize the admission of containers with capabilities assigned (Not Scored)"
         type: "manual"
         remediation: |
           Review the use of capabilites in applications runnning on your cluster. Where a namespace
