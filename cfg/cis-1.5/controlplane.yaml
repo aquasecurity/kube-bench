@@ -9,7 +9,7 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 3.1.1
-        text: "Client certificate authentication should not be used for users (Not Scored) "
+        text: "Client certificate authentication should not be used for users (Not Scored)"
         type: "manual"
         remediation: |
           Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
@@ -20,14 +20,14 @@ groups:
     text: "Logging"
     checks:
       - id: 3.2.1
-        text: "Ensure that a minimal audit policy is created (Scored) "
+        text: "Ensure that a minimal audit policy is created (Scored)"
         type: "manual"
         remediation: |
           Create an audit policy file for your cluster.
         scored: true
 
       - id: 3.2.2
-        text: "Ensure that the audit policy covers key security concerns (Not Scored) "
+        text: "Ensure that the audit policy covers key security concerns (Not Scored)"
         type: "manual"
         remediation: |
           Consider modification of the audit policy in use on the cluster to include these items, at a
