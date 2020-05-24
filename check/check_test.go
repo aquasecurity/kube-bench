@@ -16,6 +16,7 @@ package check
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -134,23 +135,41 @@ func Test_runAudit(t *testing.T) {
 			output: "hello world\n",
 		},
 		{
+			name: "run multiple lines script",
+			args: args{
+				audit: `
+hello() {
+  echo "hello world"
+}
+
+hello
+`,
+				out: &bytes.Buffer{},
+			},
+			errMsg: "",
+			output: "hello world\n",
+		},
+		{
 			name: "run failed",
 			args: args{
 				audit: "unknown_command",
 				out:   &bytes.Buffer{},
 			},
-			errMsg: "failed to run: \"unknown_command\", output: \"/bin/sh: line 1: unknown_command: command not found\\n\", error: exit status 127\n",
-			output: "/bin/sh: line 1: unknown_command: command not found\n",
+			errMsg: "failed to run: \"unknown_command\", output: \"/bin/sh: ",
+			output: "not found\n",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			errMsg := runAudit(tt.args.audit, tt.args.out)
-			if errMsg != tt.errMsg {
+			if errMsg != "" && !strings.Contains(errMsg, tt.errMsg) {
 				t.Errorf("runAudit() errMsg = %q, want %q", errMsg, tt.errMsg)
 			}
 			output := tt.args.out.String()
-			if output != tt.output {
+			if errMsg == "" && output != tt.output {
+				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+			}
+			if errMsg != "" && !strings.Contains(output, tt.output) {
 				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
 			}
 		})
