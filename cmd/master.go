@@ -27,6 +27,7 @@ var masterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filename := loadConfig(check.MASTER)
 		runChecks(check.MASTER, filename)
+		writeOutput(controlsCollection)
 	},
 }
 

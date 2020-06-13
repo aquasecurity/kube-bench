@@ -55,6 +55,7 @@ var (
 	includeTestOutput   bool
 	outputFile          string
 	configFileError     error
+	controlsCollection  []*check.Controls
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -104,6 +105,7 @@ var RootCmd = &cobra.Command{
 			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES))
 		}
 
+		writeOutput(controlsCollection)
 	},
 }
 

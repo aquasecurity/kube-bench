@@ -27,6 +27,7 @@ var nodeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filename := loadConfig(check.NODE)
 		runChecks(check.NODE, filename)
+		writeOutput(controlsCollection)
 	},
 }
 
