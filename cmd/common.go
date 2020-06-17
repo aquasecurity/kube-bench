@@ -375,7 +375,7 @@ func writePgsqlOutput(controlsCollection []*check.Controls) {
 	for _, controls := range controlsCollection {
 		out, err := controls.JSON()
 		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
 		}
 		savePgsql(string(out))
 	}
