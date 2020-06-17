@@ -477,7 +477,7 @@ groups:
             - flag: root:root
               set: true
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
         scored: true
 
@@ -492,6 +492,6 @@ groups:
                 op: bitmask
                 value: "644"
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chmod 644 $kubeletconf
         scored: true
