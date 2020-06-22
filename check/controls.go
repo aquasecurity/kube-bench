@@ -70,18 +70,6 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 		return nil, fmt.Errorf("non-%s controls file specified", t)
 	}
 
-	// Prepare audit commands
-	for _, group := range c.Groups {
-		for _, check := range group.Checks {
-			glog.V(3).Infof("Check.ID %s", check.ID)
-			check.Commands = textToCommand(check.Audit)
-			if len(check.AuditConfig) > 0 {
-				glog.V(3).Infof("Check.ID has audit_config %s", check.ID)
-				check.ConfigCommands = textToCommand(check.AuditConfig)
-			}
-		}
-	}
-
 	return c, nil
 }
 

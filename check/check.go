@@ -17,10 +17,7 @@ package check
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 
 	"github.com/golang/glog"
@@ -65,22 +62,20 @@ const (
 // Check contains information about a recommendation in the
 // CIS Kubernetes document.
 type Check struct {
-	ID             string      `yaml:"id" json:"test_number"`
-	Text           string      `json:"test_desc"`
-	Audit          string      `json:"audit"`
-	AuditConfig    string      `yaml:"audit_config"`
-	Type           string      `json:"type"`
-	Commands       []*exec.Cmd `json:"omit"`
-	ConfigCommands []*exec.Cmd `json:"omit"`
-	Tests          *tests      `json:"omit"`
-	Set            bool        `json:"omit"`
-	Remediation    string      `json:"remediation"`
-	TestInfo       []string    `json:"test_info"`
+	ID             string   `yaml:"id" json:"test_number"`
+	Text           string   `json:"test_desc"`
+	Audit          string   `json:"audit"`
+	AuditConfig    string   `yaml:"audit_config"`
+	Type           string   `json:"type"`
+	Tests          *tests   `json:"omit"`
+	Set            bool     `json:"omit"`
+	Remediation    string   `json:"remediation"`
+	TestInfo       []string `json:"test_info"`
 	State          `json:"status"`
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
 	ExpectedResult string `json:"expected_result"`
-	Reason     string `json:"reason,omitempty"`
+	Reason         string `json:"reason,omitempty"`
 }
 
 // Runner wraps the basic Run method.
@@ -128,9 +123,9 @@ func (c *Check) run() State {
 	}
 
 	lastCommand := c.Audit
-	hasAuditConfig := c.ConfigCommands != nil
+	hasAuditConfig := c.AuditConfig != ""
 
-	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Commands, c.Tests)
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Tests)
 	if len(state) > 0 {
 		c.Reason = retErrmsgs
 		c.State = state
@@ -166,7 +161,7 @@ func (c *Check) run() State {
 			currentTests.TestItems[i] = nti
 		}
 
-		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, c.ConfigCommands, currentTests)
+		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, currentTests)
 		if len(state) > 0 {
 			c.Reason = retErrmsgs
 			c.State = state
@@ -200,78 +195,13 @@ func (c *Check) run() State {
 	return c.State
 }
 
-// textToCommand transforms an input text representation of commands to be
-// run into a slice of commands.
-// TODO: Make this more robust.
-func textToCommand(s string) []*exec.Cmd {
-	glog.V(3).Infof("textToCommand: %q\n", s)
-	cmds := []*exec.Cmd{}
-
-	cp := strings.Split(s, "|")
-
-	for _, v := range cp {
-		v = strings.Trim(v, " ")
-
-		// TODO:
-		// GOAL: To split input text into arguments for exec.Cmd.
-		//
-		// CHALLENGE: The input text may contain quoted strings that
-		// must be passed as a unit to exec.Cmd.
-		// eg. bash -c 'foo bar'
-		// 'foo bar' must be passed as unit to exec.Cmd if not the command
-		// will fail when it is executed.
-		// eg. exec.Cmd("bash", "-c", "foo bar")
-		//
-		// PROBLEM: Current solution assumes the grouped string will always
-		// be at the end of the input text.
-		re := regexp.MustCompile(`^(.*)(['"].*['"])$`)
-		grps := re.FindStringSubmatch(v)
-
-		var cs []string
-		if len(grps) > 0 {
-			s := strings.Trim(grps[1], " ")
-			cs = strings.Split(s, " ")
-
-			s1 := grps[len(grps)-1]
-			s1 = strings.Trim(s1, "'\"")
-
-			cs = append(cs, s1)
-		} else {
-			cs = strings.Split(v, " ")
-		}
-
-		cmd := exec.Command(cs[0], cs[1:]...)
-		cmds = append(cmds, cmd)
-	}
-
-	return cmds
-}
-
-func isShellCommand(s string) bool {
-	cmd := exec.Command("/bin/sh", "-c", "command -v "+s)
-
-	out, err := cmd.Output()
-	if err != nil {
-		exitWithError(fmt.Errorf("failed to check if command: %q is valid %v", s, err))
-	}
-
-	if strings.Contains(string(out), s) {
-		return true
-	}
-	return false
-}
-
-func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *testOutput, string) {
+func performTest(audit string, tests *tests) (State, *testOutput, string) {
 	if len(strings.TrimSpace(audit)) == 0 {
 		return "", failTestItem("missing command"), "missing audit command"
 	}
 
 	var out bytes.Buffer
-	state, retErrmsgs := runExecCommands(audit, commands, &out)
-	if len(state) > 0 {
-		return state, nil, retErrmsgs
-	}
-	errmsgs := retErrmsgs
+	errmsgs := runAudit(audit, &out)
 
 	finalOutput := tests.execute(out.String())
 	if finalOutput == nil {
@@ -281,73 +211,17 @@ func performTest(audit string, commands []*exec.Cmd, tests *tests) (State, *test
 	return "", finalOutput, errmsgs
 }
 
-func runExecCommands(audit string, commands []*exec.Cmd, out *bytes.Buffer) (State, string) {
-	var err error
+func runAudit(audit string, out *bytes.Buffer) string {
 	errmsgs := ""
 
-	// Check if command exists or exit with WARN.
-	for _, cmd := range commands {
-		if !isShellCommand(cmd.Path) {
-			errmsgs += fmt.Sprintf("Command '%s' not found\n", cmd.Path)
-			return WARN, errmsgs
-		}
-	}
-
-	// Run commands.
-	n := len(commands)
-	if n == 0 {
-		// Likely a warning message.
-		return WARN, errmsgs
-	}
-
-	// Each command runs,
-	//   cmd0 out -> cmd1 in, cmd1 out -> cmd2 in ... cmdn out -> os.stdout
-	//   cmd0 err should terminate chain
-	cs := commands
-
-	// Initialize command pipeline
-	cs[n-1].Stdout = out
-	i := 1
-
-	for i < n {
-		cs[i-1].Stdout, err = cs[i].StdinPipe()
-		if err != nil {
-			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
-		}
-		i++
-	}
-
-	// Start command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Start()
-		if err != nil {
-			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
-		}
-		i++
-	}
-
-	// Complete command pipeline
-	i = 0
-	for i < n {
-		err := cs[i].Wait()
-		if err != nil {
-			errmsgs += fmt.Sprintf("failed to run: %s, command: %s, error: %s\n", audit, cs[i].Args, err)
-		}
-
-		if i < n-1 {
-			cs[i].Stdout.(io.Closer).Close()
-		}
-		i++
+	cmd := exec.Command("/bin/sh")
+	cmd.Stdin = strings.NewReader(audit)
+	cmd.Stdout = out
+	cmd.Stderr = out
+	if err := cmd.Run(); err != nil {
+		errmsgs += fmt.Sprintf("failed to run: %q, output: %q, error: %s\n", audit, out.String(), err)
 	}
 
 	glog.V(3).Infof("Command %q - Output:\n\n %q\n - Error Messages:%q \n", audit, out.String(), errmsgs)
-	return "", errmsgs
-}
-
-func exitWithError(err error) {
-	fmt.Fprintf(os.Stderr, "\n%v\n", err)
-	// flush before exit non-zero
-	glog.Flush()
-	os.Exit(1)
+	return errmsgs
 }
