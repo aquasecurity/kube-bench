@@ -9,6 +9,11 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
     ldflags:
       - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
       - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
@@ -16,6 +21,7 @@ builds:
 archives:
   - id: default
     format: tar.gz
+    name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
     files:
       - "cfg/**/*"
 nfpms:
