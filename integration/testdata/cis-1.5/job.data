@@ -186,6 +186,21 @@ on the master node and set the below parameter.
 13 checks FAIL
 11 checks WARN
 0 checks INFO
+[INFO] 2 Etcd Node Configuration
+[INFO] 2 Etcd Node Configuration Files
+[PASS] 2.1 Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)
+[PASS] 2.2 Ensure that the --client-cert-auth argument is set to true (Scored)
+[PASS] 2.3 Ensure that the --auto-tls argument is not set to true (Scored)
+[PASS] 2.4 Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Scored)
+[PASS] 2.5 Ensure that the --peer-client-cert-auth argument is set to true (Scored)
+[PASS] 2.6 Ensure that the --peer-auto-tls argument is not set to true (Scored)
+[PASS] 2.7 Ensure that a unique Certificate Authority is used for etcd (Not Scored)
+
+== Summary ==
+7 checks PASS
+0 checks FAIL
+0 checks WARN
+0 checks INFO
 [INFO] 3 Control Plane Configuration
 [INFO] 3.1 Authentication and Authorization
 [WARN] 3.1.1 Client certificate authentication should not be used for users (Not Scored)
@@ -207,21 +222,6 @@ minimum.
 0 checks PASS
 0 checks FAIL
 3 checks WARN
-0 checks INFO
-[INFO] 2 Etcd Node Configuration
-[INFO] 2 Etcd Node Configuration Files
-[PASS] 2.1 Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)
-[PASS] 2.2 Ensure that the --client-cert-auth argument is set to true (Scored)
-[PASS] 2.3 Ensure that the --auto-tls argument is not set to true (Scored)
-[PASS] 2.4 Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Scored)
-[PASS] 2.5 Ensure that the --peer-client-cert-auth argument is set to true (Scored)
-[PASS] 2.6 Ensure that the --peer-auto-tls argument is not set to true (Scored)
-[PASS] 2.7 Ensure that a unique Certificate Authority is used for etcd (Not Scored)
-
-== Summary ==
-7 checks PASS
-0 checks FAIL
-0 checks WARN
 0 checks INFO
 [INFO] 4 Worker Node Security Configuration
 [INFO] 4.1 Worker Node Configuration Files

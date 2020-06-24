@@ -16,10 +16,13 @@ package cmd
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -63,8 +66,6 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 }
 
 func runChecks(nodetype check.NodeType, testYamlFile string) {
-	var summary check.Summary
-
 	// Verify config file was loaded into Viper during Cobra sub-command initialization.
 	if configFileError != nil {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", configFileError))
@@ -117,36 +118,8 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
 
-	summary = controls.RunChecks(runner, filter)
-
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && junitFmt {
-		out, err := controls.JUnit()
-		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
-		}
-
-		PrintOutput(string(out), outputFile)
-		// if we successfully ran some tests and it's json format, ignore the warnings
-	} else if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
-		out, err := controls.JSON()
-		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
-		}
-
-		PrintOutput(string(out), outputFile)
-	} else {
-		// if we want to store in PostgreSQL, convert to JSON and save it
-		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && pgSQL {
-			out, err := controls.JSON()
-			if err != nil {
-				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
-			}
-
-			savePgsql(string(out))
-		} else {
-			prettyPrint(controls, summary)
-		}
-	}
+	controls.RunChecks(runner, filter)
+	controlsCollection = append(controlsCollection, controls)
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -185,7 +158,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 					}
 					if c.State == check.WARN {
 						// Print the error if test failed due to problem with the audit command
-						if c.Reason != "" && c.Type != "manual"{
+						if c.Reason != "" && c.Type != "manual" {
 							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
 						} else {
 							fmt.Printf("%s %s\n", c.ID, c.Remediation)
@@ -357,6 +330,62 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 	}
 
 	return true
+}
+
+func writeOutput(controlsCollection []*check.Controls) {
+	sort.Slice(controlsCollection, func(i, j int) bool {
+		iid, _ := strconv.Atoi(controlsCollection[i].ID)
+		jid, _ := strconv.Atoi(controlsCollection[j].ID)
+		return iid < jid
+	})
+	if junitFmt {
+		writeJunitOutput(controlsCollection)
+		return
+	}
+	if jsonFmt {
+		writeJsonOutput(controlsCollection)
+		return
+	}
+	if pgSQL {
+		writePgsqlOutput(controlsCollection)
+		return
+	}
+	writeStdoutOutput(controlsCollection)
+}
+
+func writeJsonOutput(controlsCollection []*check.Controls) {
+	out, err := json.Marshal(controlsCollection)
+	if err != nil {
+		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+	}
+	PrintOutput(string(out), outputFile)
+}
+
+func writeJunitOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.JUnit()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
+		}
+		PrintOutput(string(out), outputFile)
+	}
+}
+
+func writePgsqlOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.JSON()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
+		}
+		savePgsql(string(out))
+	}
+}
+
+func writeStdoutOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		summary := controls.Summary
+		prettyPrint(controls, summary)
+	}
 }
 
 func printRawOutput(output string) {

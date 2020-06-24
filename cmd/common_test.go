@@ -15,12 +15,15 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -473,6 +476,51 @@ func TestIsEtcd(t *testing.T) {
 
 		assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
 	}
+}
+
+func TestWriteResultToJsonFile(t *testing.T) {
+	defer func() {
+		controlsCollection = []*check.Controls{}
+		jsonFmt = false
+		outputFile = ""
+	}()
+	var err error
+	jsonFmt = true
+	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	controlsCollection, err = parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+	writeOutput(controlsCollection)
+
+	var expect []*check.Controls
+	var result []*check.Controls
+	result, err = parseControlsJsonFile(outputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	expect, err = parseControlsJsonFile("./testdata/result.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expect, result)
+}
+
+func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
+	var result []*check.Controls
+
+	d, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(d, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func loadConfigForTest() (*viper.Viper, error) {
