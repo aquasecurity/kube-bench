@@ -289,7 +289,7 @@ func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
 
 func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
 	benchmarkVersionToTargetsMap := v.GetStringMapStringSlice("target_mapping")
-	if benchmarkVersionToTargetsMap == nil || (len(benchmarkVersionToTargetsMap) == 0) {
+	if len(benchmarkVersionToTargetsMap) == 0 {
 		return nil, fmt.Errorf("config file is missing 'target_mapping' section")
 	}
 
