@@ -71,7 +71,7 @@ func ps(proc string) string {
 	out, err := cmd.Output()
 	if err != nil {
 		glog.V(2).Info(err)
-		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
+		fmt.Fprintf(os.Stderr, "%s: %s", cmd.Args, err))
 	}
 
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
