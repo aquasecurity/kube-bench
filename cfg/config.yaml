@@ -187,3 +187,6 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "rh-0.7":
+    - "master"
+    - "node"
