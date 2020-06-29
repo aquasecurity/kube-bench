@@ -358,45 +358,14 @@ groups:
     checks:
       - id: 2.2.1
         text: Ensure that the kubelet.conf file permissions are set to 644 or more restrictive (Scored)
-        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %a $kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
               set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
@@ -421,45 +390,14 @@ groups:
 
       - id: 2.2.3
         text: Ensure that the kubelet service file permissions are set to 644 or more restrictive (Scored)
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %a $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
+              set: true
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
@@ -481,45 +419,14 @@ groups:
 
       - id: 2.2.5
         text: Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %a $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
+              set: true
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on the each worker
           node. For example,
@@ -570,52 +477,21 @@ groups:
             - flag: root:root
               set: true
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
         scored: true
 
       - id: 2.2.10
         text: Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
+              set: true
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chmod 644 $kubeletconf
         scored: true

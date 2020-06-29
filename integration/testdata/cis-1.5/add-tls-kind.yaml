@@ -1,0 +1,19 @@
+---
+apiVersion: kind.sigs.k8s.io/v1alpha3
+kind: Cluster
+networking:
+  apiServerAddress: "0.0.0.0"
+
+kubeadmConfigPatchesJson6902:
+  - group: kubelet.config.k8s.io
+    version: v1beta1
+    kind: KubeletConfiguration
+    patch: |
+      - op: add
+        path: /tlsCipherSuites
+        value: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]
+
+nodes:
+  # the control plane node config
+  - role: control-plane
+    image: "kindest/node:v1.18.0"

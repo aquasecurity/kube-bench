@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/glog"
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/jsonpath"
 )
@@ -115,11 +116,16 @@ func (t *testItem) execute(s string) *testOutput {
 					if vals[3] != "" {
 						flagVal = vals[3]
 					} else {
-						flagVal = vals[1]
+						// --bool-flag
+						if strings.HasPrefix(t.Flag, "--") {
+							flagVal = "true"
+						} else {
+							flagVal = vals[1]
+						}
 					}
 				} else {
-					fmt.Fprintf(os.Stderr, "invalid flag in testitem definition")
-					os.Exit(1)
+					glog.V(1).Infof(fmt.Sprintf("invalid flag in testitem definition"))
+					return failTestItem("error invalid flag in testitem definition")
 				}
 			}
 
@@ -165,8 +171,8 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 	case "gt", "gte", "lt", "lte":
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
-			os.Exit(1)
+			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			return "Invalid Number(s) used for comparison", false
 		}
 		switch tCompareOp {
 		case "gt":
@@ -205,8 +211,20 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		target := splitAndRemoveLastSeparator(tCompareValue, defaultArraySeparator)
 		testResult = allElementsValid(s, target)
 
+	case "bitmask":
+		expectedResultPattern = "bitmask '%s' AND '%s'"
+		requested, err := strconv.ParseInt(flagVal, 8, 64)
+		if err != nil {
+			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			return fmt.Sprintf("Not numeric value - flag: %s", flagVal), false
+		}
+		max, err := strconv.ParseInt(tCompareValue, 8, 64)
+		if err != nil {
+			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			return fmt.Sprintf("Not numeric value - flag: %s", tCompareValue), false
+		}
+		testResult = (max & requested) == requested
 	}
-
 	if expectedResultPattern == "" {
 		return expectedResultPattern, testResult
 	}
@@ -317,8 +335,9 @@ func (ts *tests) execute(s string) *testOutput {
 	// If no binary operation is specified, default to AND
 	switch ts.BinOp {
 	default:
-		fmt.Fprintf(os.Stderr, "unknown binary operator for tests %s\n", ts.BinOp)
-		os.Exit(1)
+		glog.V(2).Info(fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp))
+		finalOutput.actualResult = fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp)
+		return finalOutput
 	case and, "":
 		result = true
 		for i := range res {

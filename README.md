@@ -10,9 +10,16 @@
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/). 
 
-Note that it is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
-
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve.
+
+### Please Note 
+
+1. kube-bench implements the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/) as closely as possible. Please raise issues here if kube-bench is not correctly implementing the test as described in the Benchmark. To report issues in the Benchmark itself (for example, tests that you believe are inappropriate), please join the [CIS community](https://cisecurity.org). 
+
+1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
+
+1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
+
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
 
@@ -43,20 +50,17 @@ Table of Contents
       
 ## CIS Kubernetes Benchmark support
 
-kube-bench supports the tests for Kubernetes as defined in the CIS Benchmarks 1.3.0 to 1.5.0 respectively. 
+kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/). 
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| 1.3.0| cis-1.3 | 1.11-1.12 |
-| 1.4.1| cis-1.4 | 1.13-1.14 |
-| 1.5.0 | cis-1.5 | 1.15- |
+| [1.3.0](https://workbench.cisecurity.org/benchmarks/602) | cis-1.3 | 1.11-1.12 |
+| [1.4.1](https://workbench.cisecurity.org/benchmarks/2351) | cis-1.4 | 1.13-1.14 |
+| [1.5.0](https://workbench.cisecurity.org/benchmarks/1370) | cis-1.5 | 1.15- |
+| [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
+| Red Hat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 | 
 
-
-By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
-
-There is also preliminary support for Red Hat's OpenShift Hardening Guide for 3.10 and 3.11. Please note that kube-bench does not automatically detect OpenShift - see below. 
-
-
+By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine, but please note that kube-bench does not automatically detect OpenShift and GKE - see the section below on [Running kube-bench](https://github.com/aquasecurity/kube-bench#running-kube-bench). 
 
 ## Installation
 
@@ -115,6 +119,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.3| master, node |
 | cis-1.4| master, node |
 | cis-1.5| master, controlplane, node, etcd, policies |
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
@@ -211,7 +216,7 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
-$(aws ecr get-login --no-include-email --region <AWS_REGION>)
+aws ecr get-login-password --region <AWS_REGION> | docker login --username <AWS_USERNAME> --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
 docker build -t k8s/kube-bench .
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
@@ -239,9 +244,7 @@ If Go is installed on the target machines, you can simply clone this repository 
 
 ```shell
 go get github.com/aquasecurity/kube-bench
-go get github.com/golang/dep/cmd/dep
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
-$GOPATH/bin/dep ensure -vendor-only
 go build -o kube-bench .
 
 # See all supported options
@@ -254,7 +257,7 @@ go build -o kube-bench .
 ## Running on OpenShift 
 
 | OpenShift Hardening Guide | kube-bench config |
-|---|---|---|
+|---|---|
 | ocp-3.10| rh-0.7 |
 | ocp-3.11| rh-0.7 |
 
@@ -262,6 +265,18 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML). 
 
+### Running in an GKE cluster
+| CIS Benchmark | Targets |
+|---|---|
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
+
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
+
+```
+kubectl apply -f job-gke.yaml
+```
 
 ## Output
 
@@ -304,7 +319,7 @@ No tests will be run for this check and the output will be marked [INFO].
 
 ## Roadmap
 
-Going forward we plan to release updates to kube-bench to add support for new releases of the Benchmark, which in turn we can anticipate being made for each new Kubernetes release.
+Going forward we plan to release updates to kube-bench to add support for new releases of the CIS Benchmark. Note that these are not released as frequently as Kubernetes releases. 
 
 We welcome PRs and issue reports.
 

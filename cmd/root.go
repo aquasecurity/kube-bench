@@ -33,27 +33,29 @@ type FilterOpts struct {
 }
 
 var (
-	envVarsPrefix      = "KUBE_BENCH"
-	defaultKubeVersion = "1.11"
-	kubeVersion        string
-	benchmarkVersion   string
-	cfgFile            string
-	cfgDir             = "./cfg/"
-	jsonFmt            bool
-	junitFmt           bool
-	pgSQL              bool
-	masterFile         = "master.yaml"
-	nodeFile           = "node.yaml"
-	etcdFile           = "etcd.yaml"
-	controlplaneFile   = "controlplane.yaml"
-	policiesFile       = "policies.yaml"
-	noResults          bool
-	noSummary          bool
-	noRemediations     bool
-	filterOpts         FilterOpts
-	includeTestOutput  bool
-	outputFile         string
-	configFileError    error
+	envVarsPrefix       = "KUBE_BENCH"
+	defaultKubeVersion  = "1.11"
+	kubeVersion         string
+	benchmarkVersion    string
+	cfgFile             string
+	cfgDir              = "./cfg/"
+	jsonFmt             bool
+	junitFmt            bool
+	pgSQL               bool
+	masterFile          = "master.yaml"
+	nodeFile            = "node.yaml"
+	etcdFile            = "etcd.yaml"
+	controlplaneFile    = "controlplane.yaml"
+	policiesFile        = "policies.yaml"
+	managedservicesFile = "managedservices.yaml"
+	noResults           bool
+	noSummary           bool
+	noRemediations      bool
+	filterOpts          FilterOpts
+	includeTestOutput   bool
+	outputFile          string
+	configFileError     error
+	controlsCollection  []*check.Controls
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -108,6 +110,14 @@ var RootCmd = &cobra.Command{
 			runChecks(check.POLICIES, loadConfig(check.POLICIES))
 		}
 
+		// Managedservices is only valid for GKE 1.0 and later,
+		// this a gatekeeper for previous versions.
+		if validTargets(benchmarkVersion, []string{string(check.MANAGEDSERVICES)}) {
+			glog.V(1).Info("== Running managed services checks ==\n")
+			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES))
+		}
+
+		writeOutput(controlsCollection)
 	},
 }
 

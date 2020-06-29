@@ -308,6 +308,26 @@ groups:
               value: '^1\.12.*$'
             set: true
 
+    - id: 27
+      text: "check boolean flag with no value"
+      tests:
+        test_items:
+          - flag: "--peer-client-cert-auth"
+            compare:
+              op: eq
+              value: true
+            set: true
+
+    - id: 28
+      text: "check boolean flag with false value"
+      tests:
+        test_items:
+          - flag: "--peer-client-cert-auth"
+            compare:
+              op: eq
+              value: false
+            set: true
+
 - id: 2.1
   text: "audit and audit_config commands"
   checks:

@@ -1,6 +1,6 @@
 ---
 controls:
-version: 1.5
+version: "gke-1.0"
 id: 3
 text: "Control Plane Configuration"
 type: "controlplane"
@@ -14,22 +14,19 @@ groups:
         remediation: |
           Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
           implemented in place of client certificates.
+          You can remediate the availability of client certificates in your GKE cluster. See
+          Recommendation 6.8.2.
         scored: false
 
   - id: 3.2
     text: "Logging"
     checks:
       - id: 3.2.1
-        text: "Ensure that a minimal audit policy is created (Scored)"
-        type: "manual"
-        remediation: |
-          Create an audit policy file for your cluster.
-        scored: true
+        text: "Ensure that a minimal audit policy is created (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
 
       - id: 3.2.2
-        text: "Ensure that the audit policy covers key security concerns (Not Scored)"
-        type: "manual"
-        remediation: |
-          Consider modification of the audit policy in use on the cluster to include these items, at a
-          minimum.
+        text: "Ensure that the audit policy covers key security concerns (Not Scored) "
+        remediation: "This control cannot be modified in GKE."
         scored: false

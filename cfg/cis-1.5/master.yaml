@@ -6,48 +6,17 @@ text: "Master Node Security Configuration"
 type: "master"
 groups:
   - id: 1.1
-    text: "Master Node Configuration Files "
+    text: "Master Node Configuration Files"
     checks:
       - id: 1.1.1
         text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %a $apiserverconf; fi'"
+        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the
@@ -73,44 +42,13 @@ groups:
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %a $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -136,44 +74,13 @@ groups:
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %a $schedulerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -199,44 +106,13 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %a $etcdconf; fi'"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c permissions=%a $etcdconf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -262,7 +138,7 @@ groups:
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Not Scored)"
-        audit: "stat -c %a <path/to/cni/files>"
+        audit: "stat -c permissions=%a <path/to/cni/files>"
         type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -282,18 +158,19 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
-        audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %a
+        audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a
         tests:
           test_items:
-            - flag: "700"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "700"
               set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the below command:
-          ps -ef | grep etcd Run the below command (based on the etcd data directory found above). For example,
+          ps -ef | grep etcd
+          Run the below command (based on the etcd data directory found above). For example,
           chmod 700 /var/lib/etcd
         scored: true
 
@@ -314,44 +191,13 @@ groups:
 
       - id: 1.1.13
         text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %a /etc/kubernetes/admin.conf; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c permissions=%a /etc/kubernetes/admin.conf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -360,7 +206,7 @@ groups:
         scored: true
 
       - id: 1.1.14
-        text: "Ensure that the admin.conf file ownership is set to root:root (Scored) "
+        text: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %U:%G /etc/kubernetes/admin.conf; fi'"
         tests:
           test_items:
@@ -377,44 +223,13 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %a /etc/kubernetes/scheduler.conf; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c permissions=%a /etc/kubernetes/scheduler.conf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -440,44 +255,13 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %a /etc/kubernetes/controller-manager.conf; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c permissions=%a /etc/kubernetes/controller-manager.conf; fi'"
         tests:
-          bin_op: or
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -512,7 +296,7 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored) "
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
         audit: "stat -c %n\ %a /etc/kubernetes/pki/*.crt"
         type: "manual"
         remediation: |
@@ -854,7 +638,7 @@ groups:
         scored: true
 
       - id: 1.2.20
-        text: "Ensure that the --secure-port argument is not set to 0 (Scored) "
+        text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -1005,7 +789,7 @@ groups:
         scored: true
 
       - id: 1.2.29
-        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored) "
+        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: and
@@ -1236,7 +1020,7 @@ groups:
         scored: true
 
       - id: 1.4.2
-        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Scored) "
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Scored)"
         audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
         tests:
           bin_op: or

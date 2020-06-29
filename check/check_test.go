@@ -15,7 +15,8 @@
 package check
 
 import (
-	"os/exec"
+	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -33,8 +34,8 @@ func TestCheck_Run(t *testing.T) {
 		{
 			check: Check{ // Not scored checks with passing tests are marked pass
 				Scored: false,
-				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
-				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  ":",
+				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
 			},
 			Expected: PASS,
 		},
@@ -44,8 +45,8 @@ func TestCheck_Run(t *testing.T) {
 		{
 			check: Check{ // Scored checks with passing tests are marked pass
 				Scored: true,
-				Audit:  ":", Commands: []*exec.Cmd{exec.Command("")},
-				Tests: &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  ":",
+				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
 			},
 			Expected: PASS,
 		},
@@ -109,5 +110,68 @@ func TestCheckAuditConfig(t *testing.T) {
 		if c.State != c.expected {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, c.expected, c.State)
 		}
+	}
+}
+
+func Test_runAudit(t *testing.T) {
+	type args struct {
+		audit  string
+		out    *bytes.Buffer
+		output string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		errMsg string
+		output string
+	}{
+		{
+			name: "run success",
+			args: args{
+				audit: "echo 'hello world'",
+				out:   &bytes.Buffer{},
+			},
+			errMsg: "",
+			output: "hello world\n",
+		},
+		{
+			name: "run multiple lines script",
+			args: args{
+				audit: `
+hello() {
+  echo "hello world"
+}
+
+hello
+`,
+				out: &bytes.Buffer{},
+			},
+			errMsg: "",
+			output: "hello world\n",
+		},
+		{
+			name: "run failed",
+			args: args{
+				audit: "unknown_command",
+				out:   &bytes.Buffer{},
+			},
+			errMsg: "failed to run: \"unknown_command\", output: \"/bin/sh: ",
+			output: "not found\n",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			errMsg := runAudit(tt.args.audit, tt.args.out)
+			if errMsg != "" && !strings.Contains(errMsg, tt.errMsg) {
+				t.Errorf("runAudit() errMsg = %q, want %q", errMsg, tt.errMsg)
+			}
+			output := tt.args.out.String()
+			if errMsg == "" && output != tt.output {
+				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+			}
+			if errMsg != "" && !strings.Contains(output, tt.output) {
+				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+			}
+		})
 	}
 }

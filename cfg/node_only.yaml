@@ -29,8 +29,10 @@ node:
       - "/etc/kubernetes/kubelet-kubeconfig"
     confs:
       - "/var/lib/kubelet/config.yaml"
+      - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
+      - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around

@@ -1,6 +1,6 @@
 ---
 controls:
-version: 1.5
+version: "gke-1.0"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -37,7 +37,7 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Not Scored)"
         type: "manual"
-        remediation: |
+        Remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
 
@@ -103,38 +103,38 @@ groups:
         scored: true
 
       - id: 5.2.6
-        text: "Minimize the admission of root containers (Not Scored)"
+        text: "Minimize the admission of root containers (Scored)"
         type: "manual"
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
           UIDs not including 0.
-        scored: false
+        scored: true
 
       - id: 5.2.7
-        text: "Minimize the admission of containers with the NET_RAW capability (Not Scored)"
+        text: "Minimize the admission of containers with the NET_RAW capability (Scored)"
         type: "manual"
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
-        scored: false
+        scored: true
 
       - id: 5.2.8
-        text: "Minimize the admission of containers with added capabilities (Not Scored)"
+        text: "Minimize the admission of containers with added capabilities (Scored)"
         type: "manual"
         remediation: |
           Ensure that allowedCapabilities is not present in PSPs for the cluster unless
           it is set to an empty array.
-        scored: false
+        scored: true
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Not Scored)"
+        text: "Minimize the admission of containers with capabilities assigned (Scored) "
         type: "manual"
         remediation: |
           Review the use of capabilites in applications runnning on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider adding
+          contains applications which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
-        scored: false
+        scored: true
 
   - id: 5.3
     text: "Network Policies and CNI"
@@ -143,9 +143,8 @@ groups:
         text: "Ensure that the CNI in use supports Network Policies (Not Scored)"
         type: "manual"
         remediation: |
-          If the CNI plugin in use does not support network policies, consideration should be given to
-          making use of a different plugin, or finding an alternate mechanism for restricting traffic
-          in the Kubernetes cluster.
+          To use a CNI plugin with Network Policy, enable Network Policy in GKE, and the CNI plugin
+          will be updated. See Recommendation 6.6.7.
         scored: false
 
       - id: 5.3.2
@@ -182,6 +181,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
+          See also Recommendation 6.10.5 for GKE specifically.
         scored: false
 
   - id: 5.6
