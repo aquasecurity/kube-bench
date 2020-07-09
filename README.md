@@ -38,6 +38,7 @@ Table of Contents
 * [Running on OpenShift](#running-on-openshift)
 * [Output](#output)
 * [Configuration](#configuration)
+* [Troubleshooting](#troubleshooting)
 * [Test config YAML representation](#test-config-yaml-representation)
   * [Omitting checks](#omitting-checks)
 * [Roadmap](#roadmap)
@@ -298,6 +299,12 @@ Kubernetes configuration and binary file locations and names can vary from insta
 Any settings in the version-specific config file `cfg/<version>/config.yaml` take precedence over settings in the main `cfg/config.yaml` file.
 
 You can read more about `kube-bench` configuration in our [documentation](docs/README.md#configuration-and-variables).
+
+## Troubleshooting
+
+Running `kube-bench` with the `-v 3` parameter will generate debug logs that can be very helpful for debugging problems. 
+
+If you are using one of the example `job*.yaml` files, you will need to edit the `command` field, for example `["kube-bench", "-v", "3"]`. Once the job has run, the logs can be retrieved using `kubectl logs` on the job's pod.   
 
 ## Test config YAML representation
 
