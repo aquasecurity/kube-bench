@@ -62,7 +62,7 @@ groups:
       - id: 5.4.2
         text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Not Scored)"
         type: "manual"
-        remediation: 
+        remediation:
         scored: false
 
       - id: 5.4.3

@@ -49,7 +49,7 @@ groups:
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
-        scored: false 
+        scored: false
 
       - id: 4.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Not Scored)"
