@@ -68,7 +68,7 @@ By default, kube-bench will determine the test set to run based on the Kubernete
 You can choose to
 * run kube-bench from inside a container (sharing PID namespace with the host)
 * run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases),
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory
 * compile it from source.
 
 ## Running kube-bench
