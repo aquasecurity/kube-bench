@@ -287,8 +287,14 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
-        audit: "ls -laR /etc/kubernetes/pki/"
-        type: "manual"
+        audit: "find /etc/kubernetes/pki/ | xargs stat -c %U:%G | uniq | tr -d '\n'"
+        tests:
+          test_items:
+            - flag: "root:root"
+              compare:
+                op: eq
+                value: "root:root"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -297,8 +303,22 @@ groups:
 
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
-        audit: "stat -c %n\ %a /etc/kubernetes/pki/*.crt"
-        type: "manual"
+        audit: |
+          total=0
+          count=0
+          for n in $(stat -c %a /etc/kubernetes/pki/*.crt); do
+            count=$(( $count + 1 ))
+            total=$(( $total + $n ))
+          done
+          total=$(( $total * 10 ))
+          echo permissions=$(( $total / $count ))
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: lte
+                value: 6440
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -307,8 +327,22 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)"
-        audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"
-        type: "manual"
+        audit: |
+          total=0
+          count=0
+          for n in $(stat -c %a /etc/kubernetes/pki/*.key); do
+            count=$(( $count + 1 ))
+            total=$(( $total + $n ))
+          done
+          total=$(( $total * 10 ))
+          echo permissions=$(( $total / $count ))
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: lte
+                value: 6000
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
