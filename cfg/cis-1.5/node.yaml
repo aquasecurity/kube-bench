@@ -109,9 +109,7 @@ groups:
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Scored)"
         audit: |
           CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')
-          if [[ -z $CAFILE ]]; then
-            CAFILE=$kubeletcafile
-          fi
+          if test -z $CAFILE; then CAFILE=$kubeletcafile; fi
           if test -e $CAFILE; then stat -c %U:%G $CAFILE; fi
         tests:
           test_items:
