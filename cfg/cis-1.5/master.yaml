@@ -307,11 +307,11 @@ groups:
           total=0
           count=0
           for n in $(stat -c %a /etc/kubernetes/pki/*.crt); do
-            count=$(( $count + 1 ))
-            total=$(( $total + $n ))
+            count=$(( count + 1 ))
+            total=$(( total + n ))
           done
-          total=$(( $total * 10 ))
-          echo permissions=$(( $total / $count ))
+          total=$(( total * 10 ))
+          if test $count -gt 0; then echo permissions=$(( total / count )); fi
         tests:
           test_items:
             - flag: "permissions"
@@ -331,11 +331,11 @@ groups:
           total=0
           count=0
           for n in $(stat -c %a /etc/kubernetes/pki/*.key); do
-            count=$(( $count + 1 ))
-            total=$(( $total + $n ))
+            count=$(( count + 1 ))
+            total=$(( total + n ))
           done
-          total=$(( $total * 10 ))
-          echo permissions=$(( $total / $count ))
+          total=$(( total * 10 ))
+          if test $count -gt 0; then echo permissions=$(( total / count )); fi
         tests:
           test_items:
             - flag: "permissions"
