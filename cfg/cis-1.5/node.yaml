@@ -101,10 +101,8 @@ groups:
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)"
         audit: |
           CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')
-          if [[ -z $CAFILE ]]; then
-            CAFILE=$kubeletcafile
-          fi
-          stat -c permissions=%a $CAFILE
+          if test -z $CAFILE; then CAFILE=$kubeletcafile; fi
+          if test -e $CAFILE; then stat -c permissions=%a $CAFILE; fi
         tests:
           test_items:
             - flag: "permissions"
