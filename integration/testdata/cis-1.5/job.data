@@ -231,7 +231,7 @@ minimum.
 [FAIL] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)
 [PASS] 4.1.5 Ensure that the kubelet.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 4.1.6 Ensure that the kubelet.conf file ownership is set to root:root (Scored)
-[WARN] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
+[PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
 [PASS] 4.1.8 Ensure that the client certificate authorities file ownership is set to root:root (Scored)
 [PASS] 4.1.9 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
 [PASS] 4.1.10 Ensure that the kubelet configuration file ownership is set to root:root (Scored)
@@ -258,7 +258,6 @@ chmod 644 /etc/kubernetes/proxy.conf
 4.1.4 Run the below command (based on the file location on your system) on the each worker node.
 For example, chown root:root /etc/kubernetes/proxy.conf
 
-4.1.7 audit test did not run: There are no tests
 4.2.4 If using a Kubelet config file, edit the file to set readOnlyPort to 0.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -306,9 +305,9 @@ systemctl restart kubelet.service
 
 
 == Summary ==
-15 checks PASS
+16 checks PASS
 6 checks FAIL
-2 checks WARN
+1 checks WARN
 0 checks INFO
 [INFO] 5 Kubernetes Policies
 [INFO] 5.1 RBAC and Service Accounts

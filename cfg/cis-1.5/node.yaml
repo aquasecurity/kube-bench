@@ -99,7 +99,17 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)"
-        types: "manual"
+        audit: |
+          CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')
+          if test -z $CAFILE; then CAFILE=$kubeletcafile; fi
+          if test -e $CAFILE; then stat -c permissions=%a $CAFILE; fi
+        tests:
+          test_items:
+            - flag: "permissions"
+              set: true
+              compare:
+                op: bitmask
+                value: "644"
         remediation: |
           Run the following command to modify the file permissions of the
           --client-ca-file chmod 644 <filename>
