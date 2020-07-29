@@ -26,7 +26,6 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 Table of Contents
 =================
 
-- [Table of Contents](#table-of-contents)
   - [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support)
   - [Installation](#installation)
   - [Running kube-bench](#running-kube-bench)
