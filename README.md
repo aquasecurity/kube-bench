@@ -259,7 +259,7 @@ go build -o kube-bench .
 ./kube-bench
 ```
 
-## Running on OpenShift
+### Running on OpenShift
 
 | OpenShift Hardening Guide | kube-bench config |
 |---|---|
