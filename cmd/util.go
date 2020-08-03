@@ -72,7 +72,7 @@ func ps(proc string) string {
 	if err != nil {
 		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
-
+	
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
