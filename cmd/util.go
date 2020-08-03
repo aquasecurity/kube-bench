@@ -70,8 +70,7 @@ func ps(proc string) string {
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
-		glog.V(2).Info(err)
-		fmt.Fprintf(os.Stderr, "%s: %s", cmd.Args, err)
+		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
 
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
