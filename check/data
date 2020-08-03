@@ -440,3 +440,39 @@ groups:
               value: "correct"
             set: true
       scored: true
+    - id: 9
+      text: "test use_multiple_values is correct -> pass"
+      audit: "printf 'permissions=600\npermissions=600\npermissions=600'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
+    - id: 10
+      text: "test use_multiple_values is wrong -> fail"
+      audit: "printf 'permissions=600\npermissions=600\npermissions=644'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
+    - id: 11
+      text: "test use_multiple_values include empty value -> fail"
+      audit: "printf 'permissions=600\n\npermissions=600'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
