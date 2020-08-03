@@ -64,45 +64,45 @@ var RootCmd = &cobra.Command{
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
 
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==\n")
-			runChecks(check.MASTER, loadConfig(check.MASTER))
+			runChecks(check.MASTER, loadConfig(check.MASTER, bv))
 
 			// Control Plane is only valid for CIS 1.5 and later,
 			// this a gatekeeper for previous versions
-			if validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}) {
+			if validTargets(bv, []string{string(check.CONTROLPLANE)}) {
 				glog.V(1).Info("== Running control plane checks ==\n")
-				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE))
+				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv))
 			}
 		}
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(benchmarkVersion, []string{string(check.ETCD)}) && isEtcd() {
+		if validTargets(bv, []string{string(check.ETCD)}) && isEtcd() {
 			glog.V(1).Info("== Running etcd checks ==\n")
-			runChecks(check.ETCD, loadConfig(check.ETCD))
+			runChecks(check.ETCD, loadConfig(check.ETCD, bv))
 		}
 
 		glog.V(1).Info("== Running node checks ==\n")
-		runChecks(check.NODE, loadConfig(check.NODE))
+		runChecks(check.NODE, loadConfig(check.NODE, bv))
 
 		// Policies is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(benchmarkVersion, []string{string(check.POLICIES)}) {
+		if validTargets(bv, []string{string(check.POLICIES)}) {
 			glog.V(1).Info("== Running policies checks ==\n")
-			runChecks(check.POLICIES, loadConfig(check.POLICIES))
+			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv))
 		}
 
 		// Managedservices is only valid for GKE 1.0 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(benchmarkVersion, []string{string(check.MANAGEDSERVICES)}) {
+		if validTargets(bv, []string{string(check.MANAGEDSERVICES)}) {
 			glog.V(1).Info("== Running managed services checks ==\n")
-			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES))
+			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
 		}
 
 		writeOutput(controlsCollection)
