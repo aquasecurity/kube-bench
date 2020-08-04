@@ -74,6 +74,7 @@ type Check struct {
 	State          `json:"status"`
 	ActualValue    string `json:"actual_value"`
 	Scored         bool   `json:"scored"`
+	IsMultiple     bool   `yaml:"use_multiple_values"`
 	ExpectedResult string `json:"expected_result"`
 	Reason         string `json:"reason,omitempty"`
 }
@@ -125,7 +126,7 @@ func (c *Check) run() State {
 	lastCommand := c.Audit
 	hasAuditConfig := c.AuditConfig != ""
 
-	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Tests)
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Tests, c.IsMultiple)
 	if len(state) > 0 {
 		c.Reason = retErrmsgs
 		c.State = state
@@ -161,7 +162,7 @@ func (c *Check) run() State {
 			currentTests.TestItems[i] = nti
 		}
 
-		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, currentTests)
+		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, currentTests, c.IsMultiple)
 		if len(state) > 0 {
 			c.Reason = retErrmsgs
 			c.State = state
@@ -195,7 +196,7 @@ func (c *Check) run() State {
 	return c.State
 }
 
-func performTest(audit string, tests *tests) (State, *testOutput, string) {
+func performTest(audit string, tests *tests, isMultipleOutput bool) (State, *testOutput, string) {
 	if len(strings.TrimSpace(audit)) == 0 {
 		return "", failTestItem("missing command"), "missing audit command"
 	}
@@ -203,7 +204,7 @@ func performTest(audit string, tests *tests) (State, *testOutput, string) {
 	var out bytes.Buffer
 	errmsgs := runAudit(audit, &out)
 
-	finalOutput := tests.execute(out.String())
+	finalOutput := tests.execute(out.String(), isMultipleOutput)
 	if finalOutput == nil {
 		errmsgs += fmt.Sprintf("Final output is <<EMPTY>>. Failed to run: %s\n", audit)
 	}

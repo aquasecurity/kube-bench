@@ -67,7 +67,28 @@ func failTestItem(s string) *testOutput {
 	return &testOutput{testResult: false, actualResult: s}
 }
 
-func (t *testItem) execute(s string) *testOutput {
+func (t *testItem) execute(s string, isMultipleOutput bool) *testOutput {
+	result := &testOutput{}
+	s = strings.TrimRight(s, " \n")
+
+	// If the test has output that should be evaluated for each row
+	if isMultipleOutput {
+		output := strings.Split(s, "\n")
+		for _, op := range output {
+			result = t.evaluate(op)
+			// If the test failed for the current row, no need to keep testing for this output
+			if !result.testResult {
+				break
+			}
+		}
+	} else {
+		result = t.evaluate(s)
+	}
+
+	return result
+}
+
+func (t *testItem) evaluate(s string) *testOutput {
 	result := &testOutput{}
 	var match bool
 	var flagVal string
@@ -310,7 +331,7 @@ type tests struct {
 	BinOp     binOp       `yaml:"bin_op"`
 }
 
-func (ts *tests) execute(s string) *testOutput {
+func (ts *tests) execute(s string, isMultipleOutput bool) *testOutput {
 	finalOutput := &testOutput{}
 
 	// If no tests are defined return with empty finalOutput.
@@ -327,7 +348,7 @@ func (ts *tests) execute(s string) *testOutput {
 	expectedResultArr := make([]string, len(res))
 
 	for i, t := range ts.TestItems {
-		res[i] = *(t.execute(s))
+		res[i] = *(t.execute(s, isMultipleOutput))
 		expectedResultArr[i] = res[i].ExpectedResult
 	}
 

@@ -183,7 +183,7 @@ func TestTestExecute(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		res := c.Tests.execute(c.str).testResult
+		res := c.Tests.execute(c.str, c.IsMultiple).testResult
 		if !res {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
 		}
@@ -219,7 +219,7 @@ func TestTestExecuteExceptions(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		res := c.Tests.execute(c.str).testResult
+		res := c.Tests.execute(c.str, c.IsMultiple).testResult
 		if res {
 			t.Errorf("%s, expected:%v, got:%v\n", c.Text, false, res)
 		}
