@@ -287,7 +287,8 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
-        audit: "find /etc/kubernetes/pki/ | xargs stat -c %U:%G | uniq | tr -d '\n'"
+        audit: "find /etc/kubernetes/pki/ | xargs stat -c %U:%G"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "root:root"
@@ -303,21 +304,14 @@ groups:
 
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
-        audit: |
-          total=0
-          count=0
-          for n in $(stat -c %a /etc/kubernetes/pki/*.crt); do
-            count=$(( count + 1 ))
-            total=$(( total + n ))
-          done
-          total=$(( total * 10 ))
-          if test $count -gt 0; then echo permissions=$(( total / count )); fi
+        audit: "stat -c permissions=%a /etc/kubernetes/pki/*.crt"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "6440"
+                value: "644"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
@@ -327,21 +321,14 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)"
-        audit: |
-          total=0
-          count=0
-          for n in $(stat -c %a /etc/kubernetes/pki/*.key); do
-            count=$(( count + 1 ))
-            total=$(( total + n ))
-          done
-          total=$(( total * 10 ))
-          if test $count -gt 0; then echo permissions=$(( total / count )); fi
+        audit: "stat -c permissions=%a /etc/kubernetes/pki/*.key"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "6000"
+                value: "600"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
