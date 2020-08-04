@@ -347,7 +347,8 @@ func getVersionFromKubectlOutput(s string) string {
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
 		if strings.Contains(s, "The connection to the server") {
-			continueWithError(nil, `Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server.`)
+			msg := fmt.Sprintf(`Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version %s`, defaultKubeVersion)
+			fmt.Fprintln(os.Stderr, msg)
 		}
 		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
