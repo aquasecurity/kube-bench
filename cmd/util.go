@@ -276,7 +276,7 @@ func multiWordReplace(s string, subname string, sub string) string {
 const missingKubectlKubeletMessage = `
 Unable to find the programs kubectl or kubelet in the PATH.
 These programs are used to determine which version of Kubernetes is running.
-Make sure the /usr/local/mount-from-host/bin directory is mapped to the container, 
+Make sure the /usr/local/mount-from-host/bin directory is mapped to the container,
 either in the job.yaml file, or Docker command.
 
 For job.yaml:
@@ -346,6 +346,10 @@ func getVersionFromKubectlOutput(s string) string {
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
+		if strings.Contains(s, "The connection to the server") {
+			msg := fmt.Sprintf(`Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version %s`, defaultKubeVersion)
+			fmt.Fprintln(os.Stderr, msg)
+		}
 		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
 	}
