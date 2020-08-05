@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-bench-node
+spec:
+  selector:
+    matchLabels:
+      name: kube-bench-node
+  template:
+    metadata:
+      labels:
+        name: kube-bench-node
+    spec:
+      hostPID: true
+      containers:
+        - name: kube-bench
+          image: aquasec/kube-bench:latest
+          command: ["kube-bench", "node"]
+          volumeMounts:
+            - name: var-lib-kubelet
+              mountPath: /var/lib/kubelet
+              readOnly: true
+            - name: etc-systemd
+              mountPath: /etc/systemd
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /etc/kubernetes
+              readOnly: true
+              # /usr/local/mount-from-host/bin is mounted to access kubectl / kubelet, for auto-detecting the Kubernetes version.
+              # You can omit this mount if you specify --version as part of the command.
+            - name: usr-bin
+              mountPath: /usr/local/mount-from-host/bin
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: var-lib-kubelet
+          hostPath:
+            path: "/var/lib/kubelet"
+        - name: etc-systemd
+          hostPath:
+            path: "/etc/systemd"
+        - name: etc-kubernetes
+          hostPath:
+            path: "/etc/kubernetes"
+        - name: usr-bin
+          hostPath:
+            path: "/usr/bin"
