@@ -103,7 +103,7 @@ func (c *Check) run() State {
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
-	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
+	if c.Scored && strings.TrimSpace(c.Type) == "" && c.Tests == nil {
 		c.Reason = "There are no tests"
 		c.State = WARN
 		return c.State
@@ -197,7 +197,7 @@ func (c *Check) run() State {
 }
 
 func performTest(audit string, tests *tests, isMultipleOutput bool) (State, *testOutput, string) {
-	if len(strings.TrimSpace(audit)) == 0 {
+	if strings.TrimSpace(audit) == "" {
 		return "", failTestItem("missing command"), "missing audit command"
 	}
 

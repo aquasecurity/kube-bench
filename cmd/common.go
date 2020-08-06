@@ -401,7 +401,7 @@ func writeOutputToFile(output string, outputFile string) error {
 }
 
 func PrintOutput(output string, outputFile string) {
-	if len(outputFile) == 0 {
+	if outputFile == "" {
 		fmt.Println(output)
 	} else {
 		err := writeOutputToFile(output, outputFile)

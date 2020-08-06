@@ -145,7 +145,7 @@ func (t *testItem) evaluate(s string) *testOutput {
 						}
 					}
 				} else {
-					glog.V(1).Infof(fmt.Sprintf("invalid flag in testitem definition"))
+					glog.V(1).Infof("invalid flag in testitem definition")
 					return failTestItem("error invalid flag in testitem definition")
 				}
 			}
