@@ -191,7 +191,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 // loadConfig finds the correct config dir based on the kubernetes version,
 // merges any specific config.yaml file found with the main config
 // and returns the benchmark file to use.
-func loadConfig(nodetype check.NodeType) string {
+func loadConfig(nodetype check.NodeType, benchmarkVersion string) string {
 	var file string
 	var err error
 
@@ -208,11 +208,6 @@ func loadConfig(nodetype check.NodeType) string {
 		file = policiesFile
 	case check.MANAGEDSERVICES:
 		file = managedservicesFile
-	}
-
-	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
-	if err != nil {
-		exitWithError(fmt.Errorf("failed to get benchMark version: %v", err))
 	}
 
 	path, err := getConfigFilePath(benchmarkVersion, file)
@@ -302,7 +297,6 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
-	loadConfig(check.MASTER)
 	return isThisNodeRunning(check.MASTER)
 }
 
