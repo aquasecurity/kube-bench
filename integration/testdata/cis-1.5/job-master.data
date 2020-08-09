@@ -18,9 +18,9 @@
 [PASS] 1.1.16 Ensure that the scheduler.conf file ownership is set to root:root (Scored)
 [PASS] 1.1.17 Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 1.1.18 Ensure that the controller-manager.conf file ownership is set to root:root (Scored)
-[WARN] 1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)
-[WARN] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)
-[WARN] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)
+[PASS] 1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)
+[PASS] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)
+[PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)
 [INFO] 1.2 API Server
 [WARN] 1.2.1 Ensure that the --anonymous-auth argument is set to false (Not Scored)
 [PASS] 1.2.2 Ensure that the --basic-auth-file argument is not set (Scored)
@@ -83,18 +83,6 @@ from the below command:
 ps -ef | grep etcd
 Run the below command (based on the etcd data directory found above).
 For example, chown etcd:etcd /var/lib/etcd
-
-1.1.19 Run the below command (based on the file location on your system) on the master node.
-For example,
-chown -R root:root /etc/kubernetes/pki/
-
-1.1.20 Run the below command (based on the file location on your system) on the master node.
-For example,
-chmod -R 644 /etc/kubernetes/pki/*.crt
-
-1.1.21 Run the below command (based on the file location on your system) on the master node.
-For example,
-chmod -R 600 /etc/kubernetes/pki/*.key
 
 1.2.1 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
@@ -182,7 +170,7 @@ on the master node and set the below parameter.
 
 
 == Summary ==
-41 checks PASS
+44 checks PASS
 13 checks FAIL
-11 checks WARN
+8 checks WARN
 0 checks INFO
