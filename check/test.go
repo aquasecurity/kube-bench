@@ -398,3 +398,16 @@ func toNumeric(a, b string) (c, d int, err error) {
 
 	return c, d, nil
 }
+
+func (t *testItem) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type buildTest testItem
+
+	// Make Set parameter to be true by default.
+	newTestItem := buildTest{Set: true}
+	err := unmarshal(&newTestItem)
+	if err != nil {
+		return err
+	}
+	*t = testItem(newTestItem)
+	return nil
+}
