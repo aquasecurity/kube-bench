@@ -164,7 +164,7 @@ groups:
     text: "Kubelet"
     checks:
       - id: 4.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+        text: "Ensure that the anonymous-auth argument is set to false (Scored)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
