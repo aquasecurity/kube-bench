@@ -15,38 +15,57 @@
 package check
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
 
 func TestCheck_Run(t *testing.T) {
 	type TestCase struct {
+		name     string
 		check    Check
 		Expected State
 	}
 
 	testCases := []TestCase{
-		{check: Check{Type: MANUAL}, Expected: WARN},
-		{check: Check{Type: "skip"}, Expected: INFO},
-
-		{check: Check{Scored: false}, Expected: WARN}, // Not scored checks with no type, or not scored failing tests are marked warn
+		{name: "Manual check should WARN", check: Check{Type: MANUAL}, Expected: WARN},
+		{name: "Skip check should INFO", check: Check{Type: "skip"}, Expected: INFO},
+		{name: "Unscored check (with no type) should WARN on failure", check: Check{Scored: false}, Expected: WARN},
 		{
-			check: Check{ // Not scored checks with passing tests are marked pass
+			name: "Unscored check that pass should PASS",
+			check: Check{
 				Scored: false,
-				Audit:  ":",
-				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  "echo hello",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "hello",
+					Set:  true,
+				}}},
 			},
 			Expected: PASS,
 		},
 
-		{check: Check{Scored: true}, Expected: WARN},                  // If there are no tests in the check, warn
-		{check: Check{Scored: true, Tests: &tests{}}, Expected: FAIL}, // If there are tests that are not passing, fail
+		{name: "Check with no tests should WARN", check: Check{Scored: true}, Expected: WARN},
+		{name: "Scored check with empty tests should FAIL", check: Check{Scored: true, Tests: &tests{}}, Expected: FAIL},
 		{
-			check: Check{ // Scored checks with passing tests are marked pass
+			name: "Scored check that doesn't pass should FAIL",
+			check: Check{
 				Scored: true,
-				Audit:  ":",
-				Tests:  &tests{TestItems: []*testItem{&testItem{}}},
+				Audit:  "echo hello",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "hello",
+					Set:  false,
+				}},
+				}},
+			Expected: FAIL,
+		},
+		{
+			name: "Scored checks that pass should PASS",
+			check: Check{
+				Scored: true,
+				Audit:  "echo hello",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "hello",
+					Set:  true,
+				}}},
 			},
 			Expected: PASS,
 		},
@@ -56,7 +75,7 @@ func TestCheck_Run(t *testing.T) {
 		testCase.check.run()
 
 		if testCase.check.State != testCase.Expected {
-			t.Errorf("test failed, expected %s, actual %s\n", testCase.Expected, testCase.check.State)
+			t.Errorf("%s: expected %s, actual %s\n", testCase.name, testCase.Expected, testCase.check.State)
 		}
 	}
 }
@@ -115,6 +134,22 @@ func TestCheckAuditConfig(t *testing.T) {
 			controls.Groups[1].Checks[11],
 			"FAIL",
 		},
+		{
+			controls.Groups[1].Checks[12],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[13],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[14],
+			"FAIL",
+		},
+		{
+			controls.Groups[1].Checks[15],
+			"PASS",
+		},
 	}
 
 	for _, c := range cases {
@@ -128,7 +163,6 @@ func TestCheckAuditConfig(t *testing.T) {
 func Test_runAudit(t *testing.T) {
 	type args struct {
 		audit  string
-		out    *bytes.Buffer
 		output string
 	}
 	tests := []struct {
@@ -141,7 +175,6 @@ func Test_runAudit(t *testing.T) {
 			name: "run success",
 			args: args{
 				audit: "echo 'hello world'",
-				out:   &bytes.Buffer{},
 			},
 			errMsg: "",
 			output: "hello world\n",
@@ -156,7 +189,6 @@ hello() {
 
 hello
 `,
-				out: &bytes.Buffer{},
 			},
 			errMsg: "",
 			output: "hello world\n",
@@ -165,7 +197,6 @@ hello
 			name: "run failed",
 			args: args{
 				audit: "unknown_command",
-				out:   &bytes.Buffer{},
 			},
 			errMsg: "failed to run: \"unknown_command\", output: \"/bin/sh: ",
 			output: "not found\n",
@@ -173,16 +204,19 @@ hello
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			errMsg := runAudit(tt.args.audit, tt.args.out)
-			if errMsg != "" && !strings.Contains(errMsg, tt.errMsg) {
-				t.Errorf("runAudit() errMsg = %q, want %q", errMsg, tt.errMsg)
+			var errMsg string
+			output, err := runAudit(tt.args.audit)
+			if err != nil {
+				errMsg = err.Error()
 			}
-			output := tt.args.out.String()
+			if errMsg != "" && !strings.Contains(errMsg, tt.errMsg) {
+				t.Errorf("name %s errMsg = %q, want %q", tt.name, errMsg, tt.errMsg)
+			}
 			if errMsg == "" && output != tt.output {
-				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+				t.Errorf("name %s output = %q, want %q", tt.name, output, tt.output)
 			}
 			if errMsg != "" && !strings.Contains(output, tt.output) {
-				t.Errorf("runAudit() output = %q, want %q", output, tt.output)
+				t.Errorf("name %s output = %q, want %q", tt.name, output, tt.output)
 			}
 		})
 	}
