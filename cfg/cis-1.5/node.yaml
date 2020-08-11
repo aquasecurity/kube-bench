@@ -236,6 +236,7 @@ groups:
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
+          bin_op: or
           test_items:
             - flag: "--read-only-port"
               path: '{.readOnlyPort}'
@@ -243,6 +244,8 @@ groups:
               compare:
                 op: eq
                 value: 0
+            - path: '{.readOnlyPort}'
+              set: false
         remediation: |
           If using a Kubelet config file, edit the file to set readOnlyPort to 0.
           If using command line arguments, edit the kubelet service file
