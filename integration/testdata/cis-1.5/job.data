@@ -227,7 +227,7 @@ minimum.
 [PASS] 4.2.1 Ensure that the --anonymous-auth argument is set to false (Scored)
 [PASS] 4.2.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
 [PASS] 4.2.3 Ensure that the --client-ca-file argument is set as appropriate (Scored)
-[FAIL] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Scored)
+[PASS] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Scored)
 [PASS] 4.2.5 Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)
 [FAIL] 4.2.6 Ensure that the --protect-kernel-defaults argument is set to true (Scored)
 [PASS] 4.2.7 Ensure that the --make-iptables-util-chains argument is set to true (Scored)
@@ -245,15 +245,6 @@ chmod 644 /etc/kubernetes/proxy.conf
 
 4.1.4 Run the below command (based on the file location on your system) on the each worker node.
 For example, chown root:root /etc/kubernetes/proxy.conf
-
-4.2.4 If using a Kubelet config file, edit the file to set readOnlyPort to 0.
-If using command line arguments, edit the kubelet service file
-/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
-set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
---read-only-port=0
-Based on your system, restart the kubelet service. For example:
-systemctl daemon-reload
-systemctl restart kubelet.service
 
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
@@ -293,8 +284,8 @@ systemctl restart kubelet.service
 
 
 == Summary ==
-16 checks PASS
-6 checks FAIL
+17 checks PASS
+5 checks FAIL
 1 checks WARN
 0 checks INFO
 [INFO] 5 Kubernetes Policies
