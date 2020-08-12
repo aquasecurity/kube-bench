@@ -53,8 +53,8 @@ func TestCheck_Run(t *testing.T) {
 				Tests: &tests{TestItems: []*testItem{{
 					Flag: "hello",
 					Set:  false,
-				}},
-				}},
+        }}},
+			},
 			Expected: FAIL,
 		},
 		{
@@ -70,6 +70,7 @@ func TestCheck_Run(t *testing.T) {
 			Expected: PASS,
 		},
 	}
+  
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			testCase.check.run()
@@ -77,7 +78,6 @@ func TestCheck_Run(t *testing.T) {
 				t.Errorf("expected %s, actual %s", testCase.Expected, testCase.check.State)
 			}
 		})
-
 	}
 }
 
