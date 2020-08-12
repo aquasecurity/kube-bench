@@ -150,6 +150,10 @@ func TestCheckAuditConfig(t *testing.T) {
 			controls.Groups[1].Checks[15],
 			"PASS",
 		},
+		{
+			controls.Groups[1].Checks[16],
+			"FAIL",
+		},
 	}
 
 	for _, c := range cases {

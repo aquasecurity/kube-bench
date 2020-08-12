@@ -502,7 +502,8 @@ groups:
             compare:
               op: eq
               value: 0
-          - path: '{.readOnlyPort}'
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
             set: false
       scored: true
     - id: 14
@@ -518,7 +519,8 @@ groups:
             compare:
               op: eq
               value: 0
-          - path: '{.readOnlyPort}'
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
             set: false
       scored: true
     - id: 15
@@ -534,6 +536,24 @@ groups:
             compare:
               op: eq
               value: 0
-          - path: '{.readOnlyPort}'
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 15
+      text: "parameter and config file don't have same default - parameter has bad value and config is not present - failing"
+      audit: "echo '--read-only-port=1'"
+      audit_config: "echo ''"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
             set: false
       scored: true

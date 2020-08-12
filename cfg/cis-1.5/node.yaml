@@ -244,7 +244,8 @@ groups:
               compare:
                 op: eq
                 value: 0
-            - path: '{.readOnlyPort}'
+            - flag: "--read-only-port"
+              path: '{.readOnlyPort}'
               set: false
         remediation: |
           If using a Kubelet config file, edit the file to set readOnlyPort to 0.
