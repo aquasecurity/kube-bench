@@ -1,4 +1,4 @@
-// Copyright © 2017 Aqua Security Software Ltd. <info@aquasec.com>
+// Copyright © 2017-2020 Aqua Security Software Ltd. <info@aquasec.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package check
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -216,15 +217,17 @@ func TestTestExecute(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c.Check.AuditOutput = c.str
-		c.Check.AuditConfigOutput = c.strConfig
-		res, err := c.Check.execute()
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-		if !res.testResult {
-			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
-		}
+		t.Run(c.Text, func(t *testing.T) {
+			c.Check.AuditOutput = c.str
+			c.Check.AuditConfigOutput = c.strConfig
+			res, err := c.Check.execute()
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if !res.testResult {
+				t.Errorf("expected:%v, got:%v", true, res)
+			}
+		})
 	}
 }
 
@@ -257,14 +260,16 @@ func TestTestExecuteExceptions(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c.Check.AuditConfigOutput = c.str
-		res, err := c.Check.execute()
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-		if res.testResult {
-			t.Errorf("%s, expected:%v, got:%v\n", c.Text, false, res)
-		}
+		t.Run(c.Text, func(t *testing.T) {
+			c.Check.AuditConfigOutput = c.str
+			res, err := c.Check.execute()
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if res.testResult {
+				t.Errorf("expected:%v, got:%v", false, res)
+			}
+		})
 	}
 }
 
@@ -339,13 +344,14 @@ func TestExecuteJSONPath(t *testing.T) {
 		Address    string
 	}
 	cases := []struct {
+		name           string
 		jsonPath       string
 		jsonInterface  kubeletConfig
 		expectedResult string
 		expectedToFail bool
 	}{
 		{
-			// JSONPath parse works, results don't match
+			"JSONPath parse works, results don't match",
 			"{.Kind}",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -356,7 +362,7 @@ func TestExecuteJSONPath(t *testing.T) {
 			true,
 		},
 		{
-			// JSONPath parse works, results match
+			"JSONPath parse works, results match",
 			"{.Kind}",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -367,7 +373,7 @@ func TestExecuteJSONPath(t *testing.T) {
 			false,
 		},
 		{
-			// JSONPath parse fails
+			"JSONPath parse fails",
 			"{.ApiVersion",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -379,13 +385,15 @@ func TestExecuteJSONPath(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
-		if err != nil && !c.expectedToFail {
-			t.Fatalf("jsonPath:%q, expectedResult:%q got:%v\n", c.jsonPath, c.expectedResult, err)
-		}
-		if c.expectedResult != result && !c.expectedToFail {
-			t.Errorf("jsonPath:%q, expectedResult:%q got:%q\n", c.jsonPath, c.expectedResult, result)
-		}
+		t.Run(c.name, func(t *testing.T) {
+			result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
+			if err != nil && !c.expectedToFail {
+				t.Fatalf("jsonPath:%q, expectedResult:%q got:%v", c.jsonPath, c.expectedResult, err)
+			}
+			if c.expectedResult != result && !c.expectedToFail {
+				t.Errorf("jsonPath:%q, expectedResult:%q got:%q", c.jsonPath, c.expectedResult, result)
+			}
+		})
 	}
 }
 
@@ -438,10 +446,12 @@ func TestAllElementsValid(t *testing.T) {
 			valid: false,
 		},
 	}
-	for _, c := range cases {
-		if !allElementsValid(c.source, c.target) && c.valid {
-			t.Errorf("Not All Elements in %q are found in %q \n", c.source, c.target)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			if !allElementsValid(c.source, c.target) && c.valid {
+				t.Errorf("Not All Elements in %q are found in %q \n", c.source, c.target)
+			}
+		})
 	}
 }
 
@@ -478,16 +488,17 @@ func TestSplitAndRemoveLastSeparator(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
-		if len(as) == 0 && c.valid {
-			t.Errorf("Split did not work with %q \n", c.source)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
+			if len(as) == 0 && c.valid {
+				t.Errorf("Split did not work with %q \n", c.source)
+			}
 
-		if c.elementCnt != len(as) {
-			t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
-		}
-
+			if c.elementCnt != len(as) {
+				t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
+			}
+		})
 	}
 }
 
@@ -743,15 +754,16 @@ func TestCompareOp(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+		t.Run(c.label, func(t *testing.T) {
+			expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+			if expectedResultPattern != c.expectedResultPattern {
+				t.Errorf("'expectedResultPattern' did not match - op: %q expected:%q  got:%q\n", c.op, c.expectedResultPattern, expectedResultPattern)
+			}
 
-		if expectedResultPattern != c.expectedResultPattern {
-			t.Errorf("'expectedResultPattern' did not match - label: %q op: %q expected 'expectedResultPattern':%q  got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
-		}
-
-		if testResult != c.testResult {
-			t.Errorf("'testResult' did not match - label: %q op: %q expected 'testResult':%t  got:%t\n", c.label, c.op, c.testResult, testResult)
-		}
+			if testResult != c.testResult {
+				t.Errorf("'testResult' did not match - lop: %q expected:%t  got:%t\n", c.op, c.testResult, testResult)
+			}
+		})
 	}
 }
 
@@ -778,14 +790,16 @@ func TestToNumeric(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		f, s, err := toNumeric(c.firstValue, c.secondValue)
-		if c.expectedToFail && err == nil {
-			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			f, s, err := toNumeric(c.firstValue, c.secondValue)
+			if c.expectedToFail && err == nil {
+				t.Errorf("Expected error while converting %s and %s", c.firstValue, c.secondValue)
+			}
 
-		if !c.expectedToFail && (f != 5 || s != 6) {
-			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
-		}
+			if !c.expectedToFail && (f != 5 || s != 6) {
+				t.Errorf("Expected to return %d,%d - got %d,%d", 5, 6, f, s)
+			}
+		})
 	}
 }
