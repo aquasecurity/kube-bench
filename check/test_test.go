@@ -323,17 +323,19 @@ apiVersion: kubelet.config.k8s.io/v1beta
 		},
 	}
 
-	for _, c := range cases {
-		err := unmarshal(c.content, &c.jsonInterface)
-		if err != nil {
-			if !c.expectedToFail {
-				t.Errorf("%s, expectedToFail:%v, got:%v\n", c.content, c.expectedToFail, err)
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			err := unmarshal(c.content, &c.jsonInterface)
+			if err != nil {
+				if !c.expectedToFail {
+					t.Errorf("should pass, got error:%v", err)
+				}
+			} else {
+				if c.expectedToFail {
+					t.Errorf("should fail, but passed")
+				}
 			}
-		} else {
-			if c.expectedToFail {
-				t.Errorf("%s, expectedToFail:%v, got:Did not fail\n", c.content, c.expectedToFail)
-			}
-		}
+		})
 	}
 }
 
@@ -449,7 +451,7 @@ func TestAllElementsValid(t *testing.T) {
 	for id, c := range cases {
 		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
 			if !allElementsValid(c.source, c.target) && c.valid {
-				t.Errorf("Not All Elements in %q are found in %q \n", c.source, c.target)
+				t.Errorf("Not All Elements in %q are found in %q", c.source, c.target)
 			}
 		})
 	}
@@ -492,11 +494,11 @@ func TestSplitAndRemoveLastSeparator(t *testing.T) {
 		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
 			as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
 			if len(as) == 0 && c.valid {
-				t.Errorf("Split did not work with %q \n", c.source)
+				t.Errorf("Split did not work with %q", c.source)
 			}
 
 			if c.elementCnt != len(as) {
-				t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
+				t.Errorf("Split did not work with %q expected: %d got: %d", c.source, c.elementCnt, len(as))
 			}
 		})
 	}
@@ -757,11 +759,11 @@ func TestCompareOp(t *testing.T) {
 		t.Run(c.label, func(t *testing.T) {
 			expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
 			if expectedResultPattern != c.expectedResultPattern {
-				t.Errorf("'expectedResultPattern' did not match - op: %q expected:%q  got:%q\n", c.op, c.expectedResultPattern, expectedResultPattern)
+				t.Errorf("'expectedResultPattern' did not match - op: %q expected:%q  got:%q", c.op, c.expectedResultPattern, expectedResultPattern)
 			}
 
 			if testResult != c.testResult {
-				t.Errorf("'testResult' did not match - lop: %q expected:%t  got:%t\n", c.op, c.testResult, testResult)
+				t.Errorf("'testResult' did not match - lop: %q expected:%t  got:%t", c.op, c.testResult, testResult)
 			}
 		})
 	}
