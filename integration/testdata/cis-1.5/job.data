@@ -19,8 +19,8 @@
 [PASS] 1.1.17 Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 1.1.18 Ensure that the controller-manager.conf file ownership is set to root:root (Scored)
 [PASS] 1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)
-[PASS] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)
-[PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)
+[PASS] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Not Scored)
+[PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Not Scored)
 [INFO] 1.2 API Server
 [WARN] 1.2.1 Ensure that the --anonymous-auth argument is set to false (Not Scored)
 [PASS] 1.2.2 Ensure that the --basic-auth-file argument is not set (Scored)
@@ -54,11 +54,11 @@
 [PASS] 1.2.30 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
 [PASS] 1.2.31 Ensure that the --client-ca-file argument is set as appropriate (Scored)
 [PASS] 1.2.32 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
-[FAIL] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
-[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Scored)
+[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Not Scored)
+[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Not Scored)
 [WARN] 1.2.35 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)
 [INFO] 1.3 Controller Manager
-[FAIL] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)
+[WARN] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Not Scored)
 [FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Scored)
 [PASS] 1.3.3 Ensure that the --use-service-account-credentials argument is set to true (Scored)
 [PASS] 1.3.4 Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)
@@ -171,8 +171,8 @@ on the master node and set the below parameter.
 
 == Summary ==
 44 checks PASS
-13 checks FAIL
-8 checks WARN
+11 checks FAIL
+10 checks WARN
 0 checks INFO
 [INFO] 2 Etcd Node Configuration
 [INFO] 2 Etcd Node Configuration Files
@@ -224,7 +224,7 @@ minimum.
 [PASS] 4.1.9 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
 [PASS] 4.1.10 Ensure that the kubelet configuration file ownership is set to root:root (Scored)
 [INFO] 4.2 Kubelet
-[PASS] 4.2.1 Ensure that the --anonymous-auth argument is set to false (Scored)
+[PASS] 4.2.1 Ensure that the anonymous-auth argument is set to false (Scored)
 [PASS] 4.2.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
 [PASS] 4.2.3 Ensure that the --client-ca-file argument is set as appropriate (Scored)
 [PASS] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Scored)
@@ -314,11 +314,11 @@ systemctl restart kubelet.service
 [WARN] 5.4.2 Consider external secret storage (Not Scored)
 [INFO] 5.5 Extensible Admission Control
 [WARN] 5.5.1 Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)
-[INFO] 5.6 General Policies
-[WARN] 5.6.1 Create administrative boundaries between resources using namespaces (Not Scored)
-[WARN] 5.6.2 Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)
-[WARN] 5.6.3 Apply Security Context to Your Pods and Containers (Not Scored)
-[WARN] 5.6.4 The default namespace should not be used (Scored)
+[INFO] 5.7 General Policies
+[WARN] 5.7.1 Create administrative boundaries between resources using namespaces (Not Scored)
+[WARN] 5.7.2 Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)
+[WARN] 5.7.3 Apply Security Context to Your Pods and Containers (Not Scored)
+[WARN] 5.7.4 The default namespace should not be used (Scored)
 
 == Remediations ==
 5.1.1 Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
@@ -385,10 +385,10 @@ secrets management solution.
 
 5.5.1 Follow the Kubernetes documentation and setup image provenance.
 
-5.6.1 Follow the documentation and create namespaces for objects in your deployment as you need
+5.7.1 Follow the documentation and create namespaces for objects in your deployment as you need
 them.
 
-5.6.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+5.7.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
 would need to enable alpha features in the apiserver by passing "--feature-
 gates=AllAlpha=true" argument.
 Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
@@ -409,11 +409,11 @@ spec:
     - name: trustworthy-container
       image: sotrustworthy:latest
 
-5.6.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
+5.7.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
 suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
 Containers.
 
-5.6.4 Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+5.7.4 Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
 resources and that all new resources are created in a specific namespace.
 
 
