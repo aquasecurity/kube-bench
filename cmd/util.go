@@ -48,18 +48,6 @@ func exitWithError(err error) {
 	os.Exit(1)
 }
 
-func continueWithError(err error, msg string) string {
-	if err != nil {
-		glog.V(2).Info(err)
-	}
-
-	if msg != "" {
-		fmt.Fprintf(os.Stderr, "%s\n", msg)
-	}
-
-	return ""
-}
-
 func cleanIDs(list string) map[string]bool {
 	list = strings.Trim(list, ",")
 	ids := strings.Split(list, ",")
@@ -82,9 +70,9 @@ func ps(proc string) string {
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
-		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
+		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
-
+	
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
@@ -325,7 +313,7 @@ func getKubeVersionFromKubectl() string {
 	cmd := exec.Command("kubectl", "version", "--short")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		continueWithError(fmt.Errorf("%s", out), "")
+		glog.V(2).Info(err)
 	}
 
 	return getVersionFromKubectlOutput(string(out))
@@ -336,7 +324,7 @@ func getKubeVersionFromKubelet() string {
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
-		continueWithError(fmt.Errorf("%s", out), "")
+		glog.V(2).Info(err)
 	}
 
 	return getVersionFromKubeletOutput(string(out))
