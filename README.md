@@ -353,3 +353,4 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!). 
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach. 
 - Happy coding!
+- Happy coding!
