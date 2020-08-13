@@ -1,4 +1,4 @@
-// Copyright © 2017-2019 Aqua Security Software Ltd. <info@aquasec.com>
+// Copyright © 2017-2020 Aqua Security Software Ltd. <info@aquasec.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ func TestCheck_Run(t *testing.T) {
 				Tests: &tests{TestItems: []*testItem{{
 					Flag: "hello",
 					Set:  false,
-				}},
-				}},
+				}}},
+			},
 			Expected: FAIL,
 		},
 		{
@@ -70,97 +70,58 @@ func TestCheck_Run(t *testing.T) {
 			Expected: PASS,
 		},
 	}
+
 	for _, testCase := range testCases {
-
-		testCase.check.run()
-
-		if testCase.check.State != testCase.Expected {
-			t.Errorf("%s: expected %s, actual %s\n", testCase.name, testCase.Expected, testCase.check.State)
-		}
+		t.Run(testCase.name, func(t *testing.T) {
+			testCase.check.run()
+			if testCase.check.State != testCase.Expected {
+				t.Errorf("expected %s, actual %s", testCase.Expected, testCase.check.State)
+			}
+		})
 	}
 }
 
 func TestCheckAuditConfig(t *testing.T) {
 
-	cases := []struct {
-		*Check
-		expected State
-	}{
-		{
-			controls.Groups[1].Checks[0],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[1],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[2],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[3],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[4],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[5],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[6],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[7],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[8],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[9],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[10],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[11],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[12],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[13],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[14],
-			"FAIL",
-		},
-		{
-			controls.Groups[1].Checks[15],
-			"PASS",
-		},
-		{
-			controls.Groups[1].Checks[16],
-			"FAIL",
-		},
+	passingCases := []*Check{
+		controls.Groups[1].Checks[0],
+		controls.Groups[1].Checks[3],
+		controls.Groups[1].Checks[5],
+		controls.Groups[1].Checks[7],
+		controls.Groups[1].Checks[9],
+		controls.Groups[1].Checks[15],
 	}
 
-	for _, c := range cases {
-		c.run()
-		if c.State != c.expected {
-			t.Errorf("%s, expected:%v, got:%v\n", c.Text, c.expected, c.State)
-		}
+	failingCases := []*Check{
+		controls.Groups[1].Checks[1],
+		controls.Groups[1].Checks[2],
+		controls.Groups[1].Checks[4],
+		controls.Groups[1].Checks[6],
+		controls.Groups[1].Checks[8],
+		controls.Groups[1].Checks[10],
+		controls.Groups[1].Checks[11],
+		controls.Groups[1].Checks[12],
+		controls.Groups[1].Checks[13],
+		controls.Groups[1].Checks[14],
+		controls.Groups[1].Checks[16],
+	}
+
+	for _, c := range passingCases {
+		t.Run(c.Text, func(t *testing.T) {
+			c.run()
+			if c.State != "PASS" {
+				t.Errorf("Should PASS, got: %v", c.State)
+			}
+		})
+	}
+
+	for _, c := range failingCases {
+		t.Run(c.Text, func(t *testing.T) {
+			c.run()
+			if c.State != "FAIL" {
+				t.Errorf("Should FAIL, got: %v", c.State)
+			}
+		})
 	}
 }
 
