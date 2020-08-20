@@ -1,4 +1,4 @@
-// Copyright © 2017 Aqua Security Software Ltd. <info@aquasec.com>
+// Copyright © 2017-2020 Aqua Security Software Ltd. <info@aquasec.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package check
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -48,145 +49,185 @@ func TestTestExecute(t *testing.T) {
 
 	cases := []struct {
 		*Check
-		str string
+		str       string
+		strConfig string
 	}{
 		{
 			controls.Groups[0].Checks[0],
 			"2:45 ../kubernetes/kube-apiserver --allow-privileged=false --option1=20,30,40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[1],
 			"2:45 ../kubernetes/kube-apiserver --allow-privileged=false",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[2],
 			"niinai   13617  2635 99 19:26 pts/20   00:03:08 ./kube-apiserver --insecure-port=0 --anonymous-auth",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[3],
 			"2:45 ../kubernetes/kube-apiserver --secure-port=0 --audit-log-maxage=40 --option",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[4],
 			"2:45 ../kubernetes/kube-apiserver --max-backlog=20 --secure-port=0 --audit-log-maxage=40 --option",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[5],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[6],
 			"2:45 .. --kubelet-clientkey=foo --kubelet-client-certificate=bar --admission-control=Webhook,RBAC",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[7],
 			"2:45 ..  --secure-port=0 --kubelet-client-certificate=bar --admission-control=Webhook,RBAC",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[8],
 			"644",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[9],
 			"640",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[9],
 			"600",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[10],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[11],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,RBAC ---audit-log-maxage=40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[12],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=WebHook,Something,RBAC ---audit-log-maxage=40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[13],
 			"2:45 ../kubernetes/kube-apiserver --option --admission-control=Something ---audit-log-maxage=40",
+			"",
 		},
 		{
 			// check for ':' as argument-value separator, with space between arg and val
 			controls.Groups[0].Checks[14],
 			"2:45 kube-apiserver some-arg: some-val --admission-control=Something ---audit-log-maxage=40",
+			"",
 		},
 		{
 			// check for ':' as argument-value separator, with no space between arg and val
 			controls.Groups[0].Checks[14],
 			"2:45 kube-apiserver some-arg:some-val --admission-control=Something ---audit-log-maxage=40",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[15],
+			"",
 			"{\"readOnlyPort\": 15000}",
 		},
 		{
 			controls.Groups[0].Checks[16],
+			"",
 			"{\"stringValue\": \"WebHook,Something,RBAC\"}",
 		},
 		{
 			controls.Groups[0].Checks[17],
+			"",
 			"{\"trueValue\": true}",
 		},
 		{
 			controls.Groups[0].Checks[18],
+			"",
 			"{\"readOnlyPort\": 15000}",
 		},
 		{
 			controls.Groups[0].Checks[19],
+			"",
 			"{\"authentication\": { \"anonymous\": {\"enabled\": false}}}",
 		},
 		{
 			controls.Groups[0].Checks[20],
+			"",
 			"readOnlyPort: 15000",
 		},
 		{
 			controls.Groups[0].Checks[21],
+			"",
 			"readOnlyPort: 15000",
 		},
 		{
 			controls.Groups[0].Checks[22],
+			"",
 			"authentication:\n  anonymous:\n    enabled: false",
 		},
 		{
 			controls.Groups[0].Checks[26],
+			"",
 			"currentMasterVersion: 1.12.7",
 		},
 		{
 			controls.Groups[0].Checks[27],
 			"--peer-client-cert-auth",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[27],
 			"--abc=true --peer-client-cert-auth --efg=false",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[27],
 			"--abc --peer-client-cert-auth --efg",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[27],
 			"--peer-client-cert-auth=true",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[27],
 			"--abc --peer-client-cert-auth=true --efg",
+			"",
 		},
 		{
 			controls.Groups[0].Checks[28],
 			"--abc --peer-client-cert-auth=false --efg",
+			"",
 		},
 	}
 
 	for _, c := range cases {
-		res := c.Tests.execute(c.str, c.IsMultiple).testResult
-		if !res {
-			t.Errorf("%s, expected:%v, got:%v\n", c.Text, true, res)
-		}
+		t.Run(c.Text, func(t *testing.T) {
+			c.Check.AuditOutput = c.str
+			c.Check.AuditConfigOutput = c.strConfig
+			res, err := c.Check.execute()
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if !res.testResult {
+				t.Errorf("expected:%v, got:%v", true, res)
+			}
+		})
 	}
 }
 
@@ -219,10 +260,16 @@ func TestTestExecuteExceptions(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		res := c.Tests.execute(c.str, c.IsMultiple).testResult
-		if res {
-			t.Errorf("%s, expected:%v, got:%v\n", c.Text, false, res)
-		}
+		t.Run(c.Text, func(t *testing.T) {
+			c.Check.AuditConfigOutput = c.str
+			res, err := c.Check.execute()
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if res.testResult {
+				t.Errorf("expected:%v, got:%v", false, res)
+			}
+		})
 	}
 }
 
@@ -276,17 +323,19 @@ apiVersion: kubelet.config.k8s.io/v1beta
 		},
 	}
 
-	for _, c := range cases {
-		err := unmarshal(c.content, &c.jsonInterface)
-		if err != nil {
-			if !c.expectedToFail {
-				t.Errorf("%s, expectedToFail:%v, got:%v\n", c.content, c.expectedToFail, err)
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			err := unmarshal(c.content, &c.jsonInterface)
+			if err != nil {
+				if !c.expectedToFail {
+					t.Errorf("should pass, got error:%v", err)
+				}
+			} else {
+				if c.expectedToFail {
+					t.Errorf("should fail, but passed")
+				}
 			}
-		} else {
-			if c.expectedToFail {
-				t.Errorf("%s, expectedToFail:%v, got:Did not fail\n", c.content, c.expectedToFail)
-			}
-		}
+		})
 	}
 }
 
@@ -297,13 +346,14 @@ func TestExecuteJSONPath(t *testing.T) {
 		Address    string
 	}
 	cases := []struct {
+		name           string
 		jsonPath       string
 		jsonInterface  kubeletConfig
 		expectedResult string
 		expectedToFail bool
 	}{
 		{
-			// JSONPath parse works, results don't match
+			"JSONPath parse works, results don't match",
 			"{.Kind}",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -314,7 +364,7 @@ func TestExecuteJSONPath(t *testing.T) {
 			true,
 		},
 		{
-			// JSONPath parse works, results match
+			"JSONPath parse works, results match",
 			"{.Kind}",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -325,7 +375,7 @@ func TestExecuteJSONPath(t *testing.T) {
 			false,
 		},
 		{
-			// JSONPath parse fails
+			"JSONPath parse fails",
 			"{.ApiVersion",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
@@ -337,13 +387,15 @@ func TestExecuteJSONPath(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
-		if err != nil && !c.expectedToFail {
-			t.Fatalf("jsonPath:%q, expectedResult:%q got:%v\n", c.jsonPath, c.expectedResult, err)
-		}
-		if c.expectedResult != result && !c.expectedToFail {
-			t.Errorf("jsonPath:%q, expectedResult:%q got:%q\n", c.jsonPath, c.expectedResult, result)
-		}
+		t.Run(c.name, func(t *testing.T) {
+			result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
+			if err != nil && !c.expectedToFail {
+				t.Fatalf("jsonPath:%q, expectedResult:%q got:%v", c.jsonPath, c.expectedResult, err)
+			}
+			if c.expectedResult != result && !c.expectedToFail {
+				t.Errorf("jsonPath:%q, expectedResult:%q got:%q", c.jsonPath, c.expectedResult, result)
+			}
+		})
 	}
 }
 
@@ -396,10 +448,12 @@ func TestAllElementsValid(t *testing.T) {
 			valid: false,
 		},
 	}
-	for _, c := range cases {
-		if !allElementsValid(c.source, c.target) && c.valid {
-			t.Errorf("Not All Elements in %q are found in %q \n", c.source, c.target)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			if !allElementsValid(c.source, c.target) && c.valid {
+				t.Errorf("Not All Elements in %q are found in %q", c.source, c.target)
+			}
+		})
 	}
 }
 
@@ -436,16 +490,17 @@ func TestSplitAndRemoveLastSeparator(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
-		if len(as) == 0 && c.valid {
-			t.Errorf("Split did not work with %q \n", c.source)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			as := splitAndRemoveLastSeparator(c.source, defaultArraySeparator)
+			if len(as) == 0 && c.valid {
+				t.Errorf("Split did not work with %q", c.source)
+			}
 
-		if c.elementCnt != len(as) {
-			t.Errorf("Split did not work with %q expected: %d got: %d\n", c.source, c.elementCnt, len(as))
-		}
-
+			if c.elementCnt != len(as) {
+				t.Errorf("Split did not work with %q expected: %d got: %d", c.source, c.elementCnt, len(as))
+			}
+		})
 	}
 }
 
@@ -701,15 +756,16 @@ func TestCompareOp(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+		t.Run(c.label, func(t *testing.T) {
+			expectedResultPattern, testResult := compareOp(c.op, c.flagVal, c.compareValue)
+			if expectedResultPattern != c.expectedResultPattern {
+				t.Errorf("'expectedResultPattern' did not match - op: %q expected:%q  got:%q", c.op, c.expectedResultPattern, expectedResultPattern)
+			}
 
-		if expectedResultPattern != c.expectedResultPattern {
-			t.Errorf("'expectedResultPattern' did not match - label: %q op: %q expected 'expectedResultPattern':%q  got:%q\n", c.label, c.op, c.expectedResultPattern, expectedResultPattern)
-		}
-
-		if testResult != c.testResult {
-			t.Errorf("'testResult' did not match - label: %q op: %q expected 'testResult':%t  got:%t\n", c.label, c.op, c.testResult, testResult)
-		}
+			if testResult != c.testResult {
+				t.Errorf("'testResult' did not match - lop: %q expected:%t  got:%t", c.op, c.testResult, testResult)
+			}
+		})
 	}
 }
 
@@ -736,14 +792,16 @@ func TestToNumeric(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		f, s, err := toNumeric(c.firstValue, c.secondValue)
-		if c.expectedToFail && err == nil {
-			t.Errorf("TestToNumeric - Expected error while converting %s and %s", c.firstValue, c.secondValue)
-		}
+	for id, c := range cases {
+		t.Run(fmt.Sprintf("%d", id), func(t *testing.T) {
+			f, s, err := toNumeric(c.firstValue, c.secondValue)
+			if c.expectedToFail && err == nil {
+				t.Errorf("Expected error while converting %s and %s", c.firstValue, c.secondValue)
+			}
 
-		if !c.expectedToFail && (f != 5 || s != 6) {
-			t.Errorf("TestToNumeric - Expected to return %d,%d , but instead got %d,%d", 5, 6, f, s)
-		}
+			if !c.expectedToFail && (f != 5 || s != 6) {
+				t.Errorf("Expected to return %d,%d - got %d,%d", 5, 6, f, s)
+			}
+		})
 	}
 }

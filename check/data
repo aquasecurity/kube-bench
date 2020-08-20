@@ -166,7 +166,7 @@ groups:
               op: eq
               value: some-val
             set: true
-            
+
     - id: 15
       text: "jsonpath correct value on field"
       tests:
@@ -475,4 +475,85 @@ groups:
               op: bitmask
               value: "600"
             set: true
+      scored: true
+    - id: 12
+      text: "audit is present and wrong, audit_config is right -> fail (command line parameters override config file)"
+      audit: "echo flag=wrong"
+      audit_config: "echo 'flag: correct'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 13
+      text: "parameter and config file don't have same default - parameter has failing value"
+      audit: "echo '--read-only-port=1'"
+      audit_config: "echo 'readOnlyPort: 0'"
+      tests:
+        bin_op: and
+        test_items:
+          - flag: "--read-only-port"
+            path: "{.readOnlyPort}"
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 14
+      text: "parameter and config file don't have same default - config file has failing value"
+      audit: "echo ''"
+      audit_config: "echo 'readOnlyPort: 1'"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 15
+      text: "parameter and config file don't have same default - passing"
+      audit: "echo ''"
+      audit_config: "echo ''"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 15
+      text: "parameter and config file don't have same default - parameter has bad value and config is not present - failing"
+      audit: "echo '--read-only-port=1'"
+      audit_config: "echo ''"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
       scored: true

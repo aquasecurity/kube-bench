@@ -58,7 +58,7 @@ kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes B
 |---|---|---|
 | [1.3.0](https://workbench.cisecurity.org/benchmarks/602) | cis-1.3 | 1.11-1.12 |
 | [1.4.1](https://workbench.cisecurity.org/benchmarks/2351) | cis-1.4 | 1.13-1.14 |
-| [1.5.0](https://workbench.cisecurity.org/benchmarks/1370) | cis-1.5 | 1.15- |
+| [1.5.1](https://workbench.cisecurity.org/benchmarks/4892) | cis-1.5 | 1.15- |
 | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
 | [EKS 1.0.0](https://workbench.cisecurity.org/benchmarks/5190) | eks-1.0 | EKS |
 | Red Hat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 |
