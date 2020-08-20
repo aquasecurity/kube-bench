@@ -112,7 +112,11 @@ var RootCmd = &cobra.Command{
 
 		// Managedservices is only valid for GKE 1.0 and later,
 		// this a gatekeeper for previous versions.
-		if validTargets(bv, []string{string(check.MANAGEDSERVICES)}) {
+		valid, err = validTargets(benchmarkVersion, []string{string(check.MANAGEDSERVICES)}, viper.GetViper())
+ 		if err != nil {
+ 			exitWithError(fmt.Errorf("error validating targets: %v", err))
+ 		}
+ 		if valid {		
 			glog.V(1).Info("== Running managed services checks ==\n")
 			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
 		}
