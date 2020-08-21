@@ -68,56 +68,57 @@ var RootCmd = &cobra.Command{
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
+		glog.V(1).Infof("Running checks for benchmark %v", bv)
 
 		if isMaster() {
-			glog.V(1).Info("== Running master checks ==\n")
+			glog.V(1).Info("== Running master checks ==")
 			runChecks(check.MASTER, loadConfig(check.MASTER, bv))
 
 			// Control Plane is only valid for CIS 1.5 and later,
 			// this a gatekeeper for previous versions
-			valid, err := validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}, viper.GetViper())
+			valid, err := validTargets(bv, []string{string(check.CONTROLPLANE)}, viper.GetViper())
 			if err != nil {
 				exitWithError(fmt.Errorf("error validating targets: %v", err))
 			}
 			if valid {
-				glog.V(1).Info("== Running control plane checks ==\n")
+				glog.V(1).Info("== Running control plane checks ==")
 				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv))
 			}
 		}
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		valid, err := validTargets(benchmarkVersion, []string{string(check.ETCD)}, viper.GetViper())
+		valid, err := validTargets(bv, []string{string(check.ETCD)}, viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if valid && isEtcd() {
-			glog.V(1).Info("== Running etcd checks ==\n")
+			glog.V(1).Info("== Running etcd checks ==")
 			runChecks(check.ETCD, loadConfig(check.ETCD, bv))
 		}
 
-		glog.V(1).Info("== Running node checks ==\n")
+		glog.V(1).Info("== Running node checks ==")
 		runChecks(check.NODE, loadConfig(check.NODE, bv))
 
 		// Policies is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		valid, err = validTargets(benchmarkVersion, []string{string(check.POLICIES)}, viper.GetViper())
+		valid, err = validTargets(bv, []string{string(check.POLICIES)}, viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if valid {
-			glog.V(1).Info("== Running policies checks ==\n")
+			glog.V(1).Info("== Running policies checks ==")
 			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv))
 		}
 
 		// Managedservices is only valid for GKE 1.0 and later,
 		// this a gatekeeper for previous versions.
-		valid, err = validTargets(benchmarkVersion, []string{string(check.MANAGEDSERVICES)}, viper.GetViper())
- 		if err != nil {
- 			exitWithError(fmt.Errorf("error validating targets: %v", err))
- 		}
- 		if valid {		
-			glog.V(1).Info("== Running managed services checks ==\n")
+		valid, err = validTargets(bv, []string{string(check.MANAGEDSERVICES)}, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error validating targets: %v", err))
+		}
+		if valid {
+			glog.V(1).Info("== Running managed services checks ==")
 			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
 		}
 

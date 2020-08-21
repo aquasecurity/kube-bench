@@ -539,7 +539,7 @@ func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 
 func loadConfigForTest() (*viper.Viper, error) {
 	viperWithData := viper.New()
-	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
+	viperWithData.SetConfigFile("../cfg/config.yaml")
 	if err := viperWithData.ReadInConfig(); err != nil {
 		return nil, err
 	}
