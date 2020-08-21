@@ -215,6 +215,19 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "gke-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+    - "managedservices"
+  "eks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "rh-0.7":
     - "master"
     - "node"
