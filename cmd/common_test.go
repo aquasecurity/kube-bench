@@ -154,7 +154,7 @@ func TestIsMaster(t *testing.T) {
 		},
 		{
 			name:     "valid config, does not include master",
-			cfgFile:  "../cfg/node_only.yaml",
+			cfgFile:  "../hack/node_only.yaml",
 			isMaster: false,
 		},
 	}
@@ -458,7 +458,7 @@ func TestIsEtcd(t *testing.T) {
 		},
 		{
 			name:    "valid config, does not include etcd",
-			cfgFile: "../cfg/node_only.yaml",
+			cfgFile: "../hack/node_only.yaml",
 			isEtcd:  false,
 		},
 	}
