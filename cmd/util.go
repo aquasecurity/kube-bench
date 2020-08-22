@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
@@ -72,7 +74,7 @@ func ps(proc string) string {
 	if err != nil {
 		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
-	
+
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
@@ -403,4 +405,30 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 	}
 
 	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
+}
+
+func isEKS() bool {
+	metadataService := "http://169.254.169.254/latest/meta-data/"
+	client := &http.Client{
+		Timeout: time.Second,
+	}
+	resp, err := client.Get(metadataService)
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return true
+}
+
+func isGKE() bool {
+	metadataService := "http://metadata.google.internal/computeMetadata/v1/"
+	client := &http.Client{
+		Timeout: time.Second,
+	}
+	resp, err := client.Get(metadataService)
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return true
 }
