@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
@@ -407,28 +405,36 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
 }
 
-func isEKS() bool {
-	metadataService := "http://169.254.169.254/latest/meta-data/"
-	client := &http.Client{
-		Timeout: time.Second,
-	}
-	resp, err := client.Get(metadataService)
+func getPlatformNameFromKubectl() string {
+	cmd := exec.Command("kubectl", "version", "--short")
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return false
+		glog.V(2).Info(err)
 	}
-	resp.Body.Close()
-	return true
+
+	return getPlatformNameFromKubectlOutput(string(out))
+}
+
+func getPlatformNameFromKubectlOutput(s string) string {
+	serverVersionRe := regexp.MustCompile(`Server Version: v\d+.\d+.\d+-(\w+)\.\n+`)
+	subs := serverVersionRe.FindStringSubmatch(s)
+	if len(subs) < 2 {
+		if strings.Contains(s, "The connection to the server") {
+			msg := `Warning: platform name was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server.`
+			fmt.Fprintln(os.Stderr, msg)
+		}
+		glog.V(1).Info("Unable to get platform name from kubectl")
+		return ""
+	}
+	return subs[1]
+}
+
+func isEKS() bool {
+	platform := getPlatformNameFromKubectl()
+	return platform == "eks"
 }
 
 func isGKE() bool {
-	metadataService := "http://metadata.google.internal/computeMetadata/v1/"
-	client := &http.Client{
-		Timeout: time.Second,
-	}
-	resp, err := client.Get(metadataService)
-	if err != nil {
-		return false
-	}
-	resp.Body.Close()
-	return true
+	platform := getPlatformNameFromKubectl()
+	return platform == "gke"
 }
