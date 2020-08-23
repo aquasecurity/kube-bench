@@ -270,11 +270,7 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
 	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) {
-		if isEKS() {
-			benchmarkVersion = "eks-1.0"
-		} else if isGKE() {
-			benchmarkVersion = "gke-1.0"
-		}
+		benchmarkVersion = getPlatformBenchmarkVersion()
 	}
 
 	if isEmpty(benchmarkVersion) {

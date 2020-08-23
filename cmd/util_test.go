@@ -509,3 +509,47 @@ func TestGetYamlFilesFromDir(t *testing.T) {
 		t.Fatalf("Expected to find something.yaml, found %s", files[0])
 	}
 }
+
+func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "eks",
+			args: args{s: "Client Version: v1.17.6-eks.1\nServer Version: v1.17.6-eks.1"},
+			want: "eks",
+		},
+		{
+			name: "gke",
+			args: args{s: "Client Version: v1.17.6-gke.1\nServer Version: v1.17.6-gke.1"},
+			want: "gke",
+		},
+		{
+			name: "unknown",
+			args: args{s: "Client Version: v1.17.6\nServer Version: v1.17.6"},
+			want: "",
+		},
+		{
+			name: "connection refused",
+			args: args{s: "Client Version: v1.17.6\nThe connection to the server 127.0.0.1:32768 was refused - did you specify the right host or port?"},
+			want: "",
+		},
+		{
+			name: "connection timeout",
+			args: args{s: "Client Version: v1.17.6\nUnable to connect to the server: dial tcp 192.168.64.4:8443: i/o timeout"},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getPlatformNameFromKubectlOutput(tt.args.s); got != tt.want {
+				t.Errorf("getPlatformNameFromKubectlOutput() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

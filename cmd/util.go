@@ -416,10 +416,10 @@ func getPlatformNameFromKubectl() string {
 }
 
 func getPlatformNameFromKubectlOutput(s string) string {
-	serverVersionRe := regexp.MustCompile(`Server Version: v\d+.\d+.\d+-(\w+)\.\n+`)
+	serverVersionRe := regexp.MustCompile(`Server Version: v\d+\.\d+\.\d+-(\w+)\.\d+`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
-		if strings.Contains(s, "The connection to the server") {
+		if strings.Contains(s, "The connection to the server") || strings.Contains(s, "Unable to connect to the server") {
 			msg := `Warning: platform name was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server.`
 			fmt.Fprintln(os.Stderr, msg)
 		}
@@ -429,12 +429,13 @@ func getPlatformNameFromKubectlOutput(s string) string {
 	return subs[1]
 }
 
-func isEKS() bool {
+func getPlatformBenchmarkVersion() string {
 	platform := getPlatformNameFromKubectl()
-	return platform == "eks"
-}
-
-func isGKE() bool {
-	platform := getPlatformNameFromKubectl()
-	return platform == "gke"
+	switch platform {
+	case "eks":
+		return "eks-1.0"
+	case "gke":
+		return "gke-1.0"
+	}
+	return ""
 }
