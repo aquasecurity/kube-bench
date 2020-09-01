@@ -154,7 +154,7 @@ func TestIsMaster(t *testing.T) {
 		},
 		{
 			name:     "valid config, does not include master",
-			cfgFile:  "../cfg/node_only.yaml",
+			cfgFile:  "../hack/node_only.yaml",
 			isMaster: false,
 		},
 	}
@@ -364,6 +364,10 @@ func TestGetBenchmarkVersion(t *testing.T) {
 }
 
 func TestValidTargets(t *testing.T) {
+	viperWithData, err := loadConfigForTest()
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
 	cases := []struct {
 		name      string
 		benchmark string
@@ -410,7 +414,10 @@ func TestValidTargets(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			ret := validTargets(c.benchmark, c.targets)
+			ret, err := validTargets(c.benchmark, c.targets, viperWithData)
+			if err != nil {
+				t.Fatalf("Expected nil error, got: %v", err)
+			}
 			if ret != c.expected {
 				t.Fatalf("Expected %t, got %t", c.expected, ret)
 			}
@@ -451,7 +458,7 @@ func TestIsEtcd(t *testing.T) {
 		},
 		{
 			name:    "valid config, does not include etcd",
-			cfgFile: "../cfg/node_only.yaml",
+			cfgFile: "../hack/node_only.yaml",
 			isEtcd:  false,
 		},
 	}
@@ -532,11 +539,10 @@ func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 
 func loadConfigForTest() (*viper.Viper, error) {
 	viperWithData := viper.New()
-	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
+	viperWithData.SetConfigFile("../cfg/config.yaml")
 	if err := viperWithData.ReadInConfig(); err != nil {
 		return nil, err
 	}
-
 	return viperWithData, nil
 }
 
