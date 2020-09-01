@@ -368,7 +368,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 }
 
 func isEmpty(str string) bool {
-	return len(strings.TrimSpace(str)) == 0
+	return strings.TrimSpace(str) == ""
 
 }
 
