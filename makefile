@@ -54,9 +54,10 @@ kind-push:
 	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
 # runs the current version on kind using a job and follow logs
-kind-run: KUBECONFIG = "$(shell kind get kubeconfig-path --name="$(KIND_PROFILE)")"
+kind-run: KUBECONFIG = "./kubeconfig.kube-bench"
 kind-run: ensure-stern
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind.yaml > ./hack/kind.test.yaml
+	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
 	-KUBECONFIG=$(KUBECONFIG) \
 		kubectl delete job kube-bench
 	KUBECONFIG=$(KUBECONFIG) \
