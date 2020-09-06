@@ -284,16 +284,17 @@ kubectl apply -f job-gke.yaml
 
 ## Output
 
-There are three output states:
-- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed.
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually.
+There are four output states:
+- [PASS] indicates that the test was run successfully, and passed.
+- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
 - [INFO] is informational output that needs no further action.
 
 Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
 
 ## Configuration
 
