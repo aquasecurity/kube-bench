@@ -416,7 +416,7 @@ func getPlatformNameFromKubectl() string {
 }
 
 func getPlatformNameFromKubectlOutput(s string) string {
-	serverVersionRe := regexp.MustCompile(`Server Version: v\d+\.\d+\.\d+-(\w+)\.\d+`)
+	serverVersionRe := regexp.MustCompile(`Server Version: v\d+\.\d+\.\d+-(\w+)(?:[.\-])\w+`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
 		if strings.Contains(s, "The connection to the server") || strings.Contains(s, "Unable to connect to the server") {

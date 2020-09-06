@@ -521,7 +521,7 @@ func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
 	}{
 		{
 			name: "eks",
-			args: args{s: "Client Version: v1.17.6-eks.1\nServer Version: v1.17.6-eks.1"},
+			args: args{s: "Client Version: v1.17.9\nServer Version: v1.17.9-eks-4c6976"},
 			want: "eks",
 		},
 		{
