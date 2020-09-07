@@ -306,9 +306,9 @@ You can read more about `kube-bench` configuration in our [documentation](docs/R
 
 ## Troubleshooting
 
-Running `kube-bench` with the `-v 3 --logtostderr` parameters will generate debug logs that can be very helpful for debugging problems.
+Running `kube-bench` with the `-v 3` parameter will generate debug logs that can be very helpful for debugging problems.
 
-If you are using one of the example `job*.yaml` files, you will need to edit the `command` field, for example `["kube-bench", "-v", "3", "--logtostderr"]`. Once the job has run, the logs can be retrieved using `kubectl logs` on the job's pod.
+If you are using one of the example `job*.yaml` files, you will need to edit the `command` field, for example `["kube-bench", "-v", "3"]`. Once the job has run, the logs can be retrieved using `kubectl logs` on the job's pod.
 
 ## Test config YAML representation
 
@@ -358,7 +358,7 @@ If you think you have found a bug please follow the instructions below.
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
 - Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
 - Note the version of Kubernetes you are running (from `kubectl version` or `oc version` for OpenShift).
-- Set `-v 10 --logtostderr` command line options and save the log output. Please paste this into your issue.
+- Set `-v 10` command line option and save the log output. Please paste this into your issue.
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 
 ### Features

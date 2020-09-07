@@ -175,6 +175,10 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
+	if err := goflag.Set("logtostderr", "true"); err != nil {
+		fmt.Printf("unable to set logtostderr: %+v\n", err)
+		os.Exit(-1)
+	}
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
 	})
