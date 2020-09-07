@@ -56,9 +56,7 @@ kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes B
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| [1.3.0](https://workbench.cisecurity.org/benchmarks/602) | cis-1.3 | 1.11-1.12 |
-| [1.4.1](https://workbench.cisecurity.org/benchmarks/2351) | cis-1.4 | 1.13-1.14 |
-| [1.5.1](https://workbench.cisecurity.org/benchmarks/4892) | cis-1.5 | 1.15 |
+| [1.5.1](https://workbench.cisecurity.org/benchmarks/4892) | cis-1.5 | 1.15- |
 | [1.6.0](https://workbench.cisecurity.org/benchmarks/4834) | cis-1.6 | 1.16- |
 | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
 | [EKS 1.0.0](https://workbench.cisecurity.org/benchmarks/5190) | eks-1.0 | EKS |
@@ -99,18 +97,18 @@ Or run kube-bench against a worker node using the tests for Kubernetes version 1
 kube-bench node --version 1.13
 ```
 
-`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.13`, this is mapped to CIS Benchmark version `cis-1.14`.
+`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.15`, this is mapped to CIS Benchmark version `cis-1.15`.
 
 Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark version:
 
 ```
-kube-bench node --benchmark cis-1.4
+kube-bench node --benchmark cis-1.5
 ```
 
 If you want to target specific CIS Benchmark `target` (i.e master, node, etcd, etc...)
 you can use the `run --targets` subcommand.
 ```
-kube-bench --benchmark cis-1.4 run --targets master,node
+kube-bench --benchmark cis-1.5 run --targets master,node
 ```
 or
 ```
@@ -120,8 +118,6 @@ kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
 The following table shows the valid targets based on the CIS Benchmark version.
 | CIS Benchmark | Targets |
 |---|---|
-| cis-1.3| master, node |
-| cis-1.4| master, node |
 | cis-1.5| master, controlplane, node, etcd, policies |
 | cis-1.6| master, controlplane, node, etcd, policies |
 | gke-1.0| master, controlplane, node, etcd, policies, managedservices |
@@ -130,7 +126,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
 `controls` for the various versions of CIS Benchmark can be found in directories
-with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
+with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.5`.
 
 **Note:**  **`It is an error to specify both --version and --benchmark flags together`**
 
