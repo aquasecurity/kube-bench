@@ -1,12 +1,14 @@
 SOURCES := $(shell find . -name '*.go')
 BINARY := kube-bench
-DOCKER_REGISTRY ?= aquasec
+DOCKER_ORG ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
-IMAGE_NAME ?= $(DOCKER_REGISTRY)/$(BINARY):$(VERSION)
-TARGET_OS ?= linux
+IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
+GOOS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
+ARCHS ?= amd64 arm64
+GOARCH ?= $@
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
 	BUILD_OS := windows
@@ -20,21 +22,44 @@ endif
 KIND_PROFILE ?= kube-bench
 KIND_CONTAINER_NAME=$(KIND_PROFILE)-control-plane
 
-build: kube-bench
+# build a multi-arch image and push to Docker hub
+.PHONY: docker
+docker: publish manifests
+
+# build and push an arch-specific image
+.PHONY: $(ARCHS) manifests publish
+publish: $(ARCHS)
+$(ARCHS):
+	@echo "Building Docker image for $@"
+	docker build -t ${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION} \
+	--build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH) ./
+	@echo "Push $@ Docker image to ${DOCKER_ORG}/${BINARY}"
+	docker push ${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}
+	docker manifest create --amend "${DOCKER_ORG}/${BINARY}:${VERSION}" "${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}"
+	docker manifest annotate "${DOCKER_ORG}/${BINARY}:${VERSION}" "${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}" --os=$(GOOS) --arch=$(GOARCH)
+
+# push the multi-arch manifest
+manifests:
+	@echo "Push manifest for ${DOCKER_ORG}/${BINARY}:${VERSION}"
+	docker manifest push "${DOCKER_ORG}/${BINARY}:${VERSION}"
+
+build: $(BINARY)
 
 $(BINARY): $(SOURCES)
-	GOOS=$(TARGET_OS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+	GOOS=$(GOOS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-             --build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+             --build-arg VCS_REF=$(VERSION) \
 			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
              -t $(IMAGE_NAME) .
 
+# unit tests
 tests:
 	GO111MODULE=on go test -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
 
+# integration tests using kind
 integration-tests: build-docker
 	GO111MODULE=on go test ./integration/... -v -tags integration -timeout 1200s -args -kubebenchImg=$(IMAGE_NAME)
 
@@ -49,13 +74,13 @@ endif
 		kind create cluster --name $(KIND_PROFILE) --image kindest/node:v1.15.3 --wait 5m;\
 	fi
 
-# pushses the current dev version to the kind cluster.
-kind-push:
+# pushes the current dev version to the kind cluster.
+kind-push: build-docker
 	kind load docker-image $(IMAGE_NAME) --name $(KIND_PROFILE)
 
 # runs the current version on kind using a job and follow logs
 kind-run: KUBECONFIG = "./kubeconfig.kube-bench"
-kind-run: ensure-stern
+kind-run: ensure-stern kind-push
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind.yaml > ./hack/kind.test.yaml
 	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
 	-KUBECONFIG=$(KUBECONFIG) \
