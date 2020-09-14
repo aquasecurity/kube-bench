@@ -1,6 +1,6 @@
 ---
 controls:
-version: 1.5
+version: 1.6
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -42,14 +42,14 @@ groups:
         scored: false
 
       - id: 5.1.5
-        text: "Ensure that default service accounts are not actively used. (Automated)"
+        text: "Ensure that default service accounts are not actively used. (Manual)"
         type: "manual"
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
-        scored: true
+        scored: false
 
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
@@ -76,7 +76,7 @@ groups:
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.hostPID field is omitted or set to false.
-        scored: true
+        scored: false
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
@@ -84,7 +84,7 @@ groups:
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.hostIPC field is omitted or set to false.
-        scored: true
+        scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
@@ -92,7 +92,7 @@ groups:
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.hostNetwork field is omitted or set to false.
-        scored: true
+        scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
@@ -100,7 +100,7 @@ groups:
         remediation: |
           Create a PSP as described in the Kubernetes documentation, ensuring that the
           .spec.allowPrivilegeEscalation field is omitted or set to false.
-        scored: true
+        scored: false
 
       - id: 5.2.6
         text: "Minimize the admission of root containers (Manual)"
@@ -153,7 +153,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
-        scored: true
+        scored: false
 
   - id: 5.4
     text: "Secrets Management"
@@ -231,9 +231,9 @@ groups:
         scored: false
 
       - id: 5.7.4
-        text: "The default namespace should not be used (Automated)"
+        text: "The default namespace should not be used (Manual)"
         type: "manual"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
-        scored: true
+        scored: false
