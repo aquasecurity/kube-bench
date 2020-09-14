@@ -1,6 +1,6 @@
 ---
 controls:
-version: 1.5
+version: 1.6
 id: 3
 text: "Control Plane Configuration"
 type: "controlplane"
@@ -24,7 +24,7 @@ groups:
         type: "manual"
         remediation: |
           Create an audit policy file for your cluster.
-        scored: true
+        scored: false
 
       - id: 3.2.2
         text: "Ensure that the audit policy covers key security concerns (Manual)"
