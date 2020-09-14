@@ -37,7 +37,7 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Not Scored)"
         type: "manual"
-        Remediation: |
+        remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
 
@@ -128,7 +128,7 @@ groups:
         scored: false
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Not Scored) "
+        text: "Minimize the admission of containers with capabilities assigned (Not Scored)"
         type: "manual"
         remediation: |
           Review the use of capabilites in applications runnning on your cluster. Where a namespace
@@ -184,10 +184,10 @@ groups:
           Follow the Kubernetes documentation and setup image provenance.
         scored: false
 
-  - id: 5.6
+  - id: 5.7
     text: "General Policies"
     checks:
-      - id: 5.6.1
+      - id: 5.7.1
         text: "Create administrative boundaries between resources using namespaces (Not Scored)"
         type: "manual"
         remediation: |
@@ -195,7 +195,7 @@ groups:
           them.
         scored: false
 
-      - id: 5.6.2
+      - id: 5.7.2
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
         type: "manual"
         remediation: |
@@ -221,7 +221,7 @@ groups:
                 image: sotrustworthy:latest
         scored: false
 
-      - id: 5.6.3
+      - id: 5.7.3
         text: "Apply Security Context to Your Pods and Containers (Not Scored)"
         type: "manual"
         remediation: |
@@ -230,7 +230,7 @@ groups:
           Containers.
         scored: false
 
-      - id: 5.6.4
+      - id: 5.7.4
         text: "The default namespace should not be used (Scored)"
         type: "manual"
         remediation: |

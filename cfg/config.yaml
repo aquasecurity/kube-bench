@@ -27,6 +27,7 @@ master:
       - "apiserver"
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
+      - /etc/kubernetes/manifests/kube-apiserver.yml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
       - /var/snap/kube-apiserver/current/args
       - /etc/systemd/system/kube-apiserver.service
@@ -40,6 +41,7 @@ master:
       - "scheduler"
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
+      - /etc/kubernetes/manifests/kube-scheduler.yml
       - /etc/kubernetes/manifests/kube-scheduler.manifest
       - /var/snap/kube-scheduler/current/args
       - /etc/kubernetes/manifests/12-kube-scheduler.yaml
@@ -54,6 +56,7 @@ master:
       - "controller-manager"
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
+      - /etc/kubernetes/manifests/kube-controller-manager.yml
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
       - /var/snap/kube-controller-manager/current/args
       - /etc/kubernetes/manifests/10-kube-controller-manager.yaml
@@ -65,10 +68,12 @@ master:
       - "etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
+      - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
       - /etc/etcd/etcd.conf
       - /var/snap/etcd/common/etcd.conf.yml
-      - /etc/systemd/system/etcd-member.service
+      - /var/snap/etcd/common/etcd.conf.yaml
+       - /etc/systemd/system/etcd-member.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
@@ -92,6 +97,7 @@ node:
       - "/etc/kubernetes/pki/ca.crt"
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
+      - "/var/snap/microk8s/current/certs/ca.crt"
     svc:
       # These paths must also be included
       #  in the 'confs' property below
@@ -99,6 +105,7 @@ node:
       - "/etc/systemd/system/kubelet.service"
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
+      - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
@@ -106,13 +113,17 @@ node:
       - "/etc/kubernetes/kubelet.conf"
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/var/snap/microk8s/current/credentials/kubelet.config"
     confs:
       - "/var/lib/kubelet/config.yaml"
+      - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
+      - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/kubelet/current/args"
+      - "/var/snap/microk8s/current/args/kubelet"
       ## Due to the fact that the kubelet might be configured
       ## without a kubelet-config file, we use a work-around
       ## of pointing to the systemd service file (which can also
@@ -122,6 +133,7 @@ node:
       - "/etc/systemd/system/kubelet.service"
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
+      - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
@@ -137,12 +149,16 @@ node:
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
+      - /etc/kubernetes/addons/kube-proxy-daemonset.yml
       - /var/snap/kube-proxy/current/args
+      - /var/snap/microk8s/current/args/kube-proxy
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/var/lib/kubelet/kubeconfig"
+      - "/var/snap/microk8s/current/credentials/proxy.config"
     svc:
       - "/lib/systemd/system/kube-proxy.service"
+      - "/etc/systemd/system/snap.microk8s.daemon-proxy.service"
     defaultconf: /etc/kubernetes/addons/kube-proxy-daemonset.yaml
     defaultkubeconfig: "/etc/kubernetes/proxy.conf"
 
@@ -155,10 +171,12 @@ etcd:
       - "etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
+      - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
       - /etc/etcd/etcd.conf
       - /var/snap/etcd/common/etcd.conf.yml
       - /etc/systemd/system/etcd-member.service
+      - /var/snap/microk8s/current/args/etcd
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 controlplane:
@@ -167,6 +185,8 @@ controlplane:
 policies:
   components: []
 
+managedservices:
+  components: []
 
 version_mapping:
   "1.11": "cis-1.3"
@@ -176,5 +196,8 @@ version_mapping:
   "1.15": "cis-1.5"
   "1.16": "cis-1.5"
   "1.17": "cis-1.5"
+  "1.18": "cis-1.5"
+  "eks-1.0": "eks-1.0"
+  "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"

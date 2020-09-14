@@ -67,6 +67,7 @@ func run(targets []string, benchmarkVersion string) (err error) {
 		runChecks(testType, yamlFile)
 	}
 
+	writeOutput(controlsCollection)
 	return nil
 }
 

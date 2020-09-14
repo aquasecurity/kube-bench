@@ -48,18 +48,6 @@ func exitWithError(err error) {
 	os.Exit(1)
 }
 
-func continueWithError(err error, msg string) string {
-	if err != nil {
-		glog.V(2).Info(err)
-	}
-
-	if msg != "" {
-		fmt.Fprintf(os.Stderr, "%s\n", msg)
-	}
-
-	return ""
-}
-
 func cleanIDs(list string) map[string]bool {
 	list = strings.Trim(list, ",")
 	ids := strings.Split(list, ",")
@@ -82,7 +70,7 @@ func ps(proc string) string {
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
-		continueWithError(fmt.Errorf("%s: %s", cmd.Args, err), "")
+		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
 
 	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
@@ -276,17 +264,17 @@ func multiWordReplace(s string, subname string, sub string) string {
 const missingKubectlKubeletMessage = `
 Unable to find the programs kubectl or kubelet in the PATH.
 These programs are used to determine which version of Kubernetes is running.
-Make sure the /usr/bin directory is mapped to the container, 
+Make sure the /usr/local/mount-from-host/bin directory is mapped to the container,
 either in the job.yaml file, or Docker command.
 
 For job.yaml:
 ...
 - name: usr-bin
-  mountPath: /usr/bin
+  mountPath: /usr/local/mount-from-host/bin
 ...
 
 For docker command:
-   docker -v $(which kubectl):/usr/bin/kubectl ....
+   docker -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl ....
 
 Alternatively, you can specify the version with --version
    kube-bench --version <VERSION> ...
@@ -325,7 +313,7 @@ func getKubeVersionFromKubectl() string {
 	cmd := exec.Command("kubectl", "version", "--short")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		continueWithError(fmt.Errorf("%s", out), "")
+		glog.V(2).Info(err)
 	}
 
 	return getVersionFromKubectlOutput(string(out))
@@ -336,7 +324,7 @@ func getKubeVersionFromKubelet() string {
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
-		continueWithError(fmt.Errorf("%s", out), "")
+		glog.V(2).Info(err)
 	}
 
 	return getVersionFromKubeletOutput(string(out))
@@ -346,6 +334,10 @@ func getVersionFromKubectlOutput(s string) string {
 	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
+		if strings.Contains(s, "The connection to the server") {
+			msg := fmt.Sprintf(`Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version %s`, defaultKubeVersion)
+			fmt.Fprintln(os.Stderr, msg)
+		}
 		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
 		return defaultKubeVersion
 	}

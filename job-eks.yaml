@@ -11,7 +11,7 @@ spec:
         - name: kube-bench
           # Push the image to your ECR and then refer to it here
           image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
-          command: ["kube-bench", "--version", "1.11"]
+          command: ["kube-bench", "node", "--benchmark", "eks-1.0"]
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
