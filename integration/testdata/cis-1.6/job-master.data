@@ -84,8 +84,7 @@ ps -ef | grep etcd
 Run the below command (based on the etcd data directory found above).
 For example, chown etcd:etcd /var/lib/etcd
 
-1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)
-Run the below command (based on the file location on your system) on the master node.
+1.1.19 Run the below command (based on the file location on your system) on the master node.
 For example,
 chown -R root:root /etc/kubernetes/pki/
 
