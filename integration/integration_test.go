@@ -16,7 +16,7 @@ import (
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
 var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
 
-func TestRunWithKind(t *testing.T) {
+func testCheckCISWithKind(t *testing.T, testdataDir string) {
 	flag.Parse()
 	fmt.Printf("kube-bench Container Image: %s\n", *kubebenchImg)
 
@@ -29,20 +29,20 @@ func TestRunWithKind(t *testing.T) {
 		{
 			TestName:      "kube-bench",
 			KubebenchYAML: "../job.yaml",
-			ExpectedFile:  "./testdata/job.data",
+			ExpectedFile:  fmt.Sprintf("./testdata/%s/job.data", testdataDir),
 		},
 		{
 			TestName:      "kube-bench-node",
 			KubebenchYAML: "../job-node.yaml",
-			ExpectedFile:  "./testdata/job-node.data",
+			ExpectedFile:  fmt.Sprintf("./testdata/%s/job-node.data", testdataDir),
 		},
 		{
 			TestName:      "kube-bench-master",
 			KubebenchYAML: "../job-master.yaml",
-			ExpectedFile:  "./testdata/job-master.data",
+			ExpectedFile:  fmt.Sprintf("./testdata/%s/job-master.data", testdataDir),
 		},
 	}
-	ctx, err := setupCluster("kube-bench", "./testdata/add-tls-kind-k8s114.yaml", *timeout)
+	ctx, err := setupCluster("kube-bench", fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
 	if err != nil {
 		t.Fatalf("failed to setup KIND cluster error: %v", err)
 	}
@@ -78,6 +78,18 @@ func TestRunWithKind(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCheckCIS13WithKind(t *testing.T) {
+	testCheckCISWithKind(t, "cis-1.3")
+}
+
+func TestCheckCIS14WithKind(t *testing.T) {
+	testCheckCISWithKind(t, "cis-1.4")
+}
+
+func TestCheckCIS15WithKind(t *testing.T) {
+	testCheckCISWithKind(t, "cis-1.5")
 }
 
 // This is simple "diff" between 2 strings containing multiple lines.

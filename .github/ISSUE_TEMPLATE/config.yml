@@ -1,0 +1,9 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Feature request
+    url: https://github.com/aquasecurity/kube-bench/discussions/new?category_id=19113743
+    about: Share ideas for new features
+  - name: Ask a question
+    url: https://github.com/aquasecurity/kube-bench/discussions/new?category_id=19113742
+    about: Ask questions and discuss with other community members

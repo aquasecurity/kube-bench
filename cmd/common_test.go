@@ -15,12 +15,15 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -210,6 +213,8 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "1.15", succeed: true, exp: "cis-1.5"},
 		{kubeVersion: "1.16", succeed: true, exp: "cis-1.5"},
 		{kubeVersion: "1.17", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.18", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "gke-1.0", succeed: true, exp: "gke-1.0"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
@@ -334,6 +339,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 		{n: "kubeVersion", kubeVersion: "1.11", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
+		{n: "gke10", kubeVersion: "gke-1.0", benchmarkVersion: "", v: viperWithData, exp: "gke-1.0", callFn: withNoPath, succeed: true},
 	}
 	for _, c := range cases {
 		rv, err := c.callFn(c.kubeVersion, c.benchmarkVersion, c.v, getBenchmarkVersion)
@@ -386,6 +392,18 @@ func TestValidTargets(t *testing.T) {
 			name:      "cis-1.5 valid",
 			benchmark: "cis-1.5",
 			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
+			expected:  true,
+		},
+		{
+			name:      "gke-1.0 valid",
+			benchmark: "gke-1.0",
+			targets:   []string{"master", "node", "controlplane", "etcd", "policies", "managedservices"},
+			expected:  true,
+		},
+		{
+			name:      "eks-1.0 valid",
+			benchmark: "eks-1.0",
+			targets:   []string{"node", "policies", "controlplane", "managedservices"},
 			expected:  true,
 		},
 	}
@@ -465,6 +483,51 @@ func TestIsEtcd(t *testing.T) {
 
 		assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
 	}
+}
+
+func TestWriteResultToJsonFile(t *testing.T) {
+	defer func() {
+		controlsCollection = []*check.Controls{}
+		jsonFmt = false
+		outputFile = ""
+	}()
+	var err error
+	jsonFmt = true
+	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	controlsCollection, err = parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+	writeOutput(controlsCollection)
+
+	var expect []*check.Controls
+	var result []*check.Controls
+	result, err = parseControlsJsonFile(outputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	expect, err = parseControlsJsonFile("./testdata/result.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expect, result)
+}
+
+func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
+	var result []*check.Controls
+
+	d, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(d, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func loadConfigForTest() (*viper.Viper, error) {

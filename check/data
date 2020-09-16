@@ -166,7 +166,7 @@ groups:
               op: eq
               value: some-val
             set: true
-            
+
     - id: 15
       text: "jsonpath correct value on field"
       tests:
@@ -308,6 +308,26 @@ groups:
               value: '^1\.12.*$'
             set: true
 
+    - id: 27
+      text: "check boolean flag with no value"
+      tests:
+        test_items:
+          - flag: "--peer-client-cert-auth"
+            compare:
+              op: eq
+              value: true
+            set: true
+
+    - id: 28
+      text: "check boolean flag with false value"
+      tests:
+        test_items:
+          - flag: "--peer-client-cert-auth"
+            compare:
+              op: eq
+              value: false
+            set: true
+
 - id: 2.1
   text: "audit and audit_config commands"
   checks:
@@ -419,4 +439,121 @@ groups:
               op: eq
               value: "correct"
             set: true
+      scored: true
+    - id: 9
+      text: "test use_multiple_values is correct -> pass"
+      audit: "printf 'permissions=600\npermissions=600\npermissions=600'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
+    - id: 10
+      text: "test use_multiple_values is wrong -> fail"
+      audit: "printf 'permissions=600\npermissions=600\npermissions=644'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
+    - id: 11
+      text: "test use_multiple_values include empty value -> fail"
+      audit: "printf 'permissions=600\n\npermissions=600'"
+      use_multiple_values: true
+      tests:
+        test_items:
+          - flag: "permissions"
+            compare:
+              op: bitmask
+              value: "600"
+            set: true
+      scored: true
+    - id: 12
+      text: "audit is present and wrong, audit_config is right -> fail (command line parameters override config file)"
+      audit: "echo flag=wrong"
+      audit_config: "echo 'flag: correct'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 13
+      text: "parameter and config file don't have same default - parameter has failing value"
+      audit: "echo '--read-only-port=1'"
+      audit_config: "echo 'readOnlyPort: 0'"
+      tests:
+        bin_op: and
+        test_items:
+          - flag: "--read-only-port"
+            path: "{.readOnlyPort}"
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 14
+      text: "parameter and config file don't have same default - config file has failing value"
+      audit: "echo ''"
+      audit_config: "echo 'readOnlyPort: 1'"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 15
+      text: "parameter and config file don't have same default - passing"
+      audit: "echo ''"
+      audit_config: "echo ''"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
+      scored: true
+    - id: 15
+      text: "parameter and config file don't have same default - parameter has bad value and config is not present - failing"
+      audit: "echo '--read-only-port=1'"
+      audit_config: "echo ''"
+      tests:
+        bin_op: or
+        test_items:
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: true
+            compare:
+              op: eq
+              value: 0
+          - flag: "--read-only-port"
+            path: '{.readOnlyPort}'
+            set: false
       scored: true

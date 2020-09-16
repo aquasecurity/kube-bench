@@ -1,0 +1,45 @@
+---
+controls:
+version: "gke-1.0"
+id: 2
+text: "Etcd Node Configuration"
+type: "etcd"
+groups:
+  - id: 2
+    text: "Etcd Node Configuration Files"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
+        set as appropriate (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for etcd (Not Scored)"
+        remediation: "This control cannot be modified in GKE."
+        scored: false
