@@ -406,7 +406,7 @@ func TestValidTargets(t *testing.T) {
 		},
 		{
 			name:      "cis-1.6 valid",
-			benchmark: "cis-1.5",
+			benchmark: "cis-1.6",
 			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
 			expected:  true,
 		},
