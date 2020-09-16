@@ -36,7 +36,7 @@ groups:
         scored: true
 
       - id: 4.1.3
-        text: " If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)"
+        text: "If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           test_items:
