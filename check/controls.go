@@ -175,6 +175,39 @@ func (controls *Controls) JUnit() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+// AASF encodes the results of last run to AWS Security Finding Format(AASF).
+func (controls *Controls) AASF() ([]byte, error) {
+
+	for _, g := range controls.Groups {
+		for _, check := range g.Checks {
+			f := securityhub.AwsSecurityFinding{
+				AwsAccountId: aws.String("foo"),
+				Confidence:   aws.Int64(100),
+			}
+			t := fmt.Sprintf("%s %s %s", g.ID, controls.Text, g.Text)
+			f.SetTitle(t)
+			d := fmt.Sprintf("%s %s", check.ID, check.Text)
+			f.SetDescription(d)
+
+			// Here's a basic example of formatting a time
+			// according to RFC3339, using the corresponding layout
+			// constant.
+			ti := time.Now()
+			f.SetCreatedAt(ti.Format(time.RFC3339))
+
+			switch check.State {
+			case FAIL:
+				
+			case WARN, INFO:
+				
+			case PASS:
+			default:
+				
+			}
+
+		}
+	}
+
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:
