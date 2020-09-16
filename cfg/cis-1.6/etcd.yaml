@@ -68,7 +68,7 @@ groups:
             - flag: "--peer-key-file"
         remediation: |
           Follow the etcd service documentation and configure peer TLS encryption as appropriate
-          for your etcd cluster. 
+          for your etcd cluster.
           Then, edit the etcd pod specification file $etcdconf on the
           master node and set the below parameters.
           --peer-client-file=</path/to/peer-cert-file>
