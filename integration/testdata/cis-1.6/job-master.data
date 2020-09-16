@@ -177,7 +177,7 @@ on the master node and set the below parameter.
 
 
 == Summary ==
-44 checks PASS
-11 checks FAIL
+43 checks PASS
+12 checks FAIL
 10 checks WARN
 0 checks INFO
