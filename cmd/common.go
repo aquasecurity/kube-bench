@@ -249,7 +249,7 @@ func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (str
 
 	if !found {
 		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
-		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
+		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkMap: %#v", kubeToBenchmarkMap))
 		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
 	}
 
@@ -263,6 +263,15 @@ func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
 	}
 
 	return kubeToBenchmarkMap, nil
+}
+
+func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
+	benchmarkVersionToTargetsMap := v.GetStringMapStringSlice("target_mapping")
+	if len(benchmarkVersionToTargetsMap) == 0 {
+		return nil, fmt.Errorf("config file is missing 'target_mapping' section")
+	}
+
+	return benchmarkVersionToTargetsMap, nil
 }
 
 func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (bv string, err error) {
@@ -306,16 +315,16 @@ func isEtcd() bool {
 }
 
 func isThisNodeRunning(nodeType check.NodeType) bool {
-	glog.V(2).Infof("Checking if the current node is running %s components", nodeType)
-	etcdConf := viper.Sub(string(nodeType))
-	if etcdConf == nil {
-		glog.V(2).Infof("No %s components found to be running", nodeType)
+	glog.V(3).Infof("Checking if the current node is running %s components", nodeType)
+	nodeTypeConf := viper.Sub(string(nodeType))
+	if nodeTypeConf == nil {
+		glog.V(2).Infof("No config for %s components found", nodeType)
 		return false
 	}
 
-	components, err := getBinariesFunc(etcdConf, nodeType)
+	components, err := getBinariesFunc(nodeTypeConf, nodeType)
 	if err != nil {
-		glog.V(2).Info(err)
+		glog.V(2).Infof("Failed to find %s binaries: %v", nodeType, err)
 		return false
 	}
 	if len(components) == 0 {
@@ -323,6 +332,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 		return false
 	}
 
+	glog.V(2).Infof("Node is running %s components", nodeType)
 	return true
 }
 
@@ -337,7 +347,7 @@ func writeOutput(controlsCollection []*check.Controls) {
 		return
 	}
 	if jsonFmt {
-		writeJsonOutput(controlsCollection)
+		writeJSONOutput(controlsCollection)
 		return
 	}
 	if pgSQL {
@@ -347,12 +357,12 @@ func writeOutput(controlsCollection []*check.Controls) {
 	writeStdoutOutput(controlsCollection)
 }
 
-func writeJsonOutput(controlsCollection []*check.Controls) {
+func writeJSONOutput(controlsCollection []*check.Controls) {
 	out, err := json.Marshal(controlsCollection)
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 	}
-	PrintOutput(string(out), outputFile)
+	printOutput(string(out), outputFile)
 }
 
 func writeJunitOutput(controlsCollection []*check.Controls) {
@@ -361,7 +371,7 @@ func writeJunitOutput(controlsCollection []*check.Controls) {
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
 		}
-		PrintOutput(string(out), outputFile)
+		printOutput(string(out), outputFile)
 	}
 }
 
@@ -400,8 +410,8 @@ func writeOutputToFile(output string, outputFile string) error {
 	return w.Flush()
 }
 
-func PrintOutput(output string, outputFile string) {
-	if len(outputFile) == 0 {
+func printOutput(output string, outputFile string) {
+	if outputFile == "" {
 		fmt.Println(output)
 	} else {
 		err := writeOutputToFile(output, outputFile)
@@ -411,20 +421,16 @@ func PrintOutput(output string, outputFile string) {
 	}
 }
 
-var benchmarkVersionToTargetsMap = map[string][]string{
-	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
-	"gke-1.0": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES), string(check.MANAGEDSERVICES)},
-	"eks-1.0": []string{string(check.NODE), string(check.CONTROLPLANE), string(check.POLICIES), string(check.MANAGEDSERVICES)},
-}
-
 // validTargets helps determine if the targets
 // are legitimate for the benchmarkVersion.
-func validTargets(benchmarkVersion string, targets []string) bool {
+func validTargets(benchmarkVersion string, targets []string, v *viper.Viper) (bool, error) {
+	benchmarkVersionToTargetsMap, err := loadTargetMapping(v)
+	if err != nil {
+		return false, err
+	}
 	providedTargets, found := benchmarkVersionToTargetsMap[benchmarkVersion]
 	if !found {
-		return false
+		return false, fmt.Errorf("No targets configured for %s", benchmarkVersion)
 	}
 
 	for _, pt := range targets {
@@ -437,9 +443,9 @@ func validTargets(benchmarkVersion string, targets []string) bool {
 		}
 
 		if !f {
-			return false
+			return false, nil
 		}
 	}
 
-	return true
+	return true, nil
 }
