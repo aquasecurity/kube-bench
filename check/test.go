@@ -228,6 +228,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 	case "gt", "gte", "lt", "lte":
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
+			expectedResultPattern = "Invalid Number(s) used for comparison '%s' '%s'"
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
 			return "Invalid Number(s) used for comparison", false
 		}
