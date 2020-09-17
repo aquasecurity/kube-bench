@@ -92,6 +92,10 @@ func TestCheckCIS15WithKind(t *testing.T) {
 	testCheckCISWithKind(t, "cis-1.5")
 }
 
+func TestCheckCIS16WithKind(t *testing.T) {
+	testCheckCISWithKind(t, "cis-1.6")
+}
+
 // This is simple "diff" between 2 strings containing multiple lines.
 // It's not a comprehensive diff between the 2 strings.
 // It does not inditcate when lines are deleted.
