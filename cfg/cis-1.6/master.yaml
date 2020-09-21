@@ -1,6 +1,6 @@
 ---
 controls:
-version: 1.5
+version: 1.6
 id: 1
 text: "Master Node Security Configuration"
 type: "master"
@@ -9,7 +9,7 @@ groups:
     text: "Master Node Configuration Files"
     checks:
       - id: 1.1.1
-        text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
         tests:
           test_items:
@@ -17,7 +17,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the
           master node.
@@ -25,15 +24,11 @@ groups:
         scored: true
 
       - id: 1.1.2
-        text: "Ensure that the API server pod specification file ownership is set to root:root (Scored)"
+        text: "Ensure that the API server pod specification file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -41,7 +36,7 @@ groups:
         scored: true
 
       - id: 1.1.3
-        text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; fi'"
         tests:
           test_items:
@@ -49,7 +44,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -57,15 +51,11 @@ groups:
         scored: true
 
       - id: 1.1.4
-        text: "Ensure that the controller manager pod specification file ownership is set to root:root (Scored)"
+        text: "Ensure that the controller manager pod specification file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -73,7 +63,7 @@ groups:
         scored: true
 
       - id: 1.1.5
-        text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; fi'"
         tests:
           test_items:
@@ -81,7 +71,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -89,15 +78,11 @@ groups:
         scored: true
 
       - id: 1.1.6
-        text: "Ensure that the scheduler pod specification file ownership is set to root:root (Scored)"
+        text: "Ensure that the scheduler pod specification file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -105,7 +90,7 @@ groups:
         scored: true
 
       - id: 1.1.7
-        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c permissions=%a $etcdconf; fi'"
         tests:
           test_items:
@@ -113,7 +98,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -121,15 +105,11 @@ groups:
         scored: true
 
       - id: 1.1.8
-        text: "Ensure that the etcd pod specification file ownership is set to root:root (Scored)"
+        text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -137,7 +117,7 @@ groups:
         scored: true
 
       - id: 1.1.9
-        text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Not Scored)"
+        text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
         audit: "stat -c permissions=%a <path/to/cni/files>"
         type: "manual"
         remediation: |
@@ -147,7 +127,7 @@ groups:
         scored: false
 
       - id: 1.1.10
-        text: "Ensure that the Container Network Interface file ownership is set to root:root (Not Scored)"
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
         audit: "stat -c %U:%G <path/to/cni/files>"
         type: "manual"
         remediation: |
@@ -157,7 +137,7 @@ groups:
         scored: false
 
       - id: 1.1.11
-        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Scored)"
+        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
         audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a
         tests:
           test_items:
@@ -165,7 +145,6 @@ groups:
               compare:
                 op: bitmask
                 value: "700"
-              set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the below command:
@@ -175,12 +154,11 @@ groups:
         scored: true
 
       - id: 1.1.12
-        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Scored)"
+        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
         audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
         tests:
           test_items:
             - flag: "etcd:etcd"
-              set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the below command:
@@ -190,7 +168,7 @@ groups:
         scored: true
 
       - id: 1.1.13
-        text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c permissions=%a /etc/kubernetes/admin.conf; fi'"
         tests:
           test_items:
@@ -198,7 +176,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -206,15 +183,11 @@ groups:
         scored: true
 
       - id: 1.1.14
-        text: "Ensure that the admin.conf file ownership is set to root:root (Scored)"
+        text: "Ensure that the admin.conf file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/admin.conf; then stat -c %U:%G /etc/kubernetes/admin.conf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -222,7 +195,7 @@ groups:
         scored: true
 
       - id: 1.1.15
-        text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c permissions=%a /etc/kubernetes/scheduler.conf; fi'"
         tests:
           test_items:
@@ -230,7 +203,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -238,15 +210,11 @@ groups:
         scored: true
 
       - id: 1.1.16
-        text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
+        text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%G /etc/kubernetes/scheduler.conf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -254,7 +222,7 @@ groups:
         scored: true
 
       - id: 1.1.17
-        text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)"
+        text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c permissions=%a /etc/kubernetes/controller-manager.conf; fi'"
         tests:
           test_items:
@@ -262,7 +230,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -270,15 +237,11 @@ groups:
         scored: true
 
       - id: 1.1.18
-        text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
+        text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
         audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%G /etc/kubernetes/controller-manager.conf; fi'"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -286,16 +249,12 @@ groups:
         scored: true
 
       - id: 1.1.19
-        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
+        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
         audit: "find /etc/kubernetes/pki/ | xargs stat -c %U:%G"
         use_multiple_values: true
         tests:
           test_items:
-            - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
+            - flag: "root root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -303,8 +262,8 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Not Scored)"
-        audit: "find /etc/kubernetes/pki/ -name '*.crt' | xargs stat -c permissions=%a"
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Manual)"
+        audit: "find /etc/kubernetes/pki -name '*.crt' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -312,7 +271,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -320,8 +278,8 @@ groups:
         scored: false
 
       - id: 1.1.21
-        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Not Scored)"
-        audit: "find /etc/kubernetes/pki/ -name '*.key' | xargs stat -c permissions=%a"
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
+        audit: "find /etc/kubernetes/pki -name '*.key' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -329,7 +287,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -340,15 +297,15 @@ groups:
     text: "API Server"
     checks:
       - id: 1.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
+        text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        type: manual
         tests:
           test_items:
             - flag: "--anonymous-auth"
               compare:
                 op: eq
                 value: false
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the below parameter.
@@ -356,7 +313,7 @@ groups:
         scored: false
 
       - id: 1.2.2
-        text: "Ensure that the --basic-auth-file argument is not set (Scored)"
+        text: "Ensure that the --basic-auth-file argument is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -369,7 +326,7 @@ groups:
         scored: true
 
       - id: 1.2.3
-        text: "Ensure that the --token-auth-file parameter is not set (Scored)"
+        text: "Ensure that the --token-auth-file parameter is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -382,7 +339,7 @@ groups:
         scored: true
 
       - id: 1.2.4
-        text: "Ensure that the --kubelet-https argument is set to true (Scored)"
+        text: "Ensure that the --kubelet-https argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -391,7 +348,6 @@ groups:
               compare:
                 op: eq
                 value: true
-              set: true
             - flag: "--kubelet-https"
               set: false
         remediation: |
@@ -400,15 +356,13 @@ groups:
         scored: true
 
       - id: 1.2.5
-        text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Scored)"
+        text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: and
           test_items:
             - flag: "--kubelet-client-certificate"
-              set: true
             - flag: "--kubelet-client-key"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set up the TLS connection between the
           apiserver and kubelets. Then, edit API server pod specification file
@@ -419,12 +373,11 @@ groups:
         scored: true
 
       - id: 1.2.6
-        text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Scored)"
+        text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--kubelet-certificate-authority"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and setup the TLS connection between
           the apiserver and kubelets. Then, edit the API server pod specification file
@@ -434,7 +387,7 @@ groups:
         scored: true
 
       - id: 1.2.7
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -442,7 +395,6 @@ groups:
               compare:
                 op: nothave
                 value: "AlwaysAllow"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --authorization-mode parameter to values other than AlwaysAllow.
@@ -451,7 +403,7 @@ groups:
         scored: true
 
       - id: 1.2.8
-        text: "Ensure that the --authorization-mode argument includes Node (Scored)"
+        text: "Ensure that the --authorization-mode argument includes Node (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -459,7 +411,6 @@ groups:
               compare:
                 op: has
                 value: "Node"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --authorization-mode parameter to a value that includes Node.
@@ -467,7 +418,7 @@ groups:
         scored: true
 
       - id: 1.2.9
-        text: "Ensure that the --authorization-mode argument includes RBAC (Scored)"
+        text: "Ensure that the --authorization-mode argument includes RBAC (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -475,7 +426,6 @@ groups:
               compare:
                 op: has
                 value: "RBAC"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --authorization-mode parameter to a value that includes RBAC,
@@ -484,7 +434,7 @@ groups:
         scored: true
 
       - id: 1.2.10
-        text: "Ensure that the admission control plugin EventRateLimit is set (Not Scored)"
+        text: "Ensure that the admission control plugin EventRateLimit is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -492,7 +442,6 @@ groups:
               compare:
                 op: has
                 value: "EventRateLimit"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set the desired limits in a configuration file.
           Then, edit the API server pod specification file $apiserverconf
@@ -502,7 +451,7 @@ groups:
         scored: false
 
       - id: 1.2.11
-        text: "Ensure that the admission control plugin AlwaysAdmit is not set (Scored)"
+        text: "Ensure that the admission control plugin AlwaysAdmit is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -511,7 +460,6 @@ groups:
               compare:
                 op: nothave
                 value: AlwaysAdmit
-              set: true
             - flag: "--enable-admission-plugins"
               set: false
         remediation: |
@@ -521,7 +469,7 @@ groups:
         scored: true
 
       - id: 1.2.12
-        text: "Ensure that the admission control plugin AlwaysPullImages is set (Not Scored)"
+        text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -529,7 +477,6 @@ groups:
               compare:
                 op: has
                 value: "AlwaysPullImages"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --enable-admission-plugins parameter to include
@@ -538,7 +485,7 @@ groups:
         scored: false
 
       - id: 1.2.13
-        text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Not Scored)"
+        text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -547,12 +494,10 @@ groups:
               compare:
                 op: has
                 value: "SecurityContextDeny"
-              set: true
             - flag: "--enable-admission-plugins"
               compare:
                 op: has
                 value: "PodSecurityPolicy"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --enable-admission-plugins parameter to include
@@ -561,7 +506,7 @@ groups:
         scored: false
 
       - id: 1.2.14
-        text: "Ensure that the admission control plugin ServiceAccount is set (Scored)"
+        text: "Ensure that the admission control plugin ServiceAccount is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -570,7 +515,6 @@ groups:
               compare:
                 op: nothave
                 value: "ServiceAccount"
-              set: true
             - flag: "--disable-admission-plugins"
               set: false
         remediation: |
@@ -581,7 +525,7 @@ groups:
         scored: true
 
       - id: 1.2.15
-        text: "Ensure that the admission control plugin NamespaceLifecycle is set (Scored)"
+        text: "Ensure that the admission control plugin NamespaceLifecycle is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -590,7 +534,6 @@ groups:
               compare:
                 op: nothave
                 value: "NamespaceLifecycle"
-              set: true
             - flag: "--disable-admission-plugins"
               set: false
         remediation: |
@@ -600,7 +543,7 @@ groups:
         scored: true
 
       - id: 1.2.16
-        text: "Ensure that the admission control plugin PodSecurityPolicy is set (Scored)"
+        text: "Ensure that the admission control plugin PodSecurityPolicy is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -608,7 +551,6 @@ groups:
               compare:
                 op: has
                 value: "PodSecurityPolicy"
-              set: true
         remediation: |
           Follow the documentation and create Pod Security Policy objects as per your environment.
           Then, edit the API server pod specification file $apiserverconf
@@ -619,7 +561,7 @@ groups:
         scored: true
 
       - id: 1.2.17
-        text: "Ensure that the admission control plugin NodeRestriction is set (Scored)"
+        text: "Ensure that the admission control plugin NodeRestriction is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -627,7 +569,6 @@ groups:
               compare:
                 op: has
                 value: "NodeRestriction"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and configure NodeRestriction plug-in on kubelets.
           Then, edit the API server pod specification file $apiserverconf
@@ -637,7 +578,7 @@ groups:
         scored: true
 
       - id: 1.2.18
-        text: "Ensure that the --insecure-bind-address argument is not set (Scored)"
+        text: "Ensure that the --insecure-bind-address argument is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -649,7 +590,7 @@ groups:
         scored: true
 
       - id: 1.2.19
-        text: "Ensure that the --insecure-port argument is set to 0 (Scored)"
+        text: "Ensure that the --insecure-port argument is set to 0 (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -657,7 +598,6 @@ groups:
               compare:
                 op: eq
                 value: 0
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the below parameter.
@@ -665,7 +605,7 @@ groups:
         scored: true
 
       - id: 1.2.20
-        text: "Ensure that the --secure-port argument is not set to 0 (Scored)"
+        text: "Ensure that the --secure-port argument is not set to 0 (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -674,7 +614,6 @@ groups:
               compare:
                 op: gt
                 value: 0
-              set: true
             - flag: "--secure-port"
               set: false
         remediation: |
@@ -684,7 +623,7 @@ groups:
         scored: true
 
       - id: 1.2.21
-        text: "Ensure that the --profiling argument is set to false (Scored)"
+        text: "Ensure that the --profiling argument is set to false (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -692,7 +631,6 @@ groups:
               compare:
                 op: eq
                 value: false
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the below parameter.
@@ -700,12 +638,11 @@ groups:
         scored: true
 
       - id: 1.2.22
-        text: "Ensure that the --audit-log-path argument is set (Scored)"
+        text: "Ensure that the --audit-log-path argument is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--audit-log-path"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --audit-log-path parameter to a suitable path and
@@ -714,7 +651,7 @@ groups:
         scored: true
 
       - id: 1.2.23
-        text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Scored)"
+        text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -722,7 +659,6 @@ groups:
               compare:
                 op: gte
                 value: 30
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --audit-log-maxage parameter to 30 or as an appropriate number of days:
@@ -730,7 +666,7 @@ groups:
         scored: true
 
       - id: 1.2.24
-        text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Scored)"
+        text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -738,7 +674,6 @@ groups:
               compare:
                 op: gte
                 value: 10
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --audit-log-maxbackup parameter to 10 or to an appropriate
@@ -747,7 +682,7 @@ groups:
         scored: true
 
       - id: 1.2.25
-        text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Scored)"
+        text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -755,7 +690,6 @@ groups:
               compare:
                 op: gte
                 value: 100
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --audit-log-maxsize parameter to an appropriate size in MB.
@@ -764,7 +698,7 @@ groups:
         scored: true
 
       - id: 1.2.26
-        text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
+        text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -772,7 +706,6 @@ groups:
             - flag: "--request-timeout"
               set: false
             - flag: "--request-timeout"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           and set the below parameter as appropriate and if needed.
@@ -781,7 +714,7 @@ groups:
         scored: true
 
       - id: 1.2.27
-        text: "Ensure that the --service-account-lookup argument is set to true (Scored)"
+        text: "Ensure that the --service-account-lookup argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -792,7 +725,6 @@ groups:
               compare:
                 op: eq
                 value: true
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the below parameter.
@@ -802,12 +734,11 @@ groups:
         scored: true
 
       - id: 1.2.28
-        text: "Ensure that the --service-account-key-file argument is set as appropriate (Scored)"
+        text: "Ensure that the --service-account-key-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--service-account-key-file"
-              set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the master node and set the --service-account-key-file parameter
@@ -816,15 +747,13 @@ groups:
         scored: true
 
       - id: 1.2.29
-        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Scored)"
+        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: and
           test_items:
             - flag: "--etcd-certfile"
-              set: true
             - flag: "--etcd-keyfile"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
           Then, edit the API server pod specification file $apiserverconf
@@ -834,15 +763,13 @@ groups:
         scored: true
 
       - id: 1.2.30
-        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: and
           test_items:
             - flag: "--tls-cert-file"
-              set: true
             - flag: "--tls-private-key-file"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
           Then, edit the API server pod specification file $apiserverconf
@@ -852,12 +779,11 @@ groups:
         scored: true
 
       - id: 1.2.31
-        text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--client-ca-file"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
           Then, edit the API server pod specification file $apiserverconf
@@ -866,12 +792,11 @@ groups:
         scored: true
 
       - id: 1.2.32
-        text: "Ensure that the --etcd-cafile argument is set as appropriate (Scored)"
+        text: "Ensure that the --etcd-cafile argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--etcd-cafile"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
           Then, edit the API server pod specification file $apiserverconf
@@ -880,12 +805,11 @@ groups:
         scored: true
 
       - id: 1.2.33
-        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Not Scored)"
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
             - flag: "--encryption-provider-config"
-              set: true
         remediation: |
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           Then, edit the API server pod specification file $apiserverconf
@@ -893,7 +817,7 @@ groups:
         scored: false
 
       - id: 1.2.34
-        text: "Ensure that encryption providers are appropriately configured (Not Scored)"
+        text: "Ensure that encryption providers are appropriately configured (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         type: "manual"
         remediation: |
@@ -902,7 +826,7 @@ groups:
         scored: false
 
       - id: 1.2.35
-        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
+        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -910,23 +834,24 @@ groups:
               compare:
                 op: has
                 value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
-              set: true
         remediation: |
-          Edit the API server pod specification file $apiserverconf
+          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
           on the master node and set the below parameter.
-          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM
+          _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM
+          _SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM
+          _SHA384
         scored: false
 
   - id: 1.3
     text: "Controller Manager"
     checks:
       - id: 1.3.1
-        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Not Scored)"
+        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
             - flag: "--terminated-pod-gc-threshold"
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold,
@@ -935,7 +860,7 @@ groups:
         scored: false
 
       - id: 1.3.2
-        text: "Ensure that the --profiling argument is set to false (Scored)"
+        text: "Ensure that the --profiling argument is set to false (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
@@ -943,7 +868,6 @@ groups:
               compare:
                 op: eq
                 value: false
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the below parameter.
@@ -951,7 +875,7 @@ groups:
         scored: true
 
       - id: 1.3.3
-        text: "Ensure that the --use-service-account-credentials argument is set to true (Scored)"
+        text: "Ensure that the --use-service-account-credentials argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
@@ -959,7 +883,6 @@ groups:
               compare:
                 op: noteq
                 value: false
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node to set the below parameter.
@@ -967,12 +890,11 @@ groups:
         scored: true
 
       - id: 1.3.4
-        text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)"
+        text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
             - flag: "--service-account-private-key-file"
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --service-account-private-key-file parameter
@@ -981,12 +903,11 @@ groups:
         scored: true
 
       - id: 1.3.5
-        text: "Ensure that the --root-ca-file argument is set as appropriate (Scored)"
+        text: "Ensure that the --root-ca-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
             - flag: "--root-ca-file"
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --root-ca-file parameter to the certificate bundle file`.
@@ -994,7 +915,7 @@ groups:
         scored: true
 
       - id: 1.3.6
-        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
+        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
@@ -1002,7 +923,6 @@ groups:
               compare:
                 op: eq
                 value: "RotateKubeletServerCertificate=true"
-              set: true
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
@@ -1010,7 +930,7 @@ groups:
         scored: true
 
       - id: 1.3.7
-        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Scored)"
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           bin_op: or
@@ -1019,7 +939,6 @@ groups:
               compare:
                 op: eq
                 value: "127.0.0.1"
-              set: true
             - flag: "--bind-address"
               set: false
         remediation: |
@@ -1031,7 +950,7 @@ groups:
     text: "Scheduler"
     checks:
       - id: 1.4.1
-        text: "Ensure that the --profiling argument is set to false (Scored)"
+        text: "Ensure that the --profiling argument is set to false (Automated)"
         audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
         tests:
           test_items:
@@ -1039,7 +958,6 @@ groups:
               compare:
                 op: eq
                 value: false
-              set: true
         remediation: |
           Edit the Scheduler pod specification file $schedulerconf file
           on the master node and set the below parameter.
@@ -1047,7 +965,7 @@ groups:
         scored: true
 
       - id: 1.4.2
-        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Scored)"
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
         tests:
           bin_op: or
@@ -1056,7 +974,6 @@ groups:
               compare:
                 op: eq
                 value: "127.0.0.1"
-              set: true
             - flag: "--bind-address"
               set: false
         remediation: |

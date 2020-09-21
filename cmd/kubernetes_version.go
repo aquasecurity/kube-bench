@@ -136,7 +136,7 @@ func loadCertficate(certFile string) (*tls.Certificate, error) {
 		return nil, fmt.Errorf("unable to Decode certificate")
 	}
 
-	glog.V(2).Info(fmt.Sprintf("Loading CA certificate"))
+	glog.V(2).Info("Loading CA certificate")
 	tlsCert.Certificate = append(tlsCert.Certificate, block.Bytes)
 	return &tlsCert, nil
 }
@@ -154,7 +154,7 @@ func getKubernetesURL() string {
 			return fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
 		}
 
-		glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
+		glog.V(2).Info("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set")
 	}
 
 	return k8sVersionURL
