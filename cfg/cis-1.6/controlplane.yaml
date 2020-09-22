@@ -1,0 +1,35 @@
+---
+controls:
+version: 1.6
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Client certificate authentication should not be used for users (Manual)"
+        type: "manual"
+        remediation: |
+          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+          implemented in place of client certificates.
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created (Manual)"
+        type: "manual"
+        remediation: |
+          Create an audit policy file for your cluster.
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns (Manual)"
+        type: "manual"
+        remediation: |
+          Consider modification of the audit policy in use on the cluster to include these items, at a
+          minimum.
+        scored: false

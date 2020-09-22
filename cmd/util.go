@@ -214,9 +214,8 @@ func verifyBin(bin string) bool {
 	// but apiserver is not a match for kube-apiserver
 	reFirstWord := regexp.MustCompile(`^(\S*\/)*` + bin)
 	lines := strings.Split(out, "\n")
-	glog.V(2).Info(fmt.Sprintf("verifyBin - lines(%d)", len(lines)))
 	for _, l := range lines {
-		glog.V(2).Info(fmt.Sprintf("reFirstWord.Match(%s)\n\n\n\n", l))
+		glog.V(3).Info(fmt.Sprintf("reFirstWord.Match(%s)", l))
 		if reFirstWord.Match([]byte(l)) {
 			return true
 		}
@@ -369,7 +368,7 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 }
 
 func isEmpty(str string) bool {
-	return len(strings.TrimSpace(str)) == 0
+	return strings.TrimSpace(str) == ""
 
 }
 
