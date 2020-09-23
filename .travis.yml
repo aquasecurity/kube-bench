@@ -13,7 +13,7 @@ before_install:
   - pip install --user yamllint==1.18.0
   - gem install --no-document fpm
   - go get -t -v ./...
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
 script:
   - yamllint -c ./.yamllint.yaml .

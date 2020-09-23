@@ -169,6 +169,7 @@ func (t testItem) execute(s string) *testOutput {
 		}
 	}
 
+	result.actualResult = s
 	return result
 }
 
