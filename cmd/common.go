@@ -358,7 +358,13 @@ func writeOutput(controlsCollection []*check.Controls) {
 }
 
 func writeJSONOutput(controlsCollection []*check.Controls) {
-	out, err := json.Marshal(controlsCollection)
+	var out []byte
+	var err error
+	if len(controlsCollection) == 1 { // sysdig backward compatibility - single JSON object
+		out, err = controlsCollection[0].JSON()
+	} else {
+		out, err = json.Marshal(controlsCollection)
+	}
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 	}
