@@ -91,7 +91,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Checks that the executables we need for the section are running.
 	if err != nil {
-		exitWithError(fmt.Errorf("failed to get a set of executables needed for tests: %v", err))
+		glog.V(1).Info(fmt.Sprintf("failed to get a set of executables needed for tests: %v", err))
 	}
 
 	confmap := getFiles(typeConf, "config")
