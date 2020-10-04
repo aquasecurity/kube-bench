@@ -183,7 +183,7 @@ You can still force to run specific master or node checks using respectively `jo
 
 To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
-The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+The default labels applied to master nodes have changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerances to run the job on the master node.
 
 
 ### Running in an AKS cluster
@@ -340,7 +340,7 @@ We welcome PRs and issue reports.
 
 Our makefile contains targets to test your current version of kube-bench inside a [Kind](https://kind.sigs.k8s.io/) cluster. This can be very handy if you don't want to run a real Kubernetes cluster for development purposes.
 
-First, you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
+First, you'll need to create the cluster using `make kind-test-cluster` .This will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
 *If kind cannot be found on your system the target will try to install it using `go get`*
 
@@ -368,7 +368,7 @@ If you think you have found a bug please follow the instructions below.
 We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
 
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
-- Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
+- Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 - Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
 
