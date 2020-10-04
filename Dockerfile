@@ -24,6 +24,7 @@ ENV PATH=$PATH:/usr/local/mount-from-host/bin
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
 COPY cfg/ cfg/
+COPY integration/ integration/
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["install"]
 
