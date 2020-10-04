@@ -120,8 +120,6 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 				}
 			}
 		}
-
-		return nil, fmt.Errorf("no Pod found for Job %q", jobName)
 	}
 }
 
