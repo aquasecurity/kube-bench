@@ -1,0 +1,30 @@
+---
+controls:
+version: "aks-1.0"
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Enable Azure Active Directory Integration (Not Scored)"
+        type: "manual"
+        remediation: |
+          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+          implemented in place of client certificates. Cluster administrators can configure Kubernetes role-based access control (RBAC) based on a user's identity or directory group membership. Azure AD authentication is provided to AKS clusters with OpenID Connect. See https://docs.microsoft.com/en-us/azure/aks/managed-aad. TODO: See Recommendation 6.8.2. 
+        scored: false
+      - id: 3.1.2
+        text: "Limit access to cluster configuration file"
+        type: "manual"
+        remediation: |
+          Use Azure role-based access control to define access to the Kubernetes configuration file in Azure Kubernetes Service (AKS). See https://docs.microsoft.com/en-us/azure/aks/control-kubeconfig-access
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Enable logging for the Kubernetes master components"
+        remediation: "Enable log collection for the Kubernetes master components in the AKS cluster using Diagnostic settings."
+        scored: false
