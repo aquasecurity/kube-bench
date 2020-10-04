@@ -64,7 +64,7 @@ for `type` are `master` and `node`.
 `groups` is a list of subgroups that test the various Kubernetes components
 that run on the node type specified in the `controls`. 
 
-For example, one subgroup checks parameters passed to the API server binary, while 
+For example:one subgroup checks parameters passed to the API server binary, while 
 another subgroup checks parameters passed to the controller-manager binary.
 
 ```yml
@@ -79,7 +79,7 @@ groups:
 
 These subgroups have `id`, `text` fields which serve the same purposes described
 in the previous paragraphs. The most important part of the subgroup is the
-`checks` field which is the collection of actual `check`s that form the subgroup.
+`checks` field which is the collection of actual `check` that form the subgroup.
 
 This is an example of a subgroup and checks in the subgroup.
 
@@ -241,7 +241,7 @@ For example, the kube-apiserver in Red Hat OCP distribution is run as
 This difference can be specified by editing the `master.apiserver.defaultbin`
 entry `cfg/ocp-3.10/config.yaml`.
 
-Below is the structure of `cfg/config.yaml`:
+The structure of `cfg/config.yaml` is given below:
 
 ```
 nodetype
