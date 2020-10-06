@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/kube-bench.png" height=210 width=240>
+
 # Test and config files
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
