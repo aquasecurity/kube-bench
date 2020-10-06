@@ -17,26 +17,23 @@ before_install:
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
     fi
-
 script:
   - yamllint -c ./.yamllint.yaml .
+
+  # Run unit and integration tests
+  - make tests
+  - make integration-tests
 
   # Build a local container image to test that the install sub-command works
   - IMAGE_NAME=kube-bench make build-docker
   - docker run -v `pwd`:/host kube-bench install
   - test -d cfg
   - test -f kube-bench
-
-  # Run unit and integration tests
-  - make tests
-  - make integration-tests
-  
   # Build and push the multi-arch Docker image
   - |
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       make docker
     fi
-
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 deploy:
