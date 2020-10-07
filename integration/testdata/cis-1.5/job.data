@@ -277,8 +277,8 @@ systemctl restart kubelet.service
 
 
 == Summary ==
-17 checks PASS
-5 checks FAIL
+19 checks PASS
+3 checks FAIL
 1 checks WARN
 0 checks INFO
 [INFO] 5 Kubernetes Policies
