@@ -17,7 +17,7 @@ before_install:
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
     fi
-    
+
 script:
   - yamllint -c ./.yamllint.yaml .
 
@@ -35,7 +35,7 @@ script:
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       make docker
     fi
-    
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 deploy:
