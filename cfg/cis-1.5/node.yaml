@@ -41,12 +41,15 @@ groups:
         text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               set: true
               compare:
                 op: bitmask
                 value: "644"
+            - flag: "$proxykubeconfig"
+              set: false
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -57,9 +60,12 @@ groups:
         text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
               set: true
+            - flag: "$proxykubeconfig"
+              set: false
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chown root:root $proxykubeconfig
