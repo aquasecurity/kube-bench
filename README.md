@@ -36,6 +36,7 @@ Table of Contents
     - [Running on OpenShift](#running-on-openshift)
     - [Running in an GKE cluster](#running-in-a-gke-cluster)
     - [Installing from a container](#installing-from-a-container)
+    - [Download and Install binaries](#download-and-install-binaries)
     - [Installing from sources](#installing-from-sources)
   - [Output](#output)
   - [Configuration](#configuration)
@@ -67,10 +68,10 @@ By default, kube-bench will determine the test set to run based on the Kubernete
 ## Installation
 
 You can choose to
-* run kube-bench from inside a container (sharing PID namespace with the host)
-* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory
-* compile it from source.
+* Run kube-bench from inside a container (sharing PID namespace with the host). See [Running inside a container](#running-inside-a-container) for additional details.
+* Run a container that installs kube-bench on the host, and then run kube-bench directly on the host. See [Installing from a container](#installing-from-a-container) for additional details.
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory. See [Download and Install binaries](#download-and-install-binaries) for details.
+* Compile it from source. See [Installing from sources](#installing-from-sources) for details.
 
 ## Running kube-bench
 
@@ -261,12 +262,56 @@ kubectl apply -f job-gke.yaml
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
-** binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows) **
+**binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows)**
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
 You can then run `./kube-bench [master|node]`.
+
+### Download and Install binaries
+
+It is possible to manually install and run kube-bench release binaries. In order to do that, you must have access to your Kubernetes cluster nodes. Note that if you're using one of the managed Kubernetes services (e.g. EKS, AKS, GKE), you will not have access to the master nodes of your cluster and you can’t perform any tests on the master nodes.
+
+First, log into one of the nodes using SSH.
+
+Install kube-bench binary for your platform using the commands below. Note that there may be newer releases available. See [releases page](https://github.com/aquasecurity/kube-bench/releases).
+
+Ubuntu/Debian:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.deb -o kube-bench_0.3.1_linux_amd64.deb
+
+sudo apt install ./kube-bench_0.3.1_linux_amd64.deb -f
+```
+
+RHEL:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.rpm -o kube-bench_0.3.1_linux_amd64.rpm
+
+sudo yum install kube-bench_0.3.1_linux_amd64.rpm -y
+```
+
+Alternatively, you can manually download and extract the kube-bench binary:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.tar.gz -o kube-bench_0.3.1_linux_amd64.tar.gz
+
+tar -xvf kube-bench_0.3.0_linux_amd64.tar.gz
+```
+
+You can then run kube-bench directly:
+```
+kube-bench [master|node]
+```
+
+If you manually downloaded the kube-bench binary (using curl command above), you have to specify the location of configuration directory and file. For example:
+```
+./kube-bench --config-dir `pwd`/cfg --config `pwd`/cfg/config.yaml [master|node]
+```
+
+See previous section on [Running kube-bench](#running-kube-bench) for further details on using the kube-bench binary.
 
 ### Installing from sources
 
