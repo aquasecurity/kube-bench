@@ -187,7 +187,7 @@ tests:
 ```
 
 `test_item` compares the output of the audit command and keywords using the
-`set` and `compare` fields.
+`set` and `compare` fields:
 
 ```yml
   test_items:
