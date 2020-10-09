@@ -293,7 +293,7 @@ There are four output states:
 - [INFO] is informational output that needs no further action.
 
 Note:
-- If the test is Manual, this always generates WARN (because the user has to run it manually)
+- If the test is Manual, this always generates WARN (because the user has to run it manually).
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
 - If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
@@ -342,13 +342,13 @@ Our makefile contains targets to test your current version of kube-bench inside 
 
 First, you'll need to create the cluster using `make kind-test-cluster` this will create a new cluster if it cannot be found on your machine. By default, the cluster is named `kube-bench` but you can change the name by using the environment variable `KIND_PROFILE`.
 
-*If kind cannot be found on your system the target will try to install it using `go get`*
+*If kind cannot be found on your system the target will try to install it using `go get`*.
 
 Next, you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
 
-Finally, we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit)
+Finally, we can use the `make kind-run` target to run the current version of kube-bench in the cluster and follow the logs of pods created. (Ctrl+C to exit).
 
-Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
+Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` ).
 
 ## Contributing
 
