@@ -67,9 +67,9 @@ By default, kube-bench will determine the test set to run based on the Kubernete
 ## Installation
 
 You can choose to
-* run kube-bench from inside a container (sharing PID namespace with the host)
-* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory
+* run kube-bench from inside a container (sharing PID namespace with the host).
+* run a container that installs kube-bench on the host, and then run kube-bench directly on the host.
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory.
 * compile it from source.
 
 ## Running kube-bench
@@ -188,21 +188,21 @@ The default labels applied to master nodes has changed since Kubernetes 1.11, so
 
 ### Running in an AKS cluster
 
-1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures
+1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures.
 
 1. Use the [kubectl-enter plugin] (https://github.com/kvaps/kubectl-enter) to shell into a node
 `
 kubectl-enter {node-name}
 `
 or ssh to one agent node
-could open nsg 22 port and assign a public ip for one agent node (only for testing purpose)
+could open nsg 22 port and assign a public ip for one agent node (only for testing purpose).
 
 1. Run CIS benchmark to view results:
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ./kube-bench node
 ```
-kube-bench cannot be run on AKS master nodes
+kube-bench cannot be run on AKS master nodes.
 
 ### Running in an EKS cluster
 
