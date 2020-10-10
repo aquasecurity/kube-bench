@@ -408,7 +408,7 @@ func TestValidTargets(t *testing.T) {
 		{
 			name:      "aks-1.0 valid",
 			benchmark: "aks-1.0",
-			targets:   []string{"master", "node", "controlplane", "etcd", "policies", "managedservices"},
+			targets:   []string{"node", "policies", "controlplane", "managedservices"},
 			expected:  true,
 		},
 		{
