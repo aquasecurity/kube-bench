@@ -130,7 +130,7 @@ groups:
         type: "manual"
         remediation: |
           Implement Azure Policy to define the AppArmor profile used by containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#additional-optional-policies.
-        scored: false   
+        scored: false
 
   - id: 4.3
     text: "Network Policies and CNI"
