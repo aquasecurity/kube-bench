@@ -9,13 +9,10 @@ groups:
     text: "Image Registry and Image Scanning"
     checks:
       - id: 6.1.1
-        text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
-        or a third-party provider (Scored)"
+        text: "Ensure Image Vulnerability Scanning"
         type: "manual"
         remediation: |
-          Using Command Line:
-
-            gcloud services enable containerscanning.googleapis.com
+          Scan your container images for vulnerabilities, and only deploy images that have passed validation. Regularly update the base images and application runtime, then redeploy workloads in the AKS cluster. Deployment workflow should include a process to scan container images using tools such as Twistlock or Aqua, and then only allow verified images to be deployed.
         scored: true
 
       - id: 6.1.2
@@ -165,50 +162,10 @@ groups:
     text: "Cloud Key Management Service (Cloud KMS)"
     checks:
       - id: 6.3.1
-        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Scored)"
+        text: "Ensure Kubernetes Secrets are stored and retrieved from Azure Key Vault."
         type: "manual"
         remediation: |
-          Using Command Line:
-            To create a key
-
-            Create a key ring:
-
-              gcloud kms keyrings create [RING_NAME] \
-                --location [LOCATION] \
-                --project [KEY_PROJECT_ID]
-
-            Create a key:
-
-              gcloud kms keys create [KEY_NAME] \
-                --location [LOCATION] \
-                --keyring [RING_NAME] \
-                --purpose encryption \
-                --project [KEY_PROJECT_ID]
-
-            Grant the Kubernetes Engine Service Agent service account the Cloud KMS CryptoKey
-            Encrypter/Decrypter role:
-
-              gcloud kms keys add-iam-policy-binding [KEY_NAME] \
-                --location [LOCATION] \
-                --keyring [RING_NAME] \
-                --member serviceAccount:[SERVICE_ACCOUNT_NAME] \
-                --role roles/cloudkms.cryptoKeyEncrypterDecrypter \
-                --project [KEY_PROJECT_ID]
-
-            To create a new cluster with Application-layer Secrets Encryption:
-
-              gcloud container clusters create [CLUSTER_NAME] \
-                --cluster-version=latest \
-                --zone [ZONE] \
-                --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME] \
-                --project [CLUSTER_PROJECT_ID]
-
-            To enable on an existing cluster:
-
-              gcloud container clusters update [CLUSTER_NAME] \
-                --zone [ZONE] \
-                --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME] \
-                --project [CLUSTER_PROJECT_ID]
+          Use the Azure Key Vault with Secrets Store CSI Driver to retrieve secrets from Azure Key Vault and load it in the pod. See https://github.com/Azure/secrets-store-csi-driver-provider-azure.
         scored: true
 
   - id: 6.4
@@ -450,18 +407,7 @@ groups:
         text: "Ensure Network Policy is Enabled and set as appropriate (Not Scored)"
         type: "manual"
         remediation: |
-          Using Command Line:
-            To enable Network Policy for an existing cluster, firstly enable the Network Policy add-on:
-
-              gcloud container clusters update [CLUSTER_NAME] \
-                --zone [COMPUTE_ZONE] \
-                --update-addons NetworkPolicy=ENABLED
-
-            Then, enable Network Policy:
-
-              gcloud container clusters update [CLUSTER_NAME] \
-                --zone [COMPUTE_ZONE] \
-                --enable-network-policy
+          Enable Azure Network Policy or Calico Network policy on the AKS cluster. See https://docs.microsoft.com/en-us/azure/aks/use-network-policies.
         scored: false
 
       - id: 6.6.8
@@ -618,15 +564,10 @@ groups:
         scored: true
 
       - id: 6.10.3
-        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Not Scored)"
+        text: "Secure pods with Azure Policy as appropriate"
         type: "manual"
         remediation: |
-          Using Command Line:
-            To enable Pod Security Policy for an existing cluster, run the following command:
-
-              gcloud beta container clusters update [CLUSTER_NAME] \
-                --zone [COMPUTE_ZONE] \
-                --enable-pod-security-policy
+          Enable Azure Policy Add-on for AKS to control what functions pods are granted. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy.
         scored: false
 
       - id: 6.10.4

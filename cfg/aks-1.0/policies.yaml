@@ -66,76 +66,71 @@ groups:
         text: "Minimize the admission of privileged containers (Not Scored)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that
-          the .spec.privileged field is omitted or set to false.
+          Implement Azure Policy to disallow running of privileged containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 5.2.2
-        text: "Minimize the admission of containers wishing to share the host process ID namespace (Scored)"
+        text: "Disallow shared usage of host namespaces."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostPID field is omitted or set to false.
+          Implement Azure Policy to disallow shared usage of host namespaces. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.3
-        text: "Minimize the admission of containers wishing to share the host IPC namespace (Scored)"
+        text: "Restrict all usage of host networking and ports"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostIPC field is omitted or set to false.
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.4
-        text: "Minimize the admission of containers wishing to share the host network namespace (Scored)"
+        text: "Restrict any usage of the host filesystem."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostNetwork field is omitted or set to false.
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.5
-        text: "Minimize the admission of containers with allowPrivilegeEscalation (Scored)"
+        text: "Restrict Linux capabilities to the default set."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.allowPrivilegeEscalation field is omitted or set to false.
+          Implement Azure Policy to restrict Linux capabilities to the default set. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.6
-        text: "Minimize the admission of root containers (Scored)"
+        text: "Restrict usage of defined volume types"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
-          UIDs not including 0.
+          Implement Azure Policy to restrict usage of defined volume types. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.7
-        text: "Minimize the admission of containers with the NET_RAW capability (Scored)"
+        text: "Restrict the user and group IDs of the container"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
+          Implement Azure Policy to restrict the user and group IDs of the container. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.8
-        text: "Minimize the admission of containers with added capabilities (Scored)"
+        text: "Restrict allocating an FSGroup that owns the pod's volumes"
         type: "manual"
         remediation: |
-          Ensure that allowedCapabilities is not present in PSPs for the cluster unless
-          it is set to an empty array.
+          Implement Azure Policy to restrict allocating an FSGroup that owns the pod's volumes. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: true
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Scored) "
+        text: "Requires seccomp profile"
         type: "manual"
         remediation: |
-          Review the use of capabilites in applications runnning on your cluster. Where a namespace
-          contains applications which do not require any Linux capabities to operate consider adding
-          a PSP which forbids the admission of containers which do not drop all capabilities.
+          Implement Azure Policy to requires seccomp profile. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives.
         scored: true
 
+      - id: 5.2.10
+        text: "Define the AppArmor profile used by containers"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to define the AppArmor profile used by containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#additional-optional-policies.
+        scored: false
       
 
   - id: 5.3
@@ -163,7 +158,7 @@ groups:
         text: "Prefer using secrets as files over secrets as environment variables (Not Scored)"
         type: "manual"
         remediation: |
-          if possible, rewrite application code to read secrets from mounted secret files, rather than
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false
 
@@ -171,8 +166,7 @@ groups:
         text: "Consider external secret storage (Not Scored)"
         type: "manual"
         remediation: |
-          Refer to the secrets management options offered by your cloud provider or a third-party
-          secrets management solution.
+          Use the Azure Key Vault with Secrets Store CSI Driver to retrieve secrets from Azure Key Vault and load it in the pod. See https://github.com/Azure/secrets-store-csi-driver-provider-azure.
         scored: false
 
   - id: 5.5

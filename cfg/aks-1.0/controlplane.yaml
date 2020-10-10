@@ -9,11 +9,10 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 3.1.1
-        text: "Enable Azure Active Directory Integration (Not Scored)"
+        text: "Enable Azure Active Directory Integration"
         type: "manual"
         remediation: |
-          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
-          implemented in place of client certificates. Cluster administrators can configure Kubernetes role-based access control (RBAC) based on a user's identity or directory group membership. Azure AD authentication is provided to AKS clusters with OpenID Connect. See https://docs.microsoft.com/en-us/azure/aks/managed-aad. TODO: See Recommendation 6.8.2. 
+          Use of OIDC should be implemented in place of client certificates. Cluster administrators can configure Kubernetes role-based access control (RBAC) based on a user's identity or directory group membership. Azure AD authentication is provided to AKS clusters with OpenID Connect. See https://docs.microsoft.com/en-us/azure/aks/managed-aad. TODO: See Recommendation 6.8.2. 
         scored: false
       - id: 3.1.2
         text: "Limit access to cluster configuration file"
