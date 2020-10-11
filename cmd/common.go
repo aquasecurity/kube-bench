@@ -336,7 +336,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 	return true
 }
 
-func exitCodeSelection(controlsCollection []*check.Controls) {
+func exitCodeSelection(controlsCollection []*check.Controls) int {
 	checksFailed := false
 	for _, control := range controlsCollection {
 		if control.Fail > 0 {
@@ -345,8 +345,9 @@ func exitCodeSelection(controlsCollection []*check.Controls) {
 	}
 
 	if checksFailed && exitCode != 0 {
-		os.Exit(exitCode)
+		return exitCode
 	}
+	return 0
 }
 
 func writeOutput(controlsCollection []*check.Controls) {

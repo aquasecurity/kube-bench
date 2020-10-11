@@ -124,7 +124,8 @@ var RootCmd = &cobra.Command{
 		}
 
 		writeOutput(controlsCollection)
-		exitCodeSelection(controlsCollection)
+		exitCode := exitCodeSelection(controlsCollection)
+		os.Exit(exitCode)
 	},
 }
 
