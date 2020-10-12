@@ -95,8 +95,55 @@ groups:
 
 }
 
-func TestControls_RunChecks(t *testing.T) {
 
+func TestControls_RunChecks_Skipped(t *testing.T) {
+	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
+		// given
+		runner := new(mockRunner)
+		// and
+		in := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  skip: true
+  checks:
+  - id: G1/C1
+- id: G2
+  checks:
+  - id: G2/C1
+    text: "Verify that the SomeSampleFlag argument is set to true"
+    audit: "grep -B1 SomeSampleFlag=true /this/is/a/file/path"
+    tests:
+      test_items:
+      - flag: "SomeSampleFlag=true"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
+    scored: true
+`)
+		controls, err := NewControls(MASTER, in)
+		assert.NoError(t, err)
+
+		runner.On("Run", controls.Groups[0].Checks[0]).Return(PASS)
+		runner.On("Run", controls.Groups[1].Checks[0]).Return(FAIL)
+
+		var runAll Predicate = func(group *Group, c *Check) bool {
+			return true
+		}
+		controls.RunChecks(runner, runAll)
+
+		G1 := controls.Groups[0]
+		assertEqualGroupSummary(t, 0, 0, 1, 0, G1)
+		G2 := controls.Groups[1]
+		assertEqualGroupSummary(t, 0, 1, 0, 0, G2)
+	})
+}
+
+func TestControls_RunChecks(t *testing.T) {
 	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
 		// given
 		runner := new(mockRunner)
