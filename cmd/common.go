@@ -337,16 +337,12 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 }
 
 func exitCodeSelection(controlsCollection []*check.Controls) int {
-	checksFailed := false
 	for _, control := range controlsCollection {
-		if control.Fail > 0 {
-			checksFailed = true
+		if control.Fail > 0  {
+			return exitCode
 		}
 	}
 
-	if checksFailed && exitCode != 0 {
-		return exitCode
-	}
 	return 0
 }
 
