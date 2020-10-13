@@ -52,7 +52,7 @@ groups:
       scored: true
 ```
 
-`controls` is composed of a hierarchy of groups, sub-groups and checks. Each of
+`controls` is composed of a hierarchy of groups, sub-groups, and checks. Each of
 the `controls` components have an id and a text description which are displayed 
 in the `kube-bench` output.
 
@@ -204,7 +204,7 @@ If `set` is true, the check passes only if the keyword is present in the output
 of the audit command, or config file. If `set` is false, the check passes only
 if the keyword is not present in the output of the audit command, or config file.
 
-`compare` has two fields `op` and `value` to compare keywords with expected
+`compare` has two fields `op` and `value` to compare keywords with the expected
 value. `op` specifies which operation is used for the comparison, and `value`
 specifies the value to compare against.
 

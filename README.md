@@ -18,7 +18,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
 
-1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
+1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS, and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
@@ -127,7 +127,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
 `controls` for the various versions of CIS Benchmark can be found in directories
-with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.5`.
+with same name as the CIS Benchmark versions under `cfg/`, for example, `cfg/cis-1.5`.
 
 **Note:**  **`It is an error to specify both --version and --benchmark flags together`**
 
@@ -153,7 +153,7 @@ docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.ya
 
 ### Running in a Kubernetes cluster
 
-You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
 Master nodes are automatically detected by kube-bench and will run master checks when possible.
 The detection is done by verifying that mandatory components for master, as defined in the config files, are running (see [Configuration](#configuration)).
@@ -184,7 +184,7 @@ You can still force to run specific master or node checks using respectively `jo
 
 To run the tests on the master node, the pod needs to be scheduled on that node. This involves setting a nodeSelector and tolerations in the pod spec.
 
-The default labels applied to master nodes has changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
+The default labels applied to master nodes have changed since Kubernetes 1.11, so if you are using an older version you may need to modify the nodeSelector and tolerations to run the job on the master node.
 
 
 ### Running in an AKS cluster
@@ -215,7 +215,7 @@ There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS 
 ```
 aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutability MUTABLE
 ```
-3. Download, build and push the kube-bench container image to your ECR repo
+3. Download, build, and push the kube-bench container image to your ECR repo
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
@@ -306,12 +306,12 @@ You can then run kube-bench directly:
 kube-bench [master|node]
 ```
 
-If you manually downloaded the kube-bench binary (using curl command above), you have to specify the location of configuration directory and file. For example:
+If you manually downloaded the kube-bench binary (using curl command above), you have to specify the location of the configuration directory and file. For example:
 ```
 ./kube-bench --config-dir `pwd`/cfg --config `pwd`/cfg/config.yaml [master|node]
 ```
 
-See previous section on [Running kube-bench](#running-kube-bench) for further details on using the kube-bench binary.
+See the previous section on [Running kube-bench](#running-kube-bench) for further details on using the kube-bench binary.
 
 ### Installing from sources
 
@@ -334,7 +334,7 @@ go build -o kube-bench .
 There are four output states:
 - [PASS] indicates that the test was run successfully, and passed.
 - [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
+- [WARN] means this test needs further attention, for example, it is a test that needs to be run manually. Check the remediation output for further information. 
 - [INFO] is informational output that needs no further action.
 
 Note:
