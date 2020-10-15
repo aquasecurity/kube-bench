@@ -1,0 +1,7 @@
+for i in range(0,7):
+    for j in range(0,7):
+        if (i==0 and j%3!=0) or (i==1 and j%3==0) or (i==2 and i%6==0)  or (i-j==3) or (i+j==9):
+            print("*",end="  ")
+        else:
+            print(" ",end="  ")
+    print( )
