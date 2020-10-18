@@ -87,13 +87,12 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
 				continue
 			}
 
-			state := runner.Run(check)
-
-			// Set check state to INFO if group has skip set
+			// propagate skip type to check if set at the group level.
 			if group.Skip {
-				state = INFO
-				check.State = INFO
+				check.Type = SKIP
 			}
+
+			state := runner.Run(check)
 
 			check.TestInfo = append(check.TestInfo, check.Remediation)
 

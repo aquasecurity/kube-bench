@@ -39,6 +39,9 @@ const (
 	// INFO informational message
 	INFO State = "INFO"
 
+	// SKIP for when a check should be skipped.
+	SKIP = "skip"
+
 	// MASTER a master node
 	MASTER NodeType = "master"
 	// NODE a node
@@ -111,7 +114,7 @@ func (c *Check) run() State {
 	}
 
 	// If check type is skip, force result to INFO
-	if c.Type == "skip" {
+	if c.Type == SKIP {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
 		return c.State
