@@ -46,6 +46,10 @@ master:
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
+    kubeconfig:
+      - /etc/kubernetes/scheduler.conf
+    defaultkubeconfig:
+      - /etc/kubernetes/scheduler.conf
 
   controllermanager:
     bins:
@@ -61,6 +65,10 @@ master:
       - /var/snap/kube-controller-manager/current/args
       - /var/snap/microk8s/current/args/kube-controller-manager
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
+    kubeconfig:
+      - /etc/kubernetes/controller-manager.conf
+    defaultkubeconfig:
+      - /etc/kubernetes/controller-manager.conf
 
   etcd:
     optional: true

@@ -196,7 +196,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c permissions=%a /etc/kubernetes/scheduler.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -206,24 +206,24 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 /etc/kubernetes/scheduler.conf
+          chmod 644 $schedulerkubeconfig
         scored: true
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%G /etc/kubernetes/scheduler.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root /etc/kubernetes/scheduler.conf
+          chown root:root $schedulerkubeconfig
         scored: true
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c permissions=%a /etc/kubernetes/controller-manager.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -233,19 +233,19 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 /etc/kubernetes/controller-manager.conf
+          chmod 644 $controllermanagerkubeconfig
         scored: true
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%G /etc/kubernetes/controller-manager.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root /etc/kubernetes/controller-manager.conf
+          chown root:root $controllermanagerkubeconfig
         scored: true
 
       - id: 1.1.19
