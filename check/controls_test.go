@@ -95,8 +95,36 @@ groups:
 
 }
 
-func TestControls_RunChecks(t *testing.T) {
 
+func TestControls_RunChecks_Skipped(t *testing.T) {
+	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
+		// given
+		normalRunner := &defaultRunner{}
+		// and
+		in := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  skip: true
+  checks:
+  - id: G1/C1
+`)
+		controls, err := NewControls(MASTER, in)
+		assert.NoError(t, err)
+
+		var allChecks Predicate = func(group *Group, c *Check) bool {
+			return true
+		}
+		controls.RunChecks(normalRunner, allChecks)
+
+		G1 := controls.Groups[0]
+		assertEqualGroupSummary(t, 0, 0, 1, 0, G1)
+	})
+
+}
+
+func TestControls_RunChecks(t *testing.T) {
 	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
 		// given
 		runner := new(mockRunner)
