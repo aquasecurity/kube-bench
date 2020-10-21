@@ -19,10 +19,26 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
 	"gopkg.in/yaml.v2"
+)
+
+const (
+	// UNKNOWN is when the AWS account can't be found.
+	UNKNOWN = "Unknown"
+	// ARN for th Security Hub service.
+	ARN = "FOO"
+	//
+	SCHEMA = "2018-10-08"
+	// TYPE is type of Security Hub finding
+	TYPE = "Software and Configuration Checks/Industry and Regulatory Standards/CIS Kubernetes Benchmark"
 )
 
 // Controls holds all controls to check for master nodes.
@@ -177,37 +193,58 @@ func (controls *Controls) JUnit() ([]byte, error) {
 
 // AASF encodes the results of last run to AWS Security Finding Format(AASF).
 func (controls *Controls) AASF() ([]byte, error) {
-
+	a := getAccount()
+	ti := time.Now()
+	tf := ti.Format(time.RFC3339)
 	for _, g := range controls.Groups {
 		for _, check := range g.Checks {
-			f := securityhub.AwsSecurityFinding{
-				AwsAccountId: aws.String("foo"),
-				Confidence:   aws.Int64(100),
+			if check.State == FAIL || check.State == WARN {
+				f := securityhub.AwsSecurityFinding{
+					AwsAccountId:  aws.String(a),
+					Confidence:    aws.Int64(100),
+					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, controls.Version, check.ID)),
+					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", ARN, a, check.ID, tf)),
+					CreatedAt:     aws.String(tf),
+					Description:   aws.String(check.Text),
+					ProductArn:    aws.String(ARN),
+					SchemaVersion: aws.String(SCHEMA),
+					Title:         aws.String(fmt.Sprintf("%s %s", check.ID, check.Text)),
+					UpdatedAt:     aws.String(tf),
+					Types:         []*string{aws.String(TYPE)},
+					Severity: &securityhub.Severity{
+						Label: aws.String(securityhub.SeverityLabelHigh),
+					},
+					Remediation: &securityhub.Remediation{
+						Recommendation: &securityhub.Recommendation{
+							Text: aws.String(check.Remediation),
+						},
+					},
+					ProductFields: map[string]*string{
+						"Reason":          aws.String(check.Reason),
+						"Actual result":   aws.String(check.ActualValue),
+						"Expected result": aws.String(check.ExpectedResult),
+						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),
+						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
+					},
+				}
 			}
-			t := fmt.Sprintf("%s %s %s", g.ID, controls.Text, g.Text)
-			f.SetTitle(t)
-			d := fmt.Sprintf("%s %s", check.ID, check.Text)
-			f.SetDescription(d)
-
-			// Here's a basic example of formatting a time
-			// according to RFC3339, using the corresponding layout
-			// constant.
-			ti := time.Now()
-			f.SetCreatedAt(ti.Format(time.RFC3339))
-
-			switch check.State {
-			case FAIL:
-				
-			case WARN, INFO:
-				
-			case PASS:
-			default:
-				
-			}
-
 		}
 	}
+}
 
+func getAccount() string {
+	// Create a EC2Metadata client from just a session.
+	svc := ec2metadata.New(sess)
+	if svc.Available() {
+		d, err := svc.GetInstanceIdentityDocument()
+		if err != nil {
+			log.Printf("Metadata call failed:%s", err)
+			return UNKNOWN
+		}
+		return d.AccountID
+	}
+	return UNKNOWN
+}
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:
