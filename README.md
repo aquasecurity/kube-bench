@@ -396,13 +396,14 @@ Finally, we can use the `make kind-run` target to run the current version of kub
 Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 ## Contributing
+Please encourage and support all the contribution to this project. Kindly read [Contributing.md](CONTRIBUTING.md) before contributing. Some instructions for the common contributions are stated below.
 
 ### Bugs
 
 If you think you have found a bug please follow the instructions below.
 
 - Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
-- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
+- Open a [new issue](issues/new) if a duplicate doesn't already exist.
 - Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
 - Note the version of Kubernetes you are running (from `kubectl version` or `oc version` for OpenShift).
 - Set `-v 10` command line option and save the log output. Please paste this into your issue.
@@ -412,7 +413,7 @@ If you think you have found a bug please follow the instructions below.
 
 We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
 
-- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
+- Open a [new issue](issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
 - Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
@@ -426,3 +427,21 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!).
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach.
 - Happy coding!
+
+## License Agreement
+```groovy
+Copyright 2017-2019 Aqua Security Software Ltd. 
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+This can also be read [here](LICENSE)
