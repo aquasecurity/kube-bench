@@ -68,6 +68,7 @@ type Check struct {
 	ID                string   `yaml:"id" json:"test_number"`
 	Text              string   `json:"test_desc"`
 	Audit             string   `json:"audit"`
+	AuditEnv          string   `yaml:"audit_env"`
 	AuditConfig       string   `yaml:"audit_config"`
 	Type              string   `json:"type"`
 	Tests             *tests   `json:"-"`
@@ -81,7 +82,9 @@ type Check struct {
 	ExpectedResult    string `json:"expected_result"`
 	Reason            string `json:"reason,omitempty"`
 	AuditOutput       string `json:"-"`
+	AuditEnvOutput    string `json:"-"`
 	AuditConfigOutput string `json:"-"`
+	EnvOutput    string `json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -184,6 +187,11 @@ func (c *Check) run() State {
 }
 
 func (c *Check) runAuditCommands() (lastCommand string, err error) {
+	// Always run auditEnvOutput if needed
+	if c.AuditEnv != "" {
+		c.AuditEnvOutput, err = runAudit(c.AuditEnv)
+	}
+
 	// Run the audit command and auditConfig commands, if present
 	c.AuditOutput, err = runAudit(c.Audit)
 	if err != nil {
@@ -212,6 +220,10 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		if !result.flagFound {
 			t.isConfigSetting = true
 			result = *(t.execute(c.AuditConfigOutput))
+			if !result.flagFound && t.Env != "" {
+				t.isConfigSetting = false
+				result = *(t.execute(c.AuditEnvOutput))
+			}
 		}
 		res[i] = result
 		expectedResultArr[i] = res[i].ExpectedResult

@@ -50,6 +50,7 @@ type tests struct {
 
 type testItem struct {
 	Flag             string
+	Env              string
 	Path             string
 	Output           string
 	Value            string
@@ -70,6 +71,7 @@ type compare struct {
 type testOutput struct {
 	testResult     bool
 	flagFound      bool
+	envFound       bool
 	actualResult   string
 	ExpectedResult string
 }
@@ -83,20 +85,42 @@ func (t testItem) flagValue() string {
 		return t.Path
 	}
 
+	if t.Env != "" {
+		return fmt.Sprintf("%s or %s", t.Flag, t.Env)
+	}
+
 	return t.Flag
 }
 
-func (t testItem) findValue(s string) (match bool, value string, err error) {
+func (t testItem) findEnv(s string) (match bool, value string) {
+	if s != "" && t.Env != "" {
+		r, _ := regexp.Compile(fmt.Sprintf("%s=.*\\n", t.Env))
+		out := r.FindString(s)
+		out = strings.Replace(out, "\n", "", 1)
+		out = strings.Replace(out, fmt.Sprintf("%s=", t.Env), "", 1)
+
+		if len(out) > 0 {
+			match = true
+			value = out
+		}else{
+			match = false
+			value = ""
+		}
+	}
+	return match, value
+}
+
+func (t testItem) findFlag(s string) (match bool, value string, err error) {
 	if t.isConfigSetting {
 		pt := pathTestItem(t)
-		return pt.findValue(s)
+		return pt.findFlag(s)
 	}
 
 	ft := flagTestItem(t)
-	return ft.findValue(s)
+	return ft.findFlag(s)
 }
 
-func (t flagTestItem) findValue(s string) (match bool, value string, err error) {
+func (t flagTestItem) findFlag(s string) (match bool, value string, err error) {
 	if s == "" || t.Flag == "" {
 		return
 	}
@@ -131,7 +155,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 	return match, value, err
 }
 
-func (t pathTestItem) findValue(s string) (match bool, value string, err error) {
+func (t pathTestItem) findFlag(s string) (match bool, value string, err error) {
 	var jsonInterface interface{}
 
 	err = unmarshal(s, &jsonInterface)
@@ -176,7 +200,17 @@ func (t testItem) execute(s string) *testOutput {
 func (t testItem) evaluate(s string) *testOutput {
 	result := &testOutput{}
 
-	match, value, err := t.findValue(s)
+	match, value, err := t.findFlag(s)
+	if err != nil || !match {
+		match, value = t.findEnv(s)
+		if match {
+			err = nil
+			result.envFound = match
+		}
+	} else {
+		result.flagFound = match
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		return failTestItem(err.Error())
@@ -194,8 +228,8 @@ func (t testItem) evaluate(s string) *testOutput {
 		result.testResult = !match
 	}
 
-	result.flagFound = match
 	glog.V(3).Info(fmt.Sprintf("flagFound %v", result.flagFound))
+	glog.V(3).Info(fmt.Sprintf("envFound %v", result.envFound))
 
 	return result
 }
