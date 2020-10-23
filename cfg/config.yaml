@@ -71,7 +71,7 @@ master:
       - /etc/kubernetes/controller-manager.conf
 
   etcd:
-    optional: false
+    optional: true
     bins:
       - "etcd"
     confs:
