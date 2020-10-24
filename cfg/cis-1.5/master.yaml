@@ -234,7 +234,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $schedulerkubeconfig
+          chmod 644 /etc/kubernetes/scheduler.conf
         scored: true
 
       - id: 1.1.16
@@ -250,7 +250,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $schedulerkubeconfig
+          chown root:root /etc/kubernetes/scheduler.conf
         scored: true
 
       - id: 1.1.17
@@ -266,7 +266,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $controllermanagerkubeconfig
+          chmod 644 /etc/kubernetes/controller-manager.conf
         scored: true
 
       - id: 1.1.18
@@ -282,7 +282,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $controllermanagerkubeconfig
+          chown root:root /etc/kubernetes/controller-manager.conf
         scored: true
 
       - id: 1.1.19
