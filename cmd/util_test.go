@@ -394,7 +394,7 @@ func TestMakeSubsitutions(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.input, func(t *testing.T) {
-			s := makeSubstitutions(c.input, "bin", c.subst)
+			s, _ := makeSubstitutions(c.input, "bin", c.subst)
 			if s != c.exp {
 				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
