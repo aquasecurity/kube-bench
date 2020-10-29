@@ -32,7 +32,6 @@ import (
 
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
 func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
-
 	if opts.CheckList != "" && opts.GroupList != "" {
 		return nil, fmt.Errorf("group option and check option can't be used together")
 	}
@@ -118,8 +117,18 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
 
-	controls.RunChecks(runner, filter)
+	controls.RunChecks(runner, filter, parseSkipIds(skipIds))
 	controlsCollection = append(controlsCollection, controls)
+}
+
+func parseSkipIds(skipIds string) map[string]bool {
+	var skipIdMap =  make(map[string]bool, 0)
+	if skipIds != "" {
+		for _, id := range strings.Split(skipIds, ",") {
+			skipIdMap[strings.Trim(id, " ")] = true
+		}
+	}
+	return skipIdMap
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string

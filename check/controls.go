@@ -75,7 +75,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
-func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
+func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
@@ -87,8 +87,10 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
 				continue
 			}
 
-			// propagate skip type to check if set at the group level.
-			if group.Skip {
+			_, groupSkippedViaCmd := skipIdMap[group.ID]
+			_, checkSkippedViaCmd := skipIdMap[check.ID]
+
+			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd  {
 				check.Type = SKIP
 			}
 
