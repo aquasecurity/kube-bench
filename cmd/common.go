@@ -148,7 +148,7 @@ func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
 }
 
 func parseSkipIds(skipIds string) map[string]bool {
-	var skipIdMap =  make(map[string]bool, 0)
+	var skipIdMap = make(map[string]bool, 0)
 	if skipIds != "" {
 		for _, id := range strings.Split(skipIds, ",") {
 			skipIdMap[strings.Trim(id, " ")] = true
@@ -185,7 +185,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print remediations.
 	if !noRemediations {
 		if summary.Fail > 0 || summary.Warn > 0 {
-			colors[check.WARN].Printf("== Remediations ==\n")
+			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
 					if c.State == check.FAIL {
@@ -207,20 +207,24 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print summary setting output color to highest severity.
 	if !noSummary {
-		var res check.State
-		if summary.Fail > 0 {
-			res = check.FAIL
-		} else if summary.Warn > 0 {
-			res = check.WARN
-		} else {
-			res = check.PASS
-		}
-
-		colors[res].Printf("== Summary ==\n")
-		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n",
-			summary.Pass, summary.Fail, summary.Warn, summary.Info,
-		)
+		printSummary(summary, string(r.Type))
 	}
+}
+
+func printSummary(summary check.Summary, sectionName string) {
+	var res check.State
+	if summary.Fail > 0 {
+		res = check.FAIL
+	} else if summary.Warn > 0 {
+		res = check.WARN
+	} else {
+		res = check.PASS
+	}
+
+	colors[res].Printf("== Summary %s ==\n", sectionName)
+	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
+		summary.Pass, summary.Fail, summary.Warn, summary.Info,
+	)
 }
 
 // loadConfig finds the correct config dir based on the kubernetes version,
@@ -407,7 +411,16 @@ func writeOutput(controlsCollection []*check.Controls) {
 }
 
 func writeJSONOutput(controlsCollection []*check.Controls) {
-	out, err := json.Marshal(controlsCollection)
+	var out []byte
+	var err error
+	if !noTotals {
+		var totals check.OverallControls
+		totals.Controls = controlsCollection
+		totals.Totals = getSummaryTotals(controlsCollection)
+		out, err = json.Marshal(totals)
+	} else {
+		out, err = json.Marshal(controlsCollection)
+	}
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 	}
@@ -451,6 +464,21 @@ func writeStdoutOutput(controlsCollection []*check.Controls) {
 		summary := controls.Summary
 		prettyPrint(controls, summary)
 	}
+	if !noTotals {
+		printSummary(getSummaryTotals(controlsCollection), "total")
+	}
+}
+
+func getSummaryTotals(controlsCollection []*check.Controls) check.Summary {
+	var totalSummary check.Summary
+	for _, controls := range controlsCollection {
+		summary := controls.Summary
+		totalSummary.Fail = totalSummary.Fail + summary.Fail
+		totalSummary.Warn = totalSummary.Warn + summary.Warn
+		totalSummary.Pass = totalSummary.Pass + summary.Pass
+		totalSummary.Info = totalSummary.Info + summary.Info
+	}
+	return totalSummary
 }
 
 func printRawOutput(output string) {

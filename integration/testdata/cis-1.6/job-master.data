@@ -69,7 +69,7 @@
 [FAIL] 1.4.1 Ensure that the --profiling argument is set to false (Automated)
 [PASS] 1.4.2 Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)
 
-== Remediations ==
+== Remediations master ==
 1.1.9 Run the below command (based on the file location on your system) on the master node.
 For example,
 chmod 644 <path/to/cni/files>
@@ -168,7 +168,13 @@ on the master node and set the below parameter.
 --profiling=false
 
 
-== Summary ==
+== Summary master ==
+45 checks PASS
+10 checks FAIL
+10 checks WARN
+0 checks INFO
+
+== Summary total ==
 45 checks PASS
 10 checks FAIL
 10 checks WARN

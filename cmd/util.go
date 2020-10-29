@@ -93,7 +93,7 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				glog.Warning(buildComponentMissingErrorMessage(nodetype, component, bins))
+				glog.V(1).Info(buildComponentMissingErrorMessage(nodetype, component, bins))
 				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
