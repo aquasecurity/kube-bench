@@ -48,6 +48,7 @@ var (
 	controlplaneFile    = "controlplane.yaml"
 	policiesFile        = "policies.yaml"
 	managedservicesFile = "managedservices.yaml"
+	exitCode            int
 	noResults           bool
 	noSummary           bool
 	noRemediations      bool
@@ -124,6 +125,8 @@ var RootCmd = &cobra.Command{
 		}
 
 		writeOutput(controlsCollection)
+		exitCode := exitCodeSelection(controlsCollection)
+		os.Exit(exitCode)
 	},
 }
 
@@ -146,6 +149,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Output control
+	RootCmd.PersistentFlags().IntVar(&exitCode, "exit-code", 0, "Specify the exit code for when checks fail")
 	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable printing of results section")
 	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")

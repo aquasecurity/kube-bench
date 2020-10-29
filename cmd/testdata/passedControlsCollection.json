@@ -1,0 +1,77 @@
+[
+  {
+    "id": "2",
+    "version": "1.15",
+    "text": "Etcd Node Configuration",
+    "node_type": "etcd",
+    "tests": [
+      {
+        "section": "2",
+        "pass": 7,
+        "fail": 0,
+        "warn": 0,
+        "info": 0,
+        "desc": "Etcd Node Configuration Files",
+        "results": [
+          {
+            "test_number": "2.1",
+            "test_desc": "Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)",
+            "audit": "/bin/ps -ef | /bin/grep etcd | /bin/grep -v grep",
+            "AuditConfig": "",
+            "type": "",
+            "remediation": "Follow the etcd service documentation and configure TLS encryption.\nThen, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml\non the master node and set the below parameters.\n--cert-file=</path/to/ca-file>\n--key-file=</path/to/key-file>\n",
+            "test_info": [
+              "Follow the etcd service documentation and configure TLS encryption.\nThen, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml\non the master node and set the below parameters.\n--cert-file=</path/to/ca-file>\n--key-file=</path/to/key-file>\n"
+            ],
+            "status": "PASS",
+            "actual_value": "root      3277  3218  3 Apr19 ?        03:57:52 etcd --advertise-client-urls=https://192.168.64.4:2379 --cert-file=/var/lib/minikube/certs/etcd/server.crt --client-cert-auth=true --data-dir=/var/lib/minikube/etcd --initial-advertise-peer-urls=https://192.168.64.4:2380 --initial-cluster=minikube=https://192.168.64.4:2380 --key-file=/var/lib/minikube/certs/etcd/server.key --listen-client-urls=https://127.0.0.1:2379,https://192.168.64.4:2379 --listen-metrics-urls=http://127.0.0.1:2381 --listen-peer-urls=https://192.168.64.4:2380 --name=minikube --peer-cert-file=/var/lib/minikube/certs/etcd/peer.crt --peer-client-cert-auth=true --peer-key-file=/var/lib/minikube/certs/etcd/peer.key --peer-trusted-ca-file=/var/lib/minikube/certs/etcd/ca.crt --snapshot-count=10000 --trusted-ca-file=/var/lib/minikube/certs/etcd/ca.crt\nroot      4624  4605  8 Apr21 ?        04:55:10 kube-apiserver --advertise-address=192.168.64.4 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-file=/var/lib/minikube/certs/ca.crt --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,PodSecurityPolicy --enable-bootstrap-token-auth=true --etcd-cafile=/var/lib/minikube/certs/etcd/ca.crt --etcd-certfile=/var/lib/minikube/certs/apiserver-etcd-client.crt --etcd-keyfile=/var/lib/minikube/certs/apiserver-etcd-client.key --etcd-servers=https://127.0.0.1:2379 --insecure-port=0 --kubelet-client-certificate=/var/lib/minikube/certs/apiserver-kubelet-client.crt --kubelet-client-key=/var/lib/minikube/certs/apiserver-kubelet-client.key --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --proxy-client-cert-file=/var/lib/minikube/certs/front-proxy-client.crt --proxy-client-key-file=/var/lib/minikube/certs/front-proxy-client.key --requestheader-allowed-names=front-proxy-client --requestheader-client-ca-file=/var/lib/minikube/certs/front-proxy-ca.crt --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --secure-port=8443 --service-account-key-file=/var/lib/minikube/certs/sa.pub --service-cluster-ip-range=10.96.0.0/12 --tls-cert-file=/var/lib/minikube/certs/apiserver.crt --tls-private-key-file=/var/lib/minikube/certs/apiserver.key\n",
+            "scored": true,
+            "expected_result": "'--cert-file' is present AND '--key-file' is present"
+          }
+        ]
+      }
+    ],
+    "total_pass": 7,
+    "total_fail": 0,
+    "total_warn": 0,
+    "total_info": 0
+  },
+  {
+    "id": "3",
+    "version": "1.5",
+    "text": "Control Plane Configuration",
+    "node_type": "controlplane",
+    "tests": [
+      {
+        "section": "3.1",
+        "pass": 0,
+        "fail": 0,
+        "warn": 1,
+        "info": 0,
+        "desc": "Authentication and Authorization",
+        "results": [
+          {
+            "test_number": "3.1.1",
+            "test_desc": "Client certificate authentication should not be used for users (Not Scored)",
+            "audit": "",
+            "AuditConfig": "",
+            "type": "manual",
+            "remediation": "Alternative mechanisms provided by Kubernetes such as the use of OIDC should be\nimplemented in place of client certificates.\n",
+            "test_info": [
+              "Alternative mechanisms provided by Kubernetes such as the use of OIDC should be\nimplemented in place of client certificates.\n"
+            ],
+            "status": "WARN",
+            "actual_value": "",
+            "scored": false,
+            "expected_result": "",
+            "reason": "Test marked as a manual test"
+          }
+        ]
+      }
+    ],
+    "total_pass": 0,
+    "total_fail": 0,
+    "total_warn": 3,
+    "total_info": 0
+  }
+]

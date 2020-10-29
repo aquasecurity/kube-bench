@@ -345,6 +345,16 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 	return true
 }
 
+func exitCodeSelection(controlsCollection []*check.Controls) int {
+	for _, control := range controlsCollection {
+		if control.Fail > 0  {
+			return exitCode
+		}
+	}
+
+	return 0
+}
+
 func writeOutput(controlsCollection []*check.Controls) {
 	sort.Slice(controlsCollection, func(i, j int) bool {
 		iid, _ := strconv.Atoi(controlsCollection[i].ID)

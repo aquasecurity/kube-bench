@@ -535,6 +535,24 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	assert.Equal(t, expect, result)
 }
 
+func TestExitCodeSelection(t *testing.T){
+	exitCode = 10
+	controlsCollectionAllPassed, errPassed := parseControlsJsonFile("./testdata/passedControlsCollection.json")
+	if errPassed != nil {
+		t.Error(errPassed)
+	}
+	controlsCollectionWithFailures, errFailure := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if errFailure != nil {
+		t.Error(errFailure)
+	}
+
+	exitCodePassed := exitCodeSelection(controlsCollectionAllPassed)
+	assert.Equal(t, 0, exitCodePassed)
+
+	exitCodeFailure := exitCodeSelection(controlsCollectionWithFailures)
+	assert.Equal(t, 10, exitCodeFailure)
+}
+
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 
