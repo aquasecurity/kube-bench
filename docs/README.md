@@ -79,7 +79,7 @@ groups:
 
 These subgroups have `id`, `text` fields which serve the same purposes described
 in the previous paragraphs. The most important part of the subgroup is the
-`checks` field which is the collection of actual `check`s that form the subgroup.
+`checks` field which is the collection of actual `checks` that form the subgroup.
 
 This is an example of a subgroup and checks in the subgroup.
 
@@ -208,7 +208,7 @@ if the keyword is not present in the output of the audit command, or config file
 value. `op` specifies which operation is used for the comparison, and `value`
 specifies the value to compare against.
 
-> To use `compare`, `set` must true. The comparison will be ignored if `set` is
+> To use `compare`, `set` must be true. The comparison will be ignored if `set` is
 > false
 
 The `op` (operations) currently supported in `kube-bench` are:
