@@ -127,7 +127,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
 	for _, group := range controls.Groups {
 		for _, checkItem := range group.Checks {
-			if checkItem.Tests != nil {
+			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
 				for _, test := range checkItem.Tests.TestItems {
 					if test.Env != "" && checkItem.AuditEnv == "" {
 						binPath := ""
