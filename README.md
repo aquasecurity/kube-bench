@@ -298,7 +298,7 @@ Alternatively, you can manually download and extract the kube-bench binary:
 ```
 curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.tar.gz -o kube-bench_0.3.1_linux_amd64.tar.gz
 
-tar -xvf kube-bench_0.3.0_linux_amd64.tar.gz
+tar -xvf kube-bench_0.3.1_linux_amd64.tar.gz
 ```
 
 You can then run kube-bench directly:

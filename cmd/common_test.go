@@ -30,6 +30,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseSkipIds(t *testing.T) {
+	skipMap := parseSkipIds("4.12,4.13,5")
+	_, fourTwelveExists := skipMap["4.12"]
+	_, fourThirteenExists := skipMap["4.13"]
+	_, fiveExists := skipMap["5"]
+	_, other := skipMap["G1"]
+	assert.True(t, fourThirteenExists)
+	assert.True(t, fourTwelveExists)
+	assert.True(t, fiveExists)
+	assert.False(t, other)
+}
+
 func TestNewRunFilter(t *testing.T) {
 
 	type TestCase struct {
@@ -521,6 +533,24 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	}
 
 	assert.Equal(t, expect, result)
+}
+
+func TestExitCodeSelection(t *testing.T){
+	exitCode = 10
+	controlsCollectionAllPassed, errPassed := parseControlsJsonFile("./testdata/passedControlsCollection.json")
+	if errPassed != nil {
+		t.Error(errPassed)
+	}
+	controlsCollectionWithFailures, errFailure := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if errFailure != nil {
+		t.Error(errFailure)
+	}
+
+	exitCodePassed := exitCodeSelection(controlsCollectionAllPassed)
+	assert.Equal(t, 0, exitCodePassed)
+
+	exitCodeFailure := exitCodeSelection(controlsCollectionWithFailures)
+	assert.Equal(t, 10, exitCodeFailure)
 }
 
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
