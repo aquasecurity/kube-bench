@@ -413,7 +413,7 @@ If you think you have found a bug please follow the instructions below.
 
 We also use the GitHub issue tracker to track feature requests. If you have an idea to make kube-bench even more awesome follow the steps below.
 
-- Open a [new issue](issues/new).
+- Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new).
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to helps others.
 - Clearly define the use case, using concrete examples. For example, I type `this` and kube-bench does `that`.
 - If you would like to include a technical design for your feature please feel free to do so.
