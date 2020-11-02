@@ -186,7 +186,15 @@ etcd:
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 controlplane:
-  components: []
+  components:
+    - apiserver
+
+  apiserver:
+    bins:
+      - "kube-apiserver"
+      - "hyperkube apiserver"
+      - "hyperkube kube-apiserver"
+      - "apiserver"
 
 policies:
   components: []
