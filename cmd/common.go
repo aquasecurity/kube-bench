@@ -97,6 +97,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 	svcmap := getFiles(typeConf, "service")
 	kubeconfmap := getFiles(typeConf, "kubeconfig")
 	cafilemap := getFiles(typeConf, "ca")
+	datadirmap := getFiles(typeConf, "datadir")
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
@@ -105,6 +106,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 	s = makeSubstitutions(s, "svc", svcmap)
 	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 	s = makeSubstitutions(s, "cafile", cafilemap)
+	s = makeSubstitutions(s, "datadir", datadirmap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
@@ -122,7 +124,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 }
 
 func parseSkipIds(skipIds string) map[string]bool {
-	var skipIdMap =  make(map[string]bool, 0)
+	var skipIdMap = make(map[string]bool, 0)
 	if skipIds != "" {
 		for _, id := range strings.Split(skipIds, ",") {
 			skipIdMap[strings.Trim(id, " ")] = true
@@ -347,7 +349,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 
 func exitCodeSelection(controlsCollection []*check.Controls) int {
 	for _, control := range controlsCollection {
-		if control.Fail > 0  {
+		if control.Fail > 0 {
 			return exitCode
 		}
 	}

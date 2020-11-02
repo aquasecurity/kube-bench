@@ -72,6 +72,9 @@ master:
     optional: true
     bins:
       - "etcd"
+    datadirs:
+      - /var/lib/etcd/default.etcd
+      - /var/lib/etcd/data.etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -81,6 +84,7 @@ master:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
+    defaultdatadir: /var/lib/etcd/default.etcd
 
   flanneld:
     optional: true
@@ -175,6 +179,9 @@ etcd:
   etcd:
     bins:
       - "etcd"
+    datadirs:
+      - /var/lib/etcd/default.etcd
+      - /var/lib/etcd/data.etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -184,6 +191,7 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
+    defaultdatadir: /var/lib/etcd/default.etcd
 
 controlplane:
   components: []

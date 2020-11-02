@@ -33,6 +33,7 @@ var TypeMap = map[string][]string{
 	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
 	"service":    []string{"svc", "defaultsvc"},
 	"config":     []string{"confs", "defaultconf"},
+	"datadir":    []string{"datadirs", "defaultdatadir"},
 }
 
 func init() {
