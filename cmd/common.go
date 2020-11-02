@@ -96,6 +96,7 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 	svcmap := getFiles(typeConf, "service")
 	kubeconfmap := getFiles(typeConf, "kubeconfig")
 	cafilemap := getFiles(typeConf, "ca")
+	datadirmap := getFiles(typeConf, "datadir")
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
@@ -104,6 +105,7 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 	s, _ = makeSubstitutions(s, "svc", svcmap)
 	s, _ = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 	s, _ = makeSubstitutions(s, "cafile", cafilemap)
+	s, _ = makeSubstitutions(s, "datadir", datadirmap)
 
 	controls, err := check.NewControls(nodetype, []byte(s), detectedVersion)
 	if err != nil {

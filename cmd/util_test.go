@@ -395,6 +395,58 @@ func TestGetServiceFiles(t *testing.T) {
 	}
 }
 
+func TestGetDatadirFiles(t *testing.T) {
+	var err error
+	datadir, err := ioutil.TempDir("", "kube-bench-test-etcd-data-dir")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory")
+	}
+	defer os.RemoveAll(datadir)
+
+	cases := []struct {
+		config      map[string]interface{}
+		exp         map[string]string
+		statResults []error
+	}{
+		{
+			config: map[string]interface{}{
+				"components": []string{"etcd"},
+				"etcd": map[string]interface{}{"datadirs": []string{datadir},
+					"defaultdatadir": "/var/lib/etcd/default.etcd"},
+			},
+			statResults: []error{nil},
+			exp:         map[string]string{"etcd": datadir},
+		},
+		// fallback to defaultdatadir
+		{
+			config: map[string]interface{}{
+				"components": []string{"etcd"},
+				"etcd": map[string]interface{}{"datadirs": []string{"/path/to/etcd/data.etcd"},
+					"defaultdatadir": "/var/lib/etcd/default.etcd"},
+			},
+			statResults: []error{os.ErrNotExist},
+			exp:         map[string]string{"etcd": "/var/lib/etcd/default.etcd"},
+		},
+	}
+
+	v := viper.New()
+	statFunc = fakestat
+
+	for id, c := range cases {
+		t.Run(strconv.Itoa(id), func(t *testing.T) {
+			for k, val := range c.config {
+				v.Set(k, val)
+			}
+			e = c.statResults
+			eIndex = 0
+			m := getFiles(v, "datadir")
+			if !reflect.DeepEqual(m, c.exp) {
+				t.Fatalf("Got %v\nExpected %v", m, c.exp)
+			}
+		})
+	}
+}
+
 func TestMakeSubsitutions(t *testing.T) {
 	cases := []struct {
 		input        string
