@@ -193,7 +193,7 @@ on the master node and set the below parameter.
 [INFO] 3.1 Authentication and Authorization
 [WARN] 3.1.1 Client certificate authentication should not be used for users (Not Scored)
 [INFO] 3.2 Logging
-[WARN] 3.2.1 Ensure that a minimal audit policy is created (Scored)
+[FAIL] 3.2.1 Ensure that a minimal audit policy is created (Scored)
 [WARN] 3.2.2 Ensure that the audit policy covers key security concerns (Not Scored)
 
 == Remediations ==
@@ -208,8 +208,8 @@ minimum.
 
 == Summary ==
 0 checks PASS
-0 checks FAIL
-3 checks WARN
+1 checks FAIL
+2 checks WARN
 0 checks INFO
 [INFO] 4 Worker Node Security Configuration
 [INFO] 4.1 Worker Node Configuration Files
