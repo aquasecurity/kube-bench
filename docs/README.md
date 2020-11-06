@@ -1,9 +1,9 @@
 # Table of content
--[Test and config files](#test-and-config-files)
-  -[Controls](#controls)
-  -[Groups](#groups)
-  -[Check](#check)
-  -[Configuration and Variables](#config-and-variables)
+  -[Test and config files](#test-and-config-files)
+    -[Controls](#controls)
+    -[Groups](#groups)
+    -[Check](#check)
+    -[Configuration and Variables](#config-and-variables)
 
 # Test and config files
 
