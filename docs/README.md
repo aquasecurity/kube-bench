@@ -1,3 +1,10 @@
+# Table of content
+-[Test and config files]
+  -[Controls]
+  -[Groups]
+  -[Check]
+  -[Configuration and Variables]
+
 # Test and config files
 
 `kube-bench` runs checks specified in `controls` files that are a YAML 
