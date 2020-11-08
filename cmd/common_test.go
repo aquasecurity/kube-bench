@@ -30,6 +30,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseSkipIds(t *testing.T) {
+	skipMap := parseSkipIds("4.12,4.13,5")
+	_, fourTwelveExists := skipMap["4.12"]
+	_, fourThirteenExists := skipMap["4.13"]
+	_, fiveExists := skipMap["5"]
+	_, other := skipMap["G1"]
+	assert.True(t, fourThirteenExists)
+	assert.True(t, fourTwelveExists)
+	assert.True(t, fiveExists)
+	assert.False(t, other)
+}
+
 func TestNewRunFilter(t *testing.T) {
 
 	type TestCase struct {
@@ -154,7 +166,7 @@ func TestIsMaster(t *testing.T) {
 		},
 		{
 			name:     "valid config, does not include master",
-			cfgFile:  "../cfg/node_only.yaml",
+			cfgFile:  "../hack/node_only.yaml",
 			isMaster: false,
 		},
 	}
@@ -206,14 +218,15 @@ func TestMapToCISVersion(t *testing.T) {
 		expErr      string
 	}{
 		{kubeVersion: "1.9", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.9"},
-		{kubeVersion: "1.11", succeed: true, exp: "cis-1.3"},
-		{kubeVersion: "1.12", succeed: true, exp: "cis-1.3"},
-		{kubeVersion: "1.13", succeed: true, exp: "cis-1.4"},
-		{kubeVersion: "1.14", succeed: true, exp: "cis-1.4"},
+		{kubeVersion: "1.11", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.11"},
+		{kubeVersion: "1.12", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.12"},
+		{kubeVersion: "1.13", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.13"},
+		{kubeVersion: "1.14", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: 1.14"},
 		{kubeVersion: "1.15", succeed: true, exp: "cis-1.5"},
-		{kubeVersion: "1.16", succeed: true, exp: "cis-1.5"},
-		{kubeVersion: "1.17", succeed: true, exp: "cis-1.5"},
-		{kubeVersion: "1.18", succeed: true, exp: "cis-1.5"},
+		{kubeVersion: "1.16", succeed: true, exp: "cis-1.6"},
+		{kubeVersion: "1.17", succeed: true, exp: "cis-1.6"},
+		{kubeVersion: "1.18", succeed: true, exp: "cis-1.6"},
+		{kubeVersion: "1.19", succeed: true, exp: "cis-1.6"},
 		{kubeVersion: "gke-1.0", succeed: true, exp: "gke-1.0"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
@@ -302,7 +315,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 
 	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		execCode := `#!/bin/sh
-		echo "Server Version: v1.13.10"
+		echo "Server Version: v1.15.10"
 		`
 		restore, err := fakeExecutableInPath("kubectl", execCode)
 		if err != nil {
@@ -335,8 +348,8 @@ func TestGetBenchmarkVersion(t *testing.T) {
 	}{
 		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", callFn: withNoPath, v: viper.New(), succeed: false},
 		{n: "no version-missing-kubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "", callFn: withNoPath, succeed: false},
-		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.4", callFn: withFakeKubectl, succeed: true},
-		{n: "kubeVersion", kubeVersion: "1.11", benchmarkVersion: "", v: viperWithData, exp: "cis-1.3", callFn: withNoPath, succeed: true},
+		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withFakeKubectl, succeed: true},
+		{n: "kubeVersion", kubeVersion: "1.15", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 		{n: "gke10", kubeVersion: "gke-1.0", benchmarkVersion: "", v: viperWithData, exp: "gke-1.0", callFn: withNoPath, succeed: true},
@@ -364,24 +377,16 @@ func TestGetBenchmarkVersion(t *testing.T) {
 }
 
 func TestValidTargets(t *testing.T) {
+	viperWithData, err := loadConfigForTest()
+	if err != nil {
+		t.Fatalf("Unable to load config file %v", err)
+	}
 	cases := []struct {
 		name      string
 		benchmark string
 		targets   []string
 		expected  bool
 	}{
-		{
-			name:      "cis-1.3 no etcd",
-			benchmark: "cis-1.3",
-			targets:   []string{"master", "etcd"},
-			expected:  false,
-		},
-		{
-			name:      "cis-1.4 valid",
-			benchmark: "cis-1.4",
-			targets:   []string{"master", "node"},
-			expected:  true,
-		},
 		{
 			name:      "cis-1.5 no dummy",
 			benchmark: "cis-1.5",
@@ -391,6 +396,18 @@ func TestValidTargets(t *testing.T) {
 		{
 			name:      "cis-1.5 valid",
 			benchmark: "cis-1.5",
+			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
+			expected:  true,
+		},
+		{
+			name:      "cis-1.6 no Pikachu",
+			benchmark: "cis-1.6",
+			targets:   []string{"master", "node", "controlplane", "etcd", "Pikachu"},
+			expected:  false,
+		},
+		{
+			name:      "cis-1.6 valid",
+			benchmark: "cis-1.6",
 			targets:   []string{"master", "node", "controlplane", "etcd", "policies"},
 			expected:  true,
 		},
@@ -410,7 +427,10 @@ func TestValidTargets(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			ret := validTargets(c.benchmark, c.targets)
+			ret, err := validTargets(c.benchmark, c.targets, viperWithData)
+			if err != nil {
+				t.Fatalf("Expected nil error, got: %v", err)
+			}
 			if ret != c.expected {
 				t.Fatalf("Expected %t, got %t", c.expected, ret)
 			}
@@ -451,7 +471,7 @@ func TestIsEtcd(t *testing.T) {
 		},
 		{
 			name:    "valid config, does not include etcd",
-			cfgFile: "../cfg/node_only.yaml",
+			cfgFile: "../hack/node_only.yaml",
 			isEtcd:  false,
 		},
 	}
@@ -515,6 +535,24 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	assert.Equal(t, expect, result)
 }
 
+func TestExitCodeSelection(t *testing.T){
+	exitCode = 10
+	controlsCollectionAllPassed, errPassed := parseControlsJsonFile("./testdata/passedControlsCollection.json")
+	if errPassed != nil {
+		t.Error(errPassed)
+	}
+	controlsCollectionWithFailures, errFailure := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if errFailure != nil {
+		t.Error(errFailure)
+	}
+
+	exitCodePassed := exitCodeSelection(controlsCollectionAllPassed)
+	assert.Equal(t, 0, exitCodePassed)
+
+	exitCodeFailure := exitCodeSelection(controlsCollectionWithFailures)
+	assert.Equal(t, 10, exitCodeFailure)
+}
+
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 
@@ -532,11 +570,10 @@ func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 
 func loadConfigForTest() (*viper.Viper, error) {
 	viperWithData := viper.New()
-	viperWithData.SetConfigFile(filepath.Join("..", cfgDir, "config.yaml"))
+	viperWithData.SetConfigFile("../cfg/config.yaml")
 	if err := viperWithData.ReadInConfig(); err != nil {
 		return nil, err
 	}
-
 	return viperWithData, nil
 }
 

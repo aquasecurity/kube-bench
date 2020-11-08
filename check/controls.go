@@ -38,6 +38,7 @@ type Controls struct {
 // Group is a collection of similar checks.
 type Group struct {
 	ID     string   `yaml:"id" json:"section"`
+	Skip   bool     `yaml:"skip" json:"skip"`
 	Pass   int      `json:"pass"`
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
@@ -74,7 +75,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
-func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
+func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
@@ -86,7 +87,15 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
 				continue
 			}
 
+			_, groupSkippedViaCmd := skipIdMap[group.ID]
+			_, checkSkippedViaCmd := skipIdMap[check.ID]
+
+			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd  {
+				check.Type = SKIP
+			}
+
 			state := runner.Run(check)
+
 			check.TestInfo = append(check.TestInfo, check.Remediation)
 
 			// Check if we have already added this checks group.
@@ -95,6 +104,7 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate) Summary {
 				w := &Group{
 					ID:     group.ID,
 					Text:   group.Text,
+					Skip:   group.Skip,
 					Checks: []*Check{},
 				}
 

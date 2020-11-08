@@ -33,10 +33,11 @@ Table of Contents
     - [Running in a Kubernetes cluster](#running-in-a-kubernetes-cluster)
     - [Running in an AKS cluster](#running-in-an-aks-cluster)
     - [Running in an EKS cluster](#running-in-an-eks-cluster)
+    - [Running on OpenShift](#running-on-openshift)
+    - [Running in an GKE cluster](#running-in-a-gke-cluster)
     - [Installing from a container](#installing-from-a-container)
+    - [Download and Install binaries](#download-and-install-binaries)
     - [Installing from sources](#installing-from-sources)
-  - [Running on OpenShift](#running-on-openshift)
-    - [Running in an GKE cluster](#running-in-an-gke-cluster)
   - [Output](#output)
   - [Configuration](#configuration)
   - [Troubleshooting](#troubleshooting)
@@ -56,9 +57,8 @@ kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes B
 
 | CIS Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|
-| [1.3.0](https://workbench.cisecurity.org/benchmarks/602) | cis-1.3 | 1.11-1.12 |
-| [1.4.1](https://workbench.cisecurity.org/benchmarks/2351) | cis-1.4 | 1.13-1.14 |
 | [1.5.1](https://workbench.cisecurity.org/benchmarks/4892) | cis-1.5 | 1.15- |
+| [1.6.0](https://workbench.cisecurity.org/benchmarks/4834) | cis-1.6 | 1.16- |
 | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
 | [EKS 1.0.0](https://workbench.cisecurity.org/benchmarks/5190) | eks-1.0 | EKS |
 | Red Hat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 |
@@ -68,10 +68,10 @@ By default, kube-bench will determine the test set to run based on the Kubernete
 ## Installation
 
 You can choose to
-* run kube-bench from inside a container (sharing PID namespace with the host)
-* run a container that installs kube-bench on the host, and then run kube-bench directly on the host
-* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory
-* compile it from source.
+* Run kube-bench from inside a container (sharing PID namespace with the host). See [Running inside a container](#running-inside-a-container) for additional details.
+* Run a container that installs kube-bench on the host, and then run kube-bench directly on the host. See [Installing from a container](#installing-from-a-container) for additional details.
+* install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory. See [Download and Install binaries](#download-and-install-binaries) for details.
+* Compile it from source. See [Installing from sources](#installing-from-sources) for details.
 
 ## Running kube-bench
 
@@ -98,18 +98,18 @@ Or run kube-bench against a worker node using the tests for Kubernetes version 1
 kube-bench node --version 1.13
 ```
 
-`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.13`, this is mapped to CIS Benchmark version `cis-1.14`.
+`kube-bench` will map the `--version` to the corresponding CIS Benchmark version as indicated by the mapping table above. For example, if you specify `--version 1.15`, this is mapped to CIS Benchmark version `cis-1.15`.
 
 Alternatively, you can specify `--benchmark` to run a specific CIS Benchmark version:
 
 ```
-kube-bench node --benchmark cis-1.4
+kube-bench node --benchmark cis-1.5
 ```
 
 If you want to target specific CIS Benchmark `target` (i.e master, node, etcd, etc...)
 you can use the `run --targets` subcommand.
 ```
-kube-bench --benchmark cis-1.4 run --targets master,node
+kube-bench --benchmark cis-1.5 run --targets master,node
 ```
 or
 ```
@@ -119,16 +119,15 @@ kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
 The following table shows the valid targets based on the CIS Benchmark version.
 | CIS Benchmark | Targets |
 |---|---|
-| cis-1.3| master, node |
-| cis-1.4| master, node |
 | cis-1.5| master, controlplane, node, etcd, policies |
+| cis-1.6| master, controlplane, node, etcd, policies |
 | gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 | eks-1.0| controlplane, node, policies, managedservices |
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version.
 
 `controls` for the various versions of CIS Benchmark can be found in directories
-with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.4`.
+with same name as the CIS Benchmark versions under `cfg/`, for example `cfg/cis-1.5`.
 
 **Note:**  **`It is an error to specify both --version and --benchmark flags together`**
 
@@ -232,15 +231,87 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
   - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
+### Running on OpenShift
+
+| OpenShift Hardening Guide | kube-bench config |
+|---|---|
+| ocp-3.10| rh-0.7 |
+| ocp-3.11| rh-0.7 |
+| ocp-4.* | Not supported |
+
+kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
+
+when you run the `kube-bench` command (either directly or through YAML).
+
+There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published. 
+
+### Running in a GKE cluster
+
+| CIS Benchmark | Targets |
+|---|---|
+| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
+
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
+
+```
+kubectl apply -f job-gke.yaml
+```
+
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
-** binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows) **
+**binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows)**
 ```
 docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
 ```
 
 You can then run `./kube-bench [master|node]`.
+
+### Download and Install binaries
+
+It is possible to manually install and run kube-bench release binaries. In order to do that, you must have access to your Kubernetes cluster nodes. Note that if you're using one of the managed Kubernetes services (e.g. EKS, AKS, GKE), you will not have access to the master nodes of your cluster and you can’t perform any tests on the master nodes.
+
+First, log into one of the nodes using SSH.
+
+Install kube-bench binary for your platform using the commands below. Note that there may be newer releases available. See [releases page](https://github.com/aquasecurity/kube-bench/releases).
+
+Ubuntu/Debian:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.deb -o kube-bench_0.3.1_linux_amd64.deb
+
+sudo apt install ./kube-bench_0.3.1_linux_amd64.deb -f
+```
+
+RHEL:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.rpm -o kube-bench_0.3.1_linux_amd64.rpm
+
+sudo yum install kube-bench_0.3.1_linux_amd64.rpm -y
+```
+
+Alternatively, you can manually download and extract the kube-bench binary:
+
+```
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.3.1/kube-bench_0.3.1_linux_amd64.tar.gz -o kube-bench_0.3.1_linux_amd64.tar.gz
+
+tar -xvf kube-bench_0.3.1_linux_amd64.tar.gz
+```
+
+You can then run kube-bench directly:
+```
+kube-bench [master|node]
+```
+
+If you manually downloaded the kube-bench binary (using curl command above), you have to specify the location of configuration directory and file. For example:
+```
+./kube-bench --config-dir `pwd`/cfg --config `pwd`/cfg/config.yaml [master|node]
+```
+
+See previous section on [Running kube-bench](#running-kube-bench) for further details on using the kube-bench binary.
 
 ### Installing from sources
 
@@ -258,42 +329,19 @@ go build -o kube-bench .
 ./kube-bench
 ```
 
-### Running on OpenShift
-
-| OpenShift Hardening Guide | kube-bench config |
-|---|---|
-| ocp-3.10| rh-0.7 |
-| ocp-3.11| rh-0.7 |
-
-kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 3.11. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or `--version ocp-3.11`
-
-when you run the `kube-bench` command (either directly or through YAML).
-
-### Running in an GKE cluster
-| CIS Benchmark | Targets |
-|---|---|
-| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
-
-kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
-
-To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
-
-```
-kubectl apply -f job-gke.yaml
-```
-
 ## Output
 
-There are three output states:
-- [PASS] and [FAIL] indicate that a test was run successfully, and it either passed or failed.
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually.
+There are four output states:
+- [PASS] indicates that the test was run successfully, and passed.
+- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
 - [INFO] is informational output that needs no further action.
 
 Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN.
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
 
 ## Configuration
 
@@ -305,9 +353,9 @@ You can read more about `kube-bench` configuration in our [documentation](docs/R
 
 ## Troubleshooting
 
-Running `kube-bench` with the `-v 3 --logtostderr` parameters will generate debug logs that can be very helpful for debugging problems.
+Running `kube-bench` with the `-v 3` parameter will generate debug logs that can be very helpful for debugging problems.
 
-If you are using one of the example `job*.yaml` files, you will need to edit the `command` field, for example `["kube-bench", "-v", "3", "--logtostderr"]`. Once the job has run, the logs can be retrieved using `kubectl logs` on the job's pod.
+If you are using one of the example `job*.yaml` files, you will need to edit the `command` field, for example `["kube-bench", "-v", "3"]`. Once the job has run, the logs can be retrieved using `kubectl logs` on the job's pod.
 
 ## Test config YAML representation
 
@@ -357,7 +405,7 @@ If you think you have found a bug please follow the instructions below.
 - Open a [new issue](https://github.com/aquasecurity/kube-bench/issues/new) if a duplicate doesn't already exist.
 - Note the version of kube-bench you are running (from `kube-bench version`) and the command line options you are using.
 - Note the version of Kubernetes you are running (from `kubectl version` or `oc version` for OpenShift).
-- Set `-v 10 --logtostderr` command line options and save the log output. Please paste this into your issue.
+- Set `-v 10` command line option and save the log output. Please paste this into your issue.
 - Remember users might be searching for your issue in the future, so please give it a meaningful title to help others.
 
 ### Features
