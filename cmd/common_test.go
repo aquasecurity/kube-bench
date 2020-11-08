@@ -315,7 +315,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 
 	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		execCode := `#!/bin/sh
-		echo "Server Version: v1.15.10"
+		echo '{"serverVersion": {"major": "1", "minor": "15", "gitVersion": "v1.15.10"}}'
 		`
 		restore, err := fakeExecutableInPath("kubectl", execCode)
 		if err != nil {
@@ -535,7 +535,7 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	assert.Equal(t, expect, result)
 }
 
-func TestExitCodeSelection(t *testing.T){
+func TestExitCodeSelection(t *testing.T) {
 	exitCode = 10
 	controlsCollectionAllPassed, errPassed := parseControlsJsonFile("./testdata/passedControlsCollection.json")
 	if errPassed != nil {
