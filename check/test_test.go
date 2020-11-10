@@ -251,7 +251,7 @@ func TestTestExecute(t *testing.T) {
 			controls.Groups[2].Checks[0],
 			"2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
 			"",
-			"ALLOW_PRIVILEGED=false",
+			"SOME_OTHER_ENV=true\nALLOW_PRIVILEGED=false",
 		},
 		{
 			controls.Groups[2].Checks[1],

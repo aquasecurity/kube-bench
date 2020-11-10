@@ -164,13 +164,13 @@ func (t pathTestItem) findValue(s string) (match bool, value string, err error) 
 	}
 
 	glog.V(3).Infof("In pathTestItem.findValue %s", value)
-	match = (value != "")
+	match = value != ""
 	return match, value, err
 }
 
 func (t envTestItem) findValue(s string) (match bool, value string, err error) {
 	if s != "" && t.Env != "" {
-		r, _ := regexp.Compile(fmt.Sprintf("%s=.*\\n", t.Env))
+		r, _ := regexp.Compile(fmt.Sprintf("%s=.*(?:$|\\n)", t.Env))
 		out := r.FindString(s)
 		out = strings.Replace(out, "\n", "", 1)
 		out = strings.Replace(out, fmt.Sprintf("%s=", t.Env), "", 1)
