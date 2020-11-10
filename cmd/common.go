@@ -32,7 +32,6 @@ import (
 
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
 func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
-
 	if opts.CheckList != "" && opts.GroupList != "" {
 		return nil, fmt.Errorf("group option and check option can't be used together")
 	}
@@ -120,14 +119,14 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	generateDefaultEnvAudit(controls, binSubs)
 
-	controls.RunChecks(runner, filter)
+	controls.RunChecks(runner, filter, parseSkipIds(skipIds))
 	controlsCollection = append(controlsCollection, controls)
 }
 
 func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
 	for _, group := range controls.Groups {
 		for _, checkItem := range group.Checks {
-			if checkItem.Tests != nil {
+			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
 				for _, test := range checkItem.Tests.TestItems {
 					if test.Env != "" && checkItem.AuditEnv == "" {
 						binPath := ""
@@ -146,6 +145,16 @@ func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
 			}
 		}
 	}
+}
+
+func parseSkipIds(skipIds string) map[string]bool {
+	var skipIdMap =  make(map[string]bool, 0)
+	if skipIds != "" {
+		for _, id := range strings.Split(skipIds, ",") {
+			skipIdMap[strings.Trim(id, " ")] = true
+		}
+	}
+	return skipIdMap
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -360,6 +369,16 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 
 	glog.V(2).Infof("Node is running %s components", nodeType)
 	return true
+}
+
+func exitCodeSelection(controlsCollection []*check.Controls) int {
+	for _, control := range controlsCollection {
+		if control.Fail > 0  {
+			return exitCode
+		}
+	}
+
+	return 0
 }
 
 func writeOutput(controlsCollection []*check.Controls) {

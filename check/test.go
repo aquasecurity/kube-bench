@@ -48,6 +48,14 @@ type tests struct {
 	BinOp     binOp       `yaml:"bin_op"`
 }
 
+type AuditUsed string
+
+const (
+	AuditCommand AuditUsed = "auditCommand"
+	AuditConfig AuditUsed = "auditConfig"
+	AuditEnv AuditUsed = "auditEnv"
+)
+
 type testItem struct {
 	Flag             string
 	Env              string
@@ -57,9 +65,10 @@ type testItem struct {
 	Set              bool
 	Compare          compare
 	isMultipleOutput bool
-	isConfigSetting  bool
+	auditUsed  AuditUsed
 }
 
+type envTestItem testItem
 type pathTestItem testItem
 type flagTestItem testItem
 
@@ -70,8 +79,7 @@ type compare struct {
 
 type testOutput struct {
 	testResult     bool
-	flagFound      bool
-	envFound       bool
+	found      bool
 	actualResult   string
 	ExpectedResult string
 }
@@ -80,47 +88,34 @@ func failTestItem(s string) *testOutput {
 	return &testOutput{testResult: false, actualResult: s}
 }
 
-func (t testItem) flagValue() string {
-	if t.isConfigSetting {
+func (t testItem) value() string {
+	if t.auditUsed == AuditConfig {
 		return t.Path
 	}
 
-	if t.Env != "" {
-		return fmt.Sprintf("%s or %s", t.Flag, t.Env)
+	if t.auditUsed == AuditEnv {
+		return t.Env
 	}
 
 	return t.Flag
 }
 
-func (t testItem) findEnv(s string) (match bool, value string) {
-	if s != "" && t.Env != "" {
-		r, _ := regexp.Compile(fmt.Sprintf("%s=.*\\n", t.Env))
-		out := r.FindString(s)
-		out = strings.Replace(out, "\n", "", 1)
-		out = strings.Replace(out, fmt.Sprintf("%s=", t.Env), "", 1)
-
-		if len(out) > 0 {
-			match = true
-			value = out
-		}else{
-			match = false
-			value = ""
-		}
+func (t testItem) findValue(s string) (match bool, value string, err error) {
+	if t.auditUsed == AuditEnv {
+		et := envTestItem(t)
+		return et.findValue(s)
 	}
-	return match, value
-}
 
-func (t testItem) findFlag(s string) (match bool, value string, err error) {
-	if t.isConfigSetting {
+	if t.auditUsed == AuditConfig {
 		pt := pathTestItem(t)
-		return pt.findFlag(s)
+		return pt.findValue(s)
 	}
 
 	ft := flagTestItem(t)
-	return ft.findFlag(s)
+	return ft.findValue(s)
 }
 
-func (t flagTestItem) findFlag(s string) (match bool, value string, err error) {
+func (t flagTestItem) findValue(s string) (match bool, value string, err error) {
 	if s == "" || t.Flag == "" {
 		return
 	}
@@ -155,7 +150,7 @@ func (t flagTestItem) findFlag(s string) (match bool, value string, err error) {
 	return match, value, err
 }
 
-func (t pathTestItem) findFlag(s string) (match bool, value string, err error) {
+func (t pathTestItem) findValue(s string) (match bool, value string, err error) {
 	var jsonInterface interface{}
 
 	err = unmarshal(s, &jsonInterface)
@@ -171,6 +166,24 @@ func (t pathTestItem) findFlag(s string) (match bool, value string, err error) {
 	glog.V(3).Infof("In pathTestItem.findValue %s", value)
 	match = (value != "")
 	return match, value, err
+}
+
+func (t envTestItem) findValue(s string) (match bool, value string, err error) {
+	if s != "" && t.Env != "" {
+		r, _ := regexp.Compile(fmt.Sprintf("%s=.*\\n", t.Env))
+		out := r.FindString(s)
+		out = strings.Replace(out, "\n", "", 1)
+		out = strings.Replace(out, fmt.Sprintf("%s=", t.Env), "", 1)
+
+		if len(out) > 0 {
+			match = true
+			value = out
+		}else{
+			match = false
+			value = ""
+		}
+	}
+	return match, value, nil
 }
 
 func (t testItem) execute(s string) *testOutput {
@@ -200,17 +213,7 @@ func (t testItem) execute(s string) *testOutput {
 func (t testItem) evaluate(s string) *testOutput {
 	result := &testOutput{}
 
-	match, value, err := t.findFlag(s)
-	if err != nil || !match {
-		match, value = t.findEnv(s)
-		if match {
-			err = nil
-			result.envFound = match
-		}
-	} else {
-		result.flagFound = match
-	}
-
+	match, value, err := t.findValue(s)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		return failTestItem(err.Error())
@@ -220,16 +223,16 @@ func (t testItem) evaluate(s string) *testOutput {
 		if match && t.Compare.Op != "" {
 			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, value, t.Compare.Value)
 		} else {
-			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.flagValue())
+			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.value())
 			result.testResult = match
 		}
 	} else {
-		result.ExpectedResult = fmt.Sprintf("'%s' is not present", t.flagValue())
+		result.ExpectedResult = fmt.Sprintf("'%s' is not present", t.value())
 		result.testResult = !match
 	}
 
-	glog.V(3).Info(fmt.Sprintf("flagFound %v", result.flagFound))
-	glog.V(3).Info(fmt.Sprintf("envFound %v", result.envFound))
+	result.found = match
+	glog.V(3).Info(fmt.Sprintf("found %v", result.found))
 
 	return result
 }

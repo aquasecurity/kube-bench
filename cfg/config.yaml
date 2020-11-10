@@ -48,8 +48,7 @@ master:
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
-    defaultkubeconfig:
-      - /etc/kubernetes/scheduler.conf
+    defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
     bins:
@@ -67,8 +66,7 @@ master:
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
-    defaultkubeconfig:
-      - /etc/kubernetes/controller-manager.conf
+    defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
     optional: true
