@@ -557,3 +557,54 @@ groups:
             path: '{.readOnlyPort}'
             set: false
       scored: true
+
+- id: 3.1
+  text: "audit_env commands"
+  checks:
+    - id: 0
+      text: "flag is set (via env)"
+      tests:
+        test_items:
+          - flag: "--allow-privileged"
+            env: "ALLOW_PRIVILEGED"
+            set: true
+
+    - id: 1
+      text: "flag is not set (via env)"
+      tests:
+        test_items:
+          - flag: "--basic-auth"
+            env: "BASIC_AUTH"
+            set: false
+
+    - id: 2
+      text: "flag value is set to some value (via env)"
+      tests:
+        test_items:
+          - flag: "--insecure-port"
+            env: "INSECURE_PORT"
+            compare:
+              op: eq
+              value: 0
+            set: true
+
+    - id: 3
+      text: "flag value is greater than or equal some number (via env)"
+      tests:
+        test_items:
+          - flag: "--audit-log-maxage"
+            env: "AUDIT_LOG_MAXAGE"
+            compare:
+              op: gte
+              value: 30
+            set: true
+
+    - id: 4
+      text: "flag value is less than some number (via env)"
+      tests:
+        test_items:
+          - env: "MAX_BACKLOG"
+            compare:
+              op: lt
+              value: 30
+            set: true

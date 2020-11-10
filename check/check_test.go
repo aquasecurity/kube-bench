@@ -81,6 +81,10 @@ func TestCheck_Run(t *testing.T) {
 	}
 }
 
+func TestCheckAuditEnv(t *testing.T){
+
+}
+
 func TestCheckAuditConfig(t *testing.T) {
 
 	passingCases := []*Check{

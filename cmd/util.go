@@ -362,8 +362,11 @@ func makeSubstitutions(s string, ext string, m map[string]string) (string, []str
 			continue
 		}
 		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		beforeS := s
 		s = multiWordReplace(s, subst, v)
-		substitutions = append(substitutions, v)
+		if beforeS != s {
+			substitutions = append(substitutions, v)
+		}
 	}
 
 	return s, substitutions
