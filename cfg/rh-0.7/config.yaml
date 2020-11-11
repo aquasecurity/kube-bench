@@ -6,11 +6,14 @@ master:
     bins:
       - openshift start master api
       - hypershift openshift-kube-apiserver
+      - hyperkube kube-apiserver
+      - kube-apiserver
 
   scheduler:
     bins:
       - "openshift start master controllers"
       - "hyperkube kube-scheduler"
+      - "kube-scheduler"
     confs:
       - /etc/origin/master/scheduler.json
 
@@ -18,10 +21,15 @@ master:
     bins:
       - "openshift start master controllers"
       - "hypershift openshift-controller-manager"
+      - "hyperkube controller-manager"
+      - "hyperkube kube-controller-manager"
+      - "kube-controller"
+      - "kube-controller-manager"
 
   etcd:
     bins:
       - openshift start etcd
+      - etcd
 
 node:
   svcs:
