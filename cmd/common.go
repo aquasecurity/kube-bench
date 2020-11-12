@@ -344,6 +344,10 @@ func writeOutput(controlsCollection []*check.Controls) {
 		writePgsqlOutput(controlsCollection)
 		return
 	}
+	if aASF {
+		writeAASFOutput(controlsCollection)
+		return
+	}
 	writeStdoutOutput(controlsCollection)
 }
 
@@ -372,6 +376,16 @@ func writePgsqlOutput(controlsCollection []*check.Controls) {
 			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
 		}
 		savePgsql(string(out))
+	}
+}
+
+func writeAASFOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out := controls.AASF()
+		err := writeFinding(out)
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output to AASF: %v", err))
+		}
 	}
 }
 

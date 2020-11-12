@@ -42,6 +42,7 @@ var (
 	jsonFmt             bool
 	junitFmt            bool
 	pgSQL               bool
+	aASF                bool
 	masterFile          = "master.yaml"
 	nodeFile            = "node.yaml"
 	etcdFile            = "etcd.yaml"

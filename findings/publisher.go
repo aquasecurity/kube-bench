@@ -18,7 +18,7 @@ func New(client securityhubiface.SecurityHubAPI) *Publisher {
 	}
 }
 
-func (p *Publisher) publishFinding(finding []*securityhub.AwsSecurityFinding) error {
+func (p *Publisher) PublishFinding(finding []*securityhub.AwsSecurityFinding) error {
 	i := securityhub.BatchImportFindingsInput{}
 	i.Findings = finding
 	var errs error = nil
