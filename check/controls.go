@@ -24,6 +24,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
@@ -192,7 +193,8 @@ func (controls *Controls) JUnit() ([]byte, error) {
 }
 
 // AASF encodes the results of last run to AWS Security Finding Format(AASF).
-func (controls *Controls) AASF() ([]byte, error) {
+func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
+	fs := []*securityhub.AwsSecurityFinding{}
 	a := getAccount()
 	ti := time.Now()
 	tf := ti.Format(time.RFC3339)
@@ -227,13 +229,21 @@ func (controls *Controls) AASF() ([]byte, error) {
 						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
 					},
 				}
+				fs = append(fs, &f)
 			}
 		}
 	}
+	return fs
 }
-
 func getAccount() string {
 	// Create a EC2Metadata client from just a session.
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2")},
+	)
+	if err != nil {
+		log.Printf("Metadata call failed:%s", err)
+		return UNKNOWN
+	}
 	svc := ec2metadata.New(sess)
 	if svc.Available() {
 		d, err := svc.GetInstanceIdentityDocument()
