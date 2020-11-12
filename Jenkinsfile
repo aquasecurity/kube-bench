@@ -18,7 +18,7 @@ pipeline {
                     s3Upload acl: 'PublicRead',
                              bucket: 'download.draios.com',
                              file: "out/kube-bench-${params.TAG}.tar.gz",
-                             path: "kube-bench-${params.TAG}.tar.gz"
+                             path: "dependencies/kube-bench-${params.TAG}.tar.gz"
                     }
                 }
             }
