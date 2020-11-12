@@ -2,6 +2,7 @@ kube-bench
 *.swp
 vendor
 dist
+out
 .vscode/
 hack/kind.test.yaml
 coverage.txt
