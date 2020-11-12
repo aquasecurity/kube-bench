@@ -1,7 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        label 'builder-backend-j8 || new-builder-backend-j8'
+    }
     stages {
-        stage('Build Agent tarball') {
+        stage('Build tarball') {
             steps {
                    sh """
                    docker run \
@@ -12,7 +14,10 @@ pipeline {
                    golang \
                    bash build-tarball.sh
                    """
-
+             }
+        }
+        stage('Push to S3') {
+            steps {
                 script{
                     withAWS(credentials: 'draios', region: 'us-east-1') {
                     s3Upload acl: 'PublicRead',
@@ -24,10 +29,8 @@ pipeline {
             }
             post {
                 cleanup {
-                    script {
-                        sh("rm -rf out || /bin/true")
-                        sh("docker system prune -f || /bin/true")
-                    }
+                    sh("rm -rf out || /bin/true")
+                    sh("docker system prune -f || /bin/true")
                 }
             }
         }
