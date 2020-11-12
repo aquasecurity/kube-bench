@@ -14,9 +14,9 @@ pipeline {
                    """
 
                 script{
-                    withAWS(credentials: 'draios-dev-aws', region: 'us-east-1') {
+                    withAWS(credentials: 'draios', region: 'us-east-1') {
                     s3Upload acl: 'PublicRead',
-                             bucket: 'nkraemer',
+                             bucket: 'download.draios.com',
                              file: "out/kube-bench-${params.TAG}.tar.gz",
                              path: "kube-bench-${params.TAG}.tar.gz"
                     }
