@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/aquasecurity/kube-bench/findings"
+	"github.com/aquasecurity/kube-bench/internal/findings"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/securityhub"
@@ -26,9 +27,24 @@ func writeFinding(in []*securityhub.AwsSecurityFinding) error {
 	}
 	svc := securityhub.New(sess)
 	p := findings.New(svc)
-	perr := p.PublishFinding(in)
+	out, perr := p.PublishFinding(in)
+	print(out)
 	if perr != nil {
 		return perr
 	}
 	return nil
+}
+
+func print(out *findings.PublisherOutput) {
+	if out.SuccessCount > 0 {
+		log.Printf("Number of findings that were successfully imported:%v\n", out.SuccessCount)
+	}
+	if out.FailedCount > 0 {
+		log.Printf("Number of findings that failed to import:%v\n", out.FailedCount)
+		for _, f := range out.FailedFindings {
+			log.Printf("ID:%s", *f.Id)
+			log.Printf("Message:%s", *f.ErrorMessage)
+			log.Printf("Error Code:%s", *f.ErrorCode)
+		}
+	}
 }

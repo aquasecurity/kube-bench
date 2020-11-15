@@ -197,6 +197,10 @@ func (controls *Controls) AASF() ([]*securityhub.AwsSecurityFinding, error) {
 	if err != nil {
 		return nil, err
 	}
+	c, err := getConfig("CLUSTER_ARN")
+	if err != nil {
+		return nil, err
+	}
 	ti := time.Now()
 	tf := ti.Format(time.RFC3339)
 	for _, g := range controls.Groups {
@@ -231,7 +235,7 @@ func (controls *Controls) AASF() ([]*securityhub.AwsSecurityFinding, error) {
 					},
 					Resources: []*securityhub.Resource{
 						{
-							Id:   aws.String(fmt.Sprintf("%s%sEKSID+%s%s", ARN, a, check.ID, tf)),
+							Id:   aws.String(c),
 							Type: aws.String(TYPE),
 						},
 					},

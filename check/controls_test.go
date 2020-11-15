@@ -28,6 +28,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/onsi/ginkgo/reporters"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gopkg.in/yaml.v2"
@@ -339,7 +340,7 @@ func TestControls_AASF(t *testing.T) {
 				}},
 			want: []*securityhub.AwsSecurityFinding{
 				{
-					AwsAccountId:  aws.String(UNKNOWN),
+					AwsAccountId:  aws.String("foo account"),
 					Confidence:    aws.Int64(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, "1", "check1id")),
 					Description:   aws.String("check1text"),
@@ -362,6 +363,12 @@ func TestControls_AASF(t *testing.T) {
 						"Section":         aws.String(fmt.Sprintf("%s %s", "test1", "test runnner")),
 						"Subsection":      aws.String(fmt.Sprintf("%s %s", "g1", "Group text")),
 					},
+					Resources: []*securityhub.Resource{
+						{
+							Id:   aws.String("foo Cluster"),
+							Type: aws.String(TYPE),
+						},
+					},
 				},
 			},
 			wantErr: false,
@@ -369,6 +376,8 @@ func TestControls_AASF(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			viper.Set("AWS_ACCOUNT", "foo account")
+			viper.Set("CLUSTER_ARN", "foo Cluster")
 			controls := &Controls{
 				ID:      tt.fields.ID,
 				Version: tt.fields.Version,
@@ -380,7 +389,6 @@ func TestControls_AASF(t *testing.T) {
 			tt.want[0].CreatedAt = got[0].CreatedAt
 			tt.want[0].UpdatedAt = got[0].UpdatedAt
 			tt.want[0].Id = got[0].Id
-			tt.want[0].Resources = got[0].Resources
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Controls.AASF() = %v, want %v", got, tt.want)
 			}

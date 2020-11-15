@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/aws-cloudformation/cloudformation-cli-go-plugin v1.0.2
-	github.com/aws/aws-sdk-go v1.35.10
+	github.com/aws/aws-sdk-go v1.35.28
 	github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fatih/color v1.5.0

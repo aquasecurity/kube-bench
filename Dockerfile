@@ -4,6 +4,7 @@ COPY go.mod go.sum ./
 COPY main.go .
 COPY check/ check/
 COPY cmd/ cmd/
+COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 RUN GO111MODULE=on CGO_ENABLED=0 go install -a -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w"
 
