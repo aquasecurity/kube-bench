@@ -381,9 +381,11 @@ func writePgsqlOutput(controlsCollection []*check.Controls) {
 
 func writeAASFOutput(controlsCollection []*check.Controls) {
 	for _, controls := range controlsCollection {
-		out := controls.AASF()
-		err := writeFinding(out)
+		out, err := controls.AASF()
 		if err != nil {
+			exitWithError(fmt.Errorf("failed to output to AASF: %v", err))
+		}
+		if err := writeFinding(out); err != nil {
 			exitWithError(fmt.Errorf("failed to output to AASF: %v", err))
 		}
 	}

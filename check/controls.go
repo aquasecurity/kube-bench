@@ -19,12 +19,9 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
@@ -194,16 +191,19 @@ func (controls *Controls) JUnit() ([]byte, error) {
 }
 
 // AASF encodes the results of last run to AWS Security Finding Format(AASF).
-func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
+func (controls *Controls) AASF() ([]*securityhub.AwsSecurityFinding, error) {
 	fs := []*securityhub.AwsSecurityFinding{}
-	a := getAccount()
+	a, err := getConfig("AWS_ACCOUNT")
+	if err != nil {
+		return nil, err
+	}
 	ti := time.Now()
 	tf := ti.Format(time.RFC3339)
 	for _, g := range controls.Groups {
 		for _, check := range g.Checks {
 			if check.State == FAIL || check.State == WARN {
 				f := securityhub.AwsSecurityFinding{
-					AwsAccountId:  aws.String("029670897092"),
+					AwsAccountId:  aws.String(a),
 					Confidence:    aws.Int64(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, controls.Version, check.ID)),
 					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", ARN, a, check.ID, tf)),
@@ -240,31 +240,14 @@ func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
 			}
 		}
 	}
-	return fs
+	return fs, nil
 }
-func getAccount() string {
-	r := viper.GetString("AWS_REGION")
+func getConfig(name string) (string, error) {
+	r := viper.GetString(name)
 	if len(r) == 0 {
-		log.Print("AWS_REGION environment variable missing")
+		return "", fmt.Errorf("%s not set", name)
 	}
-	// Create a EC2Metadata client from just a session.
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(r)},
-	)
-	if err != nil {
-		log.Printf("Metadata call failed:%s", err)
-		return UNKNOWN
-	}
-	svc := ec2metadata.New(sess)
-	if svc.Available() {
-		d, err := svc.GetInstanceIdentityDocument()
-		if err != nil {
-			log.Printf("Metadata call failed:%s", err)
-			return UNKNOWN
-		}
-		return d.AccountID
-	}
-	return UNKNOWN
+	return r, nil
 }
 func summarize(controls *Controls, state State) {
 	switch state {

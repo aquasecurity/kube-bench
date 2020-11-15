@@ -376,7 +376,7 @@ func TestControls_AASF(t *testing.T) {
 				Groups:  tt.fields.Groups,
 				Summary: tt.fields.Summary,
 			}
-			got := controls.AASF()
+			got, _ := controls.AASF()
 			tt.want[0].CreatedAt = got[0].CreatedAt
 			tt.want[0].UpdatedAt = got[0].UpdatedAt
 			tt.want[0].Id = got[0].Id

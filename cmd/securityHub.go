@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/aquasecurity/kube-bench/findings"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -8,14 +10,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+//REGION ...
+const REGION = "AWS_REGION"
+
 func writeFinding(in []*securityhub.AwsSecurityFinding) error {
-	r := viper.GetString("AWS_REGION")
+	r := viper.GetString(REGION)
 	if len(r) == 0 {
-		//return errors.New("AWS_REGION environment variable missing")
-		r = "us-east-1"
+		return fmt.Errorf("%s not set", REGION)
 	}
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
+		Region: aws.String(r)},
 	)
 	if err != nil {
 		return err
