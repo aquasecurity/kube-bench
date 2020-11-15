@@ -592,3 +592,21 @@ func prunePath() (restoreFn, error) {
 	}
 	return restorePath, nil
 }
+
+func Test_writeAASFOutput(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"Simple test"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			viper.Set("AWS_REGION", "us-east-1")
+			controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+			if err != nil {
+				t.Error(err)
+			}
+			writeAASFOutput(controlsCollection)
+		})
+	}
+}

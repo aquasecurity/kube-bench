@@ -33,7 +33,10 @@ func (p *Publisher) PublishFinding(finding []*securityhub.AwsSecurityFinding) er
 		}
 		i := securityhub.BatchImportFindingsInput{}
 		i.Findings = finding
-		_, err := p.client.BatchImportFindings(&i) // Process the batch.
+		o, err := p.client.BatchImportFindings(&i) // Process the batch.
+		if o.FailedCount == nil {
+			errs = errors.Wrap(err, "finding publish failed")
+		}
 		if err != nil {
 			errs = errors.Wrap(err, "finding publish failed")
 		}

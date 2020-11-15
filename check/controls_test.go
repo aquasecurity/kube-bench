@@ -377,9 +377,10 @@ func TestControls_AASF(t *testing.T) {
 				Summary: tt.fields.Summary,
 			}
 			got := controls.AASF()
-			got[0].CreatedAt = tt.want[0].CreatedAt
-			got[0].UpdatedAt = tt.want[0].UpdatedAt
-			got[0].Id = tt.want[0].Id
+			tt.want[0].CreatedAt = got[0].CreatedAt
+			tt.want[0].UpdatedAt = got[0].UpdatedAt
+			tt.want[0].Id = got[0].Id
+			tt.want[0].Resources = got[0].Resources
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Controls.AASF() = %v, want %v", got, tt.want)
 			}

@@ -28,6 +28,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,7 +36,7 @@ const (
 	// UNKNOWN is when the AWS account can't be found.
 	UNKNOWN = "Unknown"
 	// ARN for th Security Hub service.
-	ARN = "FOO"
+	ARN = "arn:aws:securityhub:us-east-1::product/aqua-security/kube-bench"
 	//
 	SCHEMA = "2018-10-08"
 	// TYPE is type of Security Hub finding
@@ -202,7 +203,7 @@ func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
 		for _, check := range g.Checks {
 			if check.State == FAIL || check.State == WARN {
 				f := securityhub.AwsSecurityFinding{
-					AwsAccountId:  aws.String(a),
+					AwsAccountId:  aws.String("029670897092"),
 					Confidence:    aws.Int64(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, controls.Version, check.ID)),
 					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", ARN, a, check.ID, tf)),
@@ -228,6 +229,12 @@ func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
 						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),
 						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
 					},
+					Resources: []*securityhub.Resource{
+						{
+							Id:   aws.String(fmt.Sprintf("%s%sEKSID+%s%s", ARN, a, check.ID, tf)),
+							Type: aws.String(TYPE),
+						},
+					},
 				}
 				fs = append(fs, &f)
 			}
@@ -236,9 +243,13 @@ func (controls *Controls) AASF() []*securityhub.AwsSecurityFinding {
 	return fs
 }
 func getAccount() string {
+	r := viper.GetString("AWS_REGION")
+	if len(r) == 0 {
+		log.Print("AWS_REGION environment variable missing")
+	}
 	// Create a EC2Metadata client from just a session.
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
+		Region: aws.String(r)},
 	)
 	if err != nil {
 		log.Printf("Metadata call failed:%s", err)
