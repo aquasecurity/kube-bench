@@ -39,6 +39,9 @@ const (
 	// INFO informational message
 	INFO State = "INFO"
 
+	// SKIP for when a check should be skipped.
+	SKIP = "skip"
+
 	// MASTER a master node
 	MASTER NodeType = "master"
 	// NODE a node
@@ -67,8 +70,8 @@ type Check struct {
 	Audit             string   `json:"audit"`
 	AuditConfig       string   `yaml:"audit_config"`
 	Type              string   `json:"type"`
-	Tests             *tests   `json:"omit"`
-	Set               bool     `json:"omit"`
+	Tests             *tests   `json:"-"`
+	Set               bool     `json:"-"`
 	Remediation       string   `json:"remediation"`
 	TestInfo          []string `json:"test_info"`
 	State             `json:"status"`
@@ -77,8 +80,8 @@ type Check struct {
 	IsMultiple        bool   `yaml:"use_multiple_values"`
 	ExpectedResult    string `json:"expected_result"`
 	Reason            string `json:"reason,omitempty"`
-	AuditOutput       string `json:"omit"`
-	AuditConfigOutput string `json:"omit"`
+	AuditOutput       string `json:"-"`
+	AuditConfigOutput string `json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -101,18 +104,17 @@ func (r *defaultRunner) Run(c *Check) State {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) run() State {
-
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
-	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
+	if c.Scored && strings.TrimSpace(c.Type) == "" && c.Tests == nil {
 		c.Reason = "There are no tests"
 		c.State = WARN
 		return c.State
 	}
 
 	// If check type is skip, force result to INFO
-	if c.Type == "skip" {
+	if c.Type == SKIP {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
 		return c.State

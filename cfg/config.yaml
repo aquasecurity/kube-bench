@@ -46,6 +46,9 @@ master:
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
+    kubeconfig:
+      - /etc/kubernetes/scheduler.conf
+    defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
     bins:
@@ -61,6 +64,9 @@ master:
       - /var/snap/kube-controller-manager/current/args
       - /var/snap/microk8s/current/args/kube-controller-manager
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
+    kubeconfig:
+      - /etc/kubernetes/controller-manager.conf
+    defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
     optional: true
@@ -180,7 +186,15 @@ etcd:
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 controlplane:
-  components: []
+  components:
+    - apiserver
+
+  apiserver:
+    bins:
+      - "kube-apiserver"
+      - "hyperkube apiserver"
+      - "hyperkube kube-apiserver"
+      - "apiserver"
 
 policies:
   components: []
@@ -189,15 +203,42 @@ managedservices:
   components: []
 
 version_mapping:
-  "1.11": "cis-1.3"
-  "1.12": "cis-1.3"
-  "1.13": "cis-1.4"
-  "1.14": "cis-1.4"
   "1.15": "cis-1.5"
-  "1.16": "cis-1.5"
-  "1.17": "cis-1.5"
-  "1.18": "cis-1.5"
+  "1.16": "cis-1.6"
+  "1.17": "cis-1.6"
+  "1.18": "cis-1.6"
+  "1.19": "cis-1.6"
   "eks-1.0": "eks-1.0"
   "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
+
+target_mapping:
+  "cis-1.5":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+  "cis-1.6":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+  "gke-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+    - "managedservices"
+  "eks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "rh-0.7":
+    - "master"
+    - "node"

@@ -14,7 +14,7 @@ import (
 )
 
 func loadImageFromDocker(imageName string, kindCtx *cluster.Context) error {
-	
+
 	// Check that the image exists locally and gets its ID, if not return error
 	_, err := docker.ImageID(imageName)
 	if err != nil {
@@ -25,7 +25,7 @@ func loadImageFromDocker(imageName string, kindCtx *cluster.Context) error {
 	if err != nil {
 		return err
 	}
- 
+
 	// Save the image into a tar
 	dir, err := fs.TempDir("", "image-tar")
 	if err != nil {

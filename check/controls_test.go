@@ -74,7 +74,6 @@ func TestYamlFiles(t *testing.T) {
 }
 
 func TestNewControls(t *testing.T) {
-
 	t.Run("Should return error when node type is not specified", func(t *testing.T) {
 		// given
 		in := []byte(`
@@ -100,8 +99,75 @@ groups:
 
 }
 
-func TestControls_RunChecks(t *testing.T) {
+func TestControls_RunChecks_SkippedCmd(t *testing.T) {
+	t.Run("Should skip checks and groups specified by skipMap", func(t *testing.T) {
+		// given
+		normalRunner := &defaultRunner{}
+		// and
+		in := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  checks:
+  - id: G1/C1
+  - id: G1/C2
+  - id: G1/C3
+- id: G2
+  checks:
+  - id: G2/C1
+  - id: G2/C2
+`)
+		controls, err := NewControls(MASTER, in)
+		assert.NoError(t, err)
 
+		var allChecks Predicate = func(group *Group, c *Check) bool {
+			return true
+		}
+
+		skipMap := make(map[string]bool, 0)
+		skipMap["G1"] = true
+		skipMap["G2/C1"] = true
+		skipMap["G2/C2"] = true
+		controls.RunChecks(normalRunner, allChecks, skipMap)
+
+		G1 := controls.Groups[0]
+		assertEqualGroupSummary(t, 0, 0, 3, 0, G1)
+
+		G2 := controls.Groups[1]
+		assertEqualGroupSummary(t, 0, 0, 2, 0, G2)
+	})
+}
+
+func TestControls_RunChecks_Skipped(t *testing.T) {
+	t.Run("Should skip checks where the parent group is marked as skip", func(t *testing.T) {
+		// given
+		normalRunner := &defaultRunner{}
+		// and
+		in := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  skip: true
+  checks:
+  - id: G1/C1
+`)
+		controls, err := NewControls(MASTER, in)
+		assert.NoError(t, err)
+
+		var allChecks Predicate = func(group *Group, c *Check) bool {
+			return true
+		}
+		emptySkipList := make(map[string]bool, 0)
+		controls.RunChecks(normalRunner, allChecks, emptySkipList)
+
+		G1 := controls.Groups[0]
+		assertEqualGroupSummary(t, 0, 0, 1, 0, G1)
+	})
+}
+
+func TestControls_RunChecks(t *testing.T) {
 	t.Run("Should run checks matching the filter and update summaries", func(t *testing.T) {
 		// given
 		runner := new(mockRunner)
@@ -139,8 +205,9 @@ groups:
 		var runAll Predicate = func(group *Group, c *Check) bool {
 			return true
 		}
+		var emptySkipList = make(map[string]bool, 0)
 		// when
-		controls.RunChecks(runner, runAll)
+		controls.RunChecks(runner, runAll, emptySkipList)
 		// then
 		assert.Equal(t, 2, len(controls.Groups))
 		// and
