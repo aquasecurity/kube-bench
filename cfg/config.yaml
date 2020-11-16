@@ -212,6 +212,7 @@ version_mapping:
   "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
+  "aks-1.0": "aks-1.0"
 
 target_mapping:
   "cis-1.5":
@@ -242,3 +243,9 @@ target_mapping:
   "rh-0.7":
     - "master"
     - "node"
+  "aks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
