@@ -80,6 +80,7 @@ master:
       - /var/snap/etcd/common/etcd.conf.yml
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
+      - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
@@ -183,6 +184,7 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yml
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
+      - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
 controlplane:
