@@ -32,7 +32,7 @@ import (
 const (
 	// UNKNOWN is when the AWS account can't be found.
 	UNKNOWN = "Unknown"
-	// ARN for th Security Hub service.
+	// ARN for the AWS Security Hub service.
 	ARN = "arn:aws:securityhub:us-east-1::product/aqua-security/kube-bench"
 	//
 	SCHEMA = "2018-10-08"
