@@ -105,7 +105,7 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap m
 			_, groupSkippedViaCmd := skipIdMap[group.ID]
 			_, checkSkippedViaCmd := skipIdMap[check.ID]
 
-			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd  {
+			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd {
 				check.Type = SKIP
 			}
 
@@ -216,6 +216,11 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	for _, g := range controls.Groups {
 		for _, check := range g.Checks {
 			if check.State == FAIL || check.State == WARN {
+				// ASFF ProductFields['Actual result'] can't be longer than 1024 characters
+				actualValue := check.ActualValue
+				if len(check.ActualValue) > 1024 {
+					actualValue = check.ActualValue[0:1023]
+				}
 				f := securityhub.AwsSecurityFinding{
 					AwsAccountId:  aws.String(a),
 					Confidence:    aws.Int64(100),
@@ -238,7 +243,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 					},
 					ProductFields: map[string]*string{
 						"Reason":          aws.String(check.Reason),
-						"Actual result":   aws.String(check.ActualValue),
+						"Actual result":   aws.String(actualValue),
 						"Expected result": aws.String(check.ExpectedResult),
 						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),
 						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
