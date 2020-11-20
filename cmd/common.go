@@ -373,8 +373,8 @@ func writeOutput(controlsCollection []*check.Controls) {
 		writePgsqlOutput(controlsCollection)
 		return
 	}
-	if aASF {
-		writeAASFOutput(controlsCollection)
+	if aSFF {
+		writeASFFOutput(controlsCollection)
 		return
 	}
 	writeStdoutOutput(controlsCollection)
@@ -408,14 +408,14 @@ func writePgsqlOutput(controlsCollection []*check.Controls) {
 	}
 }
 
-func writeAASFOutput(controlsCollection []*check.Controls) {
+func writeASFFOutput(controlsCollection []*check.Controls) {
 	for _, controls := range controlsCollection {
-		out, err := controls.AASF()
+		out, err := controls.ASFF()
 		if err != nil {
-			exitWithError(fmt.Errorf("failed to output to AASF: %v", err))
+			exitWithError(fmt.Errorf("failed to format findings as ASFF: %v", err))
 		}
 		if err := writeFinding(out); err != nil {
-			exitWithError(fmt.Errorf("failed to output to AASF: %v", err))
+			exitWithError(fmt.Errorf("failed to output to ASFF: %v", err))
 		}
 	}
 }

@@ -200,8 +200,8 @@ func (controls *Controls) JUnit() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// AASF encodes the results of last run to AWS Security Finding Format(AASF).
-func (controls *Controls) AASF() ([]*securityhub.AwsSecurityFinding, error) {
+// ASFF encodes the results of last run to AWS Security Finding Format(ASFF).
+func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	fs := []*securityhub.AwsSecurityFinding{}
 	a, err := getConfig("AWS_ACCOUNT")
 	if err != nil {

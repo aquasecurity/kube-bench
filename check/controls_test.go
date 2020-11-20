@@ -363,7 +363,7 @@ func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn int, actual *G
 	assert.Equal(t, warn, actual.Warn)
 }
 
-func TestControls_AASF(t *testing.T) {
+func TestControls_ASFF(t *testing.T) {
 	type fields struct {
 		ID      string
 		Version string
@@ -452,12 +452,12 @@ func TestControls_AASF(t *testing.T) {
 				Groups:  tt.fields.Groups,
 				Summary: tt.fields.Summary,
 			}
-			got, _ := controls.AASF()
+			got, _ := controls.ASFF()
 			tt.want[0].CreatedAt = got[0].CreatedAt
 			tt.want[0].UpdatedAt = got[0].UpdatedAt
 			tt.want[0].Id = got[0].Id
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Controls.AASF() = %v, want %v", got, tt.want)
+				t.Errorf("Controls.ASFF() = %v, want %v", got, tt.want)
 			}
 		})
 	}
