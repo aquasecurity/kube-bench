@@ -29,10 +29,7 @@ func writeFinding(in []*securityhub.AwsSecurityFinding) error {
 	p := findings.New(svc)
 	out, perr := p.PublishFinding(in)
 	print(out)
-	if perr != nil {
-		return perr
-	}
-	return nil
+	return perr
 }
 
 func print(out *findings.PublisherOutput) {

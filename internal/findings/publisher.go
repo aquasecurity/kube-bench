@@ -39,7 +39,7 @@ func (p *Publisher) PublishFinding(finding []*securityhub.AwsSecurityFinding) (*
 	o := PublisherOutput{}
 	i := securityhub.BatchImportFindingsInput{}
 	i.Findings = finding
-	var errs error = nil
+	var errs error
 
 	// Split the slice into batches of 100 finding.
 	batch := 100

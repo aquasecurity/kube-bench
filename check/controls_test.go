@@ -378,7 +378,7 @@ func TestControls_ASFF(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test simple converstion",
+			name: "Test simple conversion",
 			fields: fields{
 				ID:      "test1",
 				Version: "1",
