@@ -409,9 +409,9 @@ func TestControls_ASFF(t *testing.T) {
 				{
 					AwsAccountId:  aws.String("foo account"),
 					Confidence:    aws.Int64(100),
-					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, "1", "check1id")),
+					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", fmt.Sprintf(ARN, "somewhere"), "1", "check1id")),
 					Description:   aws.String("check1text"),
-					ProductArn:    aws.String(ARN),
+					ProductArn:    aws.String(fmt.Sprintf(ARN, "somewhere")),
 					SchemaVersion: aws.String(SCHEMA),
 					Title:         aws.String(fmt.Sprintf("%s %s", "check1id", "check1text")),
 					Types:         []*string{aws.String(TYPE)},
@@ -445,6 +445,7 @@ func TestControls_ASFF(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			viper.Set("AWS_ACCOUNT", "foo account")
 			viper.Set("CLUSTER_ARN", "foo Cluster")
+			viper.Set("AWS_REGION", "somewhere")
 			controls := &Controls{
 				ID:      tt.fields.ID,
 				Version: tt.fields.Version,

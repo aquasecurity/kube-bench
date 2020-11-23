@@ -33,7 +33,7 @@ const (
 	// UNKNOWN is when the AWS account can't be found
 	UNKNOWN = "Unknown"
 	// ARN for the AWS Security Hub service
-	ARN = "arn:aws:securityhub:us-east-1::product/aqua-security/kube-bench"
+	ARN = "arn:aws:securityhub:%s::product/aqua-security/kube-bench"
 	// SCHEMA for the AWS Security Hub service
 	SCHEMA = "2018-10-08"
 	// TYPE is type of Security Hub finding
@@ -90,7 +90,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
-func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap map[string]bool) Summary {
+func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
@@ -102,8 +102,8 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap m
 				continue
 			}
 
-			_, groupSkippedViaCmd := skipIdMap[group.ID]
-			_, checkSkippedViaCmd := skipIdMap[check.ID]
+			_, groupSkippedViaCmd := skipIDMap[group.ID]
+			_, checkSkippedViaCmd := skipIDMap[check.ID]
 
 			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd {
 				check.Type = SKIP
@@ -211,6 +211,12 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	if err != nil {
 		return nil, err
 	}
+	region, err := getConfig("AWS_REGION")
+	if err != nil {
+		return nil, err
+	}
+	arn := fmt.Sprintf(ARN, region)
+
 	ti := time.Now()
 	tf := ti.Format(time.RFC3339)
 	for _, g := range controls.Groups {
@@ -224,11 +230,11 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 				f := securityhub.AwsSecurityFinding{
 					AwsAccountId:  aws.String(a),
 					Confidence:    aws.Int64(100),
-					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", ARN, controls.Version, check.ID)),
-					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", ARN, a, check.ID, tf)),
+					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
+					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", arn, a, check.ID, tf)),
 					CreatedAt:     aws.String(tf),
 					Description:   aws.String(check.Text),
-					ProductArn:    aws.String(ARN),
+					ProductArn:    aws.String(arn),
 					SchemaVersion: aws.String(SCHEMA),
 					Title:         aws.String(fmt.Sprintf("%s %s", check.ID, check.Text)),
 					UpdatedAt:     aws.String(tf),
