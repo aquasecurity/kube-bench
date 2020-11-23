@@ -243,7 +243,7 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML).
 
-There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published. 
+There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published.
 
 ### Running in a GKE cluster
 
@@ -333,15 +333,15 @@ go build -o kube-bench .
 
 There are four output states:
 - [PASS] indicates that the test was run successfully, and passed.
-- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
+- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run.
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information.
 - [INFO] is informational output that needs no further action.
 
 Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined.
 
 ## Configuration
 
@@ -427,7 +427,3 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!).
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach.
 - Happy coding!
-
-## License Agreement
-
-This entire project comes with a Apache License, Version 2.0. Kindly read it [here](LICENSE)
