@@ -30,11 +30,11 @@ import (
 )
 
 const (
-	// UNKNOWN is when the AWS account can't be found.
+	// UNKNOWN is when the AWS account can't be found
 	UNKNOWN = "Unknown"
-	// ARN for the AWS Security Hub service.
+	// ARN for the AWS Security Hub service
 	ARN = "arn:aws:securityhub:us-east-1::product/aqua-security/kube-bench"
-	//
+	// SCHEMA for the AWS Security Hub service
 	SCHEMA = "2018-10-08"
 	// TYPE is type of Security Hub finding
 	TYPE = "Software and Configuration Checks/Industry and Regulatory Standards/CIS Kubernetes Benchmark"
