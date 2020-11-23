@@ -18,12 +18,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/onsi/ginkgo/reporters"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gopkg.in/yaml.v2"
@@ -356,4 +361,105 @@ func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn int, actual *G
 	assert.Equal(t, fail, actual.Fail)
 	assert.Equal(t, info, actual.Info)
 	assert.Equal(t, warn, actual.Warn)
+}
+
+func TestControls_ASFF(t *testing.T) {
+	type fields struct {
+		ID      string
+		Version string
+		Text    string
+		Groups  []*Group
+		Summary Summary
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    []*securityhub.AwsSecurityFinding
+		wantErr bool
+	}{
+		{
+			name: "Test simple conversion",
+			fields: fields{
+				ID:      "test1",
+				Version: "1",
+				Text:    "test runnner",
+				Summary: Summary{
+					Fail: 99,
+					Pass: 100,
+					Warn: 101,
+					Info: 102,
+				},
+				Groups: []*Group{
+					{
+						ID:   "g1",
+						Text: "Group text",
+						Checks: []*Check{
+							{ID: "check1id",
+								Text:           "check1text",
+								State:          FAIL,
+								Remediation:    "fix me",
+								Reason:         "failed",
+								ExpectedResult: "failed",
+								ActualValue:    "failed",
+							},
+						},
+					},
+				}},
+			want: []*securityhub.AwsSecurityFinding{
+				{
+					AwsAccountId:  aws.String("foo account"),
+					Confidence:    aws.Int64(100),
+					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", fmt.Sprintf(ARN, "somewhere"), "1", "check1id")),
+					Description:   aws.String("check1text"),
+					ProductArn:    aws.String(fmt.Sprintf(ARN, "somewhere")),
+					SchemaVersion: aws.String(SCHEMA),
+					Title:         aws.String(fmt.Sprintf("%s %s", "check1id", "check1text")),
+					Types:         []*string{aws.String(TYPE)},
+					Severity: &securityhub.Severity{
+						Label: aws.String(securityhub.SeverityLabelHigh),
+					},
+					Remediation: &securityhub.Remediation{
+						Recommendation: &securityhub.Recommendation{
+							Text: aws.String("fix me"),
+						},
+					},
+					ProductFields: map[string]*string{
+						"Reason":          aws.String("failed"),
+						"Actual result":   aws.String("failed"),
+						"Expected result": aws.String("failed"),
+						"Section":         aws.String(fmt.Sprintf("%s %s", "test1", "test runnner")),
+						"Subsection":      aws.String(fmt.Sprintf("%s %s", "g1", "Group text")),
+					},
+					Resources: []*securityhub.Resource{
+						{
+							Id:   aws.String("foo Cluster"),
+							Type: aws.String(TYPE),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			viper.Set("AWS_ACCOUNT", "foo account")
+			viper.Set("CLUSTER_ARN", "foo Cluster")
+			viper.Set("AWS_REGION", "somewhere")
+			controls := &Controls{
+				ID:      tt.fields.ID,
+				Version: tt.fields.Version,
+				Text:    tt.fields.Text,
+				Groups:  tt.fields.Groups,
+				Summary: tt.fields.Summary,
+			}
+			got, _ := controls.ASFF()
+			tt.want[0].CreatedAt = got[0].CreatedAt
+			tt.want[0].UpdatedAt = got[0].UpdatedAt
+			tt.want[0].Id = got[0].Id
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Controls.ASFF() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

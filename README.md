@@ -231,6 +231,10 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
   - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
+#### Report kube-bench findings to AWS Security Hub
+
+You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page][kube-bench-aws-security-hub] for more information on how to enable the kube-bench integration with AWS Security Hub.
+
 ### Running on OpenShift
 
 | OpenShift Hardening Guide | kube-bench config |
@@ -243,7 +247,7 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML).
 
-There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published. 
+There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published.
 
 ### Running in a GKE cluster
 
@@ -333,15 +337,15 @@ go build -o kube-bench .
 
 There are four output states:
 - [PASS] indicates that the test was run successfully, and passed.
-- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
+- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run.
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information.
 - [INFO] is informational output that needs no further action.
 
 Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined.
 
 ## Configuration
 
@@ -426,3 +430,5 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!).
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach.
 - Happy coding!
+
+[kube-bench-aws-security-hub]: ./docs/asff.md
