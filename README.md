@@ -233,7 +233,7 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 
 #### Report kube-bench findings to AWS Security Hub
 
-You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page](kube-bench-aws-security-hub) for more information on how to enable the kube-bench integration with AWS Security Hub.
+You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page][kube-bench-aws-security-hub] for more information on how to enable the kube-bench integration with AWS Security Hub.
 
 ### Running on OpenShift
 
