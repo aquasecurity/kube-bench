@@ -18,6 +18,23 @@ You can configure kube-bench with the `--asff` to send findings to AWS Security 
 * Grant these permissions to the IAM Role that the kube-bench pod will be associated with. There are two potions:
   * You can run the kube-bench pod under a specific [service account associated with an IAM role](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) that has these permissions to write Security Hub findings.
   * Alternatively the pod can be granted permissions specified by the Role that your [EKS node group uses](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).
+  
+Here is an example IAM Policy that you can attach to your EKS node group's IAM Role: 
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "securityhub:BatchImportFindings",
+            "Resource": [
+                "arn:aws:securityhub:us-east-1::product/aqua-security/kube-bench"
+            ]
+        }
+    ]
+}
+```
 
 ## Configure and rebuild kube-bench
 
