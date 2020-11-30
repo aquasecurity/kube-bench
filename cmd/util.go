@@ -353,7 +353,8 @@ func getVersionFromKubeletOutput(s string) string {
 	return subs[1]
 }
 
-func makeSubstitutions(s string, ext string, m map[string]string) string {
+func makeSubstitutions(s string, ext string, m map[string]string) (string, []string) {
+	substitutions := make([]string, 0)
 	for k, v := range m {
 		subst := "$" + k + ext
 		if v == "" {
@@ -361,10 +362,14 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 			continue
 		}
 		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		beforeS := s
 		s = multiWordReplace(s, subst, v)
+		if beforeS != s {
+			substitutions = append(substitutions, v)
+		}
 	}
 
-	return s
+	return s, substitutions
 }
 
 func isEmpty(str string) bool {

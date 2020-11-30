@@ -68,6 +68,7 @@ type Check struct {
 	ID                string   `yaml:"id" json:"test_number"`
 	Text              string   `json:"test_desc"`
 	Audit             string   `json:"audit"`
+	AuditEnv          string   `yaml:"audit_env"`
 	AuditConfig       string   `yaml:"audit_config"`
 	Type              string   `json:"type"`
 	Tests             *tests   `json:"-"`
@@ -81,7 +82,9 @@ type Check struct {
 	ExpectedResult    string `json:"expected_result"`
 	Reason            string `json:"reason,omitempty"`
 	AuditOutput       string `json:"-"`
+	AuditEnvOutput    string `json:"-"`
 	AuditConfigOutput string `json:"-"`
+	DisableEnvTesting bool `json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -184,6 +187,14 @@ func (c *Check) run() State {
 }
 
 func (c *Check) runAuditCommands() (lastCommand string, err error) {
+	// Always run auditEnvOutput if needed
+	if c.AuditEnv != "" {
+		c.AuditEnvOutput, err = runAudit(c.AuditEnv)
+		if err != nil {
+			return c.AuditEnv, err
+		}
+	}
+
 	// Run the audit command and auditConfig commands, if present
 	c.AuditOutput, err = runAudit(c.Audit)
 	if err != nil {
@@ -207,11 +218,15 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		t.isMultipleOutput = c.IsMultiple
 
 		// Try with the auditOutput first, and if that's not found, try the auditConfigOutput
-		t.isConfigSetting = false
+		t.auditUsed = AuditCommand
 		result := *(t.execute(c.AuditOutput))
-		if !result.flagFound {
-			t.isConfigSetting = true
+		if !result.found {
+			t.auditUsed = AuditConfig
 			result = *(t.execute(c.AuditConfigOutput))
+			if !result.found && t.Env != "" {
+				t.auditUsed = AuditEnv
+				result = *(t.execute(c.AuditEnvOutput))
+			}
 		}
 		res[i] = result
 		expectedResultArr[i] = res[i].ExpectedResult

@@ -100,11 +100,11 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
-	s = makeSubstitutions(s, "bin", binmap)
-	s = makeSubstitutions(s, "conf", confmap)
-	s = makeSubstitutions(s, "svc", svcmap)
-	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
-	s = makeSubstitutions(s, "cafile", cafilemap)
+	s, binSubs := makeSubstitutions(s, "bin", binmap)
+	s, _ = makeSubstitutions(s, "conf", confmap)
+	s, _ = makeSubstitutions(s, "svc", svcmap)
+	s, _ = makeSubstitutions(s, "kubeconfig", kubeconfmap)
+	s, _ = makeSubstitutions(s, "cafile", cafilemap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
@@ -117,8 +117,34 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
 
+	generateDefaultEnvAudit(controls, binSubs)
+
 	controls.RunChecks(runner, filter, parseSkipIds(skipIds))
 	controlsCollection = append(controlsCollection, controls)
+}
+
+func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
+	for _, group := range controls.Groups {
+		for _, checkItem := range group.Checks {
+			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
+				for _, test := range checkItem.Tests.TestItems {
+					if test.Env != "" && checkItem.AuditEnv == "" {
+						binPath := ""
+
+						if len(binSubs) == 1 {
+							binPath = binSubs[0]
+						} else {
+							fmt.Printf("AuditEnv not explicit for check (%s), where bin path cannot be determined\n", checkItem.ID)
+						}
+
+						if test.Env != "" && checkItem.AuditEnv == "" {
+							checkItem.AuditEnv = fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binPath)
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 func parseSkipIds(skipIds string) map[string]bool {
