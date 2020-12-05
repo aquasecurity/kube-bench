@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -439,17 +440,19 @@ func TestMakeSubsitutions(t *testing.T) {
 		input string
 		subst map[string]string
 		exp   string
+		expectedSubs []string
 	}{
-		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that"},
-		{input: "Replace $thisbin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that"},
-		{input: "Replace $thisbin and $herebin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that and there"},
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that", expectedSubs: []string{"that"}},
+		{input: "Replace $thisbin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that", expectedSubs: []string{"that"}},
+		{input: "Replace $thisbin and $herebin", subst: map[string]string{"this": "that", "here": "there"}, exp: "Replace that and there", expectedSubs: []string{"that", "there"}},
 	}
 	for _, c := range cases {
 		t.Run(c.input, func(t *testing.T) {
-			s := makeSubstitutions(c.input, "bin", c.subst)
+			s, subs := makeSubstitutions(c.input, "bin", c.subst)
 			if s != c.exp {
 				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
+			assert.Equal(t, c.expectedSubs, subs)
 		})
 	}
 }

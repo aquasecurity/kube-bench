@@ -418,6 +418,12 @@ func TestValidTargets(t *testing.T) {
 			expected:  true,
 		},
 		{
+			name:      "aks-1.0 valid",
+			benchmark: "aks-1.0",
+			targets:   []string{"node", "policies", "controlplane", "managedservices"},
+			expected:  true,
+		},
+		{
 			name:      "eks-1.0 valid",
 			benchmark: "eks-1.0",
 			targets:   []string{"node", "policies", "controlplane", "managedservices"},
@@ -551,6 +557,41 @@ func TestExitCodeSelection(t *testing.T){
 
 	exitCodeFailure := exitCodeSelection(controlsCollectionWithFailures)
 	assert.Equal(t, 10, exitCodeFailure)
+}
+
+func TestGenerationDefaultEnvAudit(t *testing.T) {
+	input := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  checks:
+  - id: G1/C1
+- id: G2
+  checks:
+  - id: G2/C1
+    text: "Verify that the SomeSampleFlag argument is set to true"
+    audit: "grep -B1 SomeSampleFlag=true /this/is/a/file/path"
+    tests:
+      test_items:
+      - flag: "SomeSampleFlag=true"
+        env: "SOME_SAMPLE_FLAG"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
+    scored: true
+`)
+	controls, err := check.NewControls(check.MASTER, input)
+	assert.NoError(t, err)
+
+	binSubs := []string {"TestBinPath"}
+	generateDefaultEnvAudit(controls, binSubs)
+
+	expectedAuditEnv := fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binSubs[0])
+	assert.Equal(t, expectedAuditEnv, controls.Groups[1].Checks[0].AuditEnv)
 }
 
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
