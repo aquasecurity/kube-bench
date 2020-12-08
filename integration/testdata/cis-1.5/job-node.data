@@ -25,7 +25,7 @@
 [PASS] 4.2.12 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
 [PASS] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)
 
-== Remediations ==
+== Remediations node ==
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -56,7 +56,13 @@ systemctl daemon-reload
 systemctl restart kubelet.service
 
 
-== Summary ==
+== Summary node ==
+20 checks PASS
+2 checks FAIL
+1 checks WARN
+0 checks INFO
+
+== Summary total ==
 20 checks PASS
 2 checks FAIL
 1 checks WARN

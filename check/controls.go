@@ -40,6 +40,11 @@ const (
 	TYPE = "Software and Configuration Checks/Industry and Regulatory Standards/CIS Kubernetes Benchmark"
 )
 
+type OverallControls struct {
+	Controls []*Controls
+	Totals   Summary
+}
+
 // Controls holds all controls to check for master nodes.
 type Controls struct {
 	ID      string   `yaml:"id" json:"id"`
