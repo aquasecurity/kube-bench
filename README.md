@@ -400,6 +400,7 @@ Finally, we can use the `make kind-run` target to run the current version of kub
 Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 ## Contributing
+Kindly read [Contributing.md](CONTRIBUTING.md) before contributing. Some instructions for the common contributions are stated below.
 
 ### Bugs
 
