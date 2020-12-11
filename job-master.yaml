@@ -21,6 +21,12 @@ spec:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
               readOnly: true
+            - name: var-lib-kube-scheduler
+              mountPath: /var/lib/kube-scheduler
+              readOnly: true
+            - name: var-lib-kube-controller-manager
+              mountPath: /var/lib/kube-controller-manager
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
@@ -34,6 +40,12 @@ spec:
         - name: var-lib-etcd
           hostPath:
             path: "/var/lib/etcd"
+        - name: var-lib-kube-scheduler
+          hostPath:
+            path: "/var/lib/kube-scheduler"
+        - name: var-lib-kube-controller-manager
+          hostPath:
+            path: "/var/lib/kube-controller-manager"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"

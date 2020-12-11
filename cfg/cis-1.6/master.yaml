@@ -196,7 +196,10 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: |
+          KUBECONFIG=$(ps -ef | grep kube-scheduler | grep -- --config= | awk -F '--config=' '{print $2}' | awk '{print $1}')
+          if test -z $KUBECONFIG; then KUBECONFIG=$schedulerkubeconfig; fi
+          if test -e $KUBECONFIG; then stat -c permissions=%a $KUBECONFIG; fi
         tests:
           test_items:
             - flag: "permissions"
@@ -206,24 +209,30 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $schedulerkubeconfig
+          chmod 644 $KUBECONFIG
         scored: true
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: |
+          KUBECONFIG=$(ps -ef | grep kube-scheduler | grep -- --config= | awk -F '--config=' '{print $2}' | awk '{print $1}')
+          if test -z $KUBECONFIG; then KUBECONFIG=$schedulerkubeconfig; fi
+          if test -e $KUBECONFIG; then stat -c %U:%G $KUBECONFIG; fi
         tests:
           test_items:
             - flag: "root:root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $schedulerkubeconfig
+          chown root:root $KUBECONFIG
         scored: true
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: |
+          KUBECONFIG=$(ps -ef | grep kube-controller-manager | grep -- --kubeconfig= | awk -F '--kubeconfig=' '{print $2}' | awk '{print $1}')
+          if test -z $KUBECONFIG; then KUBECONFIG=$controllermanagerkubeconfig; fi
+          if test -e $KUBECONFIG; then stat -c permissions=%a $KUBECONFIG; fi
         tests:
           test_items:
             - flag: "permissions"
@@ -233,19 +242,22 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $controllermanagerkubeconfig
+          chmod 644 $KUBECONFIG
         scored: true
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: |
+          KUBECONFIG=$(ps -ef | grep kube-controller-manager | grep -- --kubeconfig= | awk -F '--kubeconfig=' '{print $2}' | awk '{print $1}')
+          if test -z $KUBECONFIG; then KUBECONFIG=$controllermanagerkubeconfig; fi
+          if test -e $KUBECONFIG; then stat -c %U:%G $KUBECONFIG; fi
         tests:
           test_items:
             - flag: "root:root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $controllermanagerkubeconfig
+          chown root:root $KUBECONFIG
         scored: true
 
       - id: 1.1.19
