@@ -18,6 +18,12 @@ spec:
             - name: etc-systemd
               mountPath: /etc/systemd
               readOnly: true
+            - name: lib-systemd
+              mountPath: /lib/systemd/
+              readOnly: true
+            - name: srv-kubernetes
+              mountPath: /srv/kubernetes/
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
@@ -34,6 +40,12 @@ spec:
         - name: etc-systemd
           hostPath:
             path: "/etc/systemd"
+        - name: lib-systemd
+          hostPath:
+            path: "/lib/systemd"
+        - name: srv-kubernetes
+          hostPath:
+            path: "/srv/kubernetes"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"
