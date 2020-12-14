@@ -317,13 +317,17 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
+	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) {
+		benchmarkVersion = getPlatformBenchmarkVersion(getPlatformName())
+	}
 
 	if isEmpty(benchmarkVersion) {
 		if isEmpty(kubeVersion) {
-			kubeVersion, err = getKubeVersion()
+			kv, err := getKubeVersion()
 			if err != nil {
 				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
 			}
+			kubeVersion = kv.BaseVersion()
 		}
 
 		kubeToBenchmarkMap, err := loadVersionMapping(v)
@@ -377,7 +381,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 
 func exitCodeSelection(controlsCollection []*check.Controls) int {
 	for _, control := range controlsCollection {
-		if control.Fail > 0  {
+		if control.Fail > 0 {
 			return exitCode
 		}
 	}

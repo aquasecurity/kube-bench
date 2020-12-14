@@ -218,7 +218,7 @@ func TestExtractVersion(t *testing.T) {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 				}
-				if c.expectedVer != ver {
+				if c.expectedVer != ver.BaseVersion() {
 					t.Errorf("Expected %q but Got %q", c.expectedVer, ver)
 				}
 			} else {

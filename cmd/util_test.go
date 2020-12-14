@@ -202,17 +202,21 @@ func TestMultiWordReplace(t *testing.T) {
 	}
 }
 
-func TestKubeVersionRegex(t *testing.T) {
-	ver := getVersionFromKubectlOutput(`Client Version: v1.8.0
-		Server Version: v1.8.12
-		`)
-	if ver != "1.8" {
-		t.Fatalf("Expected 1.8 got %s", ver)
+func Test_getVersionFromKubectlOutput(t *testing.T) {
+	ver := getVersionFromKubectlOutput(`{
+  "serverVersion": {
+    "major": "1",
+    "minor": "8",
+    "gitVersion": "v1.8.0"
+  }
+}`)
+	if ver.BaseVersion() != "1.8" {
+		t.Fatalf("Expected 1.8 got %s", ver.BaseVersion())
 	}
 
 	ver = getVersionFromKubectlOutput("Something completely different")
-	if ver != defaultKubeVersion {
-		t.Fatalf("Expected %s got %s", defaultKubeVersion, ver)
+	if ver.BaseVersion() != defaultKubeVersion {
+		t.Fatalf("Expected %s got %s", defaultKubeVersion, ver.BaseVersion())
 	}
 }
 
@@ -510,5 +514,91 @@ func TestGetYamlFilesFromDir(t *testing.T) {
 
 	if files[0] != filepath.Join(d, "something.yaml") {
 		t.Fatalf("Expected to find something.yaml, found %s", files[0])
+	}
+}
+
+func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "eks",
+			args: args{s: "v1.17.9-eks-4c6976"},
+			want: "eks",
+		},
+		{
+			name: "gke",
+			args: args{s: "v1.17.6-gke.1"},
+			want: "gke",
+		},
+		{
+			name: "unknown",
+			args: args{s: "v1.17.6"},
+			want: "",
+		},
+		{
+			name: "empty string",
+			args: args{s: ""},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getPlatformNameFromVersion(tt.args.s); got != tt.want {
+				t.Errorf("getPlatformNameFromKubectlOutput() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getPlatformBenchmarkVersion(t *testing.T) {
+	type args struct {
+		platform string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "eks",
+			args: args{
+				platform: "eks",
+			},
+			want: "eks-1.0",
+		},
+		{
+			name: "gke",
+			args: args{
+				platform: "gke",
+			},
+			want: "gke-1.0",
+		},
+		{
+			name: "unknown",
+			args: args{
+				platform: "rh",
+			},
+			want: "",
+		},
+		{
+			name: "empty",
+			args: args{
+				platform: "",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getPlatformBenchmarkVersion(tt.args.platform); got != tt.want {
+				t.Errorf("getPlatformBenchmarkVersion() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
