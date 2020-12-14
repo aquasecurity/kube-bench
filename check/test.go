@@ -229,9 +229,9 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 	case "gt", "gte", "lt", "lte":
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
-			expectedResultPattern = "Invalid Number(s) used for comparison '%s' '%s'"
+			expectedResultPattern = "Invalid Number(s) used for comparison: '%s' '%s'"
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
-			return "Invalid Number(s) used for comparison", false
+			return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), false
 		}
 		switch tCompareOp {
 		case "gt":
@@ -271,7 +271,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		testResult = allElementsValid(s, target)
 
 	case "bitmask":
-		expectedResultPattern = "bitmask between '%s' AND '%s'"
+		expectedResultPattern = fmt.Sprintf("%s has permission '%s', expected '%s' or more restrictive", "%s", flagVal, "%s")
 		requested, err := strconv.ParseInt(flagVal, 8, 64)
 		if err != nil {
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
