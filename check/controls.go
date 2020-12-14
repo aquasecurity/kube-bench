@@ -58,7 +58,7 @@ type Controls struct {
 // Group is a collection of similar checks.
 type Group struct {
 	ID     string   `yaml:"id" json:"section"`
-	Skip   bool     `yaml:"skip" json:"skip"`
+	Type   string   `yaml:"type" json:"type"`
 	Pass   int      `json:"pass"`
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
@@ -110,7 +110,7 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap m
 			_, groupSkippedViaCmd := skipIDMap[group.ID]
 			_, checkSkippedViaCmd := skipIDMap[check.ID]
 
-			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd {
+			if group.Type == SKIP || groupSkippedViaCmd || checkSkippedViaCmd {
 				check.Type = SKIP
 			}
 
@@ -124,7 +124,6 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap m
 				w := &Group{
 					ID:     group.ID,
 					Text:   group.Text,
-					Skip:   group.Skip,
 					Checks: []*Check{},
 				}
 
