@@ -271,7 +271,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		testResult = allElementsValid(s, target)
 
 	case "bitmask":
-		expectedResultPattern = fmt.Sprintf("%s has permission '%s', expected '%s' or more restrictive", "%s", flagVal, "%s")
+		expectedResultPattern = "%s has permissions " + flagVal + ", expected %s or more restrictive"
 		requested, err := strconv.ParseInt(flagVal, 8, 64)
 		if err != nil {
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
