@@ -3,10 +3,13 @@ env:
   - GO111MODULE=on
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
 builds:
-  - main: main.go
+  - id: kube-bench
+    main: main.go
     binary: kube-bench
     goos:
       - linux
+      - windows
+      - darwin
     goarch:
       - amd64
       - arm
@@ -17,6 +20,19 @@ builds:
     ldflags:
       - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
       - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
+
+dockers:
+  - image_templates:
+    - syncier/kube-bench
+    - "syncier/kube-bench:{{ .Tag }}"
+    binaries:
+    - kube-bench
+    builds:
+    - kube-bench
+    dockerfile: Dockerfile.goreleaser
+    extra_files:
+    - entrypoint.sh
+    - cfg
 # Archive customization
 archives:
   - id: default
