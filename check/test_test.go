@@ -52,6 +52,7 @@ func TestTestExecute(t *testing.T) {
 		str                string
 		strConfig          string
 		expectedTestResult string
+    strEnv             string
 	}{
 		{
 			check:              controls.Groups[0].Checks[0],
@@ -246,6 +247,41 @@ func TestTestExecute(t *testing.T) {
 			str:                "--abc --peer-client-cert-auth=false --efg",
 			strConfig:          "",
 			expectedTestResult: "'--peer-client-cert-auth' is equal to 'false'",
+    },
+    {
+      check:              controls.Groups[0].Checks[29],
+      str:                "2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
+      strConfig:          "",
+      expectedTestResult: "'--allow-privileged' is equal to 'true'",
+      strEnv:             "SOME_OTHER_ENV=true\nALLOW_PRIVILEGED=false",
+		},
+		{
+			check:              controls.Groups[0].Checks[30],
+			str:                "2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
+			strConfig:          "",
+      expectedTestResult: "'--basic-auth' is equal to 'false'",
+			strEnv:             "",
+		},
+		{
+			check:              controls.Groups[0].Checks[31],
+			str:                "2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
+			strConfig:          "",
+      expectedTestResult: "'--insecure-port' is equal to '0'",
+			strEnv:             "INSECURE_PORT=0",
+		},
+		{
+			check:              controls.Groups[0].Checks[32],
+			str:                "2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
+			strConfig:          "",
+      expectedTestResult: "'----audit-log-maxage' is gte to '30'",
+			strEnv:             "AUDIT_LOG_MAXAGE=40",
+		},
+		{
+			check:              controls.Groups[0].Checks[33],
+			str:                "2:45 ../kubernetes/kube-apiserver --option1=20,30,40",
+			strConfig:          "",
+      expectedTestResult: "'MAX_BACKLOG' is lt to '30'",
+			strEnv:             "MAX_BACKLOG=20",
 		},
 	}
 
@@ -253,6 +289,7 @@ func TestTestExecute(t *testing.T) {
 		t.Run(c.check.Text, func(t *testing.T) {
 			c.check.AuditOutput = c.str
 			c.check.AuditConfigOutput = c.strConfig
+      c.check.AuditEnvOutput = c.strEnv
 			res, err := c.check.execute()
 			if err != nil {
 				t.Errorf(err.Error())

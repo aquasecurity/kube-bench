@@ -14,7 +14,25 @@ import (
 	"github.com/golang/glog"
 )
 
-func getKubeVersionFromRESTAPI() (string, error) {
+type KubeVersion struct {
+	Major       string
+	Minor       string
+	baseVersion string
+	GitVersion  string
+}
+
+func (k *KubeVersion) BaseVersion() string {
+	if k.baseVersion != "" {
+		return k.baseVersion
+	}
+	// Some provides return the minor version like "15+"
+	minor := strings.Replace(k.Minor, "+", "", -1)
+	ver := fmt.Sprintf("%s.%s", k.Major, minor)
+	k.baseVersion = ver
+	return ver
+}
+
+func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 	k8sVersionURL := getKubernetesURL()
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
@@ -22,23 +40,23 @@ func getKubeVersionFromRESTAPI() (string, error) {
 
 	tlsCert, err := loadCertficate(cacertfile)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	tb, err := ioutil.ReadFile(tokenfile)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	token := strings.TrimSpace(string(tb))
 
 	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	k8sVersion, err := extractVersion(data)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return k8sVersion, nil
 }
@@ -61,31 +79,32 @@ func getWebDataWithRetry(k8sVersionURL, token string, cacert *tls.Certificate) (
 	return
 }
 
-func extractVersion(data []byte) (string, error) {
-	type versionResponse struct {
-		Major        string
-		Minor        string
-		GitVersion   string
-		GitCommit    string
-		GitTreeState string
-		BuildDate    string
-		GoVersion    string
-		Compiler     string
-		Platform     string
-	}
+type VersionResponse struct {
+	Major        string
+	Minor        string
+	GitVersion   string
+	GitCommit    string
+	GitTreeState string
+	BuildDate    string
+	GoVersion    string
+	Compiler     string
+	Platform     string
+}
 
-	vrObj := &versionResponse{}
+func extractVersion(data []byte) (*KubeVersion, error) {
+	vrObj := &VersionResponse{}
 	glog.V(2).Info(fmt.Sprintf("vd: %s\n", string(data)))
 	err := json.Unmarshal(data, vrObj)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	glog.V(2).Info(fmt.Sprintf("vrObj: %#v\n", vrObj))
 
-	// Some provides return the minor version like "15+"
-	minor := strings.Replace(vrObj.Minor, "+", "", -1)
-	ver := fmt.Sprintf("%s.%s", vrObj.Major, minor)
-	return ver, nil
+	return &KubeVersion{
+		Major:      vrObj.Major,
+		Minor:      vrObj.Minor,
+		GitVersion: vrObj.GitVersion,
+	}, nil
 }
 
 func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {

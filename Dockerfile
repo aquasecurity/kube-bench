@@ -1,9 +1,10 @@
-FROM golang:1.14.0 AS build
+FROM golang:1.15 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY go.mod go.sum ./
 COPY main.go .
 COPY check/ check/
 COPY cmd/ cmd/
+COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 ARG GOOS=linux
 ARG GOARCH=amd64

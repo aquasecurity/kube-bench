@@ -39,6 +39,9 @@ const (
 	// INFO informational message
 	INFO State = "INFO"
 
+	// SKIP for when a check should be skipped.
+	SKIP = "skip"
+
 	// MASTER a master node
 	MASTER NodeType = "master"
 	// NODE a node
@@ -65,10 +68,11 @@ type Check struct {
 	ID                string   `yaml:"id" json:"test_number"`
 	Text              string   `json:"test_desc"`
 	Audit             string   `json:"audit"`
+	AuditEnv          string   `yaml:"audit_env"`
 	AuditConfig       string   `yaml:"audit_config"`
 	Type              string   `json:"type"`
-	Tests             *tests   `json:"omit"`
-	Set               bool     `json:"omit"`
+	Tests             *tests   `json:"-"`
+	Set               bool     `json:"-"`
 	Remediation       string   `json:"remediation"`
 	TestInfo          []string `json:"test_info"`
 	State             `json:"status"`
@@ -77,8 +81,10 @@ type Check struct {
 	IsMultiple        bool   `yaml:"use_multiple_values"`
 	ExpectedResult    string `json:"expected_result"`
 	Reason            string `json:"reason,omitempty"`
-	AuditOutput       string `json:"omit"`
-	AuditConfigOutput string `json:"omit"`
+	AuditOutput       string `json:"-"`
+	AuditEnvOutput    string `json:"-"`
+	AuditConfigOutput string `json:"-"`
+	DisableEnvTesting bool `json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -101,7 +107,6 @@ func (r *defaultRunner) Run(c *Check) State {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) run() State {
-
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
@@ -112,7 +117,7 @@ func (c *Check) run() State {
 	}
 
 	// If check type is skip, force result to INFO
-	if c.Type == "skip" {
+	if c.Type == SKIP {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
 		return c.State
@@ -182,6 +187,14 @@ func (c *Check) run() State {
 }
 
 func (c *Check) runAuditCommands() (lastCommand string, err error) {
+	// Always run auditEnvOutput if needed
+	if c.AuditEnv != "" {
+		c.AuditEnvOutput, err = runAudit(c.AuditEnv)
+		if err != nil {
+			return c.AuditEnv, err
+		}
+	}
+
 	// Run the audit command and auditConfig commands, if present
 	c.AuditOutput, err = runAudit(c.Audit)
 	if err != nil {
@@ -205,13 +218,18 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		t.isMultipleOutput = c.IsMultiple
 
 		// Try with the auditOutput first, and if that's not found, try the auditConfigOutput
-		t.isConfigSetting = false
+		t.auditUsed = AuditCommand
 		result := *(t.execute(c.AuditOutput))
-		
 		// Check for AuditConfigOutput only if AuditConfig is set
 		if !result.flagFound && c.AuditConfig != "" {
 			t.isConfigSetting = true
-			result = *(t.execute(c.AuditConfigOutput))
+			t.auditUsed = AuditConfig
+      result = *(t.execute(c.AuditConfigOutput))
+    }
+    
+		if !result.flagFound && t.Env != "" {
+			t.auditUsed = AuditEnv
+			result = *(t.execute(c.AuditEnvOutput))
 		}
 		res[i] = result
 		expectedResultArr[i] = res[i].ExpectedResult
