@@ -14,7 +14,7 @@ before_install:
   - gem install --no-document fpm
   - go get -t -v ./...
   - |
-    if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    if [ "$TRAVIS_BRANCH" = "main" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
     fi
 
@@ -32,7 +32,7 @@ script:
   - test -f kube-bench
   # Build and push the multi-arch Docker image
   - |
-    if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    if [ "$TRAVIS_BRANCH" = "main" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       make docker
     fi
 
