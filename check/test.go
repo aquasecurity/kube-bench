@@ -52,8 +52,8 @@ type AuditUsed string
 
 const (
 	AuditCommand AuditUsed = "auditCommand"
-	AuditConfig AuditUsed = "auditConfig"
-	AuditEnv AuditUsed = "auditEnv"
+	AuditConfig  AuditUsed = "auditConfig"
+	AuditEnv     AuditUsed = "auditEnv"
 )
 
 type testItem struct {
@@ -65,7 +65,7 @@ type testItem struct {
 	Set              bool
 	Compare          compare
 	isMultipleOutput bool
-	auditUsed  AuditUsed
+	auditUsed        AuditUsed
 }
 
 type envTestItem testItem
@@ -79,7 +79,7 @@ type compare struct {
 
 type testOutput struct {
 	testResult     bool
-	found      bool
+	flagFound      bool
 	actualResult   string
 	ExpectedResult string
 }
@@ -178,7 +178,7 @@ func (t envTestItem) findValue(s string) (match bool, value string, err error) {
 		if len(out) > 0 {
 			match = true
 			value = out
-		}else{
+		} else {
 			match = false
 			value = ""
 		}
@@ -221,7 +221,7 @@ func (t testItem) evaluate(s string) *testOutput {
 
 	if t.Set {
 		if match && t.Compare.Op != "" {
-			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, value, t.Compare.Value, t.flagValue())
+			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, value, t.Compare.Value, t.value())
 		} else {
 			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.value())
 			result.testResult = match
@@ -231,8 +231,8 @@ func (t testItem) evaluate(s string) *testOutput {
 		result.testResult = !match
 	}
 
-	result.found = match
-	glog.V(3).Info(fmt.Sprintf("found %v", result.found))
+	result.flagFound = match
+	glog.V(3).Info(fmt.Sprintf("found %v", result.flagFound))
 
 	return result
 }

@@ -84,7 +84,7 @@ type Check struct {
 	AuditOutput       string `json:"-"`
 	AuditEnvOutput    string `json:"-"`
 	AuditConfigOutput string `json:"-"`
-	DisableEnvTesting bool `json:"-"`
+	DisableEnvTesting bool   `json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -222,11 +222,11 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		result := *(t.execute(c.AuditOutput))
 		// Check for AuditConfigOutput only if AuditConfig is set
 		if !result.flagFound && c.AuditConfig != "" {
-			t.isConfigSetting = true
+			//t.isConfigSetting = true
 			t.auditUsed = AuditConfig
-      result = *(t.execute(c.AuditConfigOutput))
-    }
-    
+			result = *(t.execute(c.AuditConfigOutput))
+		}
+
 		if !result.flagFound && t.Env != "" {
 			t.auditUsed = AuditEnv
 			result = *(t.execute(c.AuditEnvOutput))
