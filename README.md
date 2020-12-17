@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=master)](https://travis-ci.org/aquasecurity/kube-bench)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=main)](https://travis-ci.org/aquasecurity/kube-bench)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
 
-[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/master/graph/badge.svg
+[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/main/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
 <img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
@@ -21,7 +21,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
-![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
+![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/main/images/output.png "Kubernetes Bench for Security")
 
 Table of Contents
 =================
