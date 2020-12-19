@@ -1,0 +1,37 @@
+name: Publish-ECR
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    name: Publish to Amazon ECR
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install AWS Cli 2.0
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+      - name: Get the version
+        id: vars
+        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+      - name: Publish to ECR
+        env:
+          IMAGE_TAG: ${{steps.vars.outputs.tag}}
+          REP_NAME: kube-bench
+          ALIAS: aquasecurity
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/$ALIAS
+          docker build -t $REP_NAME:$IMAGE_TAG .
+          docker tag $REP_NAME:$IMAGE_TAG public.ecr.aws/$ALIAS/$REP_NAME:$IMAGE_TAG
+          docker push public.ecr.aws/$ALIAS/$REP_NAME:$IMAGE_TAG
