@@ -18,10 +18,6 @@ jobs:
         run: make tests
       - name: Run integration tests
         run: make integration-tests
-      - name: Upload code coverage
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.txt
       - name: Release
         uses: goreleaser/goreleaser-action@v2
         with:
