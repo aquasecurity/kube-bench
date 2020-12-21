@@ -79,7 +79,7 @@ type compare struct {
 
 type testOutput struct {
 	testResult     bool
-	found      bool
+	flagFound      bool
 	actualResult   string
 	ExpectedResult string
 }
