@@ -1,11 +1,22 @@
-[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=master)](https://travis-ci.org/aquasecurity/kube-bench)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE)
+[![GitHub Release][release-img]][release]
+![Downloads][download]
+![Docker Pulls][docker-pull]
+[![Go Report Card][report-card-img]][report-card]
+[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=main)](https://travis-ci.org/aquasecurity/kube-bench)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
 
-[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/master/graph/badge.svg
+[download]: https://img.shields.io/github/downloads/aquasecurity/kube-bench/total?logo=github
+[release-img]: https://img.shields.io/github/release/aquasecurity/kube-bench.svg?logo=github
+[release]: https://github.com/aquasecurity/kube-bench/releases
+[docker-pull]: https://img.shields.io/docker/pulls/aquasec/kube-bench?logo=docker&label=docker%20pulls%20%2F%20kube-bench
+[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/main/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
+[report-card-img]: https://goreportcard.com/badge/github.com/aquasecurity/kube-bench
+[report-card]: https://goreportcard.com/report/github.com/aquasecurity/kube-bench
+
 <img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/).
@@ -21,7 +32,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
-![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
+![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/main/images/output.png "Kubernetes Bench for Security")
 
 Table of Contents
 =================
@@ -219,7 +230,7 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
-aws ecr get-login-password --region <AWS_REGION> | docker login --username <AWS_USERNAME> --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
+aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
 docker build -t k8s/kube-bench .
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest

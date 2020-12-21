@@ -79,7 +79,7 @@ type compare struct {
 
 type testOutput struct {
 	testResult     bool
-	flagFound      bool
+	found      bool
 	actualResult   string
 	ExpectedResult string
 }
@@ -233,6 +233,7 @@ func (t testItem) evaluate(s string) *testOutput {
 
 	result.flagFound = match
 	glog.V(3).Info(fmt.Sprintf("found %v", result.flagFound))
+
 
 	return result
 }
