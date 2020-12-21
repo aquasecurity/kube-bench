@@ -419,12 +419,16 @@ groups:
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
+          bin_op: or
           test_items:
             - flag: RotateKubeletServerCertificate
               path: '{.featureGates.RotateKubeletServerCertificate}'
               compare:
-                op: eq
-                value: true
+                op: nothave
+                value: false
+            - flag: RotateKubeletServerCertificate
+              path: '{.featureGates.RotateKubeletServerCertificate}'
+              set: false
         remediation: |
           Edit the kubelet service file $kubeletsvc
           on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.

@@ -4,6 +4,7 @@ COPY go.mod go.sum ./
 COPY main.go .
 COPY check/ check/
 COPY cmd/ cmd/
+COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 ARG GOOS=linux
 ARG GOARCH=amd64

@@ -42,6 +42,7 @@ var (
 	jsonFmt             bool
 	junitFmt            bool
 	pgSQL               bool
+	aSFF                bool
 	masterFile          = "master.yaml"
 	nodeFile            = "node.yaml"
 	etcdFile            = "etcd.yaml"
@@ -53,6 +54,7 @@ var (
 	noSummary           bool
 	noRemediations      bool
 	skipIds             string
+	noTotals            bool
 	filterOpts          FilterOpts
 	includeTestOutput   bool
 	outputFile          string
@@ -86,6 +88,8 @@ var RootCmd = &cobra.Command{
 				glog.V(1).Info("== Running control plane checks ==")
 				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv))
 			}
+		} else {
+			glog.V(1).Info("== Skipping master checks ==")
 		}
 
 		// Etcd is only valid for CIS 1.5 and later,
@@ -97,6 +101,8 @@ var RootCmd = &cobra.Command{
 		if valid && isEtcd() {
 			glog.V(1).Info("== Running etcd checks ==")
 			runChecks(check.ETCD, loadConfig(check.ETCD, bv))
+		} else {
+			glog.V(1).Info("== Skipping etcd checks ==")
 		}
 
 		glog.V(1).Info("== Running node checks ==")
@@ -111,6 +117,8 @@ var RootCmd = &cobra.Command{
 		if valid {
 			glog.V(1).Info("== Running policies checks ==")
 			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv))
+		} else {
+			glog.V(1).Info("== Skipping policies checks ==")
 		}
 
 		// Managedservices is only valid for GKE 1.0 and later,
@@ -122,6 +130,8 @@ var RootCmd = &cobra.Command{
 		if valid {
 			glog.V(1).Info("== Running managed services checks ==")
 			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
+		} else {
+			glog.V(1).Info("== Skipping managed services checks ==")
 		}
 
 		writeOutput(controlsCollection)
@@ -153,9 +163,11 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable printing of results section")
 	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
+	RootCmd.PersistentFlags().BoolVar(&noTotals, "nototals", false, "Disable printing of totals for failed, passed, ... checks across all sections")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
+	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
 	RootCmd.PersistentFlags().StringVar(&skipIds, "skip", "", "List of comma separated values of checks to be skipped")

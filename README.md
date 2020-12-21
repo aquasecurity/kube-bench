@@ -1,11 +1,22 @@
-[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=master)](https://travis-ci.org/aquasecurity/kube-bench)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/master/LICENSE)
+[![GitHub Release][release-img]][release]
+![Downloads][download]
+![Docker Pulls][docker-pull]
+[![Go Report Card][report-card-img]][report-card]
+[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=main)](https://travis-ci.org/aquasecurity/kube-bench)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
 
-[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/master/graph/badge.svg
+[download]: https://img.shields.io/github/downloads/aquasecurity/kube-bench/total?logo=github
+[release-img]: https://img.shields.io/github/release/aquasecurity/kube-bench.svg?logo=github
+[release]: https://github.com/aquasecurity/kube-bench/releases
+[docker-pull]: https://img.shields.io/docker/pulls/aquasec/kube-bench?logo=docker&label=docker%20pulls%20%2F%20kube-bench
+[cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/main/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
+[report-card-img]: https://goreportcard.com/badge/github.com/aquasecurity/kube-bench
+[report-card]: https://goreportcard.com/report/github.com/aquasecurity/kube-bench
+
 <img src="images/kube-bench.png" width="200" alt="kube-bench logo">
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/).
@@ -21,7 +32,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
-![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/master/images/output.png "Kubernetes Bench for Security")
+![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/main/images/output.png "Kubernetes Bench for Security")
 
 Table of Contents
 =================
@@ -219,7 +230,7 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 ```
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
-aws ecr get-login-password --region <AWS_REGION> | docker login --username <AWS_USERNAME> --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
+aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
 docker build -t k8s/kube-bench .
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
@@ -230,6 +241,10 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 7. Find the Pod that was created, it *should* be in the `default` namespace: `kubectl get pods --all-namespaces`
 8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
   - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
+
+#### Report kube-bench findings to AWS Security Hub
+
+You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page][kube-bench-aws-security-hub] for more information on how to enable the kube-bench integration with AWS Security Hub.
 
 ### Running on OpenShift
 
@@ -243,7 +258,7 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 when you run the `kube-bench` command (either directly or through YAML).
 
-There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published. 
+There is work in progress on a [CIS Red Hat OpenShift Container Platform Benchmark](https://workbench.cisecurity.org/benchmarks/5248) which we believe should cover OCP 4.* and we intend to add support in kube-bench when it's published.
 
 ### Running in a GKE cluster
 
@@ -333,15 +348,15 @@ go build -o kube-bench .
 
 There are four output states:
 - [PASS] indicates that the test was run successfully, and passed.
-- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run. 
-- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information. 
+- [FAIL] indicates that the test was run successfully, and failed. The remediation output describes how to correct the configuration, or includes an error message describing why the test could not be run.
+- [WARN] means this test needs further attention, for example it is a test that needs to be run manually. Check the remediation output for further information.
 - [INFO] is informational output that needs no further action.
 
 Note:
 - If the test is Manual, this always generates WARN (because the user has to run it manually)
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
-- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined. 
+- If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined.
 
 ## Configuration
 
@@ -396,6 +411,7 @@ Finally, we can use the `make kind-run` target to run the current version of kub
 Every time you want to test a change, you'll need to rebuild the docker image and push it to cluster before running it again. ( `make build-docker kind-push kind-run` )
 
 ## Contributing
+Kindly read [Contributing.md](CONTRIBUTING.md) before contributing. Some instructions for the common contributions are stated below.
 
 ### Bugs
 
@@ -426,3 +442,5 @@ We welcome pull requests!
 - Your PR is more likely to be accepted if it includes tests. (We have not historically been very strict about tests, but we would like to improve this!).
 - You're welcome to submit a draft PR if you would like early feedback on an idea or an approach.
 - Happy coding!
+
+[kube-bench-aws-security-hub]: ./docs/asff.md

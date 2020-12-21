@@ -19,11 +19,31 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
+
+const (
+	// UNKNOWN is when the AWS account can't be found
+	UNKNOWN = "Unknown"
+	// ARN for the AWS Security Hub service
+	ARN = "arn:aws:securityhub:%s::product/aqua-security/kube-bench"
+	// SCHEMA for the AWS Security Hub service
+	SCHEMA = "2018-10-08"
+	// TYPE is type of Security Hub finding
+	TYPE = "Software and Configuration Checks/Industry and Regulatory Standards/CIS Kubernetes Benchmark"
+)
+
+type OverallControls struct {
+	Controls []*Controls
+	Totals   Summary
+}
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
@@ -38,7 +58,7 @@ type Controls struct {
 // Group is a collection of similar checks.
 type Group struct {
 	ID     string   `yaml:"id" json:"section"`
-	Skip   bool     `yaml:"skip" json:"skip"`
+	Type   string   `yaml:"type" json:"type"`
 	Pass   int      `json:"pass"`
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
@@ -75,7 +95,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 }
 
 // RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
-func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap map[string]bool) Summary {
+func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
 	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
@@ -87,10 +107,10 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap m
 				continue
 			}
 
-			_, groupSkippedViaCmd := skipIdMap[group.ID]
-			_, checkSkippedViaCmd := skipIdMap[check.ID]
+			_, groupSkippedViaCmd := skipIDMap[group.ID]
+			_, checkSkippedViaCmd := skipIDMap[check.ID]
 
-			if group.Skip || groupSkippedViaCmd || checkSkippedViaCmd  {
+			if group.Type == SKIP || groupSkippedViaCmd || checkSkippedViaCmd {
 				check.Type = SKIP
 			}
 
@@ -104,7 +124,6 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIdMap m
 				w := &Group{
 					ID:     group.ID,
 					Text:   group.Text,
-					Skip:   group.Skip,
 					Checks: []*Check{},
 				}
 
@@ -185,6 +204,80 @@ func (controls *Controls) JUnit() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+// ASFF encodes the results of last run to AWS Security Finding Format(ASFF).
+func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
+	fs := []*securityhub.AwsSecurityFinding{}
+	a, err := getConfig("AWS_ACCOUNT")
+	if err != nil {
+		return nil, err
+	}
+	c, err := getConfig("CLUSTER_ARN")
+	if err != nil {
+		return nil, err
+	}
+	region, err := getConfig("AWS_REGION")
+	if err != nil {
+		return nil, err
+	}
+	arn := fmt.Sprintf(ARN, region)
+
+	ti := time.Now()
+	tf := ti.Format(time.RFC3339)
+	for _, g := range controls.Groups {
+		for _, check := range g.Checks {
+			if check.State == FAIL || check.State == WARN {
+				// ASFF ProductFields['Actual result'] can't be longer than 1024 characters
+				actualValue := check.ActualValue
+				if len(check.ActualValue) > 1024 {
+					actualValue = check.ActualValue[0:1023]
+				}
+				f := securityhub.AwsSecurityFinding{
+					AwsAccountId:  aws.String(a),
+					Confidence:    aws.Int64(100),
+					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
+					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", arn, a, check.ID, tf)),
+					CreatedAt:     aws.String(tf),
+					Description:   aws.String(check.Text),
+					ProductArn:    aws.String(arn),
+					SchemaVersion: aws.String(SCHEMA),
+					Title:         aws.String(fmt.Sprintf("%s %s", check.ID, check.Text)),
+					UpdatedAt:     aws.String(tf),
+					Types:         []*string{aws.String(TYPE)},
+					Severity: &securityhub.Severity{
+						Label: aws.String(securityhub.SeverityLabelHigh),
+					},
+					Remediation: &securityhub.Remediation{
+						Recommendation: &securityhub.Recommendation{
+							Text: aws.String(check.Remediation),
+						},
+					},
+					ProductFields: map[string]*string{
+						"Reason":          aws.String(check.Reason),
+						"Actual result":   aws.String(actualValue),
+						"Expected result": aws.String(check.ExpectedResult),
+						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),
+						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
+					},
+					Resources: []*securityhub.Resource{
+						{
+							Id:   aws.String(c),
+							Type: aws.String(TYPE),
+						},
+					},
+				}
+				fs = append(fs, &f)
+			}
+		}
+	}
+	return fs, nil
+}
+func getConfig(name string) (string, error) {
+	r := viper.GetString(name)
+	if len(r) == 0 {
+		return "", fmt.Errorf("%s not set", name)
+	}
+	return r, nil
+}
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:

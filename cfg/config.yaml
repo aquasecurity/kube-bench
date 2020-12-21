@@ -83,6 +83,7 @@ master:
       - /var/snap/etcd/common/etcd.conf.yml
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
+      - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
@@ -190,11 +191,20 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yml
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
+      - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
 controlplane:
-  components: []
+  components:
+    - apiserver
+
+  apiserver:
+    bins:
+      - "kube-apiserver"
+      - "hyperkube apiserver"
+      - "hyperkube kube-apiserver"
+      - "apiserver"
 
 policies:
   components: []
@@ -212,6 +222,7 @@ version_mapping:
   "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
+  "aks-1.0": "aks-1.0"
 
 target_mapping:
   "cis-1.5":
@@ -242,3 +253,9 @@ target_mapping:
   "rh-0.7":
     - "master"
     - "node"
+  "aks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"

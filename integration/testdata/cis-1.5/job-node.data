@@ -22,10 +22,10 @@
 [WARN] 4.2.9 Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Not Scored)
 [FAIL] 4.2.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
 [PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Scored)
-[FAIL] 4.2.12 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
+[PASS] 4.2.12 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
 [PASS] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)
 
-== Remediations ==
+== Remediations node ==
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -55,16 +55,15 @@ Based on your system, restart the kubelet service. For example:
 systemctl daemon-reload
 systemctl restart kubelet.service
 
-4.2.12 Edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
---feature-gates=RotateKubeletServerCertificate=true
-Based on your system, restart the kubelet service. For example:
-systemctl daemon-reload
-systemctl restart kubelet.service
 
+== Summary node ==
+20 checks PASS
+2 checks FAIL
+1 checks WARN
+0 checks INFO
 
-== Summary ==
-19 checks PASS
-3 checks FAIL
+== Summary total ==
+20 checks PASS
+2 checks FAIL
 1 checks WARN
 0 checks INFO
