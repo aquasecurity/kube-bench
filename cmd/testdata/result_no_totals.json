@@ -1,5 +1,42 @@
 [
   {
+    "id": "1",
+    "version": "1.5",
+    "text": "Master Node Security Configuration",
+    "node_type": "master",
+    "tests": [
+      {
+        "section": "1.1",
+        "pass": 15,
+        "fail": 1,
+        "warn": 5,
+        "info": 0,
+        "desc": "Master Node Configuration Files",
+        "results": [
+          {
+            "test_number": "1.1.1",
+            "test_desc": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Scored)",
+            "audit": "/bin/sh -c 'if test -e /etc/kubernetes/manifests/kube-apiserver.yaml; then stat -c permissions=%a /etc/kubernetes/manifests/kube-apiserver.yaml; fi'",
+            "AuditConfig": "",
+            "type": "",
+            "remediation": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example, chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n",
+            "test_info": [
+              "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example, chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n"
+            ],
+            "status": "PASS",
+            "actual_value": "permissions=600\n",
+            "scored": true,
+            "expected_result": "bitmask '600' AND '644'"
+          }
+        ]
+      }
+    ],
+    "total_pass": 42,
+    "total_fail": 12,
+    "total_warn": 11,
+    "total_info": 0
+  },
+  {
     "id": "2",
     "version": "1.15",
     "text": "Etcd Node Configuration",
@@ -72,43 +109,6 @@
     "total_pass": 0,
     "total_fail": 0,
     "total_warn": 3,
-    "total_info": 0
-  },
-  {
-    "id": "1",
-    "version": "1.5",
-    "text": "Master Node Security Configuration",
-    "node_type": "master",
-    "tests": [
-      {
-        "section": "1.1",
-        "pass": 15,
-        "fail": 1,
-        "warn": 5,
-        "info": 0,
-        "desc": "Master Node Configuration Files",
-        "results": [
-          {
-            "test_number": "1.1.1",
-            "test_desc": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Scored)",
-            "audit": "/bin/sh -c 'if test -e /etc/kubernetes/manifests/kube-apiserver.yaml; then stat -c permissions=%a /etc/kubernetes/manifests/kube-apiserver.yaml; fi'",
-            "AuditConfig": "",
-            "type": "",
-            "remediation": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example, chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n",
-            "test_info": [
-              "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example, chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n"
-            ],
-            "status": "PASS",
-            "actual_value": "permissions=600\n",
-            "scored": true,
-            "expected_result": "bitmask '600' AND '644'"
-          }
-        ]
-      }
-    ],
-    "total_pass": 42,
-    "total_fail": 12,
-    "total_warn": 11,
     "total_info": 0
   }
 ]

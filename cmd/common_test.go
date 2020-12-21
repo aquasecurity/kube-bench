@@ -30,6 +30,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type JsonOutputFormat struct {
+	Controls     []*check.Controls `json:"Controls"`
+	TotalSummary map[string]int    `json:"Totals"`
+}
+
+type JsonOutputFormatNoTotals struct {
+	Controls []*check.Controls `json:"Controls"`
+}
+
 func TestParseSkipIds(t *testing.T) {
 	skipMap := parseSkipIds("4.12,4.13,5")
 	_, fourTwelveExists := skipMap["4.12"]
@@ -315,7 +324,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 
 	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		execCode := `#!/bin/sh
-		echo "Server Version: v1.15.10"
+		echo '{"serverVersion": {"major": "1", "minor": "15", "gitVersion": "v1.15.10"}}'
 		`
 		restore, err := fakeExecutableInPath("kubectl", execCode)
 		if err != nil {
@@ -527,13 +536,13 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	}
 	writeOutput(controlsCollection)
 
-	var expect []*check.Controls
-	var result []*check.Controls
-	result, err = parseControlsJsonFile(outputFile)
+	var expect JsonOutputFormat
+	var result JsonOutputFormat
+	result, err = parseResultJsonFile(outputFile)
 	if err != nil {
 		t.Error(err)
 	}
-	expect, err = parseControlsJsonFile("./testdata/result.json")
+	expect, err = parseResultJsonFile("./testdata/result.json")
 	if err != nil {
 		t.Error(err)
 	}
@@ -541,7 +550,39 @@ func TestWriteResultToJsonFile(t *testing.T) {
 	assert.Equal(t, expect, result)
 }
 
-func TestExitCodeSelection(t *testing.T){
+func TestWriteResultNoTotalsToJsonFile(t *testing.T) {
+	defer func() {
+		controlsCollection = []*check.Controls{}
+		jsonFmt = false
+		outputFile = ""
+	}()
+	var err error
+	jsonFmt = true
+	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	noTotals = true
+
+	controlsCollection, err = parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+	writeOutput(controlsCollection)
+
+	var expect []*check.Controls
+	var result []*check.Controls
+	result, err = parseResultNoTotalsJsonFile(outputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	expect, err = parseResultNoTotalsJsonFile("./testdata/result_no_totals.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expect, result)
+}
+
+func TestExitCodeSelection(t *testing.T) {
 	exitCode = 10
 	controlsCollectionAllPassed, errPassed := parseControlsJsonFile("./testdata/passedControlsCollection.json")
 	if errPassed != nil {
@@ -559,7 +600,180 @@ func TestExitCodeSelection(t *testing.T){
 	assert.Equal(t, 10, exitCodeFailure)
 }
 
+func TestGenerationDefaultEnvAudit(t *testing.T) {
+	input := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  checks:
+  - id: G1/C1
+- id: G2
+  checks:
+  - id: G2/C1
+    text: "Verify that the SomeSampleFlag argument is set to true"
+    audit: "grep -B1 SomeSampleFlag=true /this/is/a/file/path"
+    tests:
+      test_items:
+      - flag: "SomeSampleFlag=true"
+        env: "SOME_SAMPLE_FLAG"
+        compare:
+          op: has
+          value: "true"
+        set: true
+    remediation: |
+      Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
+    scored: true
+`)
+	controls, err := check.NewControls(check.MASTER, input)
+	assert.NoError(t, err)
+
+	binSubs := []string{"TestBinPath"}
+	generateDefaultEnvAudit(controls, binSubs)
+
+	expectedAuditEnv := fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binSubs[0])
+	assert.Equal(t, expectedAuditEnv, controls.Groups[1].Checks[0].AuditEnv)
+}
+
+func TestGetSummaryTotals(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	resultTotals := getSummaryTotals(controlsCollection)
+	assert.Equal(t, 12, resultTotals.Fail)
+	assert.Equal(t, 14, resultTotals.Warn)
+	assert.Equal(t, 0, resultTotals.Info)
+	assert.Equal(t, 49, resultTotals.Pass)
+}
+
+func TestPrintSummary(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	resultTotals := getSummaryTotals(controlsCollection)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	printSummary(resultTotals, "totals")
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n\n")
+}
+
+func TestPrettyPrintNoSummary(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	resultTotals := getSummaryTotals(controlsCollection)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	noSummary = true
+	prettyPrint(controlsCollection[0], resultTotals)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	assert.NotContains(t, string(out), "49 checks PASS")
+}
+
+func TestPrettyPrintSummary(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	resultTotals := getSummaryTotals(controlsCollection)
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	noSummary = false
+	prettyPrint(controlsCollection[0], resultTotals)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	assert.Contains(t, string(out), "49 checks PASS")
+}
+
+func TestWriteStdoutOutputNoTotal(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	noTotals = true
+	writeStdoutOutput(controlsCollection)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+
+	assert.NotContains(t, string(out), "49 checks PASS")
+}
+
+func TestWriteStdoutOutputTotal(t *testing.T) {
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	rescueStdout := os.Stdout
+
+	r, w, _ := os.Pipe()
+
+	os.Stdout = w
+	noTotals = false
+	writeStdoutOutput(controlsCollection)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+
+	os.Stdout = rescueStdout
+
+	assert.Contains(t, string(out), "49 checks PASS")
+}
+
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
+	var result []*check.Controls
+
+	d, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(d, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func parseResultJsonFile(filepath string) (JsonOutputFormat, error) {
+	var result JsonOutputFormat
+
+	d, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return result, err
+	}
+	err = json.Unmarshal(d, &result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func parseResultNoTotalsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 
 	d, err := ioutil.ReadFile(filepath)

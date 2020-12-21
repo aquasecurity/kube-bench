@@ -100,11 +100,11 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
-	s = makeSubstitutions(s, "bin", binmap)
-	s = makeSubstitutions(s, "conf", confmap)
-	s = makeSubstitutions(s, "svc", svcmap)
-	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
-	s = makeSubstitutions(s, "cafile", cafilemap)
+	s, binSubs := makeSubstitutions(s, "bin", binmap)
+	s, _ = makeSubstitutions(s, "conf", confmap)
+	s, _ = makeSubstitutions(s, "svc", svcmap)
+	s, _ = makeSubstitutions(s, "kubeconfig", kubeconfmap)
+	s, _ = makeSubstitutions(s, "cafile", cafilemap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
@@ -117,12 +117,38 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
 
+	generateDefaultEnvAudit(controls, binSubs)
+
 	controls.RunChecks(runner, filter, parseSkipIds(skipIds))
 	controlsCollection = append(controlsCollection, controls)
 }
 
+func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
+	for _, group := range controls.Groups {
+		for _, checkItem := range group.Checks {
+			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
+				for _, test := range checkItem.Tests.TestItems {
+					if test.Env != "" && checkItem.AuditEnv == "" {
+						binPath := ""
+
+						if len(binSubs) == 1 {
+							binPath = binSubs[0]
+						} else {
+							fmt.Printf("AuditEnv not explicit for check (%s), where bin path cannot be determined\n", checkItem.ID)
+						}
+
+						if test.Env != "" && checkItem.AuditEnv == "" {
+							checkItem.AuditEnv = fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binPath)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 func parseSkipIds(skipIds string) map[string]bool {
-	var skipIdMap =  make(map[string]bool, 0)
+	var skipIdMap = make(map[string]bool, 0)
 	if skipIds != "" {
 		for _, id := range strings.Split(skipIds, ",") {
 			skipIdMap[strings.Trim(id, " ")] = true
@@ -159,7 +185,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print remediations.
 	if !noRemediations {
 		if summary.Fail > 0 || summary.Warn > 0 {
-			colors[check.WARN].Printf("== Remediations ==\n")
+			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
 					if c.State == check.FAIL {
@@ -181,20 +207,24 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print summary setting output color to highest severity.
 	if !noSummary {
-		var res check.State
-		if summary.Fail > 0 {
-			res = check.FAIL
-		} else if summary.Warn > 0 {
-			res = check.WARN
-		} else {
-			res = check.PASS
-		}
-
-		colors[res].Printf("== Summary ==\n")
-		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n",
-			summary.Pass, summary.Fail, summary.Warn, summary.Info,
-		)
+		printSummary(summary, string(r.Type))
 	}
+}
+
+func printSummary(summary check.Summary, sectionName string) {
+	var res check.State
+	if summary.Fail > 0 {
+		res = check.FAIL
+	} else if summary.Warn > 0 {
+		res = check.WARN
+	} else {
+		res = check.PASS
+	}
+
+	colors[res].Printf("== Summary %s ==\n", sectionName)
+	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
+		summary.Pass, summary.Fail, summary.Warn, summary.Info,
+	)
 }
 
 // loadConfig finds the correct config dir based on the kubernetes version,
@@ -287,13 +317,17 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
+	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) {
+		benchmarkVersion = getPlatformBenchmarkVersion(getPlatformName())
+	}
 
 	if isEmpty(benchmarkVersion) {
 		if isEmpty(kubeVersion) {
-			kubeVersion, err = getKubeVersion()
+			kv, err := getKubeVersion()
 			if err != nil {
 				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
 			}
+			kubeVersion = kv.BaseVersion()
 		}
 
 		kubeToBenchmarkMap, err := loadVersionMapping(v)
@@ -347,7 +381,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 
 func exitCodeSelection(controlsCollection []*check.Controls) int {
 	for _, control := range controlsCollection {
-		if control.Fail > 0  {
+		if control.Fail > 0 {
 			return exitCode
 		}
 	}
@@ -381,7 +415,16 @@ func writeOutput(controlsCollection []*check.Controls) {
 }
 
 func writeJSONOutput(controlsCollection []*check.Controls) {
-	out, err := json.Marshal(controlsCollection)
+	var out []byte
+	var err error
+	if !noTotals {
+		var totals check.OverallControls
+		totals.Controls = controlsCollection
+		totals.Totals = getSummaryTotals(controlsCollection)
+		out, err = json.Marshal(totals)
+	} else {
+		out, err = json.Marshal(controlsCollection)
+	}
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 	}
@@ -425,6 +468,21 @@ func writeStdoutOutput(controlsCollection []*check.Controls) {
 		summary := controls.Summary
 		prettyPrint(controls, summary)
 	}
+	if !noTotals {
+		printSummary(getSummaryTotals(controlsCollection), "total")
+	}
+}
+
+func getSummaryTotals(controlsCollection []*check.Controls) check.Summary {
+	var totalSummary check.Summary
+	for _, controls := range controlsCollection {
+		summary := controls.Summary
+		totalSummary.Fail = totalSummary.Fail + summary.Fail
+		totalSummary.Warn = totalSummary.Warn + summary.Warn
+		totalSummary.Pass = totalSummary.Pass + summary.Pass
+		totalSummary.Info = totalSummary.Info + summary.Info
+	}
+	return totalSummary
 }
 
 func printRawOutput(output string) {

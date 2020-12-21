@@ -997,12 +997,15 @@ groups:
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
+          bin_op: or
           test_items:
             - flag: "--feature-gates"
               compare:
-                op: eq
-                value: "RotateKubeletServerCertificate=true"
+                op: nothave
+                value: "RotateKubeletServerCertificate=false"
               set: true
+            - flag: "--feature-gates"
+              set: false
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
