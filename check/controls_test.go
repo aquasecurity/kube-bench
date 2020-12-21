@@ -149,7 +149,7 @@ func TestControls_RunChecks_Skipped(t *testing.T) {
 type: "master"
 groups:
 - id: G1
-  skip: true
+  type: skip
   checks:
   - id: G1/C1
 `)
