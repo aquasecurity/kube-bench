@@ -226,7 +226,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 			//t.isConfigSetting = true
 			t.auditUsed = AuditConfig
 			result = *(t.execute(c.AuditConfigOutput))
-			if !result.found && t.Env != "" {
+			if !result.flagFound && t.Env != "" {
 				t.auditUsed = AuditEnv
 				result = *(t.execute(c.AuditEnvOutput))
 			}
