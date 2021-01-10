@@ -43,7 +43,7 @@ You will need to download, build and push the kube-bench container image to your
 ## Modify the job configuration
 
 * Modify the kube-bench Configmap in `job-eks-asff.yaml` to specify the AWS account, AWS region, and the EKS Cluster ARN.
-* [Optional] - If you have created a dedicated IAM role to be used with kube-bench as described above in (Configure permissions in an IAM Role](#configure-permissions-in-an-iam-role), you will need to add the IAM role arn to the kube-bench ServiceAccount in `job-eks-asff.yaml`.
+* [Optional] - If you have created a dedicated IAM role to be used with kube-bench as described above in [Configure permissions in an IAM Role](#configure-permissions-in-an-iam-role), you will need to add the IAM role arn to the kube-bench ServiceAccount in `job-eks-asff.yaml`.
 * Make sure that `job-eks-asff.yaml` specifies the container image you just pushed to your ECR registry.
 
 You can now run kube-bench as a pod in your cluster: `kubectl apply -f job-eks-asff.yaml`
