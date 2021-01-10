@@ -10,11 +10,9 @@ spec:
       containers:
         - name: kube-bench
           # Push the image to your ECR and then refer to it here
-          image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
-          # Use the --asff flag if you would like to send findings to AWS Security Hub
-          # Note that this requires you to rebuild a version of the kube-bench image
-          # after editing the cfg/eks-1.0/config.yaml with your account information
-          # command: ["kube-bench", "node", "--benchmark", "eks-1.0", "--asff"]
+          # image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
+          image: aquasec/kube-bench:latest
+          # To send findings to AWS Security Hub, refer to `job-eks-asff.yaml` instead
           command: ["kube-bench", "node", "--benchmark", "eks-1.0"]
           volumeMounts:
             - name: var-lib-kubelet
