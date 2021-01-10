@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -63,5 +64,5 @@ spec:
           configMap:
             name: kube-bench-eks-config
             items:
-            - key: config.yaml
-              path: config.yaml
+              - key: config.yaml
+                path: config.yaml
