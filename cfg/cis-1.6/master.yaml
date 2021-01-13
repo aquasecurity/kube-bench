@@ -299,7 +299,6 @@ groups:
       - id: 1.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        type: manual
         tests:
           test_items:
             - flag: "--anonymous-auth"
