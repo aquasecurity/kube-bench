@@ -120,7 +120,7 @@ groups:
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Automated)"
         audit: |
           ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c permissions=%a
-          ps -ef | grep $kubeletbin | grep -- --cni-bin-dir | sed 's%.*cni-bin-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c permissions=%a
+          find /var/lib/cni/networks -type f | xargs --no-run-if-empty stat -c permissions=%a
         use_multiple_values: true
         test_items:
           - flag: "permissions"
@@ -137,7 +137,7 @@ groups:
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Automated)"
         audit: |
           ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c %U:%G
-          ps -ef | grep $kubeletbin | grep -- --cni-bin-dir | sed 's%.*cni-bin-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c %U:%G
+          find /var/lib/cni/networks -type f | xargs --no-run-if-empty stat -c %U:%G
         use_multiple_values: true
         tests:
           test_items:
