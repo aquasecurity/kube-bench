@@ -1,8 +1,7 @@
 name: Build and push dependency
 on:
-  create:
+  push:
     tags: [ "*" ]
-    branches-ignore: [ "*" ]
 jobs:
   build:
     runs-on: ubuntu-latest
