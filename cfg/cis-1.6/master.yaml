@@ -804,7 +804,7 @@ groups:
         scored: true
 
       - id: 1.2.33
-        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -816,9 +816,16 @@ groups:
         scored: false
 
       - id: 1.2.34
-        text: "Ensure that encryption providers are appropriately configured (Manual)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        type: "manual"
+        text: "Ensure that encryption providers are appropriately configured (Automated)"
+        audit: |
+          ENCRYPTION_PROVIDER_CONFIG=$(ps -ef | grep $apiserverbin | grep -- --encryption-provider-config | sed 's%.*encryption-provider-config[= ]\([^ ]*\).*%\1%')
+          if test -e $ENCRYPTION_PROVIDER_CONFIG; then grep -A1 'providers:' $ENCRYPTION_PROVIDER_CONFIG | tail -n1 | grep -o "[A-Za-z]*" | sed 's/^/provider=/'; fi
+        tests:
+          test_items:
+            - flag: "provider"
+              compare:
+                op: valid_elements
+                value: "aescbc,kms,secretbox"
         remediation: |
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           In this file, choose aescbc, kms or secretbox as the encryption provider.
