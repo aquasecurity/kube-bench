@@ -2,6 +2,7 @@ name: Build and push dependency
 on:
   create:
     tags: [ "*" ]
+    branches-ignore: [ "*" ]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,6 +13,6 @@ jobs:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
-          echo ${GITHUB_REF##*/}
+          echo Pushing to artifactory with tag: docker.internal.sysdig.com/kube-bench-dependency:${GITHUB_REF##*/}
           docker build -f Dependency-Dockerfile -t docker.internal.sysdig.com/kube-bench-dependency:${GITHUB_REF##*/} .
           docker push docker.internal.sysdig.com/kube-bench-dependency:${GITHUB_REF##*/}
