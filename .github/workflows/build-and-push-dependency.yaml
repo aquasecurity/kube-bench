@@ -1,0 +1,17 @@
+name: Build and push dependency
+on:
+  create:
+    tags: [ "*" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run a multi-line script
+        env:
+          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+          echo ${GITHUB_REF##*/}
+          docker build -f Dependency-Dockerfile -t docker.internal.sysdig.com/kube-bench-dependency:${GITHUB_REF##*/} .
+          docker push docker.internal.sysdig.com/kube-bench-dependency:${GITHUB_REF##*/}
