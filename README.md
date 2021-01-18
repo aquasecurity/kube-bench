@@ -2,7 +2,7 @@
 ![Downloads][download]
 ![Docker Pulls][docker-pull]
 [![Go Report Card][report-card-img]][report-card]
-[![Build Status](https://travis-ci.org/aquasecurity/kube-bench.svg?branch=main)](https://travis-ci.org/aquasecurity/kube-bench)
+[![Build Status](https://github.com/aquasecurity/kube-bench/workflows/Build/badge.svg?branch=main)](https://github.com/aquasecurity/kube-bench/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
 [![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
 [![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
