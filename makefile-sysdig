@@ -4,10 +4,10 @@ DOCKER := docker
 ARTIFACTORY := docker.internal.sysdig.com
 IMAGE_REPO := kube-bench-dependency
 IMAGE_TAG?= dev
-DEPENDENCY_IMAGE_NAME = $(ARTIFACTORY)/$(IMAGE_REPO):$(IMAGE_TAG)
+DEPENDENCY_IMAGE_NAME := $(ARTIFACTORY)/$(IMAGE_REPO):$(IMAGE_TAG)
 
 build-dependency-image:
-	$(DOCKER) build --build-arg GITHUB_API_KEY=$(GITHUB_API_KEY) --build-arg GITHUB_API_USER=$(GITHUB_API_USER) -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
+	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
 
 push-dependency-image:
 	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME)
