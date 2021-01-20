@@ -9,7 +9,7 @@ pipeline {
                     $class: 'GitSCM',
                     userRemoteConfigs: [[
                         url: 'https://github.com/draios/kube-bench',
-                        credentialsId: 'YOUR_GIT_CREDENTIALS_ID'
+                        credentialsId: 'github-jenkins-user-token'
                     ]],
                     branches: [[name: 'refs/tags/${params.TAG}']]
                     ], poll: false
