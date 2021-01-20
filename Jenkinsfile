@@ -5,13 +5,12 @@ pipeline {
     stages {
         stage('Build and Push Dependency Image') {
             steps {
-                   sh "docker login -u='${ARTIFACTORY_CREDENTIALS_USR}' -p='${ARTIFACTORY_CREDENTIALS_PSW}' docker.internal.sysdig.com"
-                   sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig build-dependency-image"
-                   sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig push-dependency-image"
-            }
-            post {
-                cleanup {
-                   sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig delete-dependency-image"
+                script {
+                    docker.withRegistry("https://docker.internal.sysdig.com", 'jenkins-artifactory') {
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig build-dependency-image"
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig push-dependency-image"
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig delete-dependency-image"
+                    }
                 }
             }
         }
