@@ -2,35 +2,27 @@ pipeline {
     agent {
         label 'builder-backend-j8 || new-builder-backend-j8'
     }
+    parameters {
+        gitParameter name: 'TAG',
+                     type: 'PT_TAG',
+                     defaultValue: 'master'
+    }
     stages {
-        stage('Build tarball') {
+        stage('Build and Push Dependency Image') {
             steps {
-                   sh """
-                   docker run \
-                   --rm \
-                   -e OUTPUT_FILENAME=kube-bench-${params.TAG} \
-                   -v ${WORKSPACE}:/kube-bench \
-                   -w /kube-bench \
-                   golang \
-                   bash build-tarball.sh
-                   """
-             }
-        }
-        stage('Push to S3') {
-            steps {
-                script{
-                    withAWS(credentials: 'draios', region: 'us-east-1') {
-                    s3Upload acl: 'PublicRead',
-                             bucket: 'download.draios.com',
-                             file: "out/kube-bench-${params.TAG}.tar.gz",
-                             path: "dependencies/kube-bench-${params.TAG}.tar.gz"
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "${params.TAG}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[credentialsId: 'github-jenkins-user-token', url: 'https://github.com/draios/kube-bench.git']]
+                ])
+                script {
+                    docker.withRegistry("https://docker.internal.sysdig.com", 'jenkins-artifactory') {
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig build-dependency-image"
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig push-dependency-image"
+                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig delete-dependency-image"
                     }
-                }
-            }
-            post {
-                cleanup {
-                    sh("rm -rf out || /bin/true")
-                    sh("docker system prune -f || /bin/true")
                 }
             }
         }

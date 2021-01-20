@@ -1,0 +1,18 @@
+FROM golang:1.15 AS builder
+
+ENV OUTPUT_DIR=/out
+ENV KUBECTL_VERSION="v1.20.2"
+
+COPY . /kube-bench
+WORKDIR /kube-bench
+
+RUN GOSUMDB=off CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ${OUTPUT_DIR}/kube-bench .
+RUN cp LICENSE ${OUTPUT_DIR}/LICENSE
+RUN cp README.md ${OUTPUT_DIR}/README.md
+RUN cp -rf cfg ${OUTPUT_DIR}/cfg
+
+WORKDIR /
+RUN rm -rf /kube-bench
+
+RUN curl -L -o ${OUTPUT_DIR}/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+RUN chmod +x ${OUTPUT_DIR}/kubectl
