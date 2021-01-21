@@ -54,8 +54,8 @@
 [PASS] 1.2.30 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
 [PASS] 1.2.31 Ensure that the --client-ca-file argument is set as appropriate (Automated)
 [PASS] 1.2.32 Ensure that the --etcd-cafile argument is set as appropriate (Automated)
-[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Manual)
-[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Manual)
+[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Automated)
+[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Automated)
 [WARN] 1.2.35 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)
 [INFO] 1.3 Controller Manager
 [WARN] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)
