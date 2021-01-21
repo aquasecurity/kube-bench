@@ -7,6 +7,7 @@ on:
       - "v*"
 env:
   ALIAS: aquasecurity
+  DOCKERHUB_ALIAS: aquasec
   REP: kube-bench
 jobs:
   publish:
@@ -55,9 +56,9 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USER }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
+            ${{ secrets.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
-            ${{ secrets.DOCKERHUB_USER }}/${{ env.REP }}:latest
+            ${{ secrets.DOCKERHUB_ALIAS }}/${{ env.REP }}:latest
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache/release
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
