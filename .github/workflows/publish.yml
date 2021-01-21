@@ -7,7 +7,7 @@ on:
       - "v*"
 env:
   ALIAS: aquasecurity
-  DOCKERHUB_ALIAS: aquasec  
+  DOCKERHUB_ALIAS: aquasec
   REP: kube-bench
 jobs:
   publish:
