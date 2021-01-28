@@ -30,7 +30,6 @@ spec:
       hostPID: true
       containers:
         - name: kube-bench
-        - name: kube-bench
           # Push the image to your ECR and then refer to it here
           image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
           command: ["kube-bench", "node", "--benchmark", "eks-1.0", "--asff"]
