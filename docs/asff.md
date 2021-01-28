@@ -40,7 +40,7 @@ Here is an example IAM Policy that you can attach to your EKS node group's IAM R
 
 You will need to download, build and push the kube-bench container image to your ECR repo as described in Step 3 of the [EKS instructions][eks-instructions].
 
-## Modify the job configuration
+### Modify the job configuration
 
 * Modify the kube-bench Configmap in `job-eks-asff.yaml` to specify the AWS account, AWS region, and the EKS Cluster ARN.
 * [Optional] - If you have created a dedicated IAM role to be used with kube-bench as described above in [Configure permissions in an IAM Role](#configure-permissions-in-an-iam-role), you will need to add the IAM role arn to the kube-bench ServiceAccount in `job-eks-asff.yaml`.
