@@ -291,12 +291,16 @@ func getKubeVersion() (*KubeVersion, error) {
 	_, err := exec.LookPath("kubectl")
 
 	if err != nil {
+		glog.V(3).Infof("Error locate kubectl %v", err)
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
+			glog.V(3).Infof("Error locate kubelet %v", err)
 			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
+			glog.V(3).Info("Search for kubelet binary all over filesystem")
 			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
+				glog.V(3).Infof("Found kubelet and query kubernetes version is: %v", string(out))
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
 
@@ -313,6 +317,7 @@ func getKubeVersionFromKubectl() *KubeVersion {
 	cmd := exec.Command("kubectl", "version", "-o", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		glog.V(2).Info("Failed to query kubectl")
 		glog.V(2).Info(err)
 	}
 
@@ -324,6 +329,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
+		glog.V(2).Info("Failed to query kubelet")
 		glog.V(2).Info(err)
 	}
 
@@ -331,7 +337,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 }
 
 func getVersionFromKubectlOutput(s string) *KubeVersion {
-	glog.V(2).Info(s)
+	glog.V(2).Infof(fmt.Sprintf("Kubectl output:\n%s", s))
 	type versionResult struct {
 		ServerVersion VersionResponse
 	}
@@ -354,7 +360,7 @@ func getVersionFromKubectlOutput(s string) *KubeVersion {
 }
 
 func getVersionFromKubeletOutput(s string) *KubeVersion {
-	glog.V(2).Info(s)
+	glog.V(2).Infof(fmt.Sprintf("Kubelet output:\n%s", s))
 	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
