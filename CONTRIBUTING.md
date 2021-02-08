@@ -9,7 +9,7 @@ Thank you for taking an interest in contributing to kube-bench !
 - For questions and bug reports, please include the following information:
   - version of kube-bench you are running (from kube-bench version) along with the command line options you are using.
   - version of Kubernetes you are running (from kubectl version or oc version for Openshift).
-  - Verbose log output, by setting the `-v 10` and `--logtostderr` command line options.
+  - Verbose log output, by setting the `-v 10` command line option.
 
 ## Pull Requests
 

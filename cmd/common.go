@@ -16,10 +16,13 @@ package cmd
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
@@ -29,7 +32,6 @@ import (
 
 // NewRunFilter constructs a Predicate based on FilterOpts which determines whether tested Checks should be run or not.
 func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
-
 	if opts.CheckList != "" && opts.GroupList != "" {
 		return nil, fmt.Errorf("group option and check option can't be used together")
 	}
@@ -63,8 +65,6 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 }
 
 func runChecks(nodetype check.NodeType, testYamlFile string) {
-	var summary check.Summary
-
 	// Verify config file was loaded into Viper during Cobra sub-command initialization.
 	if configFileError != nil {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", configFileError))
@@ -90,7 +90,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Checks that the executables we need for the section are running.
 	if err != nil {
-		exitWithError(fmt.Errorf("failed to get a set of executables needed for tests: %v", err))
+		glog.V(1).Info(fmt.Sprintf("failed to get a set of executables needed for tests: %v", err))
 	}
 
 	confmap := getFiles(typeConf, "config")
@@ -100,11 +100,11 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 
 	// Variable substitutions. Replace all occurrences of variables in controls files.
 	s := string(in)
-	s = makeSubstitutions(s, "bin", binmap)
-	s = makeSubstitutions(s, "conf", confmap)
-	s = makeSubstitutions(s, "svc", svcmap)
-	s = makeSubstitutions(s, "kubeconfig", kubeconfmap)
-	s = makeSubstitutions(s, "cafile", cafilemap)
+	s, binSubs := makeSubstitutions(s, "bin", binmap)
+	s, _ = makeSubstitutions(s, "conf", confmap)
+	s, _ = makeSubstitutions(s, "svc", svcmap)
+	s, _ = makeSubstitutions(s, "kubeconfig", kubeconfmap)
+	s, _ = makeSubstitutions(s, "cafile", cafilemap)
 
 	controls, err := check.NewControls(nodetype, []byte(s))
 	if err != nil {
@@ -117,36 +117,44 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 		exitWithError(fmt.Errorf("error setting up run filter: %v", err))
 	}
 
-	summary = controls.RunChecks(runner, filter)
+	generateDefaultEnvAudit(controls, binSubs)
 
-	if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && junitFmt {
-		out, err := controls.JUnit()
-		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
-		}
+	controls.RunChecks(runner, filter, parseSkipIds(skipIds))
+	controlsCollection = append(controlsCollection, controls)
+}
 
-		PrintOutput(string(out), outputFile)
-		// if we successfully ran some tests and it's json format, ignore the warnings
-	} else if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && jsonFmt {
-		out, err := controls.JSON()
-		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
-		}
+func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
+	for _, group := range controls.Groups {
+		for _, checkItem := range group.Checks {
+			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
+				for _, test := range checkItem.Tests.TestItems {
+					if test.Env != "" && checkItem.AuditEnv == "" {
+						binPath := ""
 
-		PrintOutput(string(out), outputFile)
-	} else {
-		// if we want to store in PostgreSQL, convert to JSON and save it
-		if (summary.Fail > 0 || summary.Warn > 0 || summary.Pass > 0 || summary.Info > 0) && pgSQL {
-			out, err := controls.JSON()
-			if err != nil {
-				exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+						if len(binSubs) == 1 {
+							binPath = binSubs[0]
+						} else {
+							fmt.Printf("AuditEnv not explicit for check (%s), where bin path cannot be determined\n", checkItem.ID)
+						}
+
+						if test.Env != "" && checkItem.AuditEnv == "" {
+							checkItem.AuditEnv = fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binPath)
+						}
+					}
+				}
 			}
-
-			savePgsql(string(out))
-		} else {
-			prettyPrint(controls, summary)
 		}
 	}
+}
+
+func parseSkipIds(skipIds string) map[string]bool {
+	var skipIdMap = make(map[string]bool, 0)
+	if skipIds != "" {
+		for _, id := range strings.Split(skipIds, ",") {
+			skipIdMap[strings.Trim(id, " ")] = true
+		}
+	}
+	return skipIdMap
 }
 
 // colorPrint outputs the state in a specific colour, along with a message string
@@ -177,7 +185,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 	// Print remediations.
 	if !noRemediations {
 		if summary.Fail > 0 || summary.Warn > 0 {
-			colors[check.WARN].Printf("== Remediations ==\n")
+			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
 					if c.State == check.FAIL {
@@ -185,7 +193,7 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 					}
 					if c.State == check.WARN {
 						// Print the error if test failed due to problem with the audit command
-						if c.Reason != "" && c.Type != "manual"{
+						if c.Reason != "" && c.Type != "manual" {
 							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
 						} else {
 							fmt.Printf("%s %s\n", c.ID, c.Remediation)
@@ -199,26 +207,30 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print summary setting output color to highest severity.
 	if !noSummary {
-		var res check.State
-		if summary.Fail > 0 {
-			res = check.FAIL
-		} else if summary.Warn > 0 {
-			res = check.WARN
-		} else {
-			res = check.PASS
-		}
-
-		colors[res].Printf("== Summary ==\n")
-		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n",
-			summary.Pass, summary.Fail, summary.Warn, summary.Info,
-		)
+		printSummary(summary, string(r.Type))
 	}
+}
+
+func printSummary(summary check.Summary, sectionName string) {
+	var res check.State
+	if summary.Fail > 0 {
+		res = check.FAIL
+	} else if summary.Warn > 0 {
+		res = check.WARN
+	} else {
+		res = check.PASS
+	}
+
+	colors[res].Printf("== Summary %s ==\n", sectionName)
+	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
+		summary.Pass, summary.Fail, summary.Warn, summary.Info,
+	)
 }
 
 // loadConfig finds the correct config dir based on the kubernetes version,
 // merges any specific config.yaml file found with the main config
 // and returns the benchmark file to use.
-func loadConfig(nodetype check.NodeType) string {
+func loadConfig(nodetype check.NodeType, benchmarkVersion string) string {
 	var file string
 	var err error
 
@@ -235,11 +247,6 @@ func loadConfig(nodetype check.NodeType) string {
 		file = policiesFile
 	case check.MANAGEDSERVICES:
 		file = managedservicesFile
-	}
-
-	benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
-	if err != nil {
-		exitWithError(fmt.Errorf("failed to get benchMark version: %v", err))
 	}
 
 	path, err := getConfigFilePath(benchmarkVersion, file)
@@ -281,7 +288,7 @@ func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (str
 
 	if !found {
 		glog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
-		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkSMap: %#v", kubeToBenchmarkMap))
+		glog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkMap: %#v", kubeToBenchmarkMap))
 		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
 	}
 
@@ -297,17 +304,30 @@ func loadVersionMapping(v *viper.Viper) (map[string]string, error) {
 	return kubeToBenchmarkMap, nil
 }
 
+func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
+	benchmarkVersionToTargetsMap := v.GetStringMapStringSlice("target_mapping")
+	if len(benchmarkVersionToTargetsMap) == 0 {
+		return nil, fmt.Errorf("config file is missing 'target_mapping' section")
+	}
+
+	return benchmarkVersionToTargetsMap, nil
+}
+
 func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (bv string, err error) {
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
+	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) {
+		benchmarkVersion = getPlatformBenchmarkVersion(getPlatformName())
+	}
 
 	if isEmpty(benchmarkVersion) {
 		if isEmpty(kubeVersion) {
-			kubeVersion, err = getKubeVersion()
+			kv, err := getKubeVersion()
 			if err != nil {
 				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
 			}
+			kubeVersion = kv.BaseVersion()
 		}
 
 		kubeToBenchmarkMap, err := loadVersionMapping(v)
@@ -329,7 +349,6 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion string, v *viper.Viper) (
 
 // isMaster verify if master components are running on the node.
 func isMaster() bool {
-	loadConfig(check.MASTER)
 	return isThisNodeRunning(check.MASTER)
 }
 
@@ -339,16 +358,16 @@ func isEtcd() bool {
 }
 
 func isThisNodeRunning(nodeType check.NodeType) bool {
-	glog.V(2).Infof("Checking if the current node is running %s components", nodeType)
-	etcdConf := viper.Sub(string(nodeType))
-	if etcdConf == nil {
-		glog.V(2).Infof("No %s components found to be running", nodeType)
+	glog.V(3).Infof("Checking if the current node is running %s components", nodeType)
+	nodeTypeConf := viper.Sub(string(nodeType))
+	if nodeTypeConf == nil {
+		glog.V(2).Infof("No config for %s components found", nodeType)
 		return false
 	}
 
-	components, err := getBinariesFunc(etcdConf, nodeType)
+	components, err := getBinariesFunc(nodeTypeConf, nodeType)
 	if err != nil {
-		glog.V(2).Info(err)
+		glog.V(2).Infof("Failed to find %s binaries: %v", nodeType, err)
 		return false
 	}
 	if len(components) == 0 {
@@ -356,7 +375,114 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 		return false
 	}
 
+	glog.V(2).Infof("Node is running %s components", nodeType)
 	return true
+}
+
+func exitCodeSelection(controlsCollection []*check.Controls) int {
+	for _, control := range controlsCollection {
+		if control.Fail > 0 {
+			return exitCode
+		}
+	}
+
+	return 0
+}
+
+func writeOutput(controlsCollection []*check.Controls) {
+	sort.Slice(controlsCollection, func(i, j int) bool {
+		iid, _ := strconv.Atoi(controlsCollection[i].ID)
+		jid, _ := strconv.Atoi(controlsCollection[j].ID)
+		return iid < jid
+	})
+	if junitFmt {
+		writeJunitOutput(controlsCollection)
+		return
+	}
+	if jsonFmt {
+		writeJSONOutput(controlsCollection)
+		return
+	}
+	if pgSQL {
+		writePgsqlOutput(controlsCollection)
+		return
+	}
+	if aSFF {
+		writeASFFOutput(controlsCollection)
+		return
+	}
+	writeStdoutOutput(controlsCollection)
+}
+
+func writeJSONOutput(controlsCollection []*check.Controls) {
+	var out []byte
+	var err error
+	if !noTotals {
+		var totals check.OverallControls
+		totals.Controls = controlsCollection
+		totals.Totals = getSummaryTotals(controlsCollection)
+		out, err = json.Marshal(totals)
+	} else {
+		out, err = json.Marshal(controlsCollection)
+	}
+	if err != nil {
+		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
+	}
+	printOutput(string(out), outputFile)
+}
+
+func writeJunitOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.JUnit()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
+		}
+		printOutput(string(out), outputFile)
+	}
+}
+
+func writePgsqlOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.JSON()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
+		}
+		savePgsql(string(out))
+	}
+}
+
+func writeASFFOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.ASFF()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to format findings as ASFF: %v", err))
+		}
+		if err := writeFinding(out); err != nil {
+			exitWithError(fmt.Errorf("failed to output to ASFF: %v", err))
+		}
+	}
+}
+
+func writeStdoutOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		summary := controls.Summary
+		prettyPrint(controls, summary)
+	}
+	if !noTotals {
+		printSummary(getSummaryTotals(controlsCollection), "total")
+	}
+}
+
+func getSummaryTotals(controlsCollection []*check.Controls) check.Summary {
+	var totalSummary check.Summary
+	for _, controls := range controlsCollection {
+		summary := controls.Summary
+		totalSummary.Fail = totalSummary.Fail + summary.Fail
+		totalSummary.Warn = totalSummary.Warn + summary.Warn
+		totalSummary.Pass = totalSummary.Pass + summary.Pass
+		totalSummary.Info = totalSummary.Info + summary.Info
+	}
+	return totalSummary
 }
 
 func printRawOutput(output string) {
@@ -377,8 +503,8 @@ func writeOutputToFile(output string, outputFile string) error {
 	return w.Flush()
 }
 
-func PrintOutput(output string, outputFile string) {
-	if len(outputFile) == 0 {
+func printOutput(output string, outputFile string) {
+	if outputFile == "" {
 		fmt.Println(output)
 	} else {
 		err := writeOutputToFile(output, outputFile)
@@ -388,19 +514,16 @@ func PrintOutput(output string, outputFile string) {
 	}
 }
 
-var benchmarkVersionToTargetsMap = map[string][]string{
-	"cis-1.3": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.4": []string{string(check.MASTER), string(check.NODE)},
-	"cis-1.5": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES)},
-	"gke-1.0": []string{string(check.MASTER), string(check.NODE), string(check.CONTROLPLANE), string(check.ETCD), string(check.POLICIES), string(check.MANAGEDSERVICES)},
-}
-
 // validTargets helps determine if the targets
 // are legitimate for the benchmarkVersion.
-func validTargets(benchmarkVersion string, targets []string) bool {
+func validTargets(benchmarkVersion string, targets []string, v *viper.Viper) (bool, error) {
+	benchmarkVersionToTargetsMap, err := loadTargetMapping(v)
+	if err != nil {
+		return false, err
+	}
 	providedTargets, found := benchmarkVersionToTargetsMap[benchmarkVersion]
 	if !found {
-		return false
+		return false, fmt.Errorf("No targets configured for %s", benchmarkVersion)
 	}
 
 	for _, pt := range targets {
@@ -413,9 +536,9 @@ func validTargets(benchmarkVersion string, targets []string) bool {
 		}
 
 		if !f {
-			return false
+			return false, nil
 		}
 	}
 
-	return true
+	return true, nil
 }

@@ -16,7 +16,7 @@ func init() {
 	RootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringSliceP("targets", "s", []string{},
 		`Specify targets of the benchmark to run. These names need to match the filenames in the cfg/<version> directory.
-	For example, to run the tests specified in master.yaml and etcd.yaml, specify --targets=master,etcd 
+	For example, to run the tests specified in master.yaml and etcd.yaml, specify --targets=master,etcd
 	If no targets are specified, run tests from all files in the cfg/<version> directory.
 	`)
 }
@@ -32,21 +32,29 @@ var runCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("unable to get `targets` from command line :%v", err))
 		}
 
-		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to get benchmark version. error: %v", err))
 		}
 
-		glog.V(2).Infof("Checking targets %v for %v", targets, benchmarkVersion)
-		if len(targets) > 0 && !validTargets(benchmarkVersion, targets) {
-			exitWithError(fmt.Errorf(fmt.Sprintf(`The specified --targets "%s" does not apply to the CIS Benchmark %s \n Valid targets %v`, strings.Join(targets, ","), benchmarkVersion, benchmarkVersionToTargetsMap[benchmarkVersion])))
+		glog.V(2).Infof("Checking targets %v for %v", targets, bv)
+		benchmarkVersionToTargetsMap, err := loadTargetMapping(viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error loading targets: %v", err))
+		}
+		valid, err := validTargets(bv, targets, viper.GetViper())
+		if err != nil {
+			exitWithError(fmt.Errorf("error validating targets: %v", err))
+		}
+		if len(targets) > 0 && !valid {
+			exitWithError(fmt.Errorf(fmt.Sprintf(`The specified --targets "%s" are not configured for the CIS Benchmark %s\n Valid targets %v`, strings.Join(targets, ","), bv, benchmarkVersionToTargetsMap[bv])))
 		}
 
 		// Merge version-specific config if any.
-		path := filepath.Join(cfgDir, benchmarkVersion)
+		path := filepath.Join(cfgDir, bv)
 		mergeConfig(path)
 
-		err = run(targets, benchmarkVersion)
+		err = run(targets, bv)
 		if err != nil {
 			fmt.Printf("Error in run: %v\n", err)
 		}
@@ -67,6 +75,7 @@ func run(targets []string, benchmarkVersion string) (err error) {
 		runChecks(testType, yamlFile)
 	}
 
+	writeOutput(controlsCollection)
 	return nil
 }
 

@@ -91,7 +91,8 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c permissions=%a $etcdconf; fi'"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "permissions"
@@ -106,7 +107,8 @@ groups:
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; fi'"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "root:root"

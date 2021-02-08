@@ -80,16 +80,12 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 	}
 }
 
-func TestCheckCIS13WithKind(t *testing.T) {
-	testCheckCISWithKind(t, "cis-1.3")
-}
-
-func TestCheckCIS14WithKind(t *testing.T) {
-	testCheckCISWithKind(t, "cis-1.4")
-}
-
 func TestCheckCIS15WithKind(t *testing.T) {
 	testCheckCISWithKind(t, "cis-1.5")
+}
+
+func TestCheckCIS16WithKind(t *testing.T) {
+	testCheckCISWithKind(t, "cis-1.6")
 }
 
 // This is simple "diff" between 2 strings containing multiple lines.

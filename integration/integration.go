@@ -113,16 +113,14 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 
 					if cp.Status.Phase == apiv1.PodFailed {
 						fmt.Printf("pod (%s) - %s - retrying...\n", cp.Name, cp.Status.Phase)
+						fmt.Print(getPodLogs(clientset, &cp))
 						failedPods[cp.Name] = struct{}{}
 						break podfailed
 					}
-
 				}
 			}
 		}
 	}
-
-	return nil, fmt.Errorf("no Pod found for Job %q", jobName)
 }
 
 func getPodLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod) string {

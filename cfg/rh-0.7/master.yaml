@@ -895,7 +895,7 @@ groups:
 
       - id: 4.6
         text: "Verify the scheduler pod specification file ownership set by OpenShift"
-        audit: "stat -c %u:%g /etc/origin/node/pods/controller.yaml"
+        audit: "stat -c %U:%G /etc/origin/node/pods/controller.yaml"
         tests:
           test_items:
             - flag: "root:root"

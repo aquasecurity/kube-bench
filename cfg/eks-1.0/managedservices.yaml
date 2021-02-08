@@ -1,0 +1,104 @@
+---
+controls:
+version: "eks-1.0"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access to Amazon ECR (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for Amazon ECR (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated Amazon EKS Service Accounts (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+  - id: 5.3
+    text: "AWS Key Management Service (AWS KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+  - id: 5.4
+    text: "Cluster Networking"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false
+
+
+  - id: 5.6
+    text: "Other Cluster Configurations"
+    checks:
+      - id: 5.6.1
+        text: "Consider Fargate for running untrusted workloads (Not Scored)"
+        type: "manual"
+        remediation:
+        scored: false

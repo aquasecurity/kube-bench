@@ -1,0 +1,256 @@
+---
+controls:
+version: "aks-1.0"
+id: 4
+text: "Kubernetes Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Not Scored)"
+        type: "manual"
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
+          if they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
+        scored: false
+
+      - id: 4.1.2
+        text: "Minimize access to secrets (Not Scored)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 4.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Not Scored)"
+        type: "manual"
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 4.1.4
+        text: "Minimize access to create pods (Not Scored)"
+        type: "manual"
+        Remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that default service accounts are not actively used. (Scored)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific access
+          to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+        scored: true
+
+      - id: 4.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Not Scored)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+  - id: 4.2
+    text: "Pod Security Policies"
+    checks:
+      - id: 4.2.1
+        text: "Minimize the admission of privileged containers (Not Scored)"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to disallow running of privileged containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.2
+        text: "Disallow shared usage of host namespaces."
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to disallow shared usage of host namespaces. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.3
+        text: "Restrict all usage of host networking and ports"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.4
+        text: "Restrict any usage of the host filesystem."
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.5
+        text: "Restrict Linux capabilities to the default set."
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict Linux capabilities to the default set. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.6
+        text: "Restrict usage of defined volume types"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict usage of defined volume types. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.7
+        text: "Restrict the user and group IDs of the container"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict the user and group IDs of the container. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.8
+        text: "Restrict allocating an FSGroup that owns the pod's volumes"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to restrict allocating an FSGroup that owns the pod's volumes. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
+        scored: false
+
+      - id: 4.2.9
+        text: "Requires seccomp profile"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to requires seccomp profile. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives.
+        scored: false
+
+      - id: 4.2.10
+        text: "Define the AppArmor profile used by containers"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to define the AppArmor profile used by containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#additional-optional-policies.
+        scored: false
+
+  - id: 4.3
+    text: "Network Policies and CNI"
+    checks:
+      - id: 4.3.1
+        text: "Ensure that the CNI in use supports Network Policies (Not Scored)"
+        type: "manual"
+        remediation: |
+          To use a CNI plugin with Network Policy, enable Network Policy in AKS. See Recommendation 6.4.4.
+        scored: false
+
+      - id: 4.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Scored)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as you need them.
+        scored: false
+
+  - id: 4.4
+    text: "Secrets Management"
+    checks:
+      - id: 4.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Not Scored)"
+        type: "manual"
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 4.4.2
+        text: "Consider external secret storage (Not Scored)"
+        type: "manual"
+        remediation: |
+          Use the Azure Key Vault with Secrets Store CSI Driver to retrieve secrets from Azure Key Vault and load it in the pod. See https://github.com/Azure/secrets-store-csi-driver-provider-azure.
+        scored: false
+
+  - id: 4.5
+    text: "Extensible Admission Control"
+    checks:
+      - id: 4.5.1
+        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and setup image provenance.
+        scored: false
+
+  - id: 4.6
+    text: "General Policies"
+    checks:
+      - id: 4.6.1
+        text: "Create administrative boundaries between resources using namespaces (Not Scored)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 4.6.2
+        text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)"
+        type: "manual"
+        remediation: |
+          Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+          would need to enable alpha features in the apiserver by passing "--feature-
+          gates=AllAlpha=true" argument.
+          Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
+          parameter to "--feature-gates=AllAlpha=true"
+          KUBE_API_ARGS="--feature-gates=AllAlpha=true"
+          Based on your system, restart the kube-apiserver service. For example:
+          systemctl restart kube-apiserver.service
+          Use annotations to enable the docker/default seccomp profile in your pod definitions. An
+          example is as below:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: trustworthy-pod
+            annotations:
+              seccomp.security.alpha.kubernetes.io/pod: docker/default
+          spec:
+            containers:
+              - name: trustworthy-container
+                image: sotrustworthy:latest
+        scored: false
+
+      - id: 4.6.3
+        text: "Apply Security Context to Your Pods and Containers (Not Scored)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and apply security contexts to your pods. For a
+          suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
+          Containers.
+        scored: false
+
+      - id: 4.6.4
+        text: "The default namespace should not be used (Scored)"
+        type: "manual"
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false
+
+  - id: 4.7
+    text: "Azure Policy Controls for ACR"
+    checks:
+      - id: 4.7.1
+        text: "Container Registry should use a virtual network service endpoint"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container Registry should use a virtual network service endpoint. See https://docs.microsoft.com/en-us/azure/container-registry/security-controls-policy#azure-security-benchmark
+        scored: false
+
+      - id: 4.7.2
+        text: "Container registries should not allow unrestricted network access"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container registries should not allow unrestricted network access. See https://docs.microsoft.com/en-us/azure/container-registry/container-registry-azure-policy#built-in-policy-definitions
+        scored: false
+
+      - id: 4.7.3
+        text: "Container registries should use private links"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container registries should use private links. See https://docs.microsoft.com/en-us/azure/container-registry/container-registry-azure-policy#built-in-policy-definitions
+        scored: false

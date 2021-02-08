@@ -1,0 +1,69 @@
+[INFO] 4 Worker Node Security Configuration
+[INFO] 4.1 Worker Node Configuration Files
+[PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)
+[PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Automated)
+[PASS] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)
+[PASS] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)
+[PASS] 4.1.5 Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)
+[PASS] 4.1.6 Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)
+[PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Manual)
+[PASS] 4.1.8 Ensure that the client certificate authorities file ownership is set to root:root (Manual)
+[PASS] 4.1.9 Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Automated)
+[PASS] 4.1.10 Ensure that the kubelet --config configuration file ownership is set to root:root (Automated)
+[INFO] 4.2 Kubelet
+[PASS] 4.2.1 Ensure that the anonymous-auth argument is set to false (Automated)
+[PASS] 4.2.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
+[PASS] 4.2.3 Ensure that the --client-ca-file argument is set as appropriate (Automated)
+[PASS] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Manual)
+[PASS] 4.2.5 Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)
+[FAIL] 4.2.6 Ensure that the --protect-kernel-defaults argument is set to true (Automated)
+[PASS] 4.2.7 Ensure that the --make-iptables-util-chains argument is set to true (Automated)
+[PASS] 4.2.8 Ensure that the --hostname-override argument is not set (Manual)
+[WARN] 4.2.9 Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Manual)
+[WARN] 4.2.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)
+[PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Manual)
+[PASS] 4.2.12 Verify that the RotateKubeletServerCertificate argument is set to true (Manual)
+[PASS] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)
+
+== Remediations node ==
+4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+--protect-kernel-defaults=true
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+4.2.9 If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+4.2.10 If using a Kubelet config file, edit the file to set tlsCertFile to the location
+of the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile
+to the location of the corresponding private key file.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
+--tls-cert-file=<path/to/tls-certificate-file>
+--tls-private-key-file=<path/to/tls-key-file>
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+
+== Summary node ==
+20 checks PASS
+1 checks FAIL
+2 checks WARN
+0 checks INFO
+
+== Summary total ==
+20 checks PASS
+1 checks FAIL
+2 checks WARN
+0 checks INFO
