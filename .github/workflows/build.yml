@@ -1,0 +1,40 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+      - "LICENSE"
+      - "NOTICE"
+  pull_request:
+    paths-ignore:
+      - "*.md"
+      - "LICENSE"
+      - "NOTICE"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: yaml-lint
+        uses: ibiqlik/action-yamllint@v3
+      - name: Run unit tests
+        run: make tests
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.txt
+      - name: Run integration tests
+        run: make integration-tests
+      - name: Dry-run release snapshot
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: v0.148.0
+          args: release --snapshot --skip-publish --rm-dist
