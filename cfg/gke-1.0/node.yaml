@@ -62,7 +62,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on each worker node.
           For example,
-          chmod 644 $proxykubeconfig
+          chmod 644 $proykubeconfig
         scored: true
 
       - id: 4.1.4

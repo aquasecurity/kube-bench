@@ -14,25 +14,7 @@ import (
 	"github.com/golang/glog"
 )
 
-type KubeVersion struct {
-	Major       string
-	Minor       string
-	baseVersion string
-	GitVersion  string
-}
-
-func (k *KubeVersion) BaseVersion() string {
-	if k.baseVersion != "" {
-		return k.baseVersion
-	}
-	// Some provides return the minor version like "15+"
-	minor := strings.Replace(k.Minor, "+", "", -1)
-	ver := fmt.Sprintf("%s.%s", k.Major, minor)
-	k.baseVersion = ver
-	return ver
-}
-
-func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
+func getKubeVersionFromRESTAPI() (string, error) {
 	k8sVersionURL := getKubernetesURL()
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
@@ -40,23 +22,23 @@ func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 
 	tlsCert, err := loadCertficate(cacertfile)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	tb, err := ioutil.ReadFile(tokenfile)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	token := strings.TrimSpace(string(tb))
 
 	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	k8sVersion, err := extractVersion(data)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return k8sVersion, nil
 }
@@ -79,32 +61,31 @@ func getWebDataWithRetry(k8sVersionURL, token string, cacert *tls.Certificate) (
 	return
 }
 
-type VersionResponse struct {
-	Major        string
-	Minor        string
-	GitVersion   string
-	GitCommit    string
-	GitTreeState string
-	BuildDate    string
-	GoVersion    string
-	Compiler     string
-	Platform     string
-}
+func extractVersion(data []byte) (string, error) {
+	type versionResponse struct {
+		Major        string
+		Minor        string
+		GitVersion   string
+		GitCommit    string
+		GitTreeState string
+		BuildDate    string
+		GoVersion    string
+		Compiler     string
+		Platform     string
+	}
 
-func extractVersion(data []byte) (*KubeVersion, error) {
-	vrObj := &VersionResponse{}
+	vrObj := &versionResponse{}
 	glog.V(2).Info(fmt.Sprintf("vd: %s\n", string(data)))
 	err := json.Unmarshal(data, vrObj)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	glog.V(2).Info(fmt.Sprintf("vrObj: %#v\n", vrObj))
 
-	return &KubeVersion{
-		Major:      vrObj.Major,
-		Minor:      vrObj.Minor,
-		GitVersion: vrObj.GitVersion,
-	}, nil
+	// Some provides return the minor version like "15+"
+	minor := strings.Replace(vrObj.Minor, "+", "", -1)
+	ver := fmt.Sprintf("%s.%s", vrObj.Major, minor)
+	return ver, nil
 }
 
 func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
@@ -155,7 +136,7 @@ func loadCertficate(certFile string) (*tls.Certificate, error) {
 		return nil, fmt.Errorf("unable to Decode certificate")
 	}
 
-	glog.V(2).Info("Loading CA certificate")
+	glog.V(2).Info(fmt.Sprintf("Loading CA certificate"))
 	tlsCert.Certificate = append(tlsCert.Certificate, block.Bytes)
 	return &tlsCert, nil
 }
@@ -173,7 +154,7 @@ func getKubernetesURL() string {
 			return fmt.Sprintf("https://%s:%s/version", k8sHost, k8sPort)
 		}
 
-		glog.V(2).Info("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set")
+		glog.V(2).Info(fmt.Sprintf("KUBE_BENCH_K8S_ENV is set, but environment variables KUBERNETES_SERVICE_HOST or KUBERNETES_SERVICE_PORT_HTTPS are not set"))
 	}
 
 	return k8sVersionURL

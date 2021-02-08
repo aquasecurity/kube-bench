@@ -15,11 +15,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // masterCmd represents the master command
@@ -28,14 +25,8 @@ var masterCmd = &cobra.Command{
 	Short: "Run Kubernetes benchmark checks from the master.yaml file.",
 	Long:  `Run Kubernetes benchmark checks from the master.yaml file in cfg/<version>.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
-		if err != nil {
-			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
-		}
-
-		filename := loadConfig(check.MASTER, bv)
+		filename := loadConfig(check.MASTER)
 		runChecks(check.MASTER, filename)
-		writeOutput(controlsCollection)
 	},
 }
 

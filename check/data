@@ -1,15 +1,14 @@
 ---
 controls:
 id: 1
-text: "Test Checks"
+text: "Master Checks"
 type: "master"
 groups:
 - id: 1.1
-  text: "First Group"
+  text: "Kube-apiserver"
   checks:
     - id: 0
       text: "flag is set"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--allow-privileged"
@@ -17,7 +16,6 @@ groups:
 
     - id: 1
       text: "flag is not set"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--basic-auth"
@@ -25,7 +23,6 @@ groups:
 
     - id: 2
       text: "flag value is set to some value"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--insecure-port"
@@ -36,7 +33,6 @@ groups:
 
     - id: 3
       text: "flag value is greater than or equal some number"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--audit-log-maxage"
@@ -47,7 +43,6 @@ groups:
 
     - id: 4
       text: "flag value is less than some number"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--max-backlog"
@@ -58,7 +53,6 @@ groups:
 
     - id: 5
       text: "flag value does not have some value"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -69,7 +63,6 @@ groups:
 
     - id: 6
       text: "test AND binary operation"
-      audit: "echo \"Non empty command\""
       tests:
         bin_op: and
         test_items:
@@ -80,7 +73,6 @@ groups:
 
     - id: 7
       text: "test OR binary operation"
-      audit: "echo \"Non empty command\""
       tests:
         bin_op: or
         test_items:
@@ -95,29 +87,38 @@ groups:
 
     - id: 8
       text: "test flag with arbitrary text"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
-        - flag: "permissions"
+        - flag: "644"
           compare:
             op: eq
-            value: "SomeValue"
+            value: "644"
           set: true
 
     - id: 9
       text: "test permissions"
-      audit: "/bin/sh -c 'if test -e $config; then stat -c permissions=%a $config; fi'"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
       tests:
+        bin_op: or
         test_items:
-        - flag: "permissions"
+        - flag: "644"
           compare:
-            op: bitmask
+            op: eq
             value: "644"
+          set: true
+        - flag: "640"
+          compare:
+            op: eq
+            value: "640"
+          set: true
+        - flag: "600"
+          compare:
+            op: eq
+            value: "600"
           set: true
 
     - id: 10
       text: "flag value includes some value in a comma-separated list, value is last in list"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -128,7 +129,6 @@ groups:
 
     - id: 11
       text: "flag value includes some value in a comma-separated list, value is first in list"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -139,7 +139,6 @@ groups:
 
     - id: 12
       text: "flag value includes some value in a comma-separated list, value middle of list"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -150,7 +149,6 @@ groups:
 
     - id: 13
       text: "flag value includes some value in a comma-separated list, value only one in list"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -161,7 +159,6 @@ groups:
 
     - id: 14
       text: "check that flag some-arg is set to some-val with ':' separator"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "some-arg"
@@ -169,13 +166,10 @@ groups:
               op: eq
               value: some-val
             set: true
-
+            
     - id: 15
       text: "jsonpath correct value on field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
-        bin_op: or
         test_items:
           - path: "{.readOnlyPort}"
             compare:
@@ -195,8 +189,6 @@ groups:
 
     - id: 16
       text: "jsonpath correct case-sensitive value on string field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.stringValue}"
@@ -217,8 +209,6 @@ groups:
 
     - id: 17
       text: "jsonpath correct value on boolean field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.trueValue}"
@@ -239,8 +229,6 @@ groups:
 
     - id: 18
       text: "jsonpath field absent"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.notARealField}"
@@ -248,8 +236,6 @@ groups:
 
     - id: 19
       text: "jsonpath correct value on nested field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -260,8 +246,6 @@ groups:
 
     - id: 20
       text: "yamlpath correct value on field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.readOnlyPort}"
@@ -272,8 +256,6 @@ groups:
 
     - id: 21
       text: "yamlpath field absent"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.fieldThatIsUnset}"
@@ -281,8 +263,6 @@ groups:
 
     - id: 22
       text: "yamlpath correct value on nested field"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -293,8 +273,6 @@ groups:
 
     - id: 23
       text: "path on invalid json"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -305,16 +283,13 @@ groups:
 
     - id: 24
       text: "path with broken expression"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
-          - path: "{.missingClosingBrace}"
+          - path: "{.missingClosingBrace"
             set: true
 
     - id: 25
       text: "yamlpath on invalid yaml"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -325,8 +300,6 @@ groups:
 
     - id: 26
       text: "check regex op matches"
-      audit: "echo \"Non empty command\""
-      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.currentMasterVersion}"
@@ -337,7 +310,6 @@ groups:
 
     - id: 27
       text: "check boolean flag with no value"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--peer-client-cert-auth"
@@ -348,60 +320,12 @@ groups:
 
     - id: 28
       text: "check boolean flag with false value"
-      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--peer-client-cert-auth"
             compare:
               op: eq
               value: false
-            set: true
-    - id: 29
-      text: "flag is set (via env)"
-      tests:
-        test_items:
-          - flag: "--allow-privileged"
-            env: "ALLOW_PRIVILEGED"
-            set: true
-
-    - id: 30
-      text: "flag is not set (via env)"
-      tests:
-        test_items:
-          - flag: "--basic-auth"
-            env: "BASIC_AUTH"
-            set: false
-
-    - id: 31
-      text: "flag value is set to some value (via env)"
-      tests:
-        test_items:
-          - flag: "--insecure-port"
-            env: "INSECURE_PORT"
-            compare:
-              op: eq
-              value: 0
-            set: true
-
-    - id: 32
-      text: "flag value is greater than or equal some number (via env)"
-      tests:
-        test_items:
-          - flag: "--audit-log-maxage"
-            env: "AUDIT_LOG_MAXAGE"
-            compare:
-              op: gte
-              value: 30
-            set: true
-
-    - id: 33
-      text: "flag value is less than some number (via env)"
-      tests:
-        test_items:
-          - env: "MAX_BACKLOG"
-            compare:
-              op: lt
-              value: 30
             set: true
 
 - id: 2.1
@@ -511,224 +435,6 @@ groups:
         test_items:
           - flag: "flag"
             path: "{.flag}"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 9
-      text: "test use_multiple_values is correct -> pass"
-      audit: "printf 'permissions=600\npermissions=600\npermissions=600'"
-      use_multiple_values: true
-      tests:
-        test_items:
-          - flag: "permissions"
-            compare:
-              op: bitmask
-              value: "600"
-            set: true
-      scored: true
-    - id: 10
-      text: "test use_multiple_values is wrong -> fail"
-      audit: "printf 'permissions=600\npermissions=600\npermissions=644'"
-      use_multiple_values: true
-      tests:
-        test_items:
-          - flag: "permissions"
-            compare:
-              op: bitmask
-              value: "600"
-            set: true
-      scored: true
-    - id: 11
-      text: "test use_multiple_values include empty value -> fail"
-      audit: "printf 'permissions=600\n\npermissions=600'"
-      use_multiple_values: true
-      tests:
-        test_items:
-          - flag: "permissions"
-            compare:
-              op: bitmask
-              value: "600"
-            set: true
-      scored: true
-    - id: 12
-      text: "audit is present and wrong, audit_config is right -> fail (command line parameters override config file)"
-      audit: "echo flag=wrong"
-      audit_config: "echo 'flag: correct'"
-      tests:
-        test_items:
-          - flag: "flag"
-            path: "{.flag}"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 13
-      text: "parameter and config file don't have same default - parameter has failing value"
-      audit: "echo '--read-only-port=1'"
-      audit_config: "echo 'readOnlyPort: 0'"
-      tests:
-        bin_op: and
-        test_items:
-          - flag: "--read-only-port"
-            path: "{.readOnlyPort}"
-            set: true
-            compare:
-              op: eq
-              value: 0
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: false
-      scored: true
-    - id: 14
-      text: "parameter and config file don't have same default - config file has failing value"
-      audit: "echo ''"
-      audit_config: "echo 'readOnlyPort: 1'"
-      tests:
-        bin_op: or
-        test_items:
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: true
-            compare:
-              op: eq
-              value: 0
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: false
-      scored: true
-    - id: 15
-      text: "parameter and config file don't have same default - passing"
-      audit: "echo ''"
-      audit_config: "echo ''"
-      tests:
-        bin_op: or
-        test_items:
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: true
-            compare:
-              op: eq
-              value: 0
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: false
-      scored: true
-    - id: 16
-      text: "parameter and config file don't have same default - parameter has bad value and config is not present - failing"
-      audit: "echo '--read-only-port=1'"
-      audit_config: "echo ''"
-      tests:
-        bin_op: or
-        test_items:
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: true
-            compare:
-              op: eq
-              value: 0
-          - flag: "--read-only-port"
-            path: '{.readOnlyPort}'
-            set: false
-      scored: true
-
-- id: 3.1
-  text: "audit_env commands"
-  checks:
-    - id: 0
-      text: "audit fails to find flag, audit_env finds flag -> pass"
-      audit: "echo in=incorrect"
-      audit_env: "echo flag=correct"
-      tests:
-        test_items:
-          - flag: "flag"
-            env: "flag"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 1
-      text: "audit fails to find flag, audit_env finds flag and fails -> fail"
-      audit: "echo in=wrong"
-      audit_env: "echo flag=wrong"
-      tests:
-        test_items:
-          - flag: "flag"
-            env: "flag"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 2
-      text: "audit finds correct flag, audit_env is incorrect -> pass"
-      audit: "echo flag=correct"
-      audit_env: "echo flag=incorrect"
-      tests:
-        test_items:
-          - flag: "flag"
-            env: "flag"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 3
-      text: "audit doesn't flag flag, audit_config finds it and passes, audit_env is not present -> pass"
-      audit: "echo in=correct"
-      audit_config: "echo 'flag: correct'"
-      tests:
-        test_items:
-          - flag: "flag"
-            path: "{.flag}"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 4
-      text: "audit doesn't flag flag, audit_config doesn't find flag, audit_env finds and passes -> pass"
-      audit: "echo in=correct"
-      audit_config: "echo 'in: correct'"
-      audit_env: "echo flag=correct"
-      tests:
-        test_items:
-          - flag: "flag"
-            path: "{.flag}"
-            env: "flag"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 5
-      text: "audit doesn't find flag, audit_config doesn't find flag, audit_env finds and fails -> fails"
-      audit: "echo in=correct"
-      audit_config: "echo 'in: correct'"
-      audit_env: "echo flag=incorrect"
-      tests:
-        test_items:
-          - flag: "flag"
-            path: "{.flag}"
-            env: "flag"
-            compare:
-              op: eq
-              value: "correct"
-            set: true
-      scored: true
-    - id: 6
-      text: "audit finds flag and fails, audit_config finds flag and fails, audit_env finds and passes -> fails"
-      audit: "echo flag=incorrect"
-      audit_config: "echo 'flag: incorrect'"
-      audit_env: "echo flag=correct"
-      tests:
-        test_items:
-          - flag: "flag"
-            path: "{.flag}"
-            env: "flag"
             compare:
               op: eq
               value: "correct"

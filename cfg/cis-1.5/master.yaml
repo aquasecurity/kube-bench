@@ -223,7 +223,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c permissions=%a /etc/kubernetes/scheduler.conf; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -234,12 +234,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $schedulerkubeconfig
+          chmod 644 /etc/kubernetes/scheduler.conf
         scored: true
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%G /etc/kubernetes/scheduler.conf; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -250,12 +250,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $schedulerkubeconfig
+          chown root:root /etc/kubernetes/scheduler.conf
         scored: true
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c permissions=%a /etc/kubernetes/controller-manager.conf; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -266,12 +266,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 $controllermanagerkubeconfig
+          chmod 644 /etc/kubernetes/controller-manager.conf
         scored: true
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%G /etc/kubernetes/controller-manager.conf; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -282,20 +282,13 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root $controllermanagerkubeconfig
+          chown root:root /etc/kubernetes/controller-manager.conf
         scored: true
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)"
-        audit: "find /etc/kubernetes/pki/ | xargs stat -c %U:%G"
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
+        audit: "ls -laR /etc/kubernetes/pki/"
+        type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -303,38 +296,24 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Not Scored)"
-        audit: "find /etc/kubernetes/pki/ -name '*.crt' | xargs stat -c permissions=%a"
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "permissions"
-              compare:
-                op: bitmask
-                value: "644"
-              set: true
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)"
+        audit: "stat -c %n\ %a /etc/kubernetes/pki/*.crt"
+        type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
           chmod -R 644 /etc/kubernetes/pki/*.crt
-        scored: false
+        scored: true
 
       - id: 1.1.21
-        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Not Scored)"
-        audit: "find /etc/kubernetes/pki/ -name '*.key' | xargs stat -c permissions=%a"
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "permissions"
-              compare:
-                op: bitmask
-                value: "600"
-              set: true
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)"
+        audit: "stat -c %n\ %a /etc/kubernetes/pki/*.key"
+        type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
           chmod -R 600 /etc/kubernetes/pki/*.key
-        scored: false
+        scored: true
 
   - id: 1.2
     text: "API Server"
@@ -541,17 +520,11 @@ groups:
         text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Not Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--enable-admission-plugins"
               compare:
                 op: has
                 value: "SecurityContextDeny"
-              set: true
-            - flag: "--enable-admission-plugins"
-              compare:
-                op: has
-                value: "PodSecurityPolicy"
               set: true
         remediation: |
           Edit the API server pod specification file $apiserverconf
@@ -880,7 +853,7 @@ groups:
         scored: true
 
       - id: 1.2.33
-        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Not Scored)"
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -890,16 +863,16 @@ groups:
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           Then, edit the API server pod specification file $apiserverconf
           on the master node and set the --encryption-provider-config parameter to the path of that file: --encryption-provider-config=</path/to/EncryptionConfig/File>
-        scored: false
+        scored: true
 
       - id: 1.2.34
-        text: "Ensure that encryption providers are appropriately configured (Not Scored)"
+        text: "Ensure that encryption providers are appropriately configured (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           In this file, choose aescbc, kms or secretbox as the encryption provider.
-        scored: false
+        scored: true
 
       - id: 1.2.35
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)"
@@ -908,7 +881,7 @@ groups:
           test_items:
             - flag: "--tls-cipher-suites"
               compare:
-                op: valid_elements
+                op: has
                 value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
               set: true
         remediation: |
@@ -921,7 +894,7 @@ groups:
     text: "Controller Manager"
     checks:
       - id: 1.3.1
-        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Not Scored)"
+        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
@@ -932,7 +905,7 @@ groups:
           on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold,
           for example:
           --terminated-pod-gc-threshold=10
-        scored: false
+        scored: true
 
       - id: 1.3.2
         text: "Ensure that the --profiling argument is set to false (Scored)"
@@ -997,15 +970,12 @@ groups:
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--feature-gates"
               compare:
-                op: nothave
-                value: "RotateKubeletServerCertificate=false"
+                op: eq
+                value: "RotateKubeletServerCertificate=true"
               set: true
-            - flag: "--feature-gates"
-              set: false
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.

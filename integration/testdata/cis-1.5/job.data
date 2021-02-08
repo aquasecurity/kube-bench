@@ -18,9 +18,9 @@
 [PASS] 1.1.16 Ensure that the scheduler.conf file ownership is set to root:root (Scored)
 [PASS] 1.1.17 Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 1.1.18 Ensure that the controller-manager.conf file ownership is set to root:root (Scored)
-[PASS] 1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)
-[PASS] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Not Scored)
-[PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Not Scored)
+[WARN] 1.1.19 Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Scored)
+[WARN] 1.1.20 Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Scored)
+[WARN] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Scored)
 [INFO] 1.2 API Server
 [WARN] 1.2.1 Ensure that the --anonymous-auth argument is set to false (Not Scored)
 [PASS] 1.2.2 Ensure that the --basic-auth-file argument is not set (Scored)
@@ -54,22 +54,22 @@
 [PASS] 1.2.30 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
 [PASS] 1.2.31 Ensure that the --client-ca-file argument is set as appropriate (Scored)
 [PASS] 1.2.32 Ensure that the --etcd-cafile argument is set as appropriate (Scored)
-[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Not Scored)
-[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Not Scored)
+[FAIL] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Scored)
+[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Scored)
 [WARN] 1.2.35 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Not Scored)
 [INFO] 1.3 Controller Manager
-[WARN] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Not Scored)
+[FAIL] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Scored)
 [FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Scored)
 [PASS] 1.3.3 Ensure that the --use-service-account-credentials argument is set to true (Scored)
 [PASS] 1.3.4 Ensure that the --service-account-private-key-file argument is set as appropriate (Scored)
 [PASS] 1.3.5 Ensure that the --root-ca-file argument is set as appropriate (Scored)
-[PASS] 1.3.6 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
+[FAIL] 1.3.6 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
 [PASS] 1.3.7 Ensure that the --bind-address argument is set to 127.0.0.1 (Scored)
 [INFO] 1.4 Scheduler
 [FAIL] 1.4.1 Ensure that the --profiling argument is set to false (Scored)
 [PASS] 1.4.2 Ensure that the --bind-address argument is set to 127.0.0.1 (Scored)
 
-== Remediations master ==
+== Remediations ==
 1.1.9 Run the below command (based on the file location on your system) on the master node.
 For example,
 chmod 644 <path/to/cni/files>
@@ -83,6 +83,18 @@ from the below command:
 ps -ef | grep etcd
 Run the below command (based on the etcd data directory found above).
 For example, chown etcd:etcd /var/lib/etcd
+
+1.1.19 Run the below command (based on the file location on your system) on the master node.
+For example,
+chown -R root:root /etc/kubernetes/pki/
+
+1.1.20 Run the below command (based on the file location on your system) on the master node.
+For example,
+chmod -R 644 /etc/kubernetes/pki/*.crt
+
+1.1.21 Run the below command (based on the file location on your system) on the master node.
+For example,
+chmod -R 600 /etc/kubernetes/pki/*.key
 
 1.2.1 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
@@ -160,17 +172,42 @@ for example:
 on the master node and set the below parameter.
 --profiling=false
 
+1.3.6 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
+on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
+--feature-gates=RotateKubeletServerCertificate=true
+
 1.4.1 Edit the Scheduler pod specification file /etc/kubernetes/manifests/kube-scheduler.yaml file
 on the master node and set the below parameter.
 --profiling=false
 
 
-== Summary master ==
-45 checks PASS
-10 checks FAIL
-10 checks WARN
+== Summary ==
+41 checks PASS
+13 checks FAIL
+11 checks WARN
 0 checks INFO
+[INFO] 3 Control Plane Configuration
+[INFO] 3.1 Authentication and Authorization
+[WARN] 3.1.1 Client certificate authentication should not be used for users (Not Scored)
+[INFO] 3.2 Logging
+[WARN] 3.2.1 Ensure that a minimal audit policy is created (Scored)
+[WARN] 3.2.2 Ensure that the audit policy covers key security concerns (Not Scored)
 
+== Remediations ==
+3.1.1 Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+implemented in place of client certificates.
+
+3.2.1 Create an audit policy file for your cluster.
+
+3.2.2 Consider modification of the audit policy in use on the cluster to include these items, at a
+minimum.
+
+
+== Summary ==
+0 checks PASS
+0 checks FAIL
+3 checks WARN
+0 checks INFO
 [INFO] 2 Etcd Node Configuration
 [INFO] 2 Etcd Node Configuration Files
 [PASS] 2.1 Ensure that the --cert-file and --key-file arguments are set as appropriate (Scored)
@@ -181,52 +218,28 @@ on the master node and set the below parameter.
 [PASS] 2.6 Ensure that the --peer-auto-tls argument is not set to true (Scored)
 [PASS] 2.7 Ensure that a unique Certificate Authority is used for etcd (Not Scored)
 
-== Summary etcd ==
+== Summary ==
 7 checks PASS
 0 checks FAIL
 0 checks WARN
 0 checks INFO
-
-[INFO] 3 Control Plane Configuration
-[INFO] 3.1 Authentication and Authorization
-[WARN] 3.1.1 Client certificate authentication should not be used for users (Not Scored)
-[INFO] 3.2 Logging
-[FAIL] 3.2.1 Ensure that a minimal audit policy is created (Scored)
-[WARN] 3.2.2 Ensure that the audit policy covers key security concerns (Not Scored)
-
-== Remediations controlplane ==
-3.1.1 Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
-implemented in place of client certificates.
-
-3.2.1 Create an audit policy file for your cluster.
-
-3.2.2 Consider modification of the audit policy in use on the cluster to include these items, at a
-minimum.
-
-
-== Summary controlplane ==
-0 checks PASS
-1 checks FAIL
-2 checks WARN
-0 checks INFO
-
 [INFO] 4 Worker Node Security Configuration
 [INFO] 4.1 Worker Node Configuration Files
 [PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Scored)
 [PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Scored)
-[PASS] 4.1.3 Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)
-[PASS] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)
+[FAIL] 4.1.3 Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)
+[FAIL] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)
 [PASS] 4.1.5 Ensure that the kubelet.conf file permissions are set to 644 or more restrictive (Scored)
 [PASS] 4.1.6 Ensure that the kubelet.conf file ownership is set to root:root (Scored)
-[PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
+[WARN] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)
 [PASS] 4.1.8 Ensure that the client certificate authorities file ownership is set to root:root (Scored)
 [PASS] 4.1.9 Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)
 [PASS] 4.1.10 Ensure that the kubelet configuration file ownership is set to root:root (Scored)
 [INFO] 4.2 Kubelet
-[PASS] 4.2.1 Ensure that the anonymous-auth argument is set to false (Scored)
+[PASS] 4.2.1 Ensure that the --anonymous-auth argument is set to false (Scored)
 [PASS] 4.2.2 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)
 [PASS] 4.2.3 Ensure that the --client-ca-file argument is set as appropriate (Scored)
-[PASS] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Scored)
+[FAIL] 4.2.4 Ensure that the --read-only-port argument is set to 0 (Scored)
 [PASS] 4.2.5 Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)
 [FAIL] 4.2.6 Ensure that the --protect-kernel-defaults argument is set to true (Scored)
 [PASS] 4.2.7 Ensure that the --make-iptables-util-chains argument is set to true (Scored)
@@ -234,10 +247,27 @@ minimum.
 [WARN] 4.2.9 Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Not Scored)
 [FAIL] 4.2.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)
 [PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Scored)
-[PASS] 4.2.12 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
+[FAIL] 4.2.12 Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)
 [PASS] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)
 
-== Remediations node ==
+== Remediations ==
+4.1.3 Run the below command (based on the file location on your system) on the each worker node.
+For example,
+chmod 644 /etc/kubernetes/proxy.conf
+
+4.1.4 Run the below command (based on the file location on your system) on the each worker node.
+For example, chown root:root /etc/kubernetes/proxy.conf
+
+4.1.7 audit test did not run: There are no tests
+4.2.4 If using a Kubelet config file, edit the file to set readOnlyPort to 0.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+--read-only-port=0
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -267,13 +297,19 @@ Based on your system, restart the kubelet service. For example:
 systemctl daemon-reload
 systemctl restart kubelet.service
 
+4.2.12 Edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
+--feature-gates=RotateKubeletServerCertificate=true
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
 
-== Summary node ==
-20 checks PASS
-2 checks FAIL
-1 checks WARN
+
+== Summary ==
+15 checks PASS
+6 checks FAIL
+2 checks WARN
 0 checks INFO
-
 [INFO] 5 Kubernetes Policies
 [INFO] 5.1 RBAC and Service Accounts
 [WARN] 5.1.1 Ensure that the cluster-admin role is only used where required (Not Scored)
@@ -300,13 +336,13 @@ systemctl restart kubelet.service
 [WARN] 5.4.2 Consider external secret storage (Not Scored)
 [INFO] 5.5 Extensible Admission Control
 [WARN] 5.5.1 Configure Image Provenance using ImagePolicyWebhook admission controller (Not Scored)
-[INFO] 5.7 General Policies
-[WARN] 5.7.1 Create administrative boundaries between resources using namespaces (Not Scored)
-[WARN] 5.7.2 Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)
-[WARN] 5.7.3 Apply Security Context to Your Pods and Containers (Not Scored)
-[WARN] 5.7.4 The default namespace should not be used (Scored)
+[INFO] 5.6 General Policies
+[WARN] 5.6.1 Create administrative boundaries between resources using namespaces (Not Scored)
+[WARN] 5.6.2 Ensure that the seccomp profile is set to docker/default in your pod definitions (Not Scored)
+[WARN] 5.6.3 Apply Security Context to Your Pods and Containers (Not Scored)
+[WARN] 5.6.4 The default namespace should not be used (Scored)
 
-== Remediations policies ==
+== Remediations ==
 5.1.1 Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
 if they need this role or if they could use a role with fewer privileges.
 Where possible, first bind users to a lower privileged role and then remove the
@@ -371,10 +407,10 @@ secrets management solution.
 
 5.5.1 Follow the Kubernetes documentation and setup image provenance.
 
-5.7.1 Follow the documentation and create namespaces for objects in your deployment as you need
+5.6.1 Follow the documentation and create namespaces for objects in your deployment as you need
 them.
 
-5.7.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+5.6.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
 would need to enable alpha features in the apiserver by passing "--feature-
 gates=AllAlpha=true" argument.
 Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
@@ -395,22 +431,16 @@ spec:
     - name: trustworthy-container
       image: sotrustworthy:latest
 
-5.7.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
+5.6.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
 suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
 Containers.
 
-5.7.4 Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+5.6.4 Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
 resources and that all new resources are created in a specific namespace.
 
 
-== Summary policies ==
+== Summary ==
 0 checks PASS
 0 checks FAIL
 24 checks WARN
-0 checks INFO
-
-== Summary total ==
-72 checks PASS
-13 checks FAIL
-37 checks WARN
 0 checks INFO

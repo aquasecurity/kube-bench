@@ -34,7 +34,7 @@ type FilterOpts struct {
 
 var (
 	envVarsPrefix       = "KUBE_BENCH"
-	defaultKubeVersion  = "1.18"
+	defaultKubeVersion  = "1.11"
 	kubeVersion         string
 	benchmarkVersion    string
 	cfgFile             string
@@ -42,24 +42,19 @@ var (
 	jsonFmt             bool
 	junitFmt            bool
 	pgSQL               bool
-	aSFF                bool
 	masterFile          = "master.yaml"
 	nodeFile            = "node.yaml"
 	etcdFile            = "etcd.yaml"
 	controlplaneFile    = "controlplane.yaml"
 	policiesFile        = "policies.yaml"
 	managedservicesFile = "managedservices.yaml"
-	exitCode            int
 	noResults           bool
 	noSummary           bool
 	noRemediations      bool
-	skipIds             string
-	noTotals            bool
 	filterOpts          FilterOpts
 	includeTestOutput   bool
 	outputFile          string
 	configFileError     error
-	controlsCollection  []*check.Controls
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -68,75 +63,47 @@ var RootCmd = &cobra.Command{
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		benchmarkVersion, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
-		glog.V(1).Infof("Running checks for benchmark %v", bv)
 
 		if isMaster() {
-			glog.V(1).Info("== Running master checks ==")
-			runChecks(check.MASTER, loadConfig(check.MASTER, bv))
+			glog.V(1).Info("== Running master checks ==\n")
+			runChecks(check.MASTER, loadConfig(check.MASTER))
 
 			// Control Plane is only valid for CIS 1.5 and later,
 			// this a gatekeeper for previous versions
-			valid, err := validTargets(bv, []string{string(check.CONTROLPLANE)}, viper.GetViper())
-			if err != nil {
-				exitWithError(fmt.Errorf("error validating targets: %v", err))
+			if validTargets(benchmarkVersion, []string{string(check.CONTROLPLANE)}) {
+				glog.V(1).Info("== Running control plane checks ==\n")
+				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE))
 			}
-			if valid {
-				glog.V(1).Info("== Running control plane checks ==")
-				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv))
-			}
-		} else {
-			glog.V(1).Info("== Skipping master checks ==")
 		}
 
 		// Etcd is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		valid, err := validTargets(bv, []string{string(check.ETCD)}, viper.GetViper())
-		if err != nil {
-			exitWithError(fmt.Errorf("error validating targets: %v", err))
-		}
-		if valid && isEtcd() {
-			glog.V(1).Info("== Running etcd checks ==")
-			runChecks(check.ETCD, loadConfig(check.ETCD, bv))
-		} else {
-			glog.V(1).Info("== Skipping etcd checks ==")
+		if validTargets(benchmarkVersion, []string{string(check.ETCD)}) && isEtcd() {
+			glog.V(1).Info("== Running etcd checks ==\n")
+			runChecks(check.ETCD, loadConfig(check.ETCD))
 		}
 
-		glog.V(1).Info("== Running node checks ==")
-		runChecks(check.NODE, loadConfig(check.NODE, bv))
+		glog.V(1).Info("== Running node checks ==\n")
+		runChecks(check.NODE, loadConfig(check.NODE))
 
 		// Policies is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
-		valid, err = validTargets(bv, []string{string(check.POLICIES)}, viper.GetViper())
-		if err != nil {
-			exitWithError(fmt.Errorf("error validating targets: %v", err))
-		}
-		if valid {
-			glog.V(1).Info("== Running policies checks ==")
-			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv))
-		} else {
-			glog.V(1).Info("== Skipping policies checks ==")
+		if validTargets(benchmarkVersion, []string{string(check.POLICIES)}) {
+			glog.V(1).Info("== Running policies checks ==\n")
+			runChecks(check.POLICIES, loadConfig(check.POLICIES))
 		}
 
 		// Managedservices is only valid for GKE 1.0 and later,
 		// this a gatekeeper for previous versions.
-		valid, err = validTargets(bv, []string{string(check.MANAGEDSERVICES)}, viper.GetViper())
-		if err != nil {
-			exitWithError(fmt.Errorf("error validating targets: %v", err))
-		}
-		if valid {
-			glog.V(1).Info("== Running managed services checks ==")
-			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
-		} else {
-			glog.V(1).Info("== Skipping managed services checks ==")
+		if validTargets(benchmarkVersion, []string{string(check.MANAGEDSERVICES)}) {
+			glog.V(1).Info("== Running managed services checks ==\n")
+			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES))
 		}
 
-		writeOutput(controlsCollection)
-		exitCode := exitCodeSelection(controlsCollection)
-		os.Exit(exitCode)
 	},
 }
 
@@ -159,18 +126,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Output control
-	RootCmd.PersistentFlags().IntVar(&exitCode, "exit-code", 0, "Specify the exit code for when checks fail")
 	RootCmd.PersistentFlags().BoolVar(&noResults, "noresults", false, "Disable printing of results section")
 	RootCmd.PersistentFlags().BoolVar(&noSummary, "nosummary", false, "Disable printing of summary section")
 	RootCmd.PersistentFlags().BoolVar(&noRemediations, "noremediations", false, "Disable printing of remediations section")
-	RootCmd.PersistentFlags().BoolVar(&noTotals, "nototals", false, "Disable printing of totals for failed, passed, ... checks across all sections")
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
-	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
-	RootCmd.PersistentFlags().StringVar(&skipIds, "skip", "", "List of comma separated values of checks to be skipped")
 	RootCmd.PersistentFlags().BoolVar(&includeTestOutput, "include-test-output", false, "Prints the actual result when test fails")
 	RootCmd.PersistentFlags().StringVar(&outputFile, "outputfile", "", "Writes the JSON results to output file")
 
@@ -193,10 +156,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
-	if err := goflag.Set("logtostderr", "true"); err != nil {
-		fmt.Printf("unable to set logtostderr: %+v\n", err)
-		os.Exit(-1)
-	}
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
 	})

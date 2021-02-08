@@ -39,9 +39,6 @@ const (
 	// INFO informational message
 	INFO State = "INFO"
 
-	// SKIP for when a check should be skipped.
-	SKIP = "skip"
-
 	// MASTER a master node
 	MASTER NodeType = "master"
 	// NODE a node
@@ -65,26 +62,20 @@ const (
 // Check contains information about a recommendation in the
 // CIS Kubernetes document.
 type Check struct {
-	ID                string   `yaml:"id" json:"test_number"`
-	Text              string   `json:"test_desc"`
-	Audit             string   `json:"audit"`
-	AuditEnv          string   `yaml:"audit_env"`
-	AuditConfig       string   `yaml:"audit_config"`
-	Type              string   `json:"type"`
-	Tests             *tests   `json:"-"`
-	Set               bool     `json:"-"`
-	Remediation       string   `json:"remediation"`
-	TestInfo          []string `json:"test_info"`
-	State             `json:"status"`
-	ActualValue       string `json:"actual_value"`
-	Scored            bool   `json:"scored"`
-	IsMultiple        bool   `yaml:"use_multiple_values"`
-	ExpectedResult    string `json:"expected_result"`
-	Reason            string `json:"reason,omitempty"`
-	AuditOutput       string `json:"-"`
-	AuditEnvOutput    string `json:"-"`
-	AuditConfigOutput string `json:"-"`
-	DisableEnvTesting bool   `json:"-"`
+	ID             string   `yaml:"id" json:"test_number"`
+	Text           string   `json:"test_desc"`
+	Audit          string   `json:"audit"`
+	AuditConfig    string   `yaml:"audit_config"`
+	Type           string   `json:"type"`
+	Tests          *tests   `json:"omit"`
+	Set            bool     `json:"omit"`
+	Remediation    string   `json:"remediation"`
+	TestInfo       []string `json:"test_info"`
+	State          `json:"status"`
+	ActualValue    string `json:"actual_value"`
+	Scored         bool   `json:"scored"`
+	ExpectedResult string `json:"expected_result"`
+	Reason         string `json:"reason,omitempty"`
 }
 
 // Runner wraps the basic Run method.
@@ -107,17 +98,18 @@ func (r *defaultRunner) Run(c *Check) State {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) run() State {
+
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
-	if c.Scored && strings.TrimSpace(c.Type) == "" && c.Tests == nil {
+	if c.Scored && len(strings.TrimSpace(c.Type)) == 0 && c.Tests == nil {
 		c.Reason = "There are no tests"
 		c.State = WARN
 		return c.State
 	}
 
 	// If check type is skip, force result to INFO
-	if c.Type == SKIP {
+	if c.Type == "skip" {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
 		return c.State
@@ -130,46 +122,63 @@ func (c *Check) run() State {
 		return c.State
 	}
 
-	// If there aren't any tests defined this is a FAIL or WARN
-	if c.Tests == nil || len(c.Tests.TestItems) == 0 {
-		c.Reason = "No tests defined"
-		if c.Scored {
-			c.State = FAIL
-		} else {
-			c.State = WARN
-		}
+	lastCommand := c.Audit
+	hasAuditConfig := c.AuditConfig != ""
+
+	state, finalOutput, retErrmsgs := performTest(c.Audit, c.Tests)
+	if len(state) > 0 {
+		c.Reason = retErrmsgs
+		c.State = state
 		return c.State
 	}
+	errmsgs := retErrmsgs
 
-	// Command line parameters override the setting in the config file, so if we get a good result from the Audit command that's all we need to run
-	var finalOutput *testOutput
-	var lastCommand string
+	// If something went wrong with the 'Audit' command
+	// and an 'AuditConfig' command was provided, use it to
+	// execute tests
+	if (finalOutput == nil || !finalOutput.testResult) && hasAuditConfig {
+		lastCommand = c.AuditConfig
 
-	lastCommand, err := c.runAuditCommands()
-	if err == nil {
-		finalOutput, err = c.execute()
-	}
-
-	if finalOutput != nil {
-		if finalOutput.testResult {
-			c.State = PASS
-		} else {
-			if c.Scored {
-				c.State = FAIL
-			} else {
-				c.State = WARN
-			}
+		nItems := len(c.Tests.TestItems)
+		// The reason we're creating a copy of the "tests"
+		// is so that tests can executed
+		// with the AuditConfig command
+		// against the Path only
+		currentTests := &tests{
+			BinOp:     c.Tests.BinOp,
+			TestItems: make([]*testItem, nItems),
 		}
 
-		c.ActualValue = finalOutput.actualResult
-		c.ExpectedResult = finalOutput.ExpectedResult
+		for i := 0; i < nItems; i++ {
+			ti := c.Tests.TestItems[i]
+			nti := &testItem{
+				// Path is used to test Command Param values
+				// AuditConfig ==> Path
+				Path:    ti.Path,
+				Set:     ti.Set,
+				Compare: ti.Compare,
+			}
+			currentTests.TestItems[i] = nti
+		}
+
+		state, finalOutput, retErrmsgs = performTest(c.AuditConfig, currentTests)
+		if len(state) > 0 {
+			c.Reason = retErrmsgs
+			c.State = state
+			return c.State
+		}
+		errmsgs += retErrmsgs
 	}
 
-	if err != nil {
-		c.Reason = err.Error()
+	if finalOutput != nil && finalOutput.testResult {
+		c.State = PASS
+		c.ActualValue = finalOutput.actualResult
+		c.ExpectedResult = finalOutput.ExpectedResult
+	} else {
 		if c.Scored {
 			c.State = FAIL
 		} else {
+			c.Reason = errmsgs
 			c.State = WARN
 		}
 	}
@@ -180,117 +189,39 @@ func (c *Check) run() State {
 		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
 	}
 
-	if c.Reason != "" {
-		glog.V(2).Info(c.Reason)
+	if errmsgs != "" {
+		glog.V(2).Info(errmsgs)
 	}
 	return c.State
 }
 
-func (c *Check) runAuditCommands() (lastCommand string, err error) {
-	// Always run auditEnvOutput if needed
-	if c.AuditEnv != "" {
-		c.AuditEnvOutput, err = runAudit(c.AuditEnv)
-		if err != nil {
-			return c.AuditEnv, err
-		}
+func performTest(audit string, tests *tests) (State, *testOutput, string) {
+	if len(strings.TrimSpace(audit)) == 0 {
+		return "", failTestItem("missing command"), "missing audit command"
 	}
 
-	// Run the audit command and auditConfig commands, if present
-	c.AuditOutput, err = runAudit(c.Audit)
-	if err != nil {
-		return c.Audit, err
-	}
-
-	c.AuditConfigOutput, err = runAudit(c.AuditConfig)
-	return c.AuditConfig, err
-}
-
-func (c *Check) execute() (finalOutput *testOutput, err error) {
-	finalOutput = &testOutput{}
-
-	ts := c.Tests
-	res := make([]testOutput, len(ts.TestItems))
-	expectedResultArr := make([]string, len(res))
-
-	glog.V(3).Infof("%d tests", len(ts.TestItems))
-	for i, t := range ts.TestItems {
-
-		t.isMultipleOutput = c.IsMultiple
-
-		// Try with the auditOutput first, and if that's not found, try the auditConfigOutput
-		t.auditUsed = AuditCommand
-		result := *(t.execute(c.AuditOutput))
-    
-		// Check for AuditConfigOutput only if AuditConfig is set
-		if !result.flagFound && c.AuditConfig != "" {
-			//t.isConfigSetting = true
-			t.auditUsed = AuditConfig
-			result = *(t.execute(c.AuditConfigOutput))
-			if !result.flagFound && t.Env != "" {
-				t.auditUsed = AuditEnv
-				result = *(t.execute(c.AuditEnvOutput))
-			}
-		}
-
-		if !result.flagFound && t.Env != "" {
-			t.auditUsed = AuditEnv
-			result = *(t.execute(c.AuditEnvOutput))
-		}
-		res[i] = result
-		expectedResultArr[i] = res[i].ExpectedResult
-	}
-
-	var result bool
-	// If no binary operation is specified, default to AND
-	switch ts.BinOp {
-	default:
-		glog.V(2).Info(fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp))
-		finalOutput.actualResult = fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp)
-		return finalOutput, fmt.Errorf("unknown binary operator for tests %s", ts.BinOp)
-	case and, "":
-		result = true
-		for i := range res {
-			result = result && res[i].testResult
-		}
-		// Generate an AND expected result
-		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " AND ")
-
-	case or:
-		result = false
-		for i := range res {
-			result = result || res[i].testResult
-		}
-		// Generate an OR expected result
-		finalOutput.ExpectedResult = strings.Join(expectedResultArr, " OR ")
-	}
-
-	finalOutput.testResult = result
-	finalOutput.actualResult = res[0].actualResult
-
-	glog.V(3).Infof("Returning from execute on tests: finalOutput %#v", finalOutput)
-	return finalOutput, nil
-}
-
-func runAudit(audit string) (output string, err error) {
 	var out bytes.Buffer
+	errmsgs := runAudit(audit, &out)
 
-	audit = strings.TrimSpace(audit)
-	if len(audit) == 0 {
-		return output, err
+	finalOutput := tests.execute(out.String())
+	if finalOutput == nil {
+		errmsgs += fmt.Sprintf("Final output is <<EMPTY>>. Failed to run: %s\n", audit)
 	}
+
+	return "", finalOutput, errmsgs
+}
+
+func runAudit(audit string, out *bytes.Buffer) string {
+	errmsgs := ""
 
 	cmd := exec.Command("/bin/sh")
 	cmd.Stdin = strings.NewReader(audit)
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	err = cmd.Run()
-	output = out.String()
-
-	if err != nil {
-		err = fmt.Errorf("failed to run: %q, output: %q, error: %s", audit, output, err)
-	} else {
-		glog.V(3).Infof("Command %q\n - Output:\n %q", audit, output)
-
+	cmd.Stdout = out
+	cmd.Stderr = out
+	if err := cmd.Run(); err != nil {
+		errmsgs += fmt.Sprintf("failed to run: %q, output: %q, error: %s\n", audit, out.String(), err)
 	}
-	return output, err
+
+	glog.V(3).Infof("Command %q - Output:\n\n %q\n - Error Messages:%q \n", audit, out.String(), errmsgs)
+	return errmsgs
 }
