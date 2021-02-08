@@ -81,6 +81,39 @@ func TestCheck_Run(t *testing.T) {
 	}
 }
 
+func TestCheckAuditEnv(t *testing.T){
+	passingCases := []*Check{
+		controls.Groups[2].Checks[0],
+		controls.Groups[2].Checks[2],
+		controls.Groups[2].Checks[3],
+		controls.Groups[2].Checks[4],
+	}
+
+	failingCases := []*Check{
+		controls.Groups[2].Checks[1],
+		controls.Groups[2].Checks[5],
+		controls.Groups[2].Checks[6],
+	}
+
+	for _, c := range passingCases {
+		t.Run(c.Text, func(t *testing.T) {
+			c.run()
+			if c.State != "PASS" {
+				t.Errorf("Should PASS, got: %v", c.State)
+			}
+		})
+	}
+
+	for _, c := range failingCases {
+		t.Run(c.Text, func(t *testing.T) {
+			c.run()
+			if c.State != "FAIL" {
+				t.Errorf("Should FAIL, got: %v", c.State)
+			}
+		})
+	}
+}
+
 func TestCheckAuditConfig(t *testing.T) {
 
 	passingCases := []*Check{

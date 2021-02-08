@@ -223,7 +223,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c permissions=%a /etc/kubernetes/scheduler.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -234,12 +234,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 /etc/kubernetes/scheduler.conf
+          chmod 644 $schedulerkubeconfig
         scored: true
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/scheduler.conf; then stat -c %U:%G /etc/kubernetes/scheduler.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -250,12 +250,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root /etc/kubernetes/scheduler.conf
+          chown root:root $schedulerkubeconfig
         scored: true
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c permissions=%a /etc/kubernetes/controller-manager.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -266,12 +266,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod 644 /etc/kubernetes/controller-manager.conf
+          chmod 644 $controllermanagerkubeconfig
         scored: true
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Scored)"
-        audit: "/bin/sh -c 'if test -e /etc/kubernetes/controller-manager.conf; then stat -c %U:%G /etc/kubernetes/controller-manager.conf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -282,7 +282,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chown root:root /etc/kubernetes/controller-manager.conf
+          chown root:root $controllermanagerkubeconfig
         scored: true
 
       - id: 1.1.19
@@ -908,7 +908,7 @@ groups:
           test_items:
             - flag: "--tls-cipher-suites"
               compare:
-                op: has
+                op: valid_elements
                 value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
               set: true
         remediation: |
@@ -997,12 +997,15 @@ groups:
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
+          bin_op: or
           test_items:
             - flag: "--feature-gates"
               compare:
-                op: eq
-                value: "RotateKubeletServerCertificate=true"
+                op: nothave
+                value: "RotateKubeletServerCertificate=false"
               set: true
+            - flag: "--feature-gates"
+              set: false
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.

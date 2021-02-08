@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -93,7 +94,7 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				glog.Warning(buildComponentMissingErrorMessage(nodetype, component, bins))
+				glog.V(1).Info(buildComponentMissingErrorMessage(nodetype, component, bins))
 				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
@@ -279,7 +280,7 @@ Alternatively, you can specify the version with --version
    kube-bench --version <VERSION> ...
 `
 
-func getKubeVersion() (string, error) {
+func getKubeVersion() (*KubeVersion, error) {
 
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
 		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
@@ -300,7 +301,7 @@ func getKubeVersion() (string, error) {
 			}
 
 			glog.Warning(missingKubectlKubeletMessage)
-			return "", fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
+			return nil, fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
@@ -308,8 +309,8 @@ func getKubeVersion() (string, error) {
 	return getKubeVersionFromKubectl(), nil
 }
 
-func getKubeVersionFromKubectl() string {
-	cmd := exec.Command("kubectl", "version", "--short")
+func getKubeVersionFromKubectl() *KubeVersion {
+	cmd := exec.Command("kubectl", "version", "-o", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		glog.V(2).Info(err)
@@ -318,7 +319,7 @@ func getKubeVersionFromKubectl() string {
 	return getVersionFromKubectlOutput(string(out))
 }
 
-func getKubeVersionFromKubelet() string {
+func getKubeVersionFromKubelet() *KubeVersion {
 	cmd := exec.Command("kubelet", "--version")
 	out, err := cmd.CombinedOutput()
 
@@ -329,31 +330,42 @@ func getKubeVersionFromKubelet() string {
 	return getVersionFromKubeletOutput(string(out))
 }
 
-func getVersionFromKubectlOutput(s string) string {
-	serverVersionRe := regexp.MustCompile(`Server Version: v(\d+.\d+)`)
-	subs := serverVersionRe.FindStringSubmatch(s)
-	if len(subs) < 2 {
+func getVersionFromKubectlOutput(s string) *KubeVersion {
+	glog.V(2).Info(s)
+	type versionResult struct {
+		ServerVersion VersionResponse
+	}
+	vrObj := &versionResult{}
+	if err := json.Unmarshal([]byte(s), vrObj); err != nil {
+		glog.V(2).Info(err)
 		if strings.Contains(s, "The connection to the server") {
 			msg := fmt.Sprintf(`Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version %s`, defaultKubeVersion)
 			fmt.Fprintln(os.Stderr, msg)
 		}
 		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
-		return defaultKubeVersion
+		return &KubeVersion{baseVersion: defaultKubeVersion}
 	}
-	return subs[1]
+	sv := vrObj.ServerVersion
+	return &KubeVersion{
+		Major:      sv.Major,
+		Minor:      sv.Minor,
+		GitVersion: sv.GitVersion,
+	}
 }
 
-func getVersionFromKubeletOutput(s string) string {
+func getVersionFromKubeletOutput(s string) *KubeVersion {
+	glog.V(2).Info(s)
 	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
 		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubelet, using default version: %s", defaultKubeVersion))
-		return defaultKubeVersion
+		return &KubeVersion{baseVersion: defaultKubeVersion}
 	}
-	return subs[1]
+	return &KubeVersion{baseVersion: subs[1]}
 }
 
-func makeSubstitutions(s string, ext string, m map[string]string) string {
+func makeSubstitutions(s string, ext string, m map[string]string) (string, []string) {
+	substitutions := make([]string, 0)
 	for k, v := range m {
 		subst := "$" + k + ext
 		if v == "" {
@@ -361,10 +373,14 @@ func makeSubstitutions(s string, ext string, m map[string]string) string {
 			continue
 		}
 		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		beforeS := s
 		s = multiWordReplace(s, subst, v)
+		if beforeS != s {
+			substitutions = append(substitutions, v)
+		}
 	}
 
-	return s
+	return s, substitutions
 }
 
 func isEmpty(str string) bool {
@@ -402,4 +418,32 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 	}
 
 	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
+}
+
+func getPlatformName() string {
+	kv, err := getKubeVersion()
+	if err != nil {
+		glog.V(2).Info(err)
+		return ""
+	}
+	return getPlatformNameFromVersion(kv.GitVersion)
+}
+
+func getPlatformNameFromVersion(s string) string {
+	versionRe := regexp.MustCompile(`v\d+\.\d+\.\d+-(\w+)(?:[.\-])\w+`)
+	subs := versionRe.FindStringSubmatch(s)
+	if len(subs) < 2 {
+		return ""
+	}
+	return subs[1]
+}
+
+func getPlatformBenchmarkVersion(platform string) string {
+	switch platform {
+	case "eks":
+		return "eks-1.0"
+	case "gke":
+		return "gke-1.0"
+	}
+	return ""
 }

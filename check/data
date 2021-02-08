@@ -327,6 +327,53 @@ groups:
               op: eq
               value: false
             set: true
+    - id: 29
+      text: "flag is set (via env)"
+      tests:
+        test_items:
+          - flag: "--allow-privileged"
+            env: "ALLOW_PRIVILEGED"
+            set: true
+
+    - id: 30
+      text: "flag is not set (via env)"
+      tests:
+        test_items:
+          - flag: "--basic-auth"
+            env: "BASIC_AUTH"
+            set: false
+
+    - id: 31
+      text: "flag value is set to some value (via env)"
+      tests:
+        test_items:
+          - flag: "--insecure-port"
+            env: "INSECURE_PORT"
+            compare:
+              op: eq
+              value: 0
+            set: true
+
+    - id: 32
+      text: "flag value is greater than or equal some number (via env)"
+      tests:
+        test_items:
+          - flag: "--audit-log-maxage"
+            env: "AUDIT_LOG_MAXAGE"
+            compare:
+              op: gte
+              value: 30
+            set: true
+
+    - id: 33
+      text: "flag value is less than some number (via env)"
+      tests:
+        test_items:
+          - env: "MAX_BACKLOG"
+            compare:
+              op: lt
+              value: 30
+            set: true
 
 - id: 2.1
   text: "audit and audit_config commands"
@@ -556,4 +603,105 @@ groups:
           - flag: "--read-only-port"
             path: '{.readOnlyPort}'
             set: false
+      scored: true
+
+- id: 3.1
+  text: "audit_env commands"
+  checks:
+    - id: 0
+      text: "audit fails to find flag, audit_env finds flag -> pass"
+      audit: "echo in=incorrect"
+      audit_env: "echo flag=correct"
+      tests:
+        test_items:
+          - flag: "flag"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 1
+      text: "audit fails to find flag, audit_env finds flag and fails -> fail"
+      audit: "echo in=wrong"
+      audit_env: "echo flag=wrong"
+      tests:
+        test_items:
+          - flag: "flag"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 2
+      text: "audit finds correct flag, audit_env is incorrect -> pass"
+      audit: "echo flag=correct"
+      audit_env: "echo flag=incorrect"
+      tests:
+        test_items:
+          - flag: "flag"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 3
+      text: "audit doesn't flag flag, audit_config finds it and passes, audit_env is not present -> pass"
+      audit: "echo in=correct"
+      audit_config: "echo 'flag: correct'"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 4
+      text: "audit doesn't flag flag, audit_config doesn't find flag, audit_env finds and passes -> pass"
+      audit: "echo in=correct"
+      audit_config: "echo 'in: correct'"
+      audit_env: "echo flag=correct"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 5
+      text: "audit doesn't find flag, audit_config doesn't find flag, audit_env finds and fails -> fails"
+      audit: "echo in=correct"
+      audit_config: "echo 'in: correct'"
+      audit_env: "echo flag=incorrect"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
+      scored: true
+    - id: 6
+      text: "audit finds flag and fails, audit_config finds flag and fails, audit_env finds and passes -> fails"
+      audit: "echo flag=incorrect"
+      audit_config: "echo 'flag: incorrect'"
+      audit_env: "echo flag=correct"
+      tests:
+        test_items:
+          - flag: "flag"
+            path: "{.flag}"
+            env: "flag"
+            compare:
+              op: eq
+              value: "correct"
+            set: true
       scored: true
