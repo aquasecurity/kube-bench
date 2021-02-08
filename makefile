@@ -57,7 +57,7 @@ build-docker:
 
 # unit tests
 tests:
-	GO111MODULE=on go test -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
+	GO111MODULE=on go test -vet all -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
 
 # integration tests using kind
 integration-tests: build-docker

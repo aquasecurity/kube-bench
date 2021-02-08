@@ -15,7 +15,9 @@ groups:
           bin_op: and
           test_items:
             - flag: "--cert-file"
+              env: "ETCD_CERT_FILE"
             - flag: "--key-file"
+              env: "ETCD_KEY_FILE"
         remediation: |
           Follow the etcd service documentation and configure TLS encryption.
           Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml
@@ -30,6 +32,7 @@ groups:
         tests:
           test_items:
             - flag: "--client-cert-auth"
+              env: "ETCD_CLIENT_CERT_AUTH"
               compare:
                 op: eq
                 value: true
@@ -46,8 +49,10 @@ groups:
           bin_op: or
           test_items:
             - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
               set: false
             - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
               compare:
                 op: eq
                 value: false
@@ -65,7 +70,9 @@ groups:
           bin_op: and
           test_items:
             - flag: "--peer-cert-file"
+              env: "ETCD_PEER_CERT_FILE"
             - flag: "--peer-key-file"
+              env: "ETCD_PEER_KEY_FILE"
         remediation: |
           Follow the etcd service documentation and configure peer TLS encryption as appropriate
           for your etcd cluster.
@@ -81,6 +88,7 @@ groups:
         tests:
           test_items:
             - flag: "--peer-client-cert-auth"
+              env: "ETCD_PEER_CLIENT_CERT_AUTH"
               compare:
                 op: eq
                 value: true
@@ -97,8 +105,10 @@ groups:
           bin_op: or
           test_items:
             - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
               set: false
             - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
               compare:
                 op: eq
                 value: false
@@ -114,6 +124,7 @@ groups:
         tests:
           test_items:
             - flag: "--trusted-ca-file"
+              env: "ETCD_TRUSTED_CA_FILE"
         remediation: |
           [Manual test]
           Follow the etcd documentation and create a dedicated certificate authority setup for the

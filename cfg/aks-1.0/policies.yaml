@@ -1,8 +1,8 @@
 ---
 controls:
-version: "eks-1.0"
+version: "aks-1.0"
 id: 4
-text: "Policies"
+text: "Kubernetes Policies"
 type: "policies"
 groups:
   - id: 4.1
@@ -42,14 +42,14 @@ groups:
         scored: false
 
       - id: 4.1.5
-        text: "Ensure that default service accounts are not actively used. (Not Scored)"
+        text: "Ensure that default service accounts are not actively used. (Scored)"
         type: "manual"
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
-        scored: false
+        scored: true
 
       - id: 4.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Not Scored)"
@@ -66,88 +66,84 @@ groups:
         text: "Minimize the admission of privileged containers (Not Scored)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that
-          the .spec.privileged field is omitted or set to false.
+          Implement Azure Policy to disallow running of privileged containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.2
-        text: "Minimize the admission of containers wishing to share the host process ID namespace (Not Scored)"
+        text: "Disallow shared usage of host namespaces."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostPID field is omitted or set to false.
+          Implement Azure Policy to disallow shared usage of host namespaces. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.3
-        text: "Minimize the admission of containers wishing to share the host IPC namespace (Not Scored)"
+        text: "Restrict all usage of host networking and ports"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostIPC field is omitted or set to false.
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.4
-        text: "Minimize the admission of containers wishing to share the host network namespace (Not Scored)"
+        text: "Restrict any usage of the host filesystem."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostNetwork field is omitted or set to false.
+          Implement Azure Policy to restrict all usage of host networking and ports. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.5
-        text: "Minimize the admission of containers with allowPrivilegeEscalation (Not Scored)"
+        text: "Restrict Linux capabilities to the default set."
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.allowPrivilegeEscalation field is omitted or set to false.
+          Implement Azure Policy to restrict Linux capabilities to the default set. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.6
-        text: "Minimize the admission of root containers (Not Scored)"
+        text: "Restrict usage of defined volume types"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
-          UIDs not including 0.
+          Implement Azure Policy to restrict usage of defined volume types. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.7
-        text: "Minimize the admission of containers with the NET_RAW capability (Not Scored)"
+        text: "Restrict the user and group IDs of the container"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
+          Implement Azure Policy to restrict the user and group IDs of the container. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.8
-        text: "Minimize the admission of containers with added capabilities (Not Scored)"
+        text: "Restrict allocating an FSGroup that owns the pod's volumes"
         type: "manual"
         remediation: |
-          Ensure that allowedCapabilities is not present in PSPs for the cluster unless
-          it is set to an empty array.
+          Implement Azure Policy to restrict allocating an FSGroup that owns the pod's volumes. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives
         scored: false
 
       - id: 4.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Not Scored)"
+        text: "Requires seccomp profile"
         type: "manual"
         remediation: |
-          Review the use of capabilities in applications running on your cluster. Where a namespace
-          contains applications which do not require any Linux capabities to operate consider adding
-          a PSP which forbids the admission of containers which do not drop all capabilities.
+          Implement Azure Policy to requires seccomp profile. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#built-in-policy-initiatives.
+        scored: false
+
+      - id: 4.2.10
+        text: "Define the AppArmor profile used by containers"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy to define the AppArmor profile used by containers. See https://docs.microsoft.com/en-us/azure/aks/use-pod-security-on-azure-policy#additional-optional-policies.
         scored: false
 
   - id: 4.3
-    text: "CNI Plugin"
+    text: "Network Policies and CNI"
     checks:
       - id: 4.3.1
-        text: "Ensure that the latest CNI version is used (Not Scored)"
+        text: "Ensure that the CNI in use supports Network Policies (Not Scored)"
         type: "manual"
         remediation: |
-          Review the documentation of AWS CNI plugin, and ensure latest CNI version is used.
+          To use a CNI plugin with Network Policy, enable Network Policy in AKS. See Recommendation 6.4.4.
         scored: false
 
       - id: 4.3.2
-        text: "Ensure that all Namespaces have Network Policies defined (Not Scored)"
+        text: "Ensure that all Namespaces have Network Policies defined (Scored)"
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
@@ -168,8 +164,7 @@ groups:
         text: "Consider external secret storage (Not Scored)"
         type: "manual"
         remediation: |
-          Refer to the secrets management options offered by your cloud provider or a third-party
-          secrets management solution.
+          Use the Azure Key Vault with Secrets Store CSI Driver to retrieve secrets from Azure Key Vault and load it in the pod. See https://github.com/Azure/secrets-store-csi-driver-provider-azure.
         scored: false
 
   - id: 4.5
@@ -229,9 +224,33 @@ groups:
         scored: false
 
       - id: 4.6.4
-        text: "The default namespace should not be used (Not Scored)"
+        text: "The default namespace should not be used (Scored)"
         type: "manual"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
+        scored: false
+
+  - id: 4.7
+    text: "Azure Policy Controls for ACR"
+    checks:
+      - id: 4.7.1
+        text: "Container Registry should use a virtual network service endpoint"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container Registry should use a virtual network service endpoint. See https://docs.microsoft.com/en-us/azure/container-registry/security-controls-policy#azure-security-benchmark
+        scored: false
+
+      - id: 4.7.2
+        text: "Container registries should not allow unrestricted network access"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container registries should not allow unrestricted network access. See https://docs.microsoft.com/en-us/azure/container-registry/container-registry-azure-policy#built-in-policy-definitions
+        scored: false
+
+      - id: 4.7.3
+        text: "Container registries should use private links"
+        type: "manual"
+        remediation: |
+          Implement Azure Policy for Container registries should use private links. See https://docs.microsoft.com/en-us/azure/container-registry/container-registry-azure-policy#built-in-policy-definitions
         scored: false
