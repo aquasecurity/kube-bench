@@ -121,11 +121,13 @@ node:
       - "/etc/kubernetes/kubelet.conf"
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/etc/kubernetes/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
     confs:
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
@@ -163,6 +165,7 @@ node:
       - /var/lib/kube-proxy/config.conf
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/etc/kubernetes/kubelet/config"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/proxy.config"
     svc:
