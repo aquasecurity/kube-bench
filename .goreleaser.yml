@@ -24,6 +24,7 @@ archives:
     name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
     files:
       - "cfg/**/*"
+      - "cfg/config.yaml"
 nfpms:
   -
     vendor: Aqua Security
@@ -32,6 +33,7 @@ nfpms:
     homepage: https://github.com/aquasecurity/kube-bench
     files:
       "cfg/**/*": "/etc/kube-bench/cfg"
+      "cfg/config.yaml": "/etc/kube-bench/cfg"
     formats:
       - deb
       - rpm
