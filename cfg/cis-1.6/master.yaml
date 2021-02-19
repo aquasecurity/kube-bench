@@ -122,7 +122,12 @@ groups:
           ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c permissions=%a
           find /var/lib/cni/networks -type f | xargs --no-run-if-empty stat -c permissions=%a
         use_multiple_values: true
-        test_items:
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
           - flag: "permissions"
             compare:
               op: bitmask
