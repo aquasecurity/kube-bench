@@ -21,11 +21,23 @@ spec:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
               readOnly: true
+            - name: var-lib-kubelet
+              mountPath: /var/lib/kubelet
+              readOnly: true
             - name: var-lib-kube-scheduler
               mountPath: /var/lib/kube-scheduler
               readOnly: true
             - name: var-lib-kube-controller-manager
               mountPath: /var/lib/kube-controller-manager
+              readOnly: true
+            - name: etc-systemd
+              mountPath: /etc/systemd
+              readOnly: true
+            - name: lib-systemd
+              mountPath: /lib/systemd/
+              readOnly: true
+            - name: srv-kubernetes
+              mountPath: /srv/kubernetes/
               readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
@@ -46,12 +58,24 @@ spec:
         - name: var-lib-etcd
           hostPath:
             path: "/var/lib/etcd"
+        - name: var-lib-kubelet
+          hostPath:
+            path: "/var/lib/kubelet"
         - name: var-lib-kube-scheduler
           hostPath:
             path: "/var/lib/kube-scheduler"
         - name: var-lib-kube-controller-manager
           hostPath:
             path: "/var/lib/kube-controller-manager"
+        - name: etc-systemd
+          hostPath:
+            path: "/etc/systemd"
+        - name: lib-systemd
+          hostPath:
+            path: "/lib/systemd"
+        - name: srv-kubernetes
+          hostPath:
+            path: "/srv/kubernetes"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"

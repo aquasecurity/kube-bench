@@ -12,8 +12,17 @@ spec:
           image: aquasec/kube-bench:latest
           command: ["kube-bench", "node"]
           volumeMounts:
+            - name: var-lib-etcd
+              mountPath: /var/lib/etcd
+              readOnly: true
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
+              readOnly: true
+            - name: var-lib-kube-scheduler
+              mountPath: /var/lib/kube-scheduler
+              readOnly: true
+            - name: var-lib-kube-controller-manager
+              mountPath: /var/lib/kube-controller-manager
               readOnly: true
             - name: etc-systemd
               mountPath: /etc/systemd
@@ -32,11 +41,26 @@ spec:
             - name: usr-bin
               mountPath: /usr/local/mount-from-host/bin
               readOnly: true
+            - name: etc-cni-netd
+              mountPath: /etc/cni/net.d/
+              readOnly: true
+            - name: opt-cni-bin
+              mountPath: /opt/cni/bin/
+              readOnly: true
       restartPolicy: Never
       volumes:
+        - name: var-lib-etcd
+          hostPath:
+            path: "/var/lib/etcd"
         - name: var-lib-kubelet
           hostPath:
             path: "/var/lib/kubelet"
+        - name: var-lib-kube-scheduler
+          hostPath:
+            path: "/var/lib/kube-scheduler"
+        - name: var-lib-kube-controller-manager
+          hostPath:
+            path: "/var/lib/kube-controller-manager"
         - name: etc-systemd
           hostPath:
             path: "/etc/systemd"
@@ -52,3 +76,9 @@ spec:
         - name: usr-bin
           hostPath:
             path: "/usr/bin"
+        - name: etc-cni-netd
+          hostPath:
+            path: "/etc/cni/net.d/"
+        - name: opt-cni-bin
+          hostPath:
+            path: "/opt/cni/bin/"
