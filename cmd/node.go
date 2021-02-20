@@ -37,7 +37,7 @@ var nodeCmd = &cobra.Command{
 		runChecks(check.NODE, filename)
 		writeOutput(controlsCollection)
 	},
-	Deprecated: "this command will be retired soon. Please use the `run` command with `--targets="node"` instead.",
+	Deprecated: "this command will be retired soon. Please use the `run` command with `--targets=node` instead.",
 }
 
 func init() {
