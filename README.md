@@ -100,18 +100,19 @@ kube-bench also attempts to identify the components running on the node, and use
 
 kube-bench uses the Kubernetes API, or access to the `kubectl` or `kubelet` executables to try to determine the Kubernetes version, and hence which benchmark to run. If you wish to override this, or if none of these methods are available, you can specify either the Kubernetes version or CIS Benchmark as a command line parameter.  
 
-You can specify `--benchmark` to run a specific CIS Benchmark version:
-
-```
-kube-bench --benchmark cis-1.5
-```
-
-Alternatively you can specify a particular version of Kubernetes by setting the `--version` flag or with the `KUBE_BENCH_VERSION` environment variable. The value of `--version` takes precedence over the value of `KUBE_BENCH_VERSION`.
+You can specify a particular version of Kubernetes by setting the `--version` flag or with the `KUBE_BENCH_VERSION` environment variable. The value of `--version` takes precedence over the value of `KUBE_BENCH_VERSION`.
 
 For example, run kube-bench using the tests for Kubernetes version 1.13:
 
 ```
 kube-bench --version 1.13
+```
+
+
+You can specify `--benchmark` to run a specific CIS Benchmark version:
+
+```
+kube-bench --benchmark cis-1.5
 ```
 
 **Note:**  It is an error to specify both `--version` and `--benchmark` flags together
@@ -122,13 +123,13 @@ If you want to run specific CIS Benchmark sections (i.e master, node, etcd, etc.
 you can use the `run --targets` subcommand.
 
 ```
-kube-bench --benchmark cis-1.5 run --targets master,node
+kube-bench run --targets master,node
 ```
 
 or
 
 ```
-kube-bench --benchmark cis-1.5 run --targets master,node,etcd,policies
+kube-bench run --targets master,node,etcd,policies
 ```
 
 Check the contents of the benchmark directory under `cfg` to see which targets are available for that benchmark. Each file except `config.yaml` represents a target (also known as a `control` in other parts of this documentation). 
