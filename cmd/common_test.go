@@ -195,17 +195,19 @@ func TestIsMaster(t *testing.T) {
 	defer restore()
 
 	for _, tc := range testCases {
-		cfgFile = tc.cfgFile
-		initConfig()
+		func() {
+			cfgFile = tc.cfgFile
+			initConfig()
 
-		oldGetBinariesFunc := getBinariesFunc
-		getBinariesFunc = tc.getBinariesFunc
-		defer func() {
-			getBinariesFunc = oldGetBinariesFunc
-			cfgFile = ""
+			oldGetBinariesFunc := getBinariesFunc
+			getBinariesFunc = tc.getBinariesFunc
+			defer func() {
+				getBinariesFunc = oldGetBinariesFunc
+				cfgFile = ""
+			}()
+
+			assert.Equal(t, tc.isMaster, isMaster(), tc.name)
 		}()
-
-		assert.Equal(t, tc.isMaster, isMaster(), tc.name)
 	}
 }
 
@@ -506,17 +508,19 @@ func TestIsEtcd(t *testing.T) {
 	defer restore()
 
 	for _, tc := range testCases {
-		cfgFile = tc.cfgFile
-		initConfig()
+		func() {
+			cfgFile = tc.cfgFile
+			initConfig()
 
-		oldGetBinariesFunc := getBinariesFunc
-		getBinariesFunc = tc.getBinariesFunc
-		defer func() {
-			getBinariesFunc = oldGetBinariesFunc
-			cfgFile = ""
+			oldGetBinariesFunc := getBinariesFunc
+			getBinariesFunc = tc.getBinariesFunc
+			defer func() {
+				getBinariesFunc = oldGetBinariesFunc
+				cfgFile = ""
+			}()
+
+			assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
 		}()
-
-		assert.Equal(t, tc.isEtcd, isEtcd(), tc.name)
 	}
 }
 

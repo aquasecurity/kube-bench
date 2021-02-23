@@ -52,7 +52,10 @@ var runCmd = &cobra.Command{
 
 		// Merge version-specific config if any.
 		path := filepath.Join(cfgDir, bv)
-		mergeConfig(path)
+		err = mergeConfig(path)
+		if err != nil {
+			fmt.Printf("Error in mergeConfig: %v\n", err)
+		}
 
 		err = run(targets, bv)
 		if err != nil {
