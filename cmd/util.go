@@ -291,7 +291,7 @@ func getKubeVersion() (*KubeVersion, error) {
 	_, err := exec.LookPath("kubectl")
 
 	if err != nil {
-		glog.V(3).Infof("Error locate kubectl %v", err)
+		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
 			glog.V(3).Infof("Error locate kubelet %v", err)
