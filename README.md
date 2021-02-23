@@ -196,7 +196,7 @@ The default labels applied to master nodes has changed since Kubernetes 1.11, so
 
 1. Create an AKS cluster(e.g. 1.13.7) with RBAC enabled, otherwise there would be 4 failures
 
-1. Use the [kubectl-enter plugin] (https://github.com/kvaps/kubectl-enter) to shell into a node
+1. Use the [kubectl-enter plugin](https://github.com/kvaps/kubectl-enter) to shell into a node
 `
 kubectl-enter {node-name}
 `
