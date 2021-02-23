@@ -294,7 +294,7 @@ func getKubeVersion() (*KubeVersion, error) {
 		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
-			glog.V(3).Infof("Error locate kubelet %v", err)
+			glog.V(3).Infof("Error locating kubelet: %s", err)
 			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
 			glog.V(3).Info("Search for kubelet binary all over filesystem")
 			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
