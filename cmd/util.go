@@ -300,7 +300,7 @@ func getKubeVersion() (*KubeVersion, error) {
 			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
-				glog.V(3).Infof("Found kubelet and query kubernetes version is: %v", string(out))
+				glog.V(3).Infof("Found kubelet and query kubernetes version is: %s", string(out))
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
 
