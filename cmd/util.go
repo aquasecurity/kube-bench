@@ -329,7 +329,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
-		glog.V(2).Info("Failed to query kubelet")
+		glog.V(2).Infof("Failed to query kubelet: %s", err)
 		glog.V(2).Info(err)
 	}
 
