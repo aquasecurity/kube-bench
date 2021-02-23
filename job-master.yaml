@@ -16,7 +16,7 @@ spec:
       containers:
         - name: kube-bench
           image: aquasec/kube-bench:latest
-          command: ["kube-bench", "master"]
+          command: ["kube-bench", "run", "--targets=master"]
           volumeMounts:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
