@@ -337,7 +337,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 }
 
 func getVersionFromKubectlOutput(s string) *KubeVersion {
-	glog.V(2).Infof(fmt.Sprintf("Kubectl output:\n%s", s))
+	glog.V(2).Infof("Kubectl output: %s", s)
 	type versionResult struct {
 		ServerVersion VersionResponse
 	}
