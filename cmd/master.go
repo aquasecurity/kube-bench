@@ -37,6 +37,7 @@ var masterCmd = &cobra.Command{
 		runChecks(check.MASTER, filename)
 		writeOutput(controlsCollection)
 	},
+	Deprecated: "this command will be retired soon. Please use the `run` command with `--targets=master` instead.",
 }
 
 func init() {
