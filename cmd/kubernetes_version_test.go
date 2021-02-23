@@ -11,8 +11,8 @@ import (
 	"testing"
 )
 
-func TestLoadCertficate(t *testing.T) {
-	tmp, err := ioutil.TempDir("", "TestFakeLoadCertficate")
+func TestLoadCertificate(t *testing.T) {
+	tmp, err := ioutil.TempDir("", "TestFakeLoadCertificate")
 	if err != nil {
 		t.Fatalf("unable to create temp directory: %v", err)
 	}
@@ -58,7 +58,7 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
-			tlsCert, err := loadCertficate(c.file)
+			tlsCert, err := loadCertificate(c.file)
 			if !c.fail {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
