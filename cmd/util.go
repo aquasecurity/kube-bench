@@ -317,7 +317,7 @@ func getKubeVersionFromKubectl() *KubeVersion {
 	cmd := exec.Command("kubectl", "version", "-o", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		glog.V(2).Info("Failed to query kubectl")
+		glog.V(2).Infof("Failed to query kubectl: %s", err)
 		glog.V(2).Info(err)
 	}
 
