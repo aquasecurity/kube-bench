@@ -126,7 +126,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 		// flag: somevalue
 		// --flag
 		// somevalue
-		// DOESN'T COVER
+		// DOESN'T COVER - use pathTestItem implementation of findValue() for this
 		// flag:
 		//	 - wehbook
 		pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
