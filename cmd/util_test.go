@@ -15,13 +15,15 @@
 package cmd
 
 import (
-	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -389,9 +391,9 @@ func TestGetServiceFiles(t *testing.T) {
 
 func TestMakeSubsitutions(t *testing.T) {
 	cases := []struct {
-		input string
-		subst map[string]string
-		exp   string
+		input        string
+		subst        map[string]string
+		exp          string
 		expectedSubs []string
 	}{
 		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that", expectedSubs: []string{"that"}},
@@ -404,6 +406,7 @@ func TestMakeSubsitutions(t *testing.T) {
 			if s != c.exp {
 				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
+			sort.Strings(subs)
 			assert.Equal(t, c.expectedSubs, subs)
 		})
 	}
