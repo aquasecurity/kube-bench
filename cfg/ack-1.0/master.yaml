@@ -146,7 +146,7 @@ groups:
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
         audit: |
           stat -c permissions=%a /var/lib/etcd/data.etcd || \
-          ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a 
+          ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a
         tests:
           test_items:
             - flag: "permissions"
