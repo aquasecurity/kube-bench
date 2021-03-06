@@ -304,7 +304,9 @@ func getKubeVersion() (*KubeVersion, error) {
 			}
 
 			glog.Warning(missingKubectlKubeletMessage)
-			return nil, fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
+			glog.V(1).Info("unable to find the programs kubectl or kubelet in the PATH")
+			glog.V(1).Infof("Cant detect version, assuming default %s", defaultKubeVersion)
+			return &KubeVersion{baseVersion: defaultKubeVersion}, nil 
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
