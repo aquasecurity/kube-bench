@@ -588,7 +588,7 @@ groups:
 
       - id: 1.34
         text: "Set the encryption provider to aescbc for etcd data at rest"
-        # Consider use $ substitution 
+
         audit_config: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs cat"
         tests:
           test_items:
@@ -706,7 +706,7 @@ groups:
                  - true
         scored: true
 
-      # Review 3.4
+
       - id: 3.4
         text: "Verify that the --service-account-private-key-file argument is set as appropriate"
         audit: |
@@ -727,7 +727,7 @@ groups:
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove service-account-private-key-file
         scored: true
 
-      # Review 3.5
+
       - id: 3.5
         text: "Verify that the --root-ca-file argument is set as appropriate"
         audit_config: "cat /etc/origin/master/master-config.yaml"
@@ -744,7 +744,7 @@ groups:
                 value: "ca-bundle.crt"
         remediation: |
           Reset to OpenShift defaults OpenShift starts kube-controller-manager with
-          root-ca-file=/etc/origin/master/ca-bundle.crt by default.  OpenShift Advanced
+          root-ca-file=/etc/origin/master/ca-bundle.crt by default. OpenShift Advanced
           Installation creates this certificate authority and configuration without any
           configuration required.
 
