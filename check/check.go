@@ -107,12 +107,14 @@ func (r *defaultRunner) Run(c *Check) State {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) run() State {
+	glog.V(3).Infof("-----   Running check %v   -----", c.ID)
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
 	if c.Scored && strings.TrimSpace(c.Type) == "" && c.Tests == nil {
 		c.Reason = "There are no tests"
 		c.State = WARN
+		glog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -120,6 +122,7 @@ func (c *Check) run() State {
 	if c.Type == SKIP {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
+		glog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -127,6 +130,7 @@ func (c *Check) run() State {
 	if c.Type == MANUAL {
 		c.Reason = "Test marked as a manual test"
 		c.State = WARN
+		glog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -138,6 +142,7 @@ func (c *Check) run() State {
 		} else {
 			c.State = WARN
 		}
+		glog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -172,12 +177,13 @@ func (c *Check) run() State {
 		} else {
 			c.State = WARN
 		}
+		glog.V(3).Info(c.Reason)
 	}
 
 	if finalOutput != nil {
-		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: %t State: %q \n", c.ID, lastCommand, finalOutput.testResult, c.State)
+		glog.V(3).Infof("Command: %q TestResult: %t State: %q \n", lastCommand, finalOutput.testResult, c.State)
 	} else {
-		glog.V(3).Infof("Check.ID: %s Command: %q TestResult: <<EMPTY>> \n", c.ID, lastCommand)
+		glog.V(3).Infof("Command: %q TestResult: <<EMPTY>> \n", lastCommand)
 	}
 
 	if c.Reason != "" {
@@ -212,7 +218,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 	res := make([]testOutput, len(ts.TestItems))
 	expectedResultArr := make([]string, len(res))
 
-	glog.V(3).Infof("%d tests", len(ts.TestItems))
+	glog.V(3).Infof("Running %d test_items", len(ts.TestItems))
 	for i, t := range ts.TestItems {
 
 		t.isMultipleOutput = c.IsMultiple
@@ -236,6 +242,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 			t.auditUsed = AuditEnv
 			result = *(t.execute(c.AuditEnvOutput))
 		}
+		glog.V(2).Infof("Used %s", t.auditUsed)
 		res[i] = result
 		expectedResultArr[i] = res[i].ExpectedResult
 	}
@@ -289,8 +296,8 @@ func runAudit(audit string) (output string, err error) {
 	if err != nil {
 		err = fmt.Errorf("failed to run: %q, output: %q, error: %s", audit, output, err)
 	} else {
-		glog.V(3).Infof("Command %q\n - Output:\n %q", audit, output)
-
+		glog.V(3).Infof("Command: %q", audit)
+		glog.V(3).Infof("Output:\n %q", output)
 	}
 	return output, err
 }
