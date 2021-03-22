@@ -723,7 +723,7 @@ groups:
                 value: "serviceaccounts.private.key"
             - flag: "service-account-private-key-file"
               set: false
-        remediation:
+        remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove service-account-private-key-file
         scored: true
 
