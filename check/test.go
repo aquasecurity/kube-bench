@@ -126,6 +126,9 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 		// flag: somevalue
 		// --flag
 		// somevalue
+		// DOESN'T COVER - use pathTestItem implementation of findValue() for this
+		// flag:
+		//	 - wehbook
 		pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
 		flagRe := regexp.MustCompile(pttn)
 		vals := flagRe.FindStringSubmatch(s)
@@ -145,7 +148,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 			err = fmt.Errorf("invalid flag in testItem definition: %s", s)
 		}
 	}
-	glog.V(3).Infof("In flagTestItem.findValue %s, match %v, s %s, t.Flag %s", value, match, s, t.Flag)
+	glog.V(3).Infof("In flagTestItem.findValue %s", value)
 
 	return match, value, err
 }
@@ -183,6 +186,7 @@ func (t envTestItem) findValue(s string) (match bool, value string, err error) {
 			value = ""
 		}
 	}
+	glog.V(3).Infof("In envTestItem.findValue %s", value)
 	return match, value, nil
 }
 
@@ -232,10 +236,22 @@ func (t testItem) evaluate(s string) *testOutput {
 	}
 
 	result.flagFound = match
-	glog.V(3).Info(fmt.Sprintf("found %v", result.flagFound))
-
-
-	return result
+	var isExist = "exists"
+	if !result.flagFound{
+		isExist = "does not exist"
+	}
+	switch t.auditUsed {
+        case "auditCommand": 
+			glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
+        case "auditConfig":
+			glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
+		case "auditEnv":
+			glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
+		default: 
+		glog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
+    	}
+	
+    	return result
 }
 
 func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName string) (string, bool) {
