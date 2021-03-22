@@ -593,6 +593,13 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			},
 			want: "",
 		},
+		{
+			name: "open shift",
+			args: args{
+				platform: "ocp-3.11",
+			},
+			want: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
