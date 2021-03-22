@@ -475,12 +475,13 @@ func getOpenShiftVersion() string{
 		if err == nil {
 			versionRe := regexp.MustCompile(`oc v(\d+\.\d+)`)
 			subs := versionRe.FindStringSubmatch(string(out))
-			glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v",string(out),getPlatformNameFromVersion(string(out)),subs[1])
-			ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
-			if err == nil{
-				return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
+			if len(subs) > 1 {
+				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v",string(out),getPlatformNameFromVersion(string(out)),subs[1])
+				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
+				if err == nil{
+					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
+				}
 			}
-
 		}
 
 	}
