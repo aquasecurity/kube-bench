@@ -742,7 +742,7 @@ groups:
               compare:
                 op: eq
                 value: "ca-bundle.crt"
-        remediation:
+        remediation: |
           Reset to OpenShift defaults OpenShift starts kube-controller-manager with
           root-ca-file=/etc/origin/master/ca-bundle.crt by default.  OpenShift Advanced
           Installation creates this certificate authority and configuration without any
@@ -765,7 +765,7 @@ groups:
               compare:
                 op: eq
                 value: "true"
-        remediation:
+        remediation: |
           If you decide not to enable the RotateKubeletServerCertificate feature,
           be sure to use the Ansible playbooks provided with the OpenShift installer to
           automate re-deploying certificates.
