@@ -19,17 +19,16 @@ groups:
 
       - id: 7.3
         text: "Verify that the --authorization-mode argument is set to WebHook"
-        audit: "grep -A1 authorization-mode /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "authorization-mode"
+            - path: "{.kubeletArguments.authorization-mode}"
               set: false
-            - flag: "authorization-mode"
+            - path: "{.kubeletArguments.authorization-mode}"
               compare:
                 op: has
                 value: "Webhook"
-              set: true
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove authorization-mode under
           kubeletArguments in /etc/origin/node/node-config.yaml or set it to "Webhook".
@@ -37,10 +36,10 @@ groups:
 
       - id: 7.4
         text: "Verify the OpenShift default for the client-ca-file argument"
-        audit: "grep -A1 client-ca-file /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           test_items:
-            - flag: "client-ca-file"
+            - path: "{.PodManifestConfig.client-ca-file}"
               set: false
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove any configuration returned by the following:
@@ -53,31 +52,32 @@ groups:
 
       - id: 7.5
         text: "Verify the OpenShift default setting for the read-only-port argument"
-        audit: "grep -A1 read-only-port /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "read-only-port"
+            - path: "{.kubeletArguments.read-only-port}"
               set: false
-            - flag: "read-only-port"
+            - path: "{.kubeletArguments.read-only-port}"
               compare:
-                op: has
+                op: eq
                 value: "0"
-              set: true
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and removed so that the OpenShift default is applied.
         scored: true
 
       - id: 7.6
         text: "Adjust the streaming-connection-idle-timeout argument"
-        audit: "grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "streaming-connection-idle-timeout"
+            - path: "{.kubeletArguments.streaming-connection-idle-timeout}"
               set: false
-            - flag: "5m"
-              set: false
+            - path: "{.kubeletArguments.streaming-connection-idle-timeout}"
+              compare:
+                op: eq
+                value: "5m"
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and set the streaming-connection-timeout
           value like the following in node-config.yaml.
@@ -94,17 +94,16 @@ groups:
 
       - id: 7.8
         text: "Verify the OpenShift default value of true for the make-iptables-util-chains argument"
-        audit: "grep -A1 make-iptables-util-chains /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "make-iptables-util-chains"
+            - path: "{.kubeletArguments.make-iptables-util-chains}"
               set: false
-            - flag: "make-iptables-util-chains"
+            - path: "{.kubeletArguments.make-iptables-util-chains}"
               compare:
-                op: has
+                op: eq
                 value: "true"
-              set: true
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and reset make-iptables-util-chains to the OpenShift
           default value of true.
@@ -112,14 +111,16 @@ groups:
 
       - id: 7.9
         text: "Verify that the --keep-terminated-pod-volumes argument is set to false"
-        audit: "grep -A1 keep-terminated-pod-volumes /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
+          bin_op: or
           test_items:
-            - flag: "keep-terminated-pod-volumes"
+            - path: "{.kubeletArguments.keep-terminated-pod-volumes}"
+              set: false
+            - path: "{.kubeletArguments.keep-terminated-pod-volumes}"
               compare:
-                op: has
+                op: eq
                 value: "false"
-              set: true
         remediation: |
           Reset to the OpenShift defaults
         scored: true
@@ -131,17 +132,16 @@ groups:
 
       - id: 7.11
         text: "Set the --event-qps argument to 0"
-        audit: "grep -A1 event-qps /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "event-qps"
+            - path: "{.kubeletArguments.event-qps}"
               set: false
-            - flag: "event-qps"
+            - path: "{.kubeletArguments.event-qps}"
               compare:
-                op: has
+                op: eq
                 value: "0"
-              set: true
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml set the event-qps argument to 0 in
           the kubeletArguments section of.
@@ -149,31 +149,29 @@ groups:
 
       - id: 7.12
         text: "Verify the OpenShift cert-dir flag for HTTPS traffic"
-        audit: "grep -A1 cert-dir /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           test_items:
-            - flag: "/etc/origin/node/certificates"
+            - path: "{.kubeletArguments.cert-dir}"
               compare:
                 op: has
                 value: "/etc/origin/node/certificates"
-              set: true
         remediation: |
           Reset to the OpenShift default values.
         scored: true
 
       - id: 7.13
         text: "Verify the OpenShift default of 0 for the cadvisor-port argument"
-        audit: "grep -A1 cadvisor-port /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "cadvisor-port"
+            - path: "{.kubeletArguments.cadvisor-port}"
               set: false
-            - flag: "cadvisor-port"
+            - path: "{.kubeletArguments.cadvisor-port}"
               compare:
-                op: has
+                op: eq
                 value: "0"
-              set: true
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and remove the cadvisor-port flag
           if it is set in the  kubeletArguments section.
@@ -181,28 +179,26 @@ groups:
 
       - id: 7.14
         text: "Verify that the RotateKubeletClientCertificate argument is set to true"
-        audit: "grep -B1 RotateKubeletClientCertificate=true /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           test_items:
-            - flag: "RotateKubeletClientCertificate=true"
+            - path: "{.kubeletArguments.feature-gates}"
               compare:
                 op: has
-                value: "true"
-              set: true
+                value: "RotateKubeletClientCertificate=true"
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletClientCertificate to true.
         scored: true
 
       - id: 7.15
         text: "Verify that the RotateKubeletServerCertificate argument is set to true"
-        audit: "grep -B1 RotateKubeletServerCertificate=true /etc/origin/node/node-config.yaml"
+        audit_config: "cat /etc/origin/node/node-config.yaml"
         tests:
           test_items:
-            - flag: "RotateKubeletServerCertificate=true"
+            - path: "{.kubeletArguments.feature-gates}"
               compare:
                 op: has
-                value: "true"
-              set: true
+                value: "RotateKubeletServerCertificate=true"
         remediation: |
           Edit the Openshift node config file /etc/origin/node/node-config.yaml and set RotateKubeletServerCertificate to true.
         scored: true
@@ -220,7 +216,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command on each worker node.
           chmod 644 /etc/origin/node/node.kubeconfig
@@ -232,10 +227,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: root:root
-              set: true
           remediation: |
             Run the below command on each worker node.
             chown root:root /etc/origin/node/node.kubeconfig
@@ -243,32 +234,27 @@ groups:
 
       - id: 8.3
         text: "Verify the kubelet service file permissions of 644"
-        audit: "stat -c permissions=%a $nodesvc"
+        audit: "stat -c permissions=%a $kubeletsvc"
         tests:
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command on each worker node.
-          chmod 644 $nodesvc
+          chmod 644 $kubeletsvc
         scored: true
 
       - id: 8.4
         text: "Verify the kubelet service file ownership of root:root"
-        audit: "stat -c %U:%G $nodesvc"
+        audit: "stat -c %U:%G $kubeletsvc"
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: root:root
-              set: true
           remediation: |
             Run the below command on each worker node.
-            chown root:root $nodesvc
+            chown root:root $kubeletsvc
           scored: true
 
       - id: 8.5
@@ -280,7 +266,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command on each worker node.
           chmod 644 /etc/origin/node/node.kubeconfig
@@ -292,10 +277,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: root:root
-              set: true
           remediation: |
             Run the below command on each worker node.
             chown root:root /etc/origin/node/node.kubeconfig
@@ -310,7 +291,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command on each worker node.
           chmod 644 /etc/origin/node/client-ca.crt
@@ -322,10 +302,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: root:root
-              set: true
           remediation: |
             Run the below command on each worker node.
             chown root:root /etc/origin/node/client-ca.crt
