@@ -16,13 +16,10 @@ groups:
 
       - id: 1.2
         text: "Verify that the basic-auth-file method is not enabled"
-        audit: "grep -A2 basic-auth-file /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "--basic-auth-file"
-              compare:
-                op: eq
-                value: ""
+            - path: "{.kubernetesMasterConfig.apiServerArguments.basic-auth-file}"
               set: false
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml and
@@ -41,35 +38,27 @@ groups:
 
       - id: 1.4
         text: "Secure communications between the API server and master nodes"
-        audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "kubeletClientInfo:"
-              compare:
-                op: eq
-                value: "kubeletClientInfo:"
-              set: true
-            - flag: "ca"
+            - path: "{.kubeletClientInfo.ca}"
               compare:
                 op: has
                 value: "ca-bundle.crt"
-              set: true
-            - flag: "certFile"
+            - path: "{.kubeletClientInfo.certFile}"
               compare:
                 op: has
                 value: "master.kubelet-client.crt"
-              set: true
-            - flag: "keyFile"
+            - path: "{.kubeletClientInfo.keyFile}"
               compare:
                 op: has
                 value: "master.kubelet-client.key"
               set: true
-            - flag: "port: 10250"
+            - path: "{.kubeletClientInfo.port}"
               compare:
                 op: eq
-                value: "port: 10250"
-              set: true
+                value: "10250"
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml
           and change it to match the below.
@@ -83,10 +72,10 @@ groups:
 
       - id: 1.5
         text: "Prevent insecure bindings"
-        audit: "grep -A2 insecure-bind-address /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "insecure-bind-address"
+            - path: "{.kubernetesMasterConfig.insecure-bind-address}"
               set: false
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml
@@ -100,10 +89,10 @@ groups:
 
       - id: 1.6
         text: "Prevent insecure port access"
-        audit: "grep -A2 insecure-port /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "insecure-port"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.insecure-port}"
               set: false
         remediation: |
          Edit the kubernetes master config file /etc/origin/master/master-config.yaml
@@ -117,17 +106,16 @@ groups:
 
       - id: 1.7
         text: "Use Secure Ports for API Server Traffic"
-        audit: "grep -A2 secure-port /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "secure-port"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.secure-port}"
               set: false
-            - flag: "secure-port"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.secure-port}"
               compare:
-                op: nothave
+                op: noteq
                 value: "0"
-              set: true
         remediation: |
          Edit the kubernetes master config file /etc/origin/master/master-config.yaml
          and either remove the secure-port parameter or set it to a different (non-zero)
@@ -146,17 +134,16 @@ groups:
 
       - id: 1.9
         text: "Verify repair-malformed-updates argument for API compatibility"
-        audit: "grep -A2 repair-malformed-updates /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "repair-malformed-updates"
+            - path: "{.repair-malformed-updates}"
               set: false
-            - flag: "repair-malformed-updates"
+            - path: "{.repair-malformed-updates}"
               compare:
-                op: has
+                op: eq
                 value: "true"
-              set: true
         remediation: |
          Edit the kubernetes master config file /etc/origin/master/master-config.yaml
          and remove the repair-malformed-updates entry or set repair-malformed-updates=true.
@@ -164,10 +151,10 @@ groups:
 
       - id: 1.10
         text: "Verify that the AlwaysAdmit admission controller is disabled"
-        audit: "grep -A4 AlwaysAdmit /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "AlwaysAdmit"
+            - path: "{.AlwaysAdmit}"
               set: false
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml
@@ -182,14 +169,13 @@ groups:
 
       - id: 1.11
         text: "Manage the AlwaysPullImages admission controller"
-        audit: "grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "disable"
+            - path: "{.admissionConfig.pluginConfig.configuration.disable}"
               compare:
-                op: has
+                op: eq
                 value: "false"
-              set: true
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml
           and add the entry below.
@@ -215,10 +201,10 @@ groups:
 
       - id: 1.14
         text: "Manage the NamespaceLifecycle admission controller"
-        audit: "grep -A4 NamespaceLifecycle /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "NamespaceLifecycle"
+            - path: "{.NamespaceLifecycle}"
               set: false
         remediation: |
           Edit the kubernetes master config file /etc/origin/master/master-config.yaml
@@ -233,14 +219,13 @@ groups:
 
       - id: 1.15
         text: "Configure API server auditing - audit log file path"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "enabled"
+            - path: "{.auditConfig.enabled}"
               compare:
-                op: has
+                op: eq
                 value: "true"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml, update the following entry and restart the API server.
 
@@ -257,14 +242,13 @@ groups:
 
       - id: 1.16
         text: "Configure API server auditing - audit log retention"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "maximumFileRetentionDays: 30"
+            - path: "{.auditConfig.maximumFileRetentionDays}"
               compare:
-                op: has
-                value: "maximumFileRetentionDays"
-              set: true
+                op: gte
+                value: 30
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml,
           update the maximumFileRetentionDays entry and restart the API server.
@@ -282,14 +266,13 @@ groups:
 
       - id: 1.17
         text: "Configure API server auditing - audit log backup retention"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "maximumRetainedFiles: 10"
+            - path: "{.auditConfig.maximumRetainedFiles}"
               compare:
-                op: has
-                value: "maximumRetainedFiles"
-              set: true
+                op: eq
+                value: "10"
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml, update the maximumRetainedFiles entry,
           set enabled to true and restart the API server.
@@ -307,14 +290,13 @@ groups:
 
       - id: 1.18
         text: "Configure audit log file size"
-        audit: "grep -A5 auditConfig /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "maximumFileSizeMegabytes: 30"
+            - path: "{.auditConfig.maximumFileSizeMegabytes}"
               compare:
-                op: has
-                value: "maximumFileSizeMegabytes"
-              set: true
+                op: eq
+                value: "30"
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml, update the maximumFileSizeMegabytes entry,
           set enabled to true and restart the API server.
@@ -332,10 +314,10 @@ groups:
 
       - id: 1.19
         text: "Verify that authorization-mode is not set to AlwaysAllow"
-        audit: "grep -A1 authorization-mode /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "authorization-mode"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.authorization-mode}"
               set: false
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove the authorization-mode
@@ -349,10 +331,10 @@ groups:
 
       - id: 1.20
         text: "Verify that the token-auth-file flag is not set"
-        audit: "grep token-auth-file /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "token-auth-file"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.token-auth-file}"
               set: false
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove the token-auth-file
@@ -366,10 +348,10 @@ groups:
 
       - id: 1.21
         text: "Verify the API server certificate authority"
-        audit: "grep -A1 kubelet-certificate-authority /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "kubelet-certificate-authority"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.kubelet-certificat-authority}"
               set: false
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove the following
@@ -383,20 +365,18 @@ groups:
 
       - id: 1.22
         text: "Verify the API server client certificate and client key"
-        audit: "grep -A4 kubeletClientInfo /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "keyFile"
+            - path: "{.kubeletClientInfo. keyFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.kubelet-client.key"
-              set: true
-            - flag: "certFile"
+            - path: "{.kubeletClientInfo.certFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.kubelet-client.crt"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and add the following
           configuration under kubeletClientInfo
@@ -420,20 +400,18 @@ groups:
 
       - id: 1.25
         text: "Verify that the service account key file argument is not set"
-        audit: "grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "privateKeyFile"
+            - path: "{.serviceAccountConfig.privateKeyFile}"
               compare:
-                op: has
+                op: eq
                 value: "serviceaccounts.private.key"
-              set: true
-            - flag: "serviceaccounts.public.key"
+            - path: "{.serviceAccountConfig. publicKeyFiles}"
               compare:
-                op: has
+                op: eq
                 value: "serviceaccounts.public.key"
-              set: true
         remediation: |
           OpenShift API server does not use the service-account-key-file argument.
           Even if value is set in master-config.yaml, it will not be used to verify
@@ -460,20 +438,18 @@ groups:
 
       - id: 1.26
         text: "Verify the certificate and key used for communication with etcd"
-        audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "certFile"
+            - path: "{.etcdClientInfo.certFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.etcd-client.crt"
-              set: true
-            - flag: "keyFile"
+            - path: "{.etcdClientInfo.keyFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.etcd-client.key"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile
           under etcdClientInfo like below.
@@ -486,17 +462,16 @@ groups:
 
       - id: 1.27
         text: "Verify that the ServiceAccount admission controller is enabled"
-        audit: "grep -A4 ServiceAccount /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "ServiceAccount"
+            - path: "{.ServiceAccount.configuration.disable}"
               set: false
-            - flag: "disable"
+            - path: "{.ServiceAccount.configuration.disable}"
               compare:
-                op: has
+                op: eq
                 value: "false"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable ServiceAccount
           admission control policy.
@@ -510,20 +485,18 @@ groups:
 
       - id: 1.28
         text: "Verify the certificate and key used to encrypt API server traffic"
-        audit: "grep -A7 servingInfo /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "certFile"
+            - path: "{.servingInfo.certFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.server.crt"
-              set: true
-            - flag: "keyFile"
+            - path: "{.servingInfo.keyFile}"
               compare:
-                op: has
+                op: eq
                 value: "master.server.key"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set keyFile and certFile under servingInfo.
 
@@ -539,10 +512,10 @@ groups:
 
       - id: 1.29
         text: "Verify that the --client-ca-file argument is not set"
-        audit: "grep client-ca-file /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "clientCA: ca.crt"
+            - path: "{.servingInfo.clientCA}"
               set: false
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set clientCA under servingInfo.
@@ -559,14 +532,13 @@ groups:
 
       - id: 1.30
         text: "Verify the CA used for communication with etcd"
-        audit: "grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "ca"
+            - path: "{.etcdClientInfo.ca}"
               compare:
-                op: has
+                op: eq
                 value: "master.etcd-ca.crt"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set ca under etcdClientInfo.
 
@@ -583,17 +555,16 @@ groups:
 
       - id: 1.32
         text: "Verify that the NodeRestriction admission controller is enabled"
-        audit: "grep -A4 NodeRestriction /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "NodeRestriction"
+            - path: "{.NodeRestriction.configuration.disable}"
               set: false
-            - flag: "disable"
+            - path: "{.NodeRestriction.configuration.disable}"
               compare:
-                op: has
+                op: eq
                 value: "false"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable NodeRestriction ca under etcdClientInfo.
 
@@ -606,14 +577,10 @@ groups:
 
       - id: 1.33
         text: "Configure encryption of data at rest in etcd datastore"
-        audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "experimental-encryption-provider-config:"
-              compare:
-                op: has
-                value: "experimental-encryption-provider-config:"
-              set: true
+            - path: "{.kubernetesMasterConfig.apiServerArguments.experimental-encryption-provider-config}"
         remediation: |
           Follow the instructions in the documentation to configure encryption.
           https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html
@@ -621,14 +588,14 @@ groups:
 
       - id: 1.34
         text: "Set the encryption provider to aescbc for etcd data at rest"
-        audit: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs grep -A1 providers"
+
+        audit_config: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs cat"
         tests:
           test_items:
-            - flag: "aescbc:"
+            - path: "{.providers.aescbc.experimental-encryption-provider-config}"
               compare:
                 op: has
-                value: "aescbc:"
-              set: true
+                value: "aescbc"
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set aescbc as the first provider in encryption provider config.
           See https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html.
@@ -636,14 +603,13 @@ groups:
 
       - id: 1.35
         text: "Enable the EventRateLimit plugin"
-        audit: "grep -A4 EventRateLimit /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "disable"
+            - path: "{.admissionConfig.pluginConfig.AlwaysPullImages.configuration.disable}"
               compare:
-                op: has
+                op: eq
                 value: "false"
-              set: true
         remediation: |
           Follow the documentation to enable the EventRateLimit plugin.
           https://docs.openshift.com/container-platform/3.10/architecture/additional_concepts/admission_controllers.html#admission-controllers-general-admission-rules
@@ -651,16 +617,15 @@ groups:
 
       - id: 1.36
         text: "Configure advanced auditing"
-        audit: "grep AdvancedAuditing /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "AdvancedAuditing"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.feature-gates.AdvancedAuditing}"
               compare:
                 op: eq
                 value: "true"
-              set: true
-            - flag: "AdvancedAuditing"
+            - path: "{.kubernetesMasterConfig.apiServerArguments.feature-gates.AdvancedAuditing}"
               set: false
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and enable AdvancedAuditing,
@@ -696,14 +661,13 @@ groups:
     checks:
       - id: 3.1
         text: "Adjust the terminated-pod-gc-threshold argument as needed"
-        audit: "grep terminated-pod-gc-threshold -A1 /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "terminated-pod-gc-threshold:"
+            - path: "{.kubernetesMasterConfig.controllerArguments.terminated-pod-gc-threshold}"
               compare:
-                op: has
+                op: eq
                 value: "12500"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml  and enable terminated-pod-gc-threshold.
 
@@ -722,17 +686,16 @@ groups:
 
       - id: 3.3
         text: "Verify that the --use-service-account-credentials argument is set to true"
-        audit: "grep -A2 use-service-account-credentials /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: or
           test_items:
-            - flag: "use-service-account-credentials"
+            - path: "{.kubernetesMasterConfig.controllerArguments.use-service-account-credentials}"
               set: false
-            - flag: "true"
+            - path: "{.kubernetesMasterConfig.controllerArguments.use-service-account-credentials}"
               compare:
-                op: has
+                op: eq
                 value: "true"
-              set: true
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set use-service-account-credentials
           to true under controllerArguments section.
@@ -743,45 +706,45 @@ groups:
                  - true
         scored: true
 
-      # Review 3.4
+
       - id: 3.4
         text: "Verify that the --service-account-private-key-file argument is set as appropriate"
         audit: |
           grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml | grep privateKeyFile;
           grep -A2 service-account-private-key-file /etc/origin/master/master-config.yaml
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
             - flag: "privateKeyFile: serviceaccounts.private.key"
+              path: "{.serviceAccountConfig.privateKeyFile}"
               compare:
-                op: has
-                value: "privateKeyFile"
+                op: eq
+                value: "serviceaccounts.private.key"
             - flag: "service-account-private-key-file"
               set: false
-        remediation:
+        remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and remove service-account-private-key-file
         scored: true
 
-      # Review 3.5
+
       - id: 3.5
         text: "Verify that the --root-ca-file argument is set as appropriate"
-        audit: "/bin/sh -c 'grep root-ca-file /etc/origin/master/master-config.yaml; grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml'"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           bin_op: and
           test_items:
-            - flag: "root-ca-file=/etc/origin/master/ca-bundle.crt"
+            - path: "{.serviceAccountConfig.root-ca-file}"
               compare:
-                op: has
+                op: eq
                 value: "/etc/origin/master/ca-bundle.crt"
-              set: true
-            - flag: "masterCA"
+            - path: "{.serviceAccountConfig.masterCA}"
               compare:
-                op: has
+                op: eq
                 value: "ca-bundle.crt"
-              set: true
-        remediation:
+        remediation: |
           Reset to OpenShift defaults OpenShift starts kube-controller-manager with
-          root-ca-file=/etc/origin/master/ca-bundle.crt by default.  OpenShift Advanced
+          root-ca-file=/etc/origin/master/ca-bundle.crt by default. OpenShift Advanced
           Installation creates this certificate authority and configuration without any
           configuration required.
 
@@ -795,15 +758,14 @@ groups:
 
       - id: 3.7
         text: "Manage certificate rotation"
-        audit: "grep -B3 RotateKubeletServerCertificate=true /etc/origin/master/master-config.yaml"
+        audit_config: "cat /etc/origin/master/master-config.yaml"
         tests:
           test_items:
-            - flag: "RotateKubeletServerCertificate"
+            - path: "{.kubeletArguments.feature-gates.RotateKubeletServerCertificate}"
               compare:
                 op: eq
                 value: "true"
-              set: true
-        remediation:
+        remediation: |
           If you decide not to enable the RotateKubeletServerCertificate feature,
           be sure to use the Ansible playbooks provided with the OpenShift installer to
           automate re-deploying certificates.
@@ -822,7 +784,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the below command.
 
@@ -835,10 +796,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -854,7 +811,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -867,10 +823,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -886,7 +838,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the below command.
 
@@ -899,10 +850,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -918,7 +865,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the below command.
 
@@ -931,10 +877,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -944,13 +886,13 @@ groups:
       - id: 4.9
         text: "Verify the default OpenShift Container Network Interface file permissions"
         audit: "stat -c permissions=%a /etc/origin/openvswitch/ /etc/cni/net.d/"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command.
 
@@ -960,13 +902,10 @@ groups:
       - id: 4.10
         text: "Verify the default OpenShift Container Network Interface file ownership"
         audit: "stat -c %U:%G /etc/origin/openvswitch/ /etc/cni/net.d/"
+        use_multiple_values: true
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -982,7 +921,6 @@ groups:
               compare:
                 op: bitmask
                 value: "700"
-              set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir ,
           from the below command:
@@ -997,10 +935,6 @@ groups:
         tests:
           test_items:
             - flag: "etcd:etcd"
-              compare:
-                op: eq
-                value: "etcd:etcd"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -1016,7 +950,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command.
 
@@ -1029,10 +962,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -1048,7 +977,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command.
 
@@ -1061,10 +989,6 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
         remediation: |
           Run the below command on the master node.
 
@@ -1080,7 +1004,6 @@ groups:
               compare:
                 op: bitmask
                 value: "644"
-              set: true
         remediation: |
           Run the below command.
 
@@ -1114,40 +1037,29 @@ groups:
           bin_op: and
           test_items:
             - flag: "Binary file /proc/1/environ matches"
+            - flag: "ETCD_CERT_FILE"
               compare:
-                op: has
-                value: "Binary file /proc/1/environ matches"
-              set: true
-            - flag: "ETCD_CERT_FILE=/etc/etcd/server.crt"
+                op: eq
+                value: "/etc/etcd/server.crt"
+            - flag: "ETCD_KEY_FILE"
               compare:
-                op: has
-                value: "ETCD_CERT_FILE=/etc/etcd/server.crt"
-              set: true
-            - flag: "ETCD_KEY_FILE=/etc/etcd/server.key"
-              compare:
-                op: has
-                value: "ETCD_KEY_FILE=/etc/etcd/server.key"
-              set: true
+                op: eq
+                value: "/etc/etcd/server.key"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
 
       - id: 5.2
         text: "Verify the default OpenShift setting for the client-cert-auth argument"
-        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_CLIENT_CERT_AUTH=true /proc/1/environ; grep ETCD_CLIENT_CERT_AUTH /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
             - flag: "Binary file /proc/1/environ matches"
+            - flag: "ETCD_CLIENT_CERT_AUTH"
               compare:
-                op: has
-                value: "Binary file /proc/1/environ matches"
-              set: true
-            - flag: "ETCD_CLIENT_CERT_AUTH=true"
-              compare:
-                op: has
-                value: "ETCD_CLIENT_CERT_AUTH=true"
-              set: true
+                op: eq
+                value: "true"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
@@ -1158,41 +1070,29 @@ groups:
         tests:
           bin_op: or
           test_items:
-            - flag: "ETCD_AUTO_TLS=false"
+            - flag: "ETCD_AUTO_TLS"
               compare:
-                op: has
-                value: "ETCD_AUTO_TLS=false"
-              set: true
-            - flag: "#ETCD_AUTO_TLS"
-              compare:
-                op: has
-                value: "#ETCD_AUTO_TLS"
-              set: true
+                op: eq
+                value: "false"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
 
       - id: 5.4
         text: "Verify the OpenShift default peer-cert-file and peer-key-file arguments for etcd"
-        audit: "/bin/sh -c'/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep ETCD_PEER_KEY_FILE=/etc/etcd/peer.key /proc/1/environ; grep ETCD_PEER_CERT_FILE /etc/etcd/etcd.conf; grep ETCD_PEER_KEY_FILE /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep ETCD_PEER_KEY_FILE=/etc/etcd/peer.key /proc/1/environ; grep ETCD_PEER_CERT_FILE /etc/etcd/etcd.conf; grep ETCD_PEER_KEY_FILE /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
             - flag: "Binary file /proc/1/environ matches"
+            - flag: "ETCD_PEER_CERT_FILE"
               compare:
-                op: has
-                value: "Binary file /proc/1/environ matches"
-              set: true
-            - flag: "ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt"
+                op: eq
+                value: "/etc/etcd/peer.crt"
+            - flag: "ETCD_PEER_KEY_FILE"
               compare:
-                op: has
-                value: "ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt"
-              set: true
-            - flag: "ETCD_PEER_KEY_FILE=/etc/etcd/peer.key"
-              compare:
-                op: has
-                value: "ETCD_PEER_KEY_FILE=/etc/etcd/peer.key"
-              set: true
+                op: eq
+                value: "/etc/etcd/peer.key"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
@@ -1204,15 +1104,10 @@ groups:
           bin_op: and
           test_items:
             - flag: "Binary file /proc/1/environ matches"
+            - flag: "ETCD_PEER_CLIENT_CERT_AUTH"
               compare:
-                op: has
-                value: "Binary file /proc/1/environ matches"
-              set: true
-            - flag: "ETCD_PEER_CLIENT_CERT_AUTH=true"
-              compare:
-                op: has
-                value: "ETCD_PEER_CLIENT_CERT_AUTH=true"
-              set: true
+                op: eq
+                value: "true"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
@@ -1221,18 +1116,11 @@ groups:
         text: "Verify the OpenShift default configuration for the peer-auto-tls argument"
         audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_PEER_AUTO_TLS /proc/1/environ; grep ETCD_PEER_AUTO_TLS /etc/etcd/etcd.conf'"
         tests:
-          bin_op: and
           test_items:
-            - flag: "Binary file /proc/1/environ matches"
+            - flag: "ETCD_PEER_AUTO_TLS"
               compare:
-                op: has
-                value: "Binary file /proc/1/environ matches"
-              set: true
-            - flag: "#ETCD_PEER_AUTO_TLS=false"
-              compare:
-                op: has
-                value: "#ETCD_PEER_AUTO_TLS=false"
-              set: true
+                op: noteq
+                value: "true"
         remediation: |
           Reset to the OpenShift default configuration.
         scored: true
@@ -1253,10 +1141,6 @@ groups:
         tests:
           test_items:
             - flag: "issuer= /CN=etcd-signer"
-              compare:
-                op: has
-                value: "issuer= /CN=etcd-signer"
-              set: true
         remediation: |
           Reset to the OpenShift default configuration.
         scored: false
