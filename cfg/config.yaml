@@ -25,12 +25,15 @@ master:
       - "hyperkube apiserver"
       - "hyperkube kube-apiserver"
       - "apiserver"
+      - "openshift start master api"
+      - "hypershift openshift-kube-apiserver"
     confs:
       - /etc/kubernetes/manifests/kube-apiserver.yaml
       - /etc/kubernetes/manifests/kube-apiserver.yml
       - /etc/kubernetes/manifests/kube-apiserver.manifest
       - /var/snap/kube-apiserver/current/args
       - /var/snap/microk8s/current/args/kube-apiserver
+      - /etc/origin/master/master-config.yaml
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -39,12 +42,14 @@ master:
       - "hyperkube scheduler"
       - "hyperkube kube-scheduler"
       - "scheduler"
+      - "openshift start master controllers"
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
       - /etc/kubernetes/manifests/kube-scheduler.yml
       - /etc/kubernetes/manifests/kube-scheduler.manifest
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
+      - /etc/origin/master/scheduler.json
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
@@ -57,6 +62,8 @@ master:
       - "hyperkube controller-manager"
       - "hyperkube kube-controller-manager"
       - "controller-manager"
+      - "openshift start master controllers"
+      - "hypershift openshift-controller-manager"
     confs:
       - /etc/kubernetes/manifests/kube-controller-manager.yaml
       - /etc/kubernetes/manifests/kube-controller-manager.yml
@@ -72,6 +79,7 @@ master:
     optional: true
     bins:
       - "etcd"
+      - "openshift start etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -81,7 +89,6 @@ master:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
-      - /etc/kubernetes/manifests
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
 
   flanneld:
@@ -114,6 +121,8 @@ node:
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
+      - "/etc/systemd/system/atomic-openshift-node.service"
+      - "/etc/systemd/system/origin-node.service"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
@@ -121,13 +130,11 @@ node:
       - "/etc/kubernetes/kubelet.conf"
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
-      - "/etc/kubernetes/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
     confs:
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
-      - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
@@ -156,16 +163,15 @@ node:
       - "hyperkube proxy"
       - "hyperkube kube-proxy"
       - "proxy"
+      - "openshift start network"
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
       - /etc/kubernetes/addons/kube-proxy-daemonset.yml
       - /var/snap/kube-proxy/current/args
       - /var/snap/microk8s/current/args/kube-proxy
-      - /var/lib/kube-proxy/config.conf
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
-      - "/etc/kubernetes/kubelet/config"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/proxy.config"
     svc:
