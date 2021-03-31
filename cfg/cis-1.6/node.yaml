@@ -10,10 +10,7 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
-        audit: |
-           SERVICEFILE=$(find /lib/systemd/system/ | grep kubelet)
-           if test -z $SERVICEFILE; then SERVICEFILE=$kubeletsvc; fi
-           if test -e $SERVICEFILE; then stat -c permissions=%a $SERVICEFILE; fi
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -28,10 +25,7 @@ groups:
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: |
-           SERVICEFILE=$(find /lib/systemd/system/ | grep kubelet)
-           if test -z $SERVICEFILE; then SERVICEFILE=$kubeletsvc; fi
-           if test -e $SERVICEFILE; then stat -c %U:%G $SERVICEFILE; fi
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
         tests:
           test_items:
             - flag: root:root

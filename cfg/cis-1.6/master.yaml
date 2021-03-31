@@ -209,10 +209,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: |
-           KUBECONFIG=$(ps -ef | grep kube-scheduler | grep -- --config= | awk -F '--config=' '{print $2}' | awk '{print $1}')
-           if test -z $KUBECONFIG; then KUBECONFIG=$schedulerkubeconfig; fi
-           if test -e $KUBECONFIG; then stat -c permissions=%a $KUBECONFIG; fi
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -227,10 +224,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: |
-           KUBECONFIG=$(ps -ef | grep kube-scheduler | grep -- --config= | awk -F '--config=' '{print $2}' | awk '{print $1}')
-           if test -z $KUBECONFIG; then KUBECONFIG=$schedulerkubeconfig; fi
-           if test -e $KUBECONFIG; then stat -c %U:%G $KUBECONFIG; fi
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -242,10 +236,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: |
-           KUBECONFIG=$(ps -ef | grep kube-controller-manager | grep -- --kubeconfig= | awk -F '--kubeconfig=' '{print $2}' | awk '{print $1}')
-           if test -z $KUBECONFIG; then KUBECONFIG=$controllermanagerkubeconfig; fi
-           if test -e $KUBECONFIG; then stat -c permissions=%a $KUBECONFIG; fi
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -260,10 +251,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: |
-           KUBECONFIG=$(ps -ef | grep kube-controller-manager | grep -- --kubeconfig= | awk -F '--kubeconfig=' '{print $2}' | awk '{print $1}')
-           if test -z $KUBECONFIG; then KUBECONFIG=$controllermanagerkubeconfig; fi
-           if test -e $KUBECONFIG; then stat -c %U:%G $KUBECONFIG; fi
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
