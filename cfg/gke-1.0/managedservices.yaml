@@ -324,7 +324,7 @@ groups:
         scored: false
 
       - id: 6.5.6
-        text: "Ensure Shielded GKE Nodes are Enabled (Not Scored)"
+        text: "Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled (Not Scored)"
         type: "manual"
         remediation: |
           Using Command Line:
