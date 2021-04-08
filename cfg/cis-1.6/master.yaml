@@ -120,8 +120,16 @@ groups:
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
-        audit: "stat -c permissions=%a <path/to/cni/files>"
-        type: "manual"
+        audit: |
+          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c permissions=%a
+          find /var/lib/cni/networks -type f | xargs --no-run-if-empty stat -c permissions=%a
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -130,8 +138,13 @@ groups:
 
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
-        audit: "stat -c %U:%G <path/to/cni/files>"
-        type: "manual"
+        audit: |
+          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c %U:%G
+          find /var/lib/cni/networks -type f | xargs --no-run-if-empty stat -c %U:%G
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
