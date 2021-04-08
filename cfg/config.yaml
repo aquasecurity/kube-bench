@@ -15,6 +15,7 @@ master:
     - flanneld
     # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
     - kubernetes
+    - kubelet
 
   kubernetes:
     defaultconf: /etc/kubernetes/config
@@ -53,6 +54,8 @@ master:
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
+      - /var/lib/kube-scheduler/kubeconfig
+      - /var/lib/kube-scheduler/config.yaml
     defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
@@ -73,6 +76,7 @@ master:
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
+      - /var/lib/kube-controller-manager/kubeconfig
     defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
@@ -96,6 +100,12 @@ master:
     bins:
       - flanneld
     defaultconf: /etc/sysconfig/flanneld
+
+  kubelet:
+    optional: true
+    bins:
+      - "hyperkube kubelet"
+      - "kubelet"
 
 node:
   components:
