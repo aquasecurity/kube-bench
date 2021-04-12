@@ -26,7 +26,6 @@ groups:
         tests:
           test_items:
             - flag: "--audit-policy-file"
-              set: true
         remediation: |
           Create an audit policy file for your cluster.
         scored: false
