@@ -62,10 +62,10 @@ groups:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"
         audit: |
-          # needs verification 
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; oc describe scc $i | grep "Allow Privileged"; 
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Privileged";
           done
         tests:
           test_items:
@@ -78,77 +78,77 @@ groups:
       - id: 5.2.2
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; oc describe scc $i | grep "Allow Host PID"; 
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host PID";
           done
         tests:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host 
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
           PID field is set to false.
         scored: false
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; oc describe scc $i | grep "Allow Host IPC"; 
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host IPC";
           done
         tests:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host 
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
           IPC field is set to false.
         scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; oc describe scc $i | grep "Allow Host Network"; 
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host Network";
           done
         tests:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host 
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
           Network field is omitted or set to false.
         scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; oc describe scc $i | grep "Allow Privilege Escalation"; 
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Privilege Escalation";
           done
         tests:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow 
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
           Privilege Escalation field is omitted or set to false.
         scored: false
 
       - id: 5.2.6
         text: "Minimize the admission of root containers (Manual)"
         audit: |
-          # needs verification 
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; 
-            oc describe scc $i | grep "Run As User Strategy"; 
-          done 
-          #For SCCs with MustRunAs verify that the range of UIDs does not include 0 
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
           do
-            echo "$i"; 
-            oc describe scc $i | grep "\sUID"; 
+            echo "$i";
+            oc describe scc $i | grep "Run As User Strategy";
+          done
+          #For SCCs with MustRunAs verify that the range of UIDs does not include 0
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i";
+            oc describe scc $i | grep "\sUID";
           done
         tests:
           bin_op: or
@@ -159,19 +159,19 @@ groups:
                 op: nothave
                 value: 0
         remediation: |
-          None required. By default, OpenShift includes the non-root SCC with the the Run As User 
-          Strategy is set to either MustRunAsNonRoot. If additional SCCs are appropriate, follow the 
+          None required. By default, OpenShift includes the non-root SCC with the the Run As User
+          Strategy is set to either MustRunAsNonRoot. If additional SCCs are appropriate, follow the
           OpenShift documentation to create custom SCCs.
         scored: false
 
       - id: 5.2.7
         text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
         audit: |
-          # needs verification 
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`; 
-          do 
-            echo "$i"; 
-            oc describe scc $i | grep "Required Drop Capabilities"; 
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i";
+            oc describe scc $i | grep "Required Drop Capabilities";
           done
         tests:
           bin_op: or
@@ -187,7 +187,7 @@ groups:
         text: "Minimize the admission of containers with added capabilities (Manual)"
         type: "manual"
         remediation: |
-          Ensure that Allowed Capabilities is set to an empty array for every SCC in the cluster 
+          Ensure that Allowed Capabilities is set to an empty array for every SCC in the cluster
           except for the privileged SCC.
         scored: false
 
@@ -196,7 +196,7 @@ groups:
         type: "manual"
         remediation: |
           Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider 
+          contains applicaions which do not require any Linux capabities to operate consider
           adding a SCC which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
@@ -224,7 +224,7 @@ groups:
         text: "Prefer using secrets as files over secrets as environment variables (Manual)"
         type: "manual"
         remediation: |
-          If possible, rewrite application code to read secrets from mounted secret files, rather than 
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false
 
@@ -261,7 +261,7 @@ groups:
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         type: "manual"
         remediation: |
-          To enable the default seccomp profile, use the reserved value /runtime/default that will 
+          To enable the default seccomp profile, use the reserved value /runtime/default that will
           make sure that the pod uses the default policy available on the host.
         scored: false
 
