@@ -157,7 +157,7 @@ func decrementVersion(version string) string {
 	if err != nil {
 		return ""
 	}
-	if minor <= 0 {
+	if minor <= 1 {
 		return ""
 	}
 	split[1] = strconv.Itoa(minor - 1)
