@@ -326,7 +326,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 
 	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		execCode := `#!/bin/sh
-		echo '{"serverVersion": {"major": "1", "minor": "15", "gitVersion": "v1.15.10"}}'
+		echo '{"serverVersion": {"major": "1", "minor": "18", "gitVersion": "v1.18.10"}}'
 		`
 		restore, err := fakeExecutableInPath("kubectl", execCode)
 		if err != nil {
@@ -359,7 +359,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 	}{
 		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", callFn: withNoPath, v: viper.New(), succeed: false},
 		{n: "no version-missing-kubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.6", callFn: withNoPath, succeed: true},
-		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withFakeKubectl, succeed: true},
+		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.6", callFn: withFakeKubectl, succeed: true},
 		{n: "kubeVersion", kubeVersion: "1.15", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
