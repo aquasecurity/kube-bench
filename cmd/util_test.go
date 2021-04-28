@@ -465,7 +465,8 @@ func TestDecrementVersion(t *testing.T) {
 		{kubeVersion: "1.13", succeed: true, exp: "1.12"},
 		{kubeVersion: "1.15", succeed: true, exp: "1.14"},
 		{kubeVersion: "1.11", succeed: true, exp: "1.10"},
-		{kubeVersion: "1.1", succeed: true, exp: ""},
+		{kubeVersion: "1.1", succeed: true, exp: "1.0"},
+		{kubeVersion: "1.0", succeed: false, exp: ""},
 		{kubeVersion: "invalid", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
@@ -627,6 +628,7 @@ func Test_getOcpValidVersion(t *testing.T) {
 		{openShiftVersion: "3.11", succeed: true, exp: "3.10"},
 		{openShiftVersion: "3.10", succeed: true, exp: "3.10"},
 		{openShiftVersion: "2.9", succeed: false, exp: ""},
+		{openShiftVersion: "4.0", succeed: true, exp: "4.0"},
 		{openShiftVersion: "4.1", succeed: false, exp: "4.0"},
 		{openShiftVersion: "4.5", succeed: false, exp: "4.0"},
 		{openShiftVersion: "4.6", succeed: false, exp: "4.0"},
@@ -636,12 +638,15 @@ func Test_getOcpValidVersion(t *testing.T) {
 		ocpVer,_ := getOcpValidVersion(c.openShiftVersion)
 		if c.succeed {
 			if c.exp != ocpVer {
-				t.Fatalf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
+				t.Errorf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
 			}
 		} else {
 			if len(ocpVer) > 0 {
-				t.Fatalf("getOcpValidVersion(%q) - Expected empty string but Got %s", c.openShiftVersion, ocpVer)
+				t.Errorf("getOcpValidVersion(%q) - Expected empty string but Got %s", c.openShiftVersion, ocpVer)
 			}
+			if err != nil {
+					t.Errorf("\tThere was an error %s",err)
+				}
 		}
 	}
 }
