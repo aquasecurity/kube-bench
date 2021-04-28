@@ -460,7 +460,7 @@ func getPlatformBenchmarkVersion(platform string) string {
 		return "gke-1.0"
 	case "ocp-3.10":
 		return "rh-0.7"
-	case "ocp-4.0":
+	case "ocp-4.1":
 		return "rh-1.0"
 	}
 	return ""
@@ -506,7 +506,7 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 
 	for (!isEmpty(ocpVer)) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
-		if ocpVer == "3.10" || ocpVer == "4.0"{
+		if ocpVer == "3.10" || ocpVer == "4.1"{
 			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}
