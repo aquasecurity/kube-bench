@@ -594,11 +594,18 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "open shift",
+			name: "openshift3",
 			args: args{
 				platform: "ocp-3.10",
 			},
 			want: "rh-0.7",
+		},
+		{
+			name: "openshift4",
+			args: args{
+				platform: "ocp-4.1",
+			},
+			want: "rh-1.0",
 		},
 	}
 	for _, tt := range tests {
@@ -620,18 +627,20 @@ func Test_getOcpValidVersion(t *testing.T) {
 		{openShiftVersion: "3.11", succeed: true, exp: "3.10"},
 		{openShiftVersion: "3.10", succeed: true, exp: "3.10"},
 		{openShiftVersion: "2.9", succeed: false, exp: ""},
-		{openShiftVersion: "4.1", succeed: false, exp: ""},
+		{openShiftVersion: "4.1", succeed: true, exp: "4.1"},
+		{openShiftVersion: "4.5", succeed: true, exp: "4.1"},
+		{openShiftVersion: "4.6", succeed: true, exp: "4.1"},
 		{openShiftVersion: "invalid", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
 		ocpVer,_ := getOcpValidVersion(c.openShiftVersion)
 		if c.succeed {
 			if c.exp != ocpVer {
-				t.Fatalf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
+				t.Errorf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
 			}
 		} else {
 			if len(ocpVer) > 0 {
-				t.Fatalf("getOcpValidVersion(%q) - Expected empty string but Got %s", c.openShiftVersion, ocpVer)
+				t.Errorf("getOcpValidVersion(%q) - Expected empty string but Got %s", c.openShiftVersion, ocpVer)
 			}
 		}
 	}

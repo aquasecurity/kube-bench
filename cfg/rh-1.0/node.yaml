@@ -1,0 +1,453 @@
+---
+controls:
+version: rh-1.0
+id: 4
+text: "Worker Node Security Configuration"
+type: "node"
+groups:
+  - id: 4.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /etc/systemd/system/kubelet.service
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          By default, the kubelet service file has permissions of 644.
+        scored: true
+
+      - id: 4.1.2
+        text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
+        audit: |
+          # Should return root:root for each node
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /etc/systemd/system/kubelet.service
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          By default, the kubelet service file has ownership of root:root.
+        scored: true
+
+      - id: 4.1.3
+        text: "If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          for i in $(oc get pods -n openshift-sdn -l app=sdn -oname)
+          do
+            oc exec -n openshift-sdn $i -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "permissions"
+              set: true
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None needed.
+        scored: false
+
+      - id: 4.1.4
+        text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)"
+        audit: |
+          for i in $(oc get pods -n openshift-sdn -l app=sdn -oname)
+          do
+            oc exec -n openshift-sdn $i -- stat -Lc "$i %n %U:%G" /config/kube-proxy-config.yaml
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required. The configuration is managed by OpenShift operators.
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Check permissions
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /etc/kubernetes/kubelet.conf
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 4.1.6
+        text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /etc/kubernetes/kubelet.conf
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 4.1.7
+        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /etc/kubernetes/kubelet-ca.crt
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.8
+        text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /etc/kubernetes/kubelet-ca.crt
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.9
+        text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /var/lib/kubelet/kubeconfig
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.10
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /var/lib/kubelet/kubeconfig
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: true
+
+  - id: 4.2
+    text: "Kubelet"
+    checks:
+      - id: 4.2.1
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host grep -B4 -A1 anonymous: /etc/kubernetes/kubelet.conf
+          done
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "enabled: true"
+              set: false
+        remediation: |
+          Follow the instructions in the documentation to create a Kubelet config CRD
+          and set the anonymous-auth is set to false.
+        scored: true
+
+      - id: 4.2.2
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        type: manual
+        # Takes a lot of time for connection to fail and
+        audit: |
+          POD=$(oc -n openshift-kube-apiserver get pod -l app=openshift-kube-apiserver -o jsonpath='{.items[0].metadata.name}')
+          TOKEN=$(oc whoami -t)
+          for name in $(oc get nodes -ojsonpath='{.items[*].metadata.name}')
+          do
+            oc exec -n openshift-kube-apiserver $POD -- curl -sS https://172.25.0.1/api/v1/nodes/$name/proxy/configz -k -H "Authorization:Bearer $TOKEN" | jq -r '.kubeletconfig.authorization.mode'
+          done
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "Connection timed out"
+        remediation: |
+          None required. Unauthenticated/Unauthorized users have no access to OpenShift nodes.
+        scored: true
+
+      - id: 4.2.3
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host grep clientCAFile: /etc/kubernetes/kubelet.conf
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "clientCAFile"
+              compare:
+                op: eq
+                value: "/etc/kubernetes/kubelet-ca.crt"
+        remediation: |
+          None required. Changing the clientCAFile value is unsupported.
+        scored: true
+
+      - id: 4.2.4
+        text: "Verify that the read only port is not used or is set to 0 (Automated)"
+        audit: |
+          echo `oc -n openshift-kube-apiserver get cm kube-apiserver-pod -o yaml | grep --color read-only-port` 2> /dev/null
+          echo `oc -n openshift-kube-apiserver get cm config -o yaml | grep --color "read-only-port"` 2> /dev/null
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "read-only-port"
+              compare:
+                op: has
+                value: "[\"0\"]"
+            - flag: "read-only-port"
+              set: false
+        remediation: |
+          In earlier versions of OpenShift 4, the read-only-port argument is not used.
+          Follow the instructions in the documentation to create a Kubelet config CRD
+          and set the --read-only-port is set to 0.
+        scored: true
+
+      - id: 4.2.5
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
+        audit: |
+          # Should return 1 for each node
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host ps -ef | grep kubelet | grep streaming-connection-idle-timeout
+            echo exit_code=$?
+          done 2>/dev/null
+          # Should return 1 for each node
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host grep streamingConnectionIdleTimeout /etc/kubernetes/kubelet.conf
+            echo exit_code=$?
+          done 2>/dev/null
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: --streaming-connection-idle-timeout
+              compare:
+                op: noteq
+                value: 0
+            - flag: "exit_code"
+              compare:
+                op: eq
+                value: 1
+        remediation: |
+          Follow the instructions in the documentation to create a Kubelet config CRD and set
+          the --streaming-connection-idle-timeout to the desired value. Do not set the value to 0.
+        scored: true
+
+      - id: 4.2.6
+        text: "Ensure that the --protect-kernel-defaults argument is not set (Manual)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
+          do
+            oc debug node/${node} -- chroot /host more /etc/kubernetes/kubelet.conf;
+          done
+        tests:
+          test_items:
+            - flag: protectKernelDefaults
+              set: false
+        remediation: |
+          None required. The OpenShift 4 kubelet modifies the system tunable;
+          using the protect-kernel-defaults flag will cause the kubelet to fail on start if the tunables
+          don't match the kubelet configuration and the OpenShift node will fail to start.
+        scored: false
+
+      - id: 4.2.7
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Manual)"
+        audit: |
+          /bin/bash
+          flag=make-iptables-util-chains
+          opt=makeIPTablesUtilChains
+          # look at each machineconfigpool
+          while read -r pool nodeconfig; do
+            # true by default
+            value='true'
+            # first look for the flag
+            oc get machineconfig $nodeconfig -o json | jq -r '.spec.config.systemd[][] | select(.name=="kubelet.service") | .contents' | sed -n "/^ExecStart=/,/^\$/ { /^\\s*--$flag=false/ q 100 }"
+            # if the above command exited with 100, the flag was false
+            [ $? == 100 ] && value='false'
+            # now look in the yaml KubeletConfig
+            yamlconfig=$(oc get machineconfig $nodeconfig -o json | jq -r '.spec.config.storage.files[] | select(.path=="/etc/kubernetes/kubelet.conf") | .contents.source ' | sed 's/^data:,//' | while read; do echo -e ${REPLY//%/\\x}; done)
+            echo "$yamlconfig" | sed -n "/^$opt:\\s*false\\s*$/ q 100"
+            [ $? == 100 ] && value='false'
+            echo "Pool $pool has $flag ($opt) set to $value"
+          done < <(oc get machineconfigpools -o json | jq -r '.items[] | select(.status.machineCount>0) | .metadata.name + " " + .spec.configuration.name')
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "set to true"
+        remediation: |
+          None required. The --make-iptables-util-chains argument is set to true by default.
+        scored: false
+
+      - id: 4.2.8
+        text: "Ensure that the --hostname-override argument is not set (Manual)"
+        audit: |
+          echo `oc get machineconfig 01-worker-kubelet -o yaml | grep hostname-override`
+          echo `oc get machineconfig 01-master-kubelet -o yaml | grep hostname-override`
+        tests:
+          test_items:
+            - flag: hostname-override
+              set: false
+        remediation: |
+          By default, --hostname-override argument is not set.
+        scored: false
+
+      - id: 4.2.9
+        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Automated)"
+        audit: |
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
+          do
+            oc debug node/${node} -- chroot /host more /etc/kubernetes/kubelet.conf;
+          done
+          oc get machineconfig 01-worker-kubelet -o yaml | grep --color kubeAPIQPS%3A%2050
+          oc get machineconfig 01-master-kubelet -o yaml | grep --color kubeAPIQPS%3A%2050
+        type: "manual"
+        remediation: |
+          Follow the documentation to edit kubelet parameters
+          https://docs.openshift.com/container-platform/4.5/scalability_and_performance/recommended-host-practices.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters
+          KubeAPIQPS: <QPS>
+        scored: true
+
+      - id: 4.2.10
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
+        audit: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.kubeletClientInfo'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
+        remediation: |
+          OpenShift automatically manages TLS authentication for the API server communication with the node/kublet.
+          This is not configurable.
+        scored: true
+
+      - id: 4.2.11
+        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
+        audit: |
+          #Verify the rotateKubeletClientCertificate feature gate is not set to false
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot /host cat /etc/kubernetes/kubelet.conf | grep RotateKubeletClientCertificate
+          done 2> /dev/null
+          # Verify the rotateCertificates argument is set to true
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot host grep rotate /etc/kubernetes/kubelet.conf;
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: rotateCertificates
+              compare:
+                op: eq
+                value: true
+            - flag: rotateKubeletClientCertificates
+              compare:
+                op: noteq
+                value: false
+            - flag: rotateKubeletClientCertificates
+              set: false
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 4.2.12
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
+        audit: |
+          #Verify the rotateKubeletServerCertificate feature gate is on
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
+          do
+            oc debug node/${node} -- chroot /host grep RotateKubeletServerCertificate /etc/kubernetes/kubelet.conf;
+          done 2> /dev/null
+          # Verify the rotateCertificates argument is set to true
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          do
+            oc debug node/${node} -- chroot host grep rotate /etc/kubernetes/kubelet.conf;
+          done 2> /dev/null
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: RotateKubeletServerCertificate
+              compare:
+                op: eq
+                value: true
+            - flag: rotateCertificates
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          By default, kubelet server certificate rotation is disabled.
+        scored: false
+
+      - id: 4.2.13
+        text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
+        audit: |
+          # needs verification
+          # verify cipher suites
+          oc describe --namespace=openshift-ingress-operator ingresscontroller/default
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
+          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
+          oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
+          #check value for tlsSecurityProfile; null is returned if default is used
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.tlsSecurityProfile
+        type: manual
+        remediation: |
+          Follow the directions above and in the OpenShift documentation to configure the tlsSecurityProfile.
+          Configuring Ingress
+        scored: false
