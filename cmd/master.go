@@ -28,7 +28,7 @@ var masterCmd = &cobra.Command{
 	Short: "Run Kubernetes benchmark checks from the master.yaml file.",
 	Long:  `Run Kubernetes benchmark checks from the master.yaml file in cfg/<version>.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, getPlatformName(), viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}

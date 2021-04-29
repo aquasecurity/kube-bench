@@ -322,11 +322,11 @@ func TestGetBenchmarkVersion(t *testing.T) {
 		t.Fatalf("Unable to load config file %v", err)
 	}
 
-	type getBenchmarkVersionFnToTest func(kubeVersion, benchmarkVersion string, v *viper.Viper) (string, error)
+	type getBenchmarkVersionFnToTest func(kubeVersion, benchmarkVersion, platformName string, v *viper.Viper) (string, error)
 
-	withFakeKubectl := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
+	withFakeKubectl := func(kubeVersion, benchmarkVersion, platformName string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		execCode := `#!/bin/sh
-		echo '{"serverVersion": {"major": "1", "minor": "15", "gitVersion": "v1.15.10"}}'
+		echo '{"serverVersion": {"major": "1", "minor": "18", "gitVersion": "v1.18.10"}}'
 		`
 		restore, err := fakeExecutableInPath("kubectl", execCode)
 		if err != nil {
@@ -334,39 +334,40 @@ func TestGetBenchmarkVersion(t *testing.T) {
 		}
 		defer restore()
 
-		return fn(kubeVersion, benchmarkVersion, v)
+		return fn(kubeVersion, benchmarkVersion, platformName, v)
 	}
 
-	withNoPath := func(kubeVersion, benchmarkVersion string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
+	withNoPath := func(kubeVersion, benchmarkVersion, platformName string, v *viper.Viper, fn getBenchmarkVersionFnToTest) (string, error) {
 		restore, err := prunePath()
 		if err != nil {
 			t.Fatal("Failed when calling prunePath ", err)
 		}
 		defer restore()
 
-		return fn(kubeVersion, benchmarkVersion, v)
+		return fn(kubeVersion, benchmarkVersion, platformName, v)
 	}
 
-	type getBenchmarkVersionFn func(string, string, *viper.Viper, getBenchmarkVersionFnToTest) (string, error)
+	type getBenchmarkVersionFn func(string, string, string, *viper.Viper, getBenchmarkVersionFnToTest) (string, error)
 	cases := []struct {
 		n                string
 		kubeVersion      string
 		benchmarkVersion string
+		platformName     string
 		v                *viper.Viper
 		callFn           getBenchmarkVersionFn
 		exp              string
 		succeed          bool
 	}{
-		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", exp: "cis-1.3", callFn: withNoPath, v: viper.New(), succeed: false},
-		{n: "no version-missing-kubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.6", callFn: withNoPath, succeed: true},
-		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withFakeKubectl, succeed: true},
-		{n: "kubeVersion", kubeVersion: "1.15", benchmarkVersion: "", v: viperWithData, exp: "cis-1.5", callFn: withNoPath, succeed: true},
-		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
-		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
-		{n: "gke10", kubeVersion: "gke-1.0", benchmarkVersion: "", v: viperWithData, exp: "gke-1.0", callFn: withNoPath, succeed: true},
+		{n: "both versions", kubeVersion: "1.11", benchmarkVersion: "cis-1.3", platformName: "", exp: "cis-1.3", callFn: withNoPath, v: viper.New(), succeed: false},
+		{n: "no version-missing-kubectl", kubeVersion: "", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "cis-1.6", callFn: withNoPath, succeed: true},
+		{n: "no version-fakeKubectl", kubeVersion: "", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "cis-1.6", callFn: withFakeKubectl, succeed: true},
+		{n: "kubeVersion", kubeVersion: "1.15", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "cis-1.5", callFn: withNoPath, succeed: true},
+		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
+		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
+		{n: "gke10", kubeVersion: "gke-1.0", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "gke-1.0", callFn: withNoPath, succeed: true},
 	}
 	for _, c := range cases {
-		rv, err := c.callFn(c.kubeVersion, c.benchmarkVersion, c.v, getBenchmarkVersion)
+		rv, err := c.callFn(c.kubeVersion, c.benchmarkVersion, c.platformName, c.v, getBenchmarkVersion)
 		if c.succeed {
 			if err != nil {
 				t.Errorf("[%q]-Unexpected error: %v", c.n, err)

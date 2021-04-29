@@ -460,6 +460,8 @@ func getPlatformBenchmarkVersion(platform string) string {
 		return "gke-1.0"
 	case "ocp-3.10":
 		return "rh-0.7"
+	case "ocp-4.1":
+		return "rh-1.0"
 	}
 	return ""
 }
@@ -475,15 +477,26 @@ func getOpenShiftVersion() string{
 		if err == nil {
 			versionRe := regexp.MustCompile(`oc v(\d+\.\d+)`)
 			subs := versionRe.FindStringSubmatch(string(out))
+			if len(subs) < 1 {
+				versionRe = regexp.MustCompile(`Client Version:\s*(\d+\.\d+)`)
+				subs = versionRe.FindStringSubmatch(string(out))
+			}
 			if len(subs) > 1 {
 				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v",string(out),getPlatformNameFromVersion(string(out)),subs[1])
 				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
 				if err == nil{
 					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
+				} else {
+					glog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
 				}
+			} else {
+				glog.V(1).Infof("Can't parse version output: %v", subs)
 			}
+		} else {
+			glog.V(1).Infof("Can't use oc command: %v", err)
 		}
-
+	} else {
+		glog.V(1).Infof("Can't find oc command: %v", err)
 	}
 	return ""
 }
@@ -493,7 +506,7 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 
 	for (!isEmpty(ocpVer)) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
-		if ocpVer == "3.10"{
+		if ocpVer == "3.10" || ocpVer == "4.1"{
 			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}
