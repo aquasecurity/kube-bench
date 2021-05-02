@@ -235,6 +235,7 @@ version_mapping:
   "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
+  "ocp-4.0": "rh-1.0"
   "aks-1.0": "aks-1.0"
 
 target_mapping:
@@ -272,3 +273,9 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "rh-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "etcd"
