@@ -148,6 +148,7 @@ node:
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubelet"
+      - "/etc/default/kubeletconfig.json"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/kubelet/current/args"
       - "/var/snap/microk8s/current/args/kubelet"
