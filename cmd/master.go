@@ -34,7 +34,7 @@ var masterCmd = &cobra.Command{
 		}
 
 		filename := loadConfig(check.MASTER, bv)
-		runChecks(check.MASTER, filename)
+		runChecks(check.MASTER, filename, detecetedKubeVersion)
 		writeOutput(controlsCollection)
 	},
 	Deprecated: "this command will be retired soon. Please use the `run` command with `--targets=master` instead.",
