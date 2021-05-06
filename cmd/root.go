@@ -33,33 +33,34 @@ type FilterOpts struct {
 }
 
 var (
-	envVarsPrefix       = "KUBE_BENCH"
-	defaultKubeVersion  = "1.18"
-	kubeVersion         string
-	benchmarkVersion    string
-	cfgFile             string
-	cfgDir              = "./cfg/"
-	jsonFmt             bool
-	junitFmt            bool
-	pgSQL               bool
-	aSFF                bool
-	masterFile          = "master.yaml"
-	nodeFile            = "node.yaml"
-	etcdFile            = "etcd.yaml"
-	controlplaneFile    = "controlplane.yaml"
-	policiesFile        = "policies.yaml"
-	managedservicesFile = "managedservices.yaml"
-	exitCode            int
-	noResults           bool
-	noSummary           bool
-	noRemediations      bool
-	skipIds             string
-	noTotals            bool
-	filterOpts          FilterOpts
-	includeTestOutput   bool
-	outputFile          string
-	configFileError     error
-	controlsCollection  []*check.Controls
+	envVarsPrefix        = "KUBE_BENCH"
+	defaultKubeVersion   = "1.18"
+	kubeVersion          string
+	detecetedKubeVersion string
+	benchmarkVersion     string
+	cfgFile              string
+	cfgDir               = "./cfg/"
+	jsonFmt              bool
+	junitFmt             bool
+	pgSQL                bool
+	aSFF                 bool
+	masterFile           = "master.yaml"
+	nodeFile             = "node.yaml"
+	etcdFile             = "etcd.yaml"
+	controlplaneFile     = "controlplane.yaml"
+	policiesFile         = "policies.yaml"
+	managedservicesFile  = "managedservices.yaml"
+	exitCode             int
+	noResults            bool
+	noSummary            bool
+	noRemediations       bool
+	skipIds              string
+	noTotals             bool
+	filterOpts           FilterOpts
+	includeTestOutput    bool
+	outputFile           string
+	configFileError      error
+	controlsCollection   []*check.Controls
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -76,7 +77,7 @@ var RootCmd = &cobra.Command{
 
 		if isMaster() {
 			glog.V(1).Info("== Running master checks ==")
-			runChecks(check.MASTER, loadConfig(check.MASTER, bv))
+			runChecks(check.MASTER, loadConfig(check.MASTER, bv), detecetedKubeVersion)
 
 			// Control Plane is only valid for CIS 1.5 and later,
 			// this a gatekeeper for previous versions
@@ -86,7 +87,7 @@ var RootCmd = &cobra.Command{
 			}
 			if valid {
 				glog.V(1).Info("== Running control plane checks ==")
-				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv))
+				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv), detecetedKubeVersion)
 			}
 		} else {
 			glog.V(1).Info("== Skipping master checks ==")
@@ -100,13 +101,13 @@ var RootCmd = &cobra.Command{
 		}
 		if valid && isEtcd() {
 			glog.V(1).Info("== Running etcd checks ==")
-			runChecks(check.ETCD, loadConfig(check.ETCD, bv))
+			runChecks(check.ETCD, loadConfig(check.ETCD, bv), detecetedKubeVersion)
 		} else {
 			glog.V(1).Info("== Skipping etcd checks ==")
 		}
 
 		glog.V(1).Info("== Running node checks ==")
-		runChecks(check.NODE, loadConfig(check.NODE, bv))
+		runChecks(check.NODE, loadConfig(check.NODE, bv), detecetedKubeVersion)
 
 		// Policies is only valid for CIS 1.5 and later,
 		// this a gatekeeper for previous versions.
@@ -116,7 +117,7 @@ var RootCmd = &cobra.Command{
 		}
 		if valid {
 			glog.V(1).Info("== Running policies checks ==")
-			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv))
+			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv), detecetedKubeVersion)
 		} else {
 			glog.V(1).Info("== Skipping policies checks ==")
 		}
@@ -129,7 +130,7 @@ var RootCmd = &cobra.Command{
 		}
 		if valid {
 			glog.V(1).Info("== Running managed services checks ==")
-			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv))
+			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv), detecetedKubeVersion)
 		} else {
 			glog.V(1).Info("== Skipping managed services checks ==")
 		}
