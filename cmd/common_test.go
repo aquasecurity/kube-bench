@@ -630,7 +630,7 @@ groups:
       Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
     scored: true
 `)
-	controls, err := check.NewControls(check.MASTER, input)
+	controls, err := check.NewControls(check.MASTER, input, "")
 	assert.NoError(t, err)
 
 	binSubs := []string{"TestBinPath"}

@@ -47,11 +47,12 @@ type OverallControls struct {
 
 // Controls holds all controls to check for master nodes.
 type Controls struct {
-	ID      string   `yaml:"id" json:"id"`
-	Version string   `json:"version"`
-	Text    string   `json:"text"`
-	Type    NodeType `json:"node_type"`
-	Groups  []*Group `json:"tests"`
+	ID              string   `yaml:"id" json:"id"`
+	Version         string   `json:"version"`
+	DetectedVersion string   `json:"detected_version,omitempty"`
+	Text            string   `json:"text"`
+	Type            NodeType `json:"node_type"`
+	Groups          []*Group `json:"tests"`
 	Summary
 }
 
@@ -79,7 +80,7 @@ type Summary struct {
 type Predicate func(group *Group, check *Check) bool
 
 // NewControls instantiates a new master Controls object.
-func NewControls(t NodeType, in []byte) (*Controls, error) {
+func NewControls(t NodeType, in []byte, detectedVersion string) (*Controls, error) {
 	c := new(Controls)
 
 	err := yaml.Unmarshal(in, c)
@@ -90,7 +91,7 @@ func NewControls(t NodeType, in []byte) (*Controls, error) {
 	if t != c.Type {
 		return nil, fmt.Errorf("non-%s controls file specified", t)
 	}
-
+	c.DetectedVersion = detectedVersion
 	return c, nil
 }
 

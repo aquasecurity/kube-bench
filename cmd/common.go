@@ -64,7 +64,7 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 	}, nil
 }
 
-func runChecks(nodetype check.NodeType, testYamlFile string) {
+func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 	// Verify config file was loaded into Viper during Cobra sub-command initialization.
 	if configFileError != nil {
 		colorPrint(check.FAIL, fmt.Sprintf("Failed to read config file: %v\n", configFileError))
@@ -106,7 +106,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 	s, _ = makeSubstitutions(s, "kubeconfig", kubeconfmap)
 	s, _ = makeSubstitutions(s, "cafile", cafilemap)
 
-	controls, err := check.NewControls(nodetype, []byte(s))
+	controls, err := check.NewControls(nodetype, []byte(s), detectedVersion)
 	if err != nil {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
@@ -123,7 +123,7 @@ func runChecks(nodetype check.NodeType, testYamlFile string) {
 	controlsCollection = append(controlsCollection, controls)
 }
 
-func generateDefaultEnvAudit(controls *check.Controls, binSubs []string){
+func generateDefaultEnvAudit(controls *check.Controls, binSubs []string) {
 	for _, group := range controls.Groups {
 		for _, checkItem := range group.Checks {
 			if checkItem.Tests != nil && !checkItem.DisableEnvTesting {
@@ -314,11 +314,15 @@ func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
 }
 
 func getBenchmarkVersion(kubeVersion, benchmarkVersion, platformName string, v *viper.Viper) (bv string, err error) {
+	detecetedKubeVersion = "none"
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
-	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) && !isEmpty(platformName){
+	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) && !isEmpty(platformName) {
 		benchmarkVersion = getPlatformBenchmarkVersion(platformName)
+		if !isEmpty(benchmarkVersion) {
+			detecetedKubeVersion = benchmarkVersion
+		}
 	}
 
 	if isEmpty(benchmarkVersion) {
@@ -328,6 +332,7 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion, platformName string, v *
 				return "", fmt.Errorf("Version check failed: %s\nAlternatively, you can specify the version with --version", err)
 			}
 			kubeVersion = kv.BaseVersion()
+			detecetedKubeVersion = kubeVersion
 		}
 
 		kubeToBenchmarkMap, err := loadVersionMapping(v)
