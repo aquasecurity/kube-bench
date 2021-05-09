@@ -42,7 +42,6 @@ groups:
           bin_op: or
           test_items:
             - flag: "permissions"
-              set: true
               compare:
                 op: bitmask
                 value: "644"
