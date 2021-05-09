@@ -32,7 +32,7 @@ var runCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("unable to get `targets` from command line :%v", err))
 		}
 
-		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, viper.GetViper())
+		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, getPlatformName(), viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to get benchmark version. error: %v", err))
 		}
@@ -75,7 +75,7 @@ func run(targets []string, benchmarkVersion string) (err error) {
 	for _, yamlFile := range yamlFiles {
 		_, name := filepath.Split(yamlFile)
 		testType := check.NodeType(strings.Split(name, ".")[0])
-		runChecks(testType, yamlFile)
+		runChecks(testType, yamlFile, detecetedKubeVersion)
 	}
 
 	writeOutput(controlsCollection)
