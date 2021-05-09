@@ -38,7 +38,7 @@ func init() {
 	user := os.Getenv("USER")
 	s := strings.Replace(string(in), "$user", user, -1)
 
-	controls, err = NewControls(MASTER, []byte(s))
+	controls, err = NewControls(MASTER, []byte(s), "")
 	// controls, err = NewControls(MASTER, in)
 	if err != nil {
 		panic("Failed creating test controls: " + err.Error())

@@ -75,7 +75,7 @@ func run(targets []string, benchmarkVersion string) (err error) {
 	for _, yamlFile := range yamlFiles {
 		_, name := filepath.Split(yamlFile)
 		testType := check.NodeType(strings.Split(name, ".")[0])
-		runChecks(testType, yamlFile)
+		runChecks(testType, yamlFile, detecetedKubeVersion)
 	}
 
 	writeOutput(controlsCollection)

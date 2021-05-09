@@ -1,6 +1,6 @@
 ---
 controls:
-version: 3.10
+version: "rh-0.7"
 id: 1
 text: "Securing the OpenShift Master"
 type: "master"
