@@ -1,5 +1,6 @@
 ---
 controls:
+version: "rh-0.7"
 id: 2
 text: "Worker Node Security Configuration"
 type: "node"
