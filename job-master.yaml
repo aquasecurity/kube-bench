@@ -53,6 +53,12 @@ spec:
             - name: opt-cni-bin
               mountPath: /opt/cni/bin/
               readOnly: true
+            - name: etc-passwd
+              mountPath: /etc/passwd
+              readOnly: true
+            - name: etc-group
+              mountPath: /etc/group
+              readOnly: true
       restartPolicy: Never
       volumes:
         - name: var-lib-etcd
@@ -88,3 +94,9 @@ spec:
         - name: opt-cni-bin
           hostPath:
             path: "/opt/cni/bin/"
+        - name: etc-passwd
+          hostPath:
+            path: "/etc/passwd"
+        - name: etc-group
+          hostPath:
+            path: "/etc/group"
