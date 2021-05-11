@@ -29,7 +29,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
 
-1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS and AKS, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
+1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS, AKS and ACK, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
 ![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/main/images/output.png "Kubernetes Bench for Security")
@@ -48,6 +48,7 @@ Table of Contents
     - [Running in an EKS cluster](#running-in-an-eks-cluster)
     - [Running on OpenShift](#running-on-openshift)
     - [Running in an GKE cluster](#running-in-a-gke-cluster)
+    - [Running in an ACK cluster](#running-in-a-ack-cluster)
     - [Installing from a container](#installing-from-a-container)
     - [Download and Install binaries](#download-and-install-binaries)
     - [Installing from sources](#installing-from-sources)
@@ -74,6 +75,7 @@ kube-bench supports the tests for Kubernetes as defined in the [CIS Kubernetes B
 | [1.6.0](https://workbench.cisecurity.org/benchmarks/4834) | cis-1.6 | 1.16- |
 | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
 | [EKS 1.0.0](https://workbench.cisecurity.org/benchmarks/5190) | eks-1.0 | EKS |
+| [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467) | ack-1.0 | ACK |
 | Red Hat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 |
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine, but please note that kube-bench does not automatically detect OpenShift and GKE - see the section below on [Running kube-bench](https://github.com/aquasecurity/kube-bench#running-kube-bench).
@@ -141,6 +143,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.6| master, controlplane, node, etcd, policies |
 | gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 | eks-1.0| controlplane, node, policies, managedservices |
+| ack-1.0| master, controlplane, node, etcd, policies, managedservices |
 
 If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version and the components detected on the node. The detection is done by verifying which components are running, as defined in the config files (see [Configuration](#configuration).
 ### Running inside a container
@@ -268,6 +271,21 @@ To run the benchmark as a job in your GKE cluster apply the included `job-gke.ya
 kubectl apply -f job-gke.yaml
 ```
 
+### Running in a ACK cluster
+
+| CIS Benchmark | Targets |
+|---|---|
+| ack-1.0| master, controlplane, node, etcd, policies, managedservices |
+
+kube-bench includes benchmarks for Alibaba Cloud Container Service For Kubernetes (ACK).
+To run this you will need to specify `--benchmark ack-1.0` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your ACK cluster apply the included `job-ack.yaml`.
+
+```
+kubectl apply -f job-ack.yaml
+```
+
 ### Installing from a container
 
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
@@ -280,7 +298,7 @@ You can then run `./kube-bench`.
 
 ### Download and Install binaries
 
-It is possible to manually install and run kube-bench release binaries. In order to do that, you must have access to your Kubernetes cluster nodes. Note that if you're using one of the managed Kubernetes services (e.g. EKS, AKS, GKE), you will not have access to the master nodes of your cluster and you can’t perform any tests on the master nodes.
+It is possible to manually install and run kube-bench release binaries. In order to do that, you must have access to your Kubernetes cluster nodes. Note that if you're using one of the managed Kubernetes services (e.g. EKS, AKS, GKE, ACK), you will not have access to the master nodes of your cluster and you can’t perform any tests on the master nodes.
 
 First, log into one of the nodes using SSH.
 

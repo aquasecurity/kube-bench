@@ -1,0 +1,39 @@
+---
+controls:
+version: "ack-1.0"
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Revoke client certificate when possible leakage (Manual)"
+        type: "manual"
+        remediation: |
+          Kubernetes provides the option to use client certificates for user authentication.
+          ACK issues kubeconfig with its client certificates as the user credentials for connecing to target cluster.
+          User should revoke his/her issued kubeconfig when possible leakage.
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created (Manual)"
+        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        tests:
+          test_items:
+            - flag: "--audit-policy-file"
+        remediation: |
+          Create an audit policy file for your cluster.
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns (Manual)"
+        type: "manual"
+        remediation: |
+          Consider modification of the audit policy in use on the cluster to include these items, at a
+          minimum.
+        scored: false
