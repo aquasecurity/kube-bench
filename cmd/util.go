@@ -306,7 +306,7 @@ func getKubeVersion() (*KubeVersion, error) {
 			glog.Warning(missingKubectlKubeletMessage)
 			glog.V(1).Info("unable to find the programs kubectl or kubelet in the PATH")
 			glog.V(1).Infof("Cant detect version, assuming default %s", defaultKubeVersion)
-			return &KubeVersion{baseVersion: defaultKubeVersion}, nil 
+			return &KubeVersion{baseVersion: defaultKubeVersion}, nil
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
@@ -430,7 +430,7 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 func getPlatformName() string {
 
 	openShiftVersion := getOpenShiftVersion()
-	if openShiftVersion != ""{
+	if openShiftVersion != "" {
 		return openShiftVersion
 	}
 
@@ -458,6 +458,8 @@ func getPlatformBenchmarkVersion(platform string) string {
 		return "eks-1.0"
 	case "gke":
 		return "gke-1.0"
+	case "aliyun":
+		return "ack-1.0"
 	case "ocp-3.10":
 		return "rh-0.7"
 	case "ocp-4.1":
@@ -466,7 +468,7 @@ func getPlatformBenchmarkVersion(platform string) string {
 	return ""
 }
 
-func getOpenShiftVersion() string{
+func getOpenShiftVersion() string {
 	glog.V(1).Info("Checking for oc")
 	_, err := exec.LookPath("oc")
 
@@ -482,9 +484,9 @@ func getOpenShiftVersion() string{
 				subs = versionRe.FindStringSubmatch(string(out))
 			}
 			if len(subs) > 1 {
-				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v",string(out),getPlatformNameFromVersion(string(out)),subs[1])
+				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformNameFromVersion(string(out)), subs[1])
 				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
-				if err == nil{
+				if err == nil {
 					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
 				} else {
 					glog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
@@ -504,13 +506,13 @@ func getOpenShiftVersion() string{
 func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
 
-	for (!isEmpty(ocpVer)) {
+	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
-		if ocpVer == "3.10" || ocpVer == "4.1"{
+		if ocpVer == "3.10" || ocpVer == "4.1" {
 			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}
-		ocpVer = decrementVersion(ocpVer)		
+		ocpVer = decrementVersion(ocpVer)
 	}
 
 	glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
