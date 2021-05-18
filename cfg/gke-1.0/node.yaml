@@ -10,55 +10,25 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.3
         text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %a $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
           Run the below command (based on the file location on your system) on each worker node.
           For example,
@@ -71,7 +41,6 @@ groups:
         tests:
           test_items:
             - flag: root:root
-              set: true
         remediation: |
           Run the below command (based on the file location on your system) on each worker node.
           For example, chown root:root $proxykubeconfig
@@ -79,65 +48,38 @@ groups:
 
       - id: 4.1.5
         text: "Ensure that the kubelet.conf file permissions are set to 644 or more restrictive (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.6
         text: "Ensure that the kubelet.conf file ownership is set to root:root (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false
 
       - id: 4.1.9
         text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               set: true
               compare:
                 op: eq
                 value: "644"
-            - flag: "640"
-              set: true
-              compare:
-                op: eq
-                value: "640"
-            - flag: "600"
-              set: true
-              compare:
-                op: eq
-                value: "600"
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chmod 644 $kubeletconf
@@ -149,7 +91,6 @@ groups:
         tests:
           test_items:
             - flag: root:root
-              set: true
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
@@ -166,7 +107,6 @@ groups:
           test_items:
             - flag: "--anonymous-auth"
               path: '{.authentication.anonymous.enabled}'
-              set: true
               compare:
                 op: eq
                 value: false
@@ -190,7 +130,6 @@ groups:
           test_items:
             - flag: --authorization-mode
               path: '{.authorization.mode}'
-              set: true
               compare:
                 op: nothave
                 value: AlwaysAllow
@@ -234,7 +173,6 @@ groups:
           test_items:
             - flag: "--read-only-port"
               path: '{.readOnlyPort}'
-              set: true
               compare:
                 op: eq
                 value: 0
@@ -257,7 +195,6 @@ groups:
           test_items:
             - flag: --streaming-connection-idle-timeout
               path: '{.streamingConnectionIdleTimeout}'
-              set: true
               compare:
                 op: noteq
                 value: 0
@@ -285,7 +222,6 @@ groups:
           test_items:
             - flag: --protect-kernel-defaults
               path: '{.protectKernelDefaults}'
-              set: true
               compare:
                 op: eq
                 value: true
@@ -308,7 +244,6 @@ groups:
           test_items:
             - flag: --make-iptables-util-chains
               path: '{.makeIPTablesUtilChains}'
-              set: true
               compare:
                 op: eq
                 value: true
@@ -329,9 +264,6 @@ groups:
 
       - id: 4.2.8
         text: "Ensure that the --hostname-override argument is not set (Scored)"
-        # This is one of those properties that can only be set as a command line argument.
-        # To check if the property is set as expected, we need to parse the kubelet command
-        # instead reading the Kubelet Configuration file.
         audit: "/bin/ps -fC $kubeletbin "
         tests:
           test_items:
@@ -373,13 +305,12 @@ groups:
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
+          bin_op: and
           test_items:
             - flag: --tls-cert-file
               path: '{.tlsCertFile}'
-              set: true
             - flag: --tls-private-key-file
               path: '{.tlsPrivateKeyFile}'
-              set: true
         remediation: |
           If using a Kubelet config file, edit the file to set tlsCertFile to the location
           of the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile
@@ -402,7 +333,6 @@ groups:
           test_items:
             - flag: --rotate-certificates
               path: '{.rotateCertificates}'
-              set: true
               compare:
                 op: eq
                 value: true
@@ -430,7 +360,6 @@ groups:
           test_items:
             - flag: RotateKubeletServerCertificate
               path: '{.featureGates.RotateKubeletServerCertificate}'
-              set: true
               compare:
                 op: eq
                 value: true
@@ -445,5 +374,6 @@ groups:
 
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)"
+        type: skip
         remediation: "This control cannot be modified in GKE."
         scored: false

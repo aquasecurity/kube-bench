@@ -20,6 +20,7 @@ groups:
 
   - id: 3.2
     text: "Logging"
+    type: skip
     checks:
       - id: 3.2.1
         text: "Ensure that a minimal audit policy is created (Not Scored)"
