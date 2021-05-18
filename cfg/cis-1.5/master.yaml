@@ -766,13 +766,7 @@ groups:
       - id: 1.2.26
         text: "Ensure that the --request-timeout argument is set as appropriate (Scored)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        tests:
-          bin_op: or
-          test_items:
-            - flag: "--request-timeout"
-              set: false
-            - flag: "--request-timeout"
-              set: true
+        type: manual
         remediation: |
           Edit the API server pod specification file $apiserverconf
           and set the below parameter as appropriate and if needed.
