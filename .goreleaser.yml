@@ -28,6 +28,7 @@ archives:
 nfpms:
   -
     vendor: Aqua Security
+    maintainer: Yoav Rotem <yoav.rotem@aquasec.com>
     description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
     license: Apache-2.0
     homepage: https://github.com/aquasecurity/kube-bench
