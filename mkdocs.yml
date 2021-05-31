@@ -1,5 +1,4 @@
 ---
-
 site_name: Kube-bench
 site_url: https://aquasecurity.github.io/kube-bench/
 site_description: Checks whether Kubernetes is deployed according to security best practices as defined in the CIS Kubernetes Benchmark
@@ -11,14 +10,14 @@ edit_uri: ""
 nav:
   - Overview: index.md
   - Getting Started:
-    - Installation: Installation.md
-    - Platforms: Platforms.md
-    - How to run: Running.md
-    - ASFF: asff.md
+      - Installation: Installation.md
+      - Platforms: Platforms.md
+      - How to run: Running.md
+      - ASFF: asff.md
   - Flags: Flags_and_commands.md
   - Configuration Options:
-    - Understanding the yamls: Controls.md
-    - Architecture: Architecture.md
+      - Understanding the yamls: Controls.md
+      - Architecture: Architecture.md
   - Contributing: Contributing.md
 
 markdown_extensions:
@@ -33,9 +32,9 @@ extra:
     provider: mike
 
 theme:
-    name: material
-    language: 'en'
-    logo: images/kube-bench-logo-only.png
+  name: material
+  language: 'en'
+  logo: images/kube-bench-logo-only.png
 
 plugins:
   - search
