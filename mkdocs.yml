@@ -25,6 +25,18 @@ theme:
     language: 'en'
     logo: images/kube-bench-logo-only.png
 
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - admonition
+
+extra:
+  generator: false
+  version:
+    method: mike
+    provider: mike
+    
 plugins:
   - search
   - macros
