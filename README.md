@@ -32,7 +32,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS, AKS and ACK, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 
-![Kubernetes Bench for Security](https://raw.githubusercontent.com/aquasecurity/kube-bench/main/docs/images/output.png "Kubernetes Bench for Security")
+![Kubernetes Bench for Security](/docs/images/output.png "Kubernetes Bench for Security")
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
