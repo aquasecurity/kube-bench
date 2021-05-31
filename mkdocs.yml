@@ -14,17 +14,11 @@ nav:
     - Platforms: Platforms.md
     - How to run: Running.md
     - ASFF: asff.md
-  - Flags: Flags_and_commands
+  - Flags: Flags_and_commands.md
   - Configuration Options:
     - Understanding the yamls: Controls.md
     - Architecture: Architecture.md
   - Contributing: Contributing.md
-
-theme:
-    name: material
-    language: 'en'
-    logo: images/kube-bench-logo-only.png
-
 
 markdown_extensions:
   - pymdownx.highlight
@@ -36,7 +30,12 @@ extra:
   version:
     method: mike
     provider: mike
-    
+
+theme:
+    name: material
+    language: 'en'
+    logo: images/kube-bench-logo-only.png
+
 plugins:
   - search
   - macros
