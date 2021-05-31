@@ -17,7 +17,7 @@
 [report-card-img]: https://goreportcard.com/badge/github.com/aquasecurity/kube-bench
 [report-card]: https://goreportcard.com/report/github.com/aquasecurity/kube-bench
 
-<img src="images/kube-bench.png" width="200" alt="kube-bench logo">
+<img src="docs/images/kube-bench.png" width="200" alt="kube-bench logo">
 
 kube-bench is a Go application that checks whether Kubernetes is deployed securely by running the checks documented in the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/).
 
