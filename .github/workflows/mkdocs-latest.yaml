@@ -1,3 +1,4 @@
+---
 name: Deploy the latest documentation
 on:
   push:
