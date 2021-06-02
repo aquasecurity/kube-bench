@@ -36,7 +36,7 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
-- see the section below on [Running kube-bench](docs/Running.md#running-kube-bench).
+- see the following documentation on [Running kube-bench](docs/Running.md#running-kube-bench) for more details.
 
 
 
