@@ -1,6 +1,6 @@
 ## Test config YAML representation
 
-The tests (or "controls") are represented as YAML documents (installed by default into `./cfg`). There are different versions of these test YAML files reflecting different [versions and platforms of the CIS Kubernetes Benchmark](./Platforms.md). You will find more information about the test file YAML definitions in our [controls documentation](./Controls.md).
+The tests (or "controls") are maintained in YAML documents. There are different versions of these test YAML files reflecting different [versions and platforms of the CIS Kubernetes Benchmark](./Platforms.md). You will find more information about the test file YAML definitions in our [controls documentation](./Controls.md).
 
 ## Kube-bench benchmarks
 
@@ -19,7 +19,6 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | ack-1.0| master, controlplane, node, etcd, policies, managedservices |
 | rh-0.7| master,node|
 | rh-1.0| master, controlplane, node, etcd, policies |
-
 
 
 
