@@ -369,7 +369,7 @@ groups:
         tests:
           bin_op: and
           test_items:
-            - path: "{.kubeletClientInfo. keyFile}"
+            - path: "{.kubeletClientInfo.keyFile}"
               compare:
                 op: eq
                 value: "master.kubelet-client.key"
@@ -408,9 +408,9 @@ groups:
               compare:
                 op: eq
                 value: "serviceaccounts.private.key"
-            - path: "{.serviceAccountConfig. publicKeyFiles}"
+            - path: "{.serviceAccountConfig.publicKeyFiles}"
               compare:
-                op: eq
+                op: has
                 value: "serviceaccounts.public.key"
         remediation: |
           OpenShift API server does not use the service-account-key-file argument.
@@ -1032,7 +1032,7 @@ groups:
     checks:
       - id: 5.1
         text: "Verify the default OpenShift cert-file and key-file configuration"
-        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_CERT_FILE=/etc/etcd/server.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep etcd_key_file=/etc/etcd/server.key /proc/1/environ; grep ETCD_CERT_FILE=/etc/etcd/server.crt /etc/etcd/etcd.conf; grep ETCD_KEY_FILE=/etc/etcd/server.key /etc/etcd/etcd.conf'"
+        audit: "/bin/sh -c '/usr/local/bin/master-exec etcd etcd grep ETCD_CERT_FILE=/etc/etcd/server.crt /proc/1/environ; /usr/local/bin/master-exec etcd etcd grep ETCD_KEY_FILE=/etc/etcd/server.key /proc/1/environ; grep ETCD_CERT_FILE=/etc/etcd/server.crt /etc/etcd/etcd.conf; grep ETCD_KEY_FILE=/etc/etcd/server.key /etc/etcd/etcd.conf'"
         tests:
           bin_op: and
           test_items:
