@@ -36,7 +36,7 @@ Flag | Description
 
 #### Report kube-bench findings to AWS Security Hub
 
-You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page][kube-bench-aws-security-hub] for more information on how to enable the kube-bench integ
+You can configure kube-bench with the `--asff` option to send findings to AWS Security Hub for any benchmark tests that fail or that generate a warning. See [this page](asff.md) for more information on how to enable the kube-bench integration with AWS Security Hub.
 
 #### Specifying the benchmark or Kubernetes version
 
@@ -75,7 +75,7 @@ kube-bench run --targets master,node,etcd,policies
 ```
 
 
-If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version and the components detected on the node. The detection is done by verifying which components are running, as defined in the config files (see [Configuration](#configuration).
+If no targets are specified, `kube-bench` will determine the appropriate targets based on the CIS Benchmark version and the components detected on the node. The detection is done by verifying which components are running, as defined in the config files (see [Configuration](controls.md#configuration-and-variables).
 
 #### Run specific check or group
 
