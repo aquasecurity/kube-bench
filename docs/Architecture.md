@@ -4,8 +4,10 @@ The tests (or "controls") are maintained in YAML documents. There are different 
 
 ## Kube-bench benchmarks
 
-The test files for the various versions of CIS Benchmark can be found in directories
-with same name as the CIS Benchmark versions under the `cfg` directory next to the kube-bench executable, for example `./cfg/cis-1.5`.
+The test files for the various versions of Benchmarks can be found in directories
+with same name as the Benchmark versions under the `cfg` directory next to the kube-bench executable, 
+for example `./cfg/cis-1.5` will contain all test files for [CIS Kubernetes Benchmark v1.5.1](https://workbench.cisecurity.org/benchmarks/4892) which are:
+master.yaml, controlplane.yaml, node.yaml, etcd.yaml, policies.yaml and config.yaml 
 
 Check the contents of the benchmark directory under `cfg` to see which targets are available for that benchmark. Each file except `config.yaml` represents a target (also known as a `control` in other parts of this documentation). 
 
