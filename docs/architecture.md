@@ -1,6 +1,6 @@
 ## Test config YAML representation
 
-The tests (or "controls") are maintained in YAML documents. There are different versions of these test YAML files reflecting different [versions and platforms of the CIS Kubernetes Benchmark](./Platforms.md). You will find more information about the test file YAML definitions in our [controls documentation](./Controls.md).
+The tests (or "controls") are maintained in YAML documents. There are different versions of these test YAML files reflecting different [versions and platforms of the CIS Kubernetes Benchmark](./platforms.md). You will find more information about the test file YAML definitions in our [controls documentation](./controls.md).
 
 ## Kube-bench benchmarks
 
