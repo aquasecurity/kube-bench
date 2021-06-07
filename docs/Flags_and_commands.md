@@ -32,7 +32,7 @@ Flag | Description
 --version string | Manually specify Kubernetes version, automatically detected if unset
 --vmodule moduleSpec | comma-separated list of pattern=N settings for file-filtered logging
 
-### Flags examples 
+### Examples 
 
 #### Report kube-bench findings to AWS Security Hub
 
