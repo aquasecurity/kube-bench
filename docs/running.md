@@ -7,6 +7,8 @@ By default kube-bench attempts to auto-detect the running version of Kubernetes,
 
 kube-bench also attempts to identify the components running on the node, and uses this to determine which tests to run (for example, only running the master node tests if the node is running an API server). 
 
+**Please note**
+It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS, AKS and ACK, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
 
 ### Running inside a container
 
