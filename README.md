@@ -56,7 +56,7 @@ For more information and different ways to run kube-bench see [documentation](do
 
 1. kube-bench implements the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/) as closely as possible. Please raise issues here if kube-bench is not correctly implementing the test as described in the Benchmark. To report issues in the Benchmark itself (for example, tests that you believe are inappropriate), please join the [CIS community](https://cisecurity.org).
 
-1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](docs/Platforms.md#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
+1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](docs/platforms.md#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
