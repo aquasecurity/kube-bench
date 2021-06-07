@@ -60,7 +60,7 @@ For more information and different ways to run kube-bench see [documentation](do
 
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
-- see the following documentation on [Running kube-bench](docs/Running.md#running-kube-bench) for more details.
+- see the following documentation on [Running kube-bench](docs/running.md#running-kube-bench) for more details.
 
 
 ## Contributing
