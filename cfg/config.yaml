@@ -15,6 +15,7 @@ master:
     - flanneld
     # kubernetes is a component to cover the config file /etc/kubernetes/config that is referred to in the benchmark
     - kubernetes
+    - kubelet
 
   kubernetes:
     defaultconf: /etc/kubernetes/config
@@ -25,7 +26,6 @@ master:
       - "hyperkube apiserver"
       - "hyperkube kube-apiserver"
       - "apiserver"
-      # Required to correctly detect the master node in openshift
       - "openshift start master api"
       - "hypershift openshift-kube-apiserver"
     confs:
@@ -34,6 +34,7 @@ master:
       - /etc/kubernetes/manifests/kube-apiserver.manifest
       - /var/snap/kube-apiserver/current/args
       - /var/snap/microk8s/current/args/kube-apiserver
+      - /etc/origin/master/master-config.yaml
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -42,7 +43,6 @@ master:
       - "hyperkube scheduler"
       - "hyperkube kube-scheduler"
       - "scheduler"
-      # Required to correctly detect the master node in openshift
       - "openshift start master controllers"
     confs:
       - /etc/kubernetes/manifests/kube-scheduler.yaml
@@ -50,9 +50,12 @@ master:
       - /etc/kubernetes/manifests/kube-scheduler.manifest
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
+      - /etc/origin/master/scheduler.json
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
+      - /var/lib/kube-scheduler/kubeconfig
+      - /var/lib/kube-scheduler/config.yaml
     defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
@@ -62,7 +65,6 @@ master:
       - "hyperkube controller-manager"
       - "hyperkube kube-controller-manager"
       - "controller-manager"
-      # Required to correctly detect the master node in openshift
       - "openshift start master controllers"
       - "hypershift openshift-controller-manager"
     confs:
@@ -74,13 +76,13 @@ master:
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
+      - /var/lib/kube-controller-manager/kubeconfig
     defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
     optional: true
     bins:
       - "etcd"
-      # Required to correctly detect the master node in openshift
       - "openshift start etcd"
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
@@ -98,6 +100,12 @@ master:
     bins:
       - flanneld
     defaultconf: /etc/sysconfig/flanneld
+
+  kubelet:
+    optional: true
+    bins:
+      - "hyperkube kubelet"
+      - "kubelet"
 
 node:
   components:
@@ -123,6 +131,8 @@ node:
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
+      - "/etc/systemd/system/atomic-openshift-node.service"
+      - "/etc/systemd/system/origin-node.service"
     bins:
       - "hyperkube kubelet"
       - "kubelet"
@@ -137,6 +147,7 @@ node:
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
+      - "/etc/default/kubeletconfig.json"
       - "/etc/default/kubelet"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/kubelet/current/args"
@@ -163,6 +174,7 @@ node:
       - "hyperkube proxy"
       - "hyperkube kube-proxy"
       - "proxy"
+      - "openshift start network"
     confs:
       - /etc/kubernetes/proxy
       - /etc/kubernetes/addons/kube-proxy-daemonset.yaml
@@ -224,7 +236,9 @@ version_mapping:
   "gke-1.0": "gke-1.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
+  "ocp-4.0": "rh-1.0"
   "aks-1.0": "aks-1.0"
+  "ack-1.0": "ack-1.0"
 
 target_mapping:
   "cis-1.5":
@@ -261,3 +275,16 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "ack-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+    - "managedservices"
+  "rh-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "etcd"

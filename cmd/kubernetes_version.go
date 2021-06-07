@@ -33,24 +33,28 @@ func (k *KubeVersion) BaseVersion() string {
 }
 
 func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
+	glog.V(2).Info("Try to get version from Rest API")
 	k8sVersionURL := getKubernetesURL()
 	serviceaccount := "/var/run/secrets/kubernetes.io/serviceaccount"
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
 	tokenfile := fmt.Sprintf("%s/token", serviceaccount)
 
-	tlsCert, err := loadCertficate(cacertfile)
+	tlsCert, err := loadCertificate(cacertfile)
 	if err != nil {
+		glog.V(2).Infof("Failed loading certificate Error: %s", err)
 		return nil, err
 	}
 
 	tb, err := ioutil.ReadFile(tokenfile)
 	if err != nil {
+		glog.V(2).Infof("Failed reading token file Error: %s", err)
 		return nil, err
 	}
 	token := strings.TrimSpace(string(tb))
 
 	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
 	if err != nil {
+		glog.V(2).Infof("Failed to get data Error: %s", err)
 		return nil, err
 	}
 
@@ -143,7 +147,7 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func loadCertficate(certFile string) (*tls.Certificate, error) {
+func loadCertificate(certFile string) (*tls.Certificate, error) {
 	cacert, err := ioutil.ReadFile(certFile)
 	if err != nil {
 		return nil, err

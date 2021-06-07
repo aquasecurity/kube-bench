@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.6"
+version: "ack-1.0"
 id: 2
 text: "Etcd Node Configuration"
 type: "etcd"

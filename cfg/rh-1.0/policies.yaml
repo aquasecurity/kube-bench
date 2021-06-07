@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.6"
+version: rh-1.0
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -45,10 +45,7 @@ groups:
         text: "Ensure that default service accounts are not actively used. (Manual)"
         type: "manual"
         remediation: |
-          Create explicit service accounts wherever a Kubernetes workload requires specific access
-          to the Kubernetes API server.
-          Modify the configuration of each default service account to include this value
-          automountServiceAccountToken: false
+          None required.
         scored: false
 
       - id: 5.1.6
@@ -64,67 +61,134 @@ groups:
     checks:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"
-        type: "manual"
+        audit: |
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Privileged";
+          done
+        tests:
+          test_items:
+            - flag: "false"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that
-          the .spec.privileged field is omitted or set to false.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
+          Privileged field is set to false.
         scored: false
 
       - id: 5.2.2
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
-        type: "manual"
+        audit: |
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host PID";
+          done
+        tests:
+          test_items:
+            - flag: "false"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostPID field is omitted or set to false.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          PID field is set to false.
         scored: false
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
-        type: "manual"
+        audit: |
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host IPC";
+          done
+        tests:
+          test_items:
+            - flag: "false"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostIPC field is omitted or set to false.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          IPC field is set to false.
         scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
-        type: "manual"
+        audit: |
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Host Network";
+          done
+        tests:
+          test_items:
+            - flag: "false"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostNetwork field is omitted or set to false.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          Network field is omitted or set to false.
         scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
-        type: "manual"
+        audit: |
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i"; oc describe scc $i | grep "Allow Privilege Escalation";
+          done
+        tests:
+          test_items:
+            - flag: "false"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.allowPrivilegeEscalation field is omitted or set to false.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
+          Privilege Escalation field is omitted or set to false.
         scored: false
 
       - id: 5.2.6
         text: "Minimize the admission of root containers (Manual)"
-        type: "manual"
+        audit: |
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i";
+            oc describe scc $i | grep "Run As User Strategy";
+          done
+          #For SCCs with MustRunAs verify that the range of UIDs does not include 0
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i";
+            oc describe scc $i | grep "\sUID";
+          done
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "MustRunAsNonRoot"
+            - flag: "MustRunAs"
+              compare:
+                op: nothave
+                value: 0
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
-          UIDs not including 0.
+          None required. By default, OpenShift includes the non-root SCC with the the Run As User
+          Strategy is set to either MustRunAsNonRoot. If additional SCCs are appropriate, follow the
+          OpenShift documentation to create custom SCCs.
         scored: false
 
       - id: 5.2.7
         text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
-        type: "manual"
+        audit: |
+          # needs verification
+          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
+          do
+            echo "$i";
+            oc describe scc $i | grep "Required Drop Capabilities";
+          done
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "ALL"
+            - flag: "NET_RAW"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
+          Create a SCC as described in the OpenShift documentation, ensuring that the Required
+          Drop Capabilities is set to include either NET_RAW or ALL.
         scored: false
 
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (Manual)"
         type: "manual"
         remediation: |
-          Ensure that allowedCapabilities is not present in PSPs for the cluster unless
-          it is set to an empty array.
+          Ensure that Allowed Capabilities is set to an empty array for every SCC in the cluster
+          except for the privileged SCC.
         scored: false
 
       - id: 5.2.9
@@ -132,8 +196,8 @@ groups:
         type: "manual"
         remediation: |
           Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider adding
-          a PSP which forbids the admission of containers which do not drop all capabilities.
+          contains applicaions which do not require any Linux capabities to operate consider
+          adding a SCC which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
   - id: 5.3
@@ -143,9 +207,7 @@ groups:
         text: "Ensure that the CNI in use supports Network Policies (Manual)"
         type: "manual"
         remediation: |
-          If the CNI plugin in use does not support network policies, consideration should be given to
-          making use of a different plugin, or finding an alternate mechanism for restricting traffic
-          in the Kubernetes cluster.
+          None required.
         scored: false
 
       - id: 5.3.2
@@ -162,7 +224,7 @@ groups:
         text: "Prefer using secrets as files over secrets as environment variables (Manual)"
         type: "manual"
         remediation: |
-          if possible, rewrite application code to read secrets from mounted secret files, rather than
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false
 
@@ -181,7 +243,7 @@ groups:
         text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
         type: "manual"
         remediation: |
-          Follow the Kubernetes documentation and setup image provenance.
+          Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
         scored: false
 
   - id: 5.7
@@ -199,26 +261,8 @@ groups:
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         type: "manual"
         remediation: |
-          Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
-          would need to enable alpha features in the apiserver by passing "--feature-
-          gates=AllAlpha=true" argument.
-          Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
-          parameter to "--feature-gates=AllAlpha=true"
-          KUBE_API_ARGS="--feature-gates=AllAlpha=true"
-          Based on your system, restart the kube-apiserver service. For example:
-          systemctl restart kube-apiserver.service
-          Use annotations to enable the docker/default seccomp profile in your pod definitions. An
-          example is as below:
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: trustworthy-pod
-            annotations:
-              seccomp.security.alpha.kubernetes.io/pod: docker/default
-          spec:
-            containers:
-              - name: trustworthy-container
-                image: sotrustworthy:latest
+          To enable the default seccomp profile, use the reserved value /runtime/default that will
+          make sure that the pod uses the default policy available on the host.
         scored: false
 
       - id: 5.7.3
