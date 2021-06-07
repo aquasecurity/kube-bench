@@ -51,7 +51,7 @@ kubectl logs kube-bench-j76s9
 [INFO] 1.1 API Server
 ...
 ```
-For more information and different ways to run kube-bench see [documentation](doc/running.md)
+For more information and different ways to run kube-bench see [documentation](docs/running.md)
 ### Please Note
 
 1. kube-bench implements the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/) as closely as possible. Please raise issues here if kube-bench is not correctly implementing the test as described in the Benchmark. To report issues in the Benchmark itself (for example, tests that you believe are inappropriate), please join the [CIS community](https://cisecurity.org).
