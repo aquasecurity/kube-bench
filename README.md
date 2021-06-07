@@ -41,7 +41,7 @@ By default, kube-bench will determine the test set to run based on the Kubernete
 
 
 ## Contributing
-Kindly read [Contributing.md](docs/Contributing.md) before contributing. 
+Kindly read [Contributing](CONTRIBUTING.md) before contributing. 
 We welcome PRs and issue reports.
 
 ## Roadmap
