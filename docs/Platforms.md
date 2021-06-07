@@ -3,7 +3,7 @@
 
 kube-bench supports running tests for Kubernetes.
 Most of our supported benchmarks are defined in the [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/).
-Some is by other hardenening guides.
+Some defined by other hardenening guides.
 
 | Source | Kubernetes Benchmark | kube-bench config | Kubernetes versions |
 |---|---|---|---|
