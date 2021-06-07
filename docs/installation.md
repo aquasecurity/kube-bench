@@ -1,7 +1,7 @@
 ## Installation
 
 You can choose to
-* Run kube-bench from inside a container (sharing PID namespace with the host). See [Running inside a container](./Running.md#running-inside-a-container) for additional details.
+* Run kube-bench from inside a container (sharing PID namespace with the host). See [Running inside a container](./running.md#running-inside-a-container) for additional details.
 * Run a container that installs kube-bench on the host, and then run kube-bench directly on the host. See [Installing from a container](#installing-from-a-container) for additional details.
 * install the latest binaries from the [Releases page](https://github.com/aquasecurity/kube-bench/releases), though please note that you also need to download the config and test files from the `cfg` directory. See [Download and Install binaries](#download-and-install-binaries) for details.
 * Compile it from source. See [Installing from sources](#installing-from-sources) for details.
@@ -49,7 +49,7 @@ If you manually downloaded the kube-bench binary (using curl command above), you
 ./kube-bench --config-dir `pwd`/cfg --config `pwd`/cfg/config.yaml 
 ```
 
-See previous section on [Running kube-bench](./Running#running-kube-bench) for further details on using the kube-bench binary.
+See previous section on [Running kube-bench](./running.md#running-kube-bench) for further details on using the kube-bench binary.
 
 ### Installing from sources
 
