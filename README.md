@@ -23,21 +23,44 @@ kube-bench is tool that checks whether Kubernetes is deployed securely by runnin
 
 Tests are configured with YAML files, making this tool easy to update as test specifications evolve.
 
+![Kubernetes Bench for Security](/docs/images/output.png "Kubernetes Bench for Security")
+
+### Quick start
+
+There are multiple ways to run kube-bench.
+You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
+
+The supplied `job.yaml` [file](job.yaml) can be applied to run the tests as a job. For example:
+
+```bash
+$ kubectl apply -f job.yaml
+job.batch/kube-bench created
+
+$ kubectl get pods
+NAME                      READY   STATUS              RESTARTS   AGE
+kube-bench-j76s9   0/1     ContainerCreating   0          3s
+
+# Wait for a few seconds for the job to complete
+$ kubectl get pods
+NAME                      READY   STATUS      RESTARTS   AGE
+kube-bench-j76s9   0/1     Completed   0          11s
+
+# The results are held in the pod's logs
+kubectl logs kube-bench-j76s9
+[INFO] 1 Master Node Security Configuration
+[INFO] 1.1 API Server
+...
+```
+For more information and different ways to run kube-bench see [documentation](doc/running.md)
 ### Please Note
 
 1. kube-bench implements the [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes/) as closely as possible. Please raise issues here if kube-bench is not correctly implementing the test as described in the Benchmark. To report issues in the Benchmark itself (for example, tests that you believe are inappropriate), please join the [CIS community](https://cisecurity.org).
 
 1. There is not a one-to-one mapping between releases of Kubernetes and releases of the CIS benchmark. See [CIS Kubernetes Benchmark support](docs/Platforms.md#cis-kubernetes-benchmark-support) to see which releases of Kubernetes are covered by different releases of the benchmark.
 
-1. It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS, AKS and ACK, using kube-bench as one does not have access to such nodes, although it is still possible to use kube-bench to check worker node configuration in these environments.
-
-
-![Kubernetes Bench for Security](/docs/images/output.png "Kubernetes Bench for Security")
-
 
 By default, kube-bench will determine the test set to run based on the Kubernetes version running on the machine.
 - see the following documentation on [Running kube-bench](docs/Running.md#running-kube-bench) for more details.
-
 
 
 ## Contributing
