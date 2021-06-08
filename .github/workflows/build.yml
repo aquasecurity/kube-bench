@@ -37,5 +37,5 @@ jobs:
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.148.0
+          version: v0.169.0
           args: release --snapshot --skip-publish --rm-dist
