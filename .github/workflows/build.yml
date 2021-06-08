@@ -38,4 +38,4 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: v0.169.0
-          args: build --snapshot --skip-publish --rm-dist
+          args: build --snapshot --rm-dist
