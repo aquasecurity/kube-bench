@@ -158,7 +158,7 @@ There are three ways to run and extract keywords from the output of the command 
 | `audit_env` | `env` |
 
 `flag` is used when the keyword is a command-line flag. The associated `audit` command could 
-be any binarys available on system like `ps` command and a `grep` for the binary whose flag we are
+be any binaries available on the system like `ps` command and a `grep` for the binary whose flag we are
 checking:
 
 ```sh
