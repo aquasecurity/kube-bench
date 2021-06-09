@@ -21,7 +21,7 @@
     
     
       
-        <title>Running - Kube-bench</title>
+        <title>How to run - Kube-bench</title>
       
     
     
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Running
+              How to run
             
           </span>
         </div>
@@ -232,12 +232,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       
       
@@ -260,7 +262,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Installation.md" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         Installation
       </a>
     </li>
@@ -274,7 +276,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Platforms.md" class="md-nav__link">
+      <a href="../platforms/" class="md-nav__link">
         Platforms
       </a>
     </li>
@@ -286,11 +288,102 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../Running.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          How to run
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         How to run
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-kube-bench" class="md-nav__link">
+    Running kube-bench
+  </a>
+  
+    <nav class="md-nav" aria-label="Running kube-bench">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-inside-a-container" class="md-nav__link">
+    Running inside a container
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-in-a-kubernetes-cluster" class="md-nav__link">
+    Running in a Kubernetes cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-in-an-aks-cluster" class="md-nav__link">
+    Running in an AKS cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-in-an-eks-cluster" class="md-nav__link">
+    Running in an EKS cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-on-openshift" class="md-nav__link">
+    Running on OpenShift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-in-a-gke-cluster" class="md-nav__link">
+    Running in a GKE cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-in-a-ack-cluster" class="md-nav__link">
+    Running in a ACK cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -324,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Flags_and_commands.md" class="md-nav__link">
+      <a href="../flags_and_commands.md" class="md-nav__link">
         Flags
       </a>
     </li>
@@ -365,7 +458,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Controls.md" class="md-nav__link">
+      <a href="../controls/" class="md-nav__link">
         Understanding the yamls
       </a>
     </li>
@@ -379,7 +472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Architecture.md" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         Architecture
       </a>
     </li>
@@ -401,7 +494,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../Contributing.md" class="md-nav__link">
+      <a href="../contributing.md" class="md-nav__link">
         Contributing
       </a>
     </li>
@@ -507,7 +600,7 @@
                 
                 
                 
-                  <h1>Running</h1>
+                  <h1>How to run</h1>
                 
                 <h2 id="running-kube-bench">Running kube-bench</h2>
 <p>If you run kube-bench directly from the command line you may need to be root / sudo to have access to all the config files.</p>
@@ -668,6 +761,41 @@ To run this you will need to specify <code>--benchmark ack-1.0</code> when you r
       
         
 <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../platforms/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Platforms" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Platforms
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../asff/" class="md-footer__link md-footer__link--next" aria-label="Next: ASFF" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              ASFF
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
