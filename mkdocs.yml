@@ -14,11 +14,11 @@ nav:
       - Platforms: platforms.md
       - How to run: running.md
       - ASFF: asff.md
-  - Flags: flags_and_commands.md
+  - Flags: flags-and-commands.md
   - Configuration Options:
       - Understanding the yamls: controls.md
       - Architecture: architecture.md
-  - Contributing: contributing.md
+  - Contributing: CONTRIBUTING.md
 
 markdown_extensions:
   - pymdownx.highlight
