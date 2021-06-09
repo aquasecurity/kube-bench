@@ -20,6 +20,12 @@ RUN apk --no-cache add procps
 # https://github.com/aquasecurity/kube-bench/issues/535
 RUN apk --no-cache add openssl
 
+# Add glibc for running oc command 
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.33-r0/glibc-2.33-r0.apk
+RUN apk add glibc-2.33-r0.apk
+RUN apk add jq
+
 ENV PATH=$PATH:/usr/local/mount-from-host/bin
 
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
