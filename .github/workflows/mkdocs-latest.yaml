@@ -23,7 +23,11 @@ jobs:
           pip install mike
           pip install mkdocs-macros-plugin
         env:
-          GH_TOKEN: ${{ secrets.ORG_GITHUB_TOKEN }}
+          # Note: It is not the same as ${{ secrets.GITHUB_TOKEN }} !
+          GH_TOKEN: ${{ secrets.MKDOCS_AQUA_BOT }}
+      - run: |
+          git config user.name "aqua-bot"
+          git config user.email "aqua-bot@users.noreply.github.com"
       - name: Deploy the latest documents
         run: |
           VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
