@@ -10,15 +10,15 @@ edit_uri: ""
 nav:
   - Overview: index.md
   - Getting Started:
-      - Installation: Installation.md
-      - Platforms: Platforms.md
-      - How to run: Running.md
+      - Installation: installation.md
+      - Platforms: platforms.md
+      - How to run: running.md
       - ASFF: asff.md
-  - Flags: Flags_and_commands.md
+  - Flags: flags_and_commands.md
   - Configuration Options:
-      - Understanding the yamls: Controls.md
-      - Architecture: Architecture.md
-  - Contributing: Contributing.md
+      - Understanding the yamls: controls.md
+      - Architecture: architecture.md
+  - Contributing: contributing.md
 
 markdown_extensions:
   - pymdownx.highlight
