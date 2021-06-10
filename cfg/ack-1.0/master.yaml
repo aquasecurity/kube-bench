@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.6"
+version: "ack-1.0"
 id: 1
 text: "Master Node Security Configuration"
 type: "master"
@@ -90,8 +90,10 @@ groups:
         scored: true
 
       - id: 1.1.7
-        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        text: "Ensure that the etcd service file permissions are set to 644 or more restrictive (Automated)"
+        audit: |
+          stat -c permissions=%a /usr/lib/systemd/system/etcd.service || \
+          if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi
         use_multiple_values: true
         tests:
           test_items:
@@ -106,8 +108,10 @@ groups:
         scored: true
 
       - id: 1.1.8
-        text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; fi'"
+        text: "Ensure that the etcd service file ownership is set to root:root (Automated)"
+        audit: |
+          stat -c %U:%G /usr/lib/systemd/system/etcd.service || \
+          if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; fi
         use_multiple_values: true
         tests:
           test_items:
@@ -120,16 +124,8 @@ groups:
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
-        audit: |
-          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c permissions=%a
-          find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c permissions=%a
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "permissions"
-              compare:
-                op: bitmask
-                value: "644"
+        audit: "stat -c permissions=%a <path/to/cni/files>"
+        type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -138,13 +134,8 @@ groups:
 
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
-        audit: |
-          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs stat -c %U:%G
-          find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "root:root"
+        audit: "stat -c %U:%G <path/to/cni/files>"
+        type: "manual"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
@@ -153,7 +144,9 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a
+        audit: |
+          stat -c permissions=%a /var/lib/etcd/data.etcd || \
+          ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c permissions=%a
         tests:
           test_items:
             - flag: "permissions"
@@ -170,7 +163,9 @@ groups:
 
       - id: 1.1.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
-        audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
+        audit: |
+          stat -c %U:%G /var/lib/etcd/data.etcd || \
+          ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
         tests:
           test_items:
             - flag: "etcd:etcd"
@@ -312,21 +307,6 @@ groups:
     text: "API Server"
     checks:
       - id: 1.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        tests:
-          test_items:
-            - flag: "--anonymous-auth"
-              compare:
-                op: eq
-                value: false
-        remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the master node and set the below parameter.
-          --anonymous-auth=false
-        scored: false
-
-      - id: 1.2.2
         text: "Ensure that the --basic-auth-file argument is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -339,7 +319,7 @@ groups:
           on the master node and remove the --basic-auth-file=<filename> parameter.
         scored: true
 
-      - id: 1.2.3
+      - id: 1.2.2
         text: "Ensure that the --token-auth-file parameter is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -352,7 +332,7 @@ groups:
           on the master node and remove the --token-auth-file=<filename> parameter.
         scored: true
 
-      - id: 1.2.4
+      - id: 1.2.3
         text: "Ensure that the --kubelet-https argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -369,7 +349,7 @@ groups:
           on the master node and remove the --kubelet-https parameter.
         scored: true
 
-      - id: 1.2.5
+      - id: 1.2.4
         text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -386,21 +366,7 @@ groups:
           --kubelet-client-key=<path/to/client-key-file>
         scored: true
 
-      - id: 1.2.6
-        text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
-        tests:
-          test_items:
-            - flag: "--kubelet-certificate-authority"
-        remediation: |
-          Follow the Kubernetes documentation and setup the TLS connection between
-          the apiserver and kubelets. Then, edit the API server pod specification file
-          $apiserverconf on the master node and set the
-          --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.
-          --kubelet-certificate-authority=<ca-string>
-        scored: true
-
-      - id: 1.2.7
+      - id: 1.2.5
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -416,7 +382,7 @@ groups:
           --authorization-mode=RBAC
         scored: true
 
-      - id: 1.2.8
+      - id: 1.2.6
         text: "Ensure that the --authorization-mode argument includes Node (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -431,7 +397,7 @@ groups:
           --authorization-mode=Node,RBAC
         scored: true
 
-      - id: 1.2.9
+      - id: 1.2.7
         text: "Ensure that the --authorization-mode argument includes RBAC (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -447,7 +413,7 @@ groups:
           --authorization-mode=Node,RBAC
         scored: true
 
-      - id: 1.2.10
+      - id: 1.2.8
         text: "Ensure that the admission control plugin EventRateLimit is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -464,7 +430,7 @@ groups:
           --admission-control-config-file=<path/to/configuration/file>
         scored: false
 
-      - id: 1.2.11
+      - id: 1.2.9
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -482,7 +448,7 @@ groups:
           value that does not include AlwaysAdmit.
         scored: true
 
-      - id: 1.2.12
+      - id: 1.2.10
         text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -498,7 +464,7 @@ groups:
           --enable-admission-plugins=...,AlwaysPullImages,...
         scored: false
 
-      - id: 1.2.13
+      - id: 1.2.11
         text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -519,7 +485,7 @@ groups:
           --enable-admission-plugins=...,SecurityContextDeny,...
         scored: false
 
-      - id: 1.2.14
+      - id: 1.2.12
         text: "Ensure that the admission control plugin ServiceAccount is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -538,7 +504,7 @@ groups:
           value that does not include ServiceAccount.
         scored: true
 
-      - id: 1.2.15
+      - id: 1.2.13
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -556,7 +522,7 @@ groups:
           ensure it does not include NamespaceLifecycle.
         scored: true
 
-      - id: 1.2.16
+      - id: 1.2.14
         text: "Ensure that the admission control plugin PodSecurityPolicy is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -574,7 +540,7 @@ groups:
           Then restart the API Server.
         scored: true
 
-      - id: 1.2.17
+      - id: 1.2.15
         text: "Ensure that the admission control plugin NodeRestriction is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -591,7 +557,7 @@ groups:
           --enable-admission-plugins=...,NodeRestriction,...
         scored: true
 
-      - id: 1.2.18
+      - id: 1.2.16
         text: "Ensure that the --insecure-bind-address argument is not set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -603,7 +569,7 @@ groups:
           on the master node and remove the --insecure-bind-address parameter.
         scored: true
 
-      - id: 1.2.19
+      - id: 1.2.17
         text: "Ensure that the --insecure-port argument is set to 0 (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -618,7 +584,7 @@ groups:
           --insecure-port=0
         scored: true
 
-      - id: 1.2.20
+      - id: 1.2.18
         text: "Ensure that the --secure-port argument is not set to 0 (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -636,7 +602,7 @@ groups:
           set it to a different (non-zero) desired port.
         scored: true
 
-      - id: 1.2.21
+      - id: 1.2.19
         text: "Ensure that the --profiling argument is set to false (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -651,7 +617,7 @@ groups:
           --profiling=false
         scored: true
 
-      - id: 1.2.22
+      - id: 1.2.20
         text: "Ensure that the --audit-log-path argument is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -664,7 +630,7 @@ groups:
           --audit-log-path=/var/log/apiserver/audit.log
         scored: true
 
-      - id: 1.2.23
+      - id: 1.2.21
         text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -679,7 +645,7 @@ groups:
           --audit-log-maxage=30
         scored: true
 
-      - id: 1.2.24
+      - id: 1.2.22
         text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -695,7 +661,7 @@ groups:
           --audit-log-maxbackup=10
         scored: true
 
-      - id: 1.2.25
+      - id: 1.2.23
         text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -711,7 +677,7 @@ groups:
           --audit-log-maxsize=100
         scored: true
 
-      - id: 1.2.26
+      - id: 1.2.24
         text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         type: manual
@@ -722,7 +688,7 @@ groups:
           --request-timeout=300s
         scored: true
 
-      - id: 1.2.27
+      - id: 1.2.25
         text: "Ensure that the --service-account-lookup argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -742,7 +708,7 @@ groups:
           that the default takes effect.
         scored: true
 
-      - id: 1.2.28
+      - id: 1.2.26
         text: "Ensure that the --service-account-key-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -755,7 +721,7 @@ groups:
           --service-account-key-file=<filename>
         scored: true
 
-      - id: 1.2.29
+      - id: 1.2.27
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -771,7 +737,7 @@ groups:
           --etcd-keyfile=<path/to/client-key-file>
         scored: true
 
-      - id: 1.2.30
+      - id: 1.2.28
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -787,7 +753,7 @@ groups:
           --tls-private-key-file=<path/to/tls-key-file>
         scored: true
 
-      - id: 1.2.31
+      - id: 1.2.29
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -800,7 +766,7 @@ groups:
           --client-ca-file=<path/to/client-ca-file>
         scored: true
 
-      - id: 1.2.32
+      - id: 1.2.30
         text: "Ensure that the --etcd-cafile argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -813,7 +779,7 @@ groups:
           --etcd-cafile=<path/to/ca-file>
         scored: true
 
-      - id: 1.2.33
+      - id: 1.2.31
         text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
@@ -825,7 +791,7 @@ groups:
           on the master node and set the --encryption-provider-config parameter to the path of that file: --encryption-provider-config=</path/to/EncryptionConfig/File>
         scored: false
 
-      - id: 1.2.34
+      - id: 1.2.32
         text: "Ensure that encryption providers are appropriately configured (Manual)"
         audit: |
           ENCRYPTION_PROVIDER_CONFIG=$(ps -ef | grep $apiserverbin | grep -- --encryption-provider-config | sed 's%.*encryption-provider-config[= ]\([^ ]*\).*%\1%')
@@ -841,7 +807,7 @@ groups:
           In this file, choose aescbc, kms or secretbox as the encryption provider.
         scored: false
 
-      - id: 1.2.35
+      - id: 1.2.33
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:

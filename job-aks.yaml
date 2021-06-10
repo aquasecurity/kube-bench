@@ -18,6 +18,9 @@ spec:
             - name: etc-systemd
               mountPath: /etc/systemd
               readOnly: true
+            - name: etc-default
+              mountPath: /etc/default
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
@@ -29,6 +32,9 @@ spec:
         - name: etc-systemd
           hostPath:
             path: "/etc/systemd"
+        - name: etc-default
+          hostPath:
+            path: "/etc/default"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"

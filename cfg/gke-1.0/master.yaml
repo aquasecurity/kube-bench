@@ -7,6 +7,7 @@ type: "master"
 groups:
   - id: 1.1
     text: "Master Node Configuration Files "
+    type: skip
     checks:
       - id: 1.1.1
         text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Not Scored)"
@@ -115,6 +116,7 @@ groups:
 
   - id: 1.2
     text: "API Server"
+    type: skip
     checks:
       - id: 1.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Not Scored)"
@@ -298,6 +300,7 @@ groups:
 
   - id: 1.3
     text: "Controller Manager"
+    type: skip
     checks:
       - id: 1.3.1
         text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Not Scored)"
@@ -336,6 +339,7 @@ groups:
 
   - id: 1.4
     text: "Scheduler"
+    type: skip
     checks:
       - id: 1.4.1
         text: "Ensure that the --profiling argument is set to false (Not Scored)"

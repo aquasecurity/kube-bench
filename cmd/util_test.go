@@ -15,13 +15,15 @@
 package cmd
 
 import (
-	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/viper"
@@ -389,9 +391,9 @@ func TestGetServiceFiles(t *testing.T) {
 
 func TestMakeSubsitutions(t *testing.T) {
 	cases := []struct {
-		input string
-		subst map[string]string
-		exp   string
+		input        string
+		subst        map[string]string
+		exp          string
 		expectedSubs []string
 	}{
 		{input: "Replace $thisbin", subst: map[string]string{"this": "that"}, exp: "Replace that", expectedSubs: []string{"that"}},
@@ -404,6 +406,7 @@ func TestMakeSubsitutions(t *testing.T) {
 			if s != c.exp {
 				t.Fatalf("Got %s expected %s", s, c.exp)
 			}
+			sort.Strings(subs)
 			assert.Equal(t, c.expectedSubs, subs)
 		})
 	}
@@ -537,6 +540,11 @@ func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
 			want: "gke",
 		},
 		{
+			name: "ack",
+			args: args{s: "v1.18.8-aliyun.1"},
+			want: "aliyun",
+		},
+		{
 			name: "unknown",
 			args: args{s: "v1.17.6"},
 			want: "",
@@ -580,6 +588,13 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			want: "gke-1.0",
 		},
 		{
+			name: "aliyun",
+			args: args{
+				platform: "aliyun",
+			},
+			want: "ack-1.0",
+		},
+		{
 			name: "unknown",
 			args: args{
 				platform: "rh",
@@ -593,6 +608,20 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			},
 			want: "",
 		},
+		{
+			name: "openshift3",
+			args: args{
+				platform: "ocp-3.10",
+			},
+			want: "rh-0.7",
+		},
+		{
+			name: "openshift4",
+			args: args{
+				platform: "ocp-4.1",
+			},
+			want: "rh-1.0",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -600,5 +629,34 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				t.Errorf("getPlatformBenchmarkVersion() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func Test_getOcpValidVersion(t *testing.T) {
+
+	cases := []struct {
+		openShiftVersion string
+		succeed          bool
+		exp              string
+	}{
+		{openShiftVersion: "3.11", succeed: true, exp: "3.10"},
+		{openShiftVersion: "3.10", succeed: true, exp: "3.10"},
+		{openShiftVersion: "2.9", succeed: false, exp: ""},
+		{openShiftVersion: "4.1", succeed: true, exp: "4.1"},
+		{openShiftVersion: "4.5", succeed: true, exp: "4.1"},
+		{openShiftVersion: "4.6", succeed: true, exp: "4.1"},
+		{openShiftVersion: "invalid", succeed: false, exp: ""},
+	}
+	for _, c := range cases {
+		ocpVer,_ := getOcpValidVersion(c.openShiftVersion)
+		if c.succeed {
+			if c.exp != ocpVer {
+				t.Errorf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
+			}
+		} else {
+			if len(ocpVer) > 0 {
+				t.Errorf("getOcpValidVersion(%q) - Expected empty string but Got %s", c.openShiftVersion, ocpVer)
+			}
+		}
 	}
 }

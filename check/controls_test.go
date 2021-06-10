@@ -83,7 +83,7 @@ type: # not specified
 groups:
 `)
 		// when
-		_, err := NewControls(MASTER, in)
+		_, err := NewControls(MASTER, in, "")
 		// then
 		assert.EqualError(t, err, "non-master controls file specified")
 	})
@@ -92,7 +92,7 @@ groups:
 		// given
 		in := []byte("BOOM")
 		// when
-		_, err := NewControls(MASTER, in)
+		_, err := NewControls(MASTER, in, "")
 		// then
 		assert.EqualError(t, err, "failed to unmarshal YAML: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `BOOM` into check.Controls")
 	})
@@ -118,7 +118,7 @@ groups:
   - id: G2/C1
   - id: G2/C2
 `)
-		controls, err := NewControls(MASTER, in)
+		controls, err := NewControls(MASTER, in, "")
 		assert.NoError(t, err)
 
 		var allChecks Predicate = func(group *Group, c *Check) bool {
@@ -149,11 +149,11 @@ func TestControls_RunChecks_Skipped(t *testing.T) {
 type: "master"
 groups:
 - id: G1
-  skip: true
+  type: skip
   checks:
   - id: G1/C1
 `)
-		controls, err := NewControls(MASTER, in)
+		controls, err := NewControls(MASTER, in, "")
 		assert.NoError(t, err)
 
 		var allChecks Predicate = func(group *Group, c *Check) bool {
@@ -196,7 +196,7 @@ groups:
     scored: true
 `)
 		// and
-		controls, err := NewControls(MASTER, in)
+		controls, err := NewControls(MASTER, in, "")
 		assert.NoError(t, err)
 		// and
 		runner.On("Run", controls.Groups[0].Checks[0]).Return(PASS)

@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.6"
+version: "ack-1.0"
 id: 3
 text: "Control Plane Configuration"
 type: "controlplane"
@@ -9,11 +9,12 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 3.1.1
-        text: "Client certificate authentication should not be used for users (Manual)"
+        text: "Revoke client certificate when possible leakage (Manual)"
         type: "manual"
         remediation: |
-          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
-          implemented in place of client certificates.
+          Kubernetes provides the option to use client certificates for user authentication.
+          ACK issues kubeconfig with its client certificates as the user credentials for connecing to target cluster.
+          User should revoke his/her issued kubeconfig when possible leakage.
         scored: false
 
   - id: 3.2
@@ -25,7 +26,6 @@ groups:
         tests:
           test_items:
             - flag: "--audit-policy-file"
-              set: true
         remediation: |
           Create an audit policy file for your cluster.
         scored: false

@@ -1,0 +1,127 @@
+---
+controls:
+version: "ack-1.0"
+id: 6
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 6.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 6.1.1
+        text: "Ensure Image Vulnerability Scanning using ACR image scanning or a third party provider (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure Image Vulnerability Scanning using ACR image scanning or a third party provider by follow the ACR document: https://www.alibabacloud.com/help/doc-detail/160146.htm
+        scored: false
+
+      - id: 6.1.2
+        text: "Minimize user access to ACR (Manual)"
+        type: "manual"
+        remediation: |
+          Minimize user access to ACR by follow the ACR document to setup network access control: https://www.alibabacloud.com/help/doc-detail/142179.htm
+          And follow the ACR document to setup Resource Access Management (RAM) policies for ACR: https://www.alibabacloud.com/help/doc-detail/144229.htm
+        scored: false
+
+      - id: 6.1.3
+        text: "Minimize cluster access to read-only for ACR (Manual)"
+        type: "manual"
+        remediation: Minimize cluster access to read-only for ACR
+        scored: false
+
+      - id: 6.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        type: "manual"
+        remediation: Minimize Container Registries to only those approved
+        scored: false
+
+  - id: 6.2
+    text: "Key Management Service (KMS)"
+    checks:
+      - id: 6.2.1
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in KMS (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure Kubernetes Secrets are encrypted using keys managed in KMS by follow The ACK document: https://www.alibabacloud.com/help/zh/doc-detail/177372.htm
+        scored: false
+
+  - id: 6.3
+    text: "Cluster Networking"
+    checks:
+      - id: 6.3.1
+        text: "Restrict Access to the Control Plane Endpoint (Manual)"
+        type: "manual"
+        remediation: Restrict Access to the Control Plane Endpoint
+        scored: false
+
+      - id: 6.3.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        type: "manual"
+        remediation: Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled
+        scored: false
+
+      - id: 6.3.3
+        text: "Ensure clusters are created with Private Nodes (Manual)"
+        type: "manual"
+        remediation: Ensure clusters are created with Private Nodes
+        scored: false
+
+      - id: 6.3.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
+        type: "manual"
+        remediation: Ensure Network Policy is Enabled and set as appropriate
+        scored: false
+
+      - id: 6.3.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        type: "manual"
+        remediation: Encrypt traffic to HTTPS load balancers with TLS certificates
+        scored: false
+
+  - id: 6.4
+    text: "Storage"
+    checks:
+      - id: 6.4.1
+        text: "Enable data disk encryption for Alibaba Cloud Disks (Manual)"
+        type: "manual"
+        remediation: Enable data disk encryption for Alibaba Cloud Disks
+        scored: false
+
+  - id: 6.5
+    text: "Logging"
+    checks:
+      - id: 6.5.1
+        text: "Ensure Cluster Auditing is Enabled (Manual)"
+        type: "manual"
+        remediation: Ensure Cluster Auditing is Enabled
+        scored: false
+
+  - id: 6.6
+    text: "Other Cluster Configurations"
+    checks:
+      - id: 6.6.1
+        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Manual)"
+        type: "manual"
+        remediation: Ensure Pod Security Policy is Enabled and set as appropriate
+        scored: false
+
+      - id: 6.6.2
+        text: "Enable Cloud Security Center (Manual)"
+        type: "manual"
+        remediation: Enable Cloud Security Center
+        scored: false
+
+      - id: 6.6.3
+        text: "Consider ACK Sandboxed-Container for running untrusted workloads (Manual)"
+        type: "manual"
+        remediation: Consider ACK Sandboxed-Container for running untrusted workloads
+
+      - id: 6.6.4
+        text: "Consider ACK TEE-based when running confidential computing (Manual)"
+        type: "manual"
+        remediation: Consider ACK TEE-based when running confidential computing
+
+      - id: 6.6.5
+        text: "Consider use service account token volume projection (Manual)"
+        type: "manual"
+        remediation: Consider use service account token volume projection

@@ -291,17 +291,22 @@ func getKubeVersion() (*KubeVersion, error) {
 	_, err := exec.LookPath("kubectl")
 
 	if err != nil {
+		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
+			glog.V(3).Infof("Error locating kubelet: %s", err)
 			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
 			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
+				glog.V(3).Infof("Found kubelet and query kubernetes version is: %s", string(out))
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
 
 			glog.Warning(missingKubectlKubeletMessage)
-			return nil, fmt.Errorf("unable to find the programs kubectl or kubelet in the PATH")
+			glog.V(1).Info("unable to find the programs kubectl or kubelet in the PATH")
+			glog.V(1).Infof("Cant detect version, assuming default %s", defaultKubeVersion)
+			return &KubeVersion{baseVersion: defaultKubeVersion}, nil
 		}
 		return getKubeVersionFromKubelet(), nil
 	}
@@ -313,6 +318,7 @@ func getKubeVersionFromKubectl() *KubeVersion {
 	cmd := exec.Command("kubectl", "version", "-o", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		glog.V(2).Infof("Failed to query kubectl: %s", err)
 		glog.V(2).Info(err)
 	}
 
@@ -324,6 +330,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 	out, err := cmd.CombinedOutput()
 
 	if err != nil {
+		glog.V(2).Infof("Failed to query kubelet: %s", err)
 		glog.V(2).Info(err)
 	}
 
@@ -331,7 +338,7 @@ func getKubeVersionFromKubelet() *KubeVersion {
 }
 
 func getVersionFromKubectlOutput(s string) *KubeVersion {
-	glog.V(2).Info(s)
+	glog.V(2).Infof("Kubectl output: %s", s)
 	type versionResult struct {
 		ServerVersion VersionResponse
 	}
@@ -354,7 +361,7 @@ func getVersionFromKubectlOutput(s string) *KubeVersion {
 }
 
 func getVersionFromKubeletOutput(s string) *KubeVersion {
-	glog.V(2).Info(s)
+	glog.V(2).Infof("Kubelet output: %s", s)
 	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
@@ -421,6 +428,12 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 }
 
 func getPlatformName() string {
+
+	openShiftVersion := getOpenShiftVersion()
+	if openShiftVersion != "" {
+		return openShiftVersion
+	}
+
 	kv, err := getKubeVersion()
 	if err != nil {
 		glog.V(2).Info(err)
@@ -439,11 +452,69 @@ func getPlatformNameFromVersion(s string) string {
 }
 
 func getPlatformBenchmarkVersion(platform string) string {
+	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform {
 	case "eks":
 		return "eks-1.0"
 	case "gke":
 		return "gke-1.0"
+	case "aliyun":
+		return "ack-1.0"
+	case "ocp-3.10":
+		return "rh-0.7"
+	case "ocp-4.1":
+		return "rh-1.0"
 	}
 	return ""
+}
+
+func getOpenShiftVersion() string {
+	glog.V(1).Info("Checking for oc")
+	_, err := exec.LookPath("oc")
+
+	if err == nil {
+		cmd := exec.Command("oc", "version")
+		out, err := cmd.CombinedOutput()
+
+		if err == nil {
+			versionRe := regexp.MustCompile(`oc v(\d+\.\d+)`)
+			subs := versionRe.FindStringSubmatch(string(out))
+			if len(subs) < 1 {
+				versionRe = regexp.MustCompile(`Client Version:\s*(\d+\.\d+)`)
+				subs = versionRe.FindStringSubmatch(string(out))
+			}
+			if len(subs) > 1 {
+				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformNameFromVersion(string(out)), subs[1])
+				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
+				if err == nil {
+					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
+				} else {
+					glog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
+				}
+			} else {
+				glog.V(1).Infof("Can't parse version output: %v", subs)
+			}
+		} else {
+			glog.V(1).Infof("Can't use oc command: %v", err)
+		}
+	} else {
+		glog.V(1).Infof("Can't find oc command: %v", err)
+	}
+	return ""
+}
+
+func getOcpValidVersion(ocpVer string) (string, error) {
+	ocpOriginal := ocpVer
+
+	for !isEmpty(ocpVer) {
+		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
+		if ocpVer == "3.10" || ocpVer == "4.1" {
+			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
+			return ocpVer, nil
+		}
+		ocpVer = decrementVersion(ocpVer)
+	}
+
+	glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
+	return "", fmt.Errorf("unable to find a matching Benchmark Version match for ocp version: %s", ocpOriginal)
 }

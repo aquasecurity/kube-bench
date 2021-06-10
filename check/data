@@ -1,14 +1,15 @@
 ---
 controls:
 id: 1
-text: "Master Checks"
+text: "Test Checks"
 type: "master"
 groups:
 - id: 1.1
-  text: "Kube-apiserver"
+  text: "First Group"
   checks:
     - id: 0
       text: "flag is set"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--allow-privileged"
@@ -16,6 +17,7 @@ groups:
 
     - id: 1
       text: "flag is not set"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--basic-auth"
@@ -23,6 +25,7 @@ groups:
 
     - id: 2
       text: "flag value is set to some value"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--insecure-port"
@@ -33,6 +36,7 @@ groups:
 
     - id: 3
       text: "flag value is greater than or equal some number"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--audit-log-maxage"
@@ -43,6 +47,7 @@ groups:
 
     - id: 4
       text: "flag value is less than some number"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--max-backlog"
@@ -53,6 +58,7 @@ groups:
 
     - id: 5
       text: "flag value does not have some value"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -63,6 +69,7 @@ groups:
 
     - id: 6
       text: "test AND binary operation"
+      audit: "echo \"Non empty command\""
       tests:
         bin_op: and
         test_items:
@@ -73,6 +80,7 @@ groups:
 
     - id: 7
       text: "test OR binary operation"
+      audit: "echo \"Non empty command\""
       tests:
         bin_op: or
         test_items:
@@ -87,38 +95,29 @@ groups:
 
     - id: 8
       text: "test flag with arbitrary text"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
-        - flag: "644"
+        - flag: "permissions"
           compare:
             op: eq
-            value: "644"
+            value: "SomeValue"
           set: true
 
     - id: 9
       text: "test permissions"
-      audit: "/bin/sh -c 'if test -e $config; then stat -c %a $config; fi'"
+      audit: "/bin/sh -c 'if test -e $config; then stat -c permissions=%a $config; fi'"
       tests:
-        bin_op: or
         test_items:
-        - flag: "644"
+        - flag: "permissions"
           compare:
-            op: eq
+            op: bitmask
             value: "644"
-          set: true
-        - flag: "640"
-          compare:
-            op: eq
-            value: "640"
-          set: true
-        - flag: "600"
-          compare:
-            op: eq
-            value: "600"
           set: true
 
     - id: 10
       text: "flag value includes some value in a comma-separated list, value is last in list"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -129,6 +128,7 @@ groups:
 
     - id: 11
       text: "flag value includes some value in a comma-separated list, value is first in list"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -139,6 +139,7 @@ groups:
 
     - id: 12
       text: "flag value includes some value in a comma-separated list, value middle of list"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -149,6 +150,7 @@ groups:
 
     - id: 13
       text: "flag value includes some value in a comma-separated list, value only one in list"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--admission-control"
@@ -159,6 +161,7 @@ groups:
 
     - id: 14
       text: "check that flag some-arg is set to some-val with ':' separator"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "some-arg"
@@ -169,7 +172,10 @@ groups:
 
     - id: 15
       text: "jsonpath correct value on field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
+        bin_op: or
         test_items:
           - path: "{.readOnlyPort}"
             compare:
@@ -189,6 +195,8 @@ groups:
 
     - id: 16
       text: "jsonpath correct case-sensitive value on string field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.stringValue}"
@@ -209,6 +217,8 @@ groups:
 
     - id: 17
       text: "jsonpath correct value on boolean field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.trueValue}"
@@ -229,6 +239,8 @@ groups:
 
     - id: 18
       text: "jsonpath field absent"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.notARealField}"
@@ -236,6 +248,8 @@ groups:
 
     - id: 19
       text: "jsonpath correct value on nested field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -246,6 +260,8 @@ groups:
 
     - id: 20
       text: "yamlpath correct value on field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.readOnlyPort}"
@@ -256,6 +272,8 @@ groups:
 
     - id: 21
       text: "yamlpath field absent"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.fieldThatIsUnset}"
@@ -263,6 +281,8 @@ groups:
 
     - id: 22
       text: "yamlpath correct value on nested field"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -273,6 +293,8 @@ groups:
 
     - id: 23
       text: "path on invalid json"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -283,13 +305,16 @@ groups:
 
     - id: 24
       text: "path with broken expression"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
-          - path: "{.missingClosingBrace"
+          - path: "{.missingClosingBrace}"
             set: true
 
     - id: 25
       text: "yamlpath on invalid yaml"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.authentication.anonymous.enabled}"
@@ -300,6 +325,8 @@ groups:
 
     - id: 26
       text: "check regex op matches"
+      audit: "echo \"Non empty command\""
+      audit_config: "echo \"Non empty command\""
       tests:
         test_items:
           - path: "{.currentMasterVersion}"
@@ -310,6 +337,7 @@ groups:
 
     - id: 27
       text: "check boolean flag with no value"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--peer-client-cert-auth"
@@ -320,6 +348,7 @@ groups:
 
     - id: 28
       text: "check boolean flag with false value"
+      audit: "echo \"Non empty command\""
       tests:
         test_items:
           - flag: "--peer-client-cert-auth"
@@ -587,7 +616,7 @@ groups:
             path: '{.readOnlyPort}'
             set: false
       scored: true
-    - id: 15
+    - id: 16
       text: "parameter and config file don't have same default - parameter has bad value and config is not present - failing"
       audit: "echo '--read-only-port=1'"
       audit_config: "echo ''"

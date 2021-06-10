@@ -52,8 +52,8 @@ type AuditUsed string
 
 const (
 	AuditCommand AuditUsed = "auditCommand"
-	AuditConfig AuditUsed = "auditConfig"
-	AuditEnv AuditUsed = "auditEnv"
+	AuditConfig  AuditUsed = "auditConfig"
+	AuditEnv     AuditUsed = "auditEnv"
 )
 
 type testItem struct {
@@ -65,7 +65,7 @@ type testItem struct {
 	Set              bool
 	Compare          compare
 	isMultipleOutput bool
-	auditUsed  AuditUsed
+	auditUsed        AuditUsed
 }
 
 type envTestItem testItem
@@ -79,7 +79,7 @@ type compare struct {
 
 type testOutput struct {
 	testResult     bool
-	found      bool
+	flagFound      bool
 	actualResult   string
 	ExpectedResult string
 }
@@ -126,6 +126,9 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 		// flag: somevalue
 		// --flag
 		// somevalue
+		// DOESN'T COVER - use pathTestItem implementation of findValue() for this
+		// flag:
+		//	 - wehbook
 		pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
 		flagRe := regexp.MustCompile(pttn)
 		vals := flagRe.FindStringSubmatch(s)
@@ -145,7 +148,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 			err = fmt.Errorf("invalid flag in testItem definition: %s", s)
 		}
 	}
-	glog.V(3).Infof("In flagTestItem.findValue %s, match %v, s %s, t.Flag %s", value, match, s, t.Flag)
+	glog.V(3).Infof("In flagTestItem.findValue %s", value)
 
 	return match, value, err
 }
@@ -178,11 +181,12 @@ func (t envTestItem) findValue(s string) (match bool, value string, err error) {
 		if len(out) > 0 {
 			match = true
 			value = out
-		}else{
+		} else {
 			match = false
 			value = ""
 		}
 	}
+	glog.V(3).Infof("In envTestItem.findValue %s", value)
 	return match, value, nil
 }
 
@@ -221,7 +225,7 @@ func (t testItem) evaluate(s string) *testOutput {
 
 	if t.Set {
 		if match && t.Compare.Op != "" {
-			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, value, t.Compare.Value)
+			result.ExpectedResult, result.testResult = compareOp(t.Compare.Op, value, t.Compare.Value, t.value())
 		} else {
 			result.ExpectedResult = fmt.Sprintf("'%s' is present", t.value())
 			result.testResult = match
@@ -231,13 +235,26 @@ func (t testItem) evaluate(s string) *testOutput {
 		result.testResult = !match
 	}
 
-	result.found = match
-	glog.V(3).Info(fmt.Sprintf("found %v", result.found))
+	result.flagFound = match
+	var isExist = "exists"
+	if !result.flagFound{
+		isExist = "does not exist"
+	}
+	switch t.auditUsed {
+        case "auditCommand":
+			glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
+        case "auditConfig":
+			glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
+		case "auditEnv":
+			glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
+		default:
+		glog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
+    	}
 
-	return result
+    	return result
 }
 
-func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string, bool) {
+func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName string) (string, bool) {
 
 	expectedResultPattern := ""
 	testResult := false
@@ -266,24 +283,25 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 	case "gt", "gte", "lt", "lte":
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
+			expectedResultPattern = "Invalid Number(s) used for comparison: '%s' '%s'"
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
-			return "Invalid Number(s) used for comparison", false
+			return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), false
 		}
 		switch tCompareOp {
 		case "gt":
-			expectedResultPattern = "%s is greater than %s"
+			expectedResultPattern = "'%s' is greater than %s"
 			testResult = a > b
 
 		case "gte":
-			expectedResultPattern = "%s is greater or equal to %s"
+			expectedResultPattern = "'%s' is greater or equal to %s"
 			testResult = a >= b
 
 		case "lt":
-			expectedResultPattern = "%s is lower than %s"
+			expectedResultPattern = "'%s' is lower than %s"
 			testResult = a < b
 
 		case "lte":
-			expectedResultPattern = "%s is lower or equal to %s"
+			expectedResultPattern = "'%s' is lower or equal to %s"
 			testResult = a <= b
 		}
 
@@ -292,11 +310,11 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		testResult = strings.Contains(flagVal, tCompareValue)
 
 	case "nothave":
-		expectedResultPattern = " '%s' not have '%s'"
+		expectedResultPattern = "'%s' does not have '%s'"
 		testResult = !strings.Contains(flagVal, tCompareValue)
 
 	case "regex":
-		expectedResultPattern = " '%s' matched by '%s'"
+		expectedResultPattern = "'%s' matched by regex expression '%s'"
 		opRe := regexp.MustCompile(tCompareValue)
 		testResult = opRe.MatchString(flagVal)
 
@@ -307,7 +325,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		testResult = allElementsValid(s, target)
 
 	case "bitmask":
-		expectedResultPattern = "bitmask '%s' AND '%s'"
+		expectedResultPattern = "%s has permissions " + flagVal + ", expected %s or more restrictive"
 		requested, err := strconv.ParseInt(flagVal, 8, 64)
 		if err != nil {
 			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
@@ -324,7 +342,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string) (string,
 		return expectedResultPattern, testResult
 	}
 
-	return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), testResult
+	return fmt.Sprintf(expectedResultPattern, flagName, tCompareValue), testResult
 }
 
 func unmarshal(s string, jsonInterface *interface{}) error {

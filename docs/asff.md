@@ -15,7 +15,7 @@ You can configure kube-bench with the `--asff` to send findings to AWS Security 
 
 ## Configure permissions in an IAM Role
 
-* Grant these permissions to the IAM Role that the kube-bench pod will be associated with. There are two potions:
+* Grant these permissions to the IAM Role that the kube-bench pod will be associated with. There are two options:
   * You can run the kube-bench pod under a specific [service account associated with an IAM role](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) that has these permissions to write Security Hub findings.
   * Alternatively the pod can be granted permissions specified by the Role that your [EKS node group uses](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).
   
@@ -36,16 +36,14 @@ Here is an example IAM Policy that you can attach to your EKS node group's IAM R
 }
 ```
 
-## Configure and rebuild kube-bench
+### Modify the job configuration
 
-You will need to download, build and push the kube-bench container image to your ECR repo as described in Step 3 of the [EKS instructions][eks-instructions], except that before you build the container image, you need to edit `cfg/eks-1.0/config.yaml` to specify the AWS account, AWS region, and the EKS Cluster ARN.
+* Modify the kube-bench Configmap in `job-eks-asff.yaml` to specify the AWS account, AWS region, and the EKS Cluster ARN.
+* In the same file, modify the image specifed in the Job to use the kube-bench image pushed to your ECR
+* [Optional] - If you have created a dedicated IAM role to be used with kube-bench as described above in [Configure permissions in an IAM Role](#configure-permissions-in-an-iam-role), you will need to add the IAM role arn to the kube-bench ServiceAccount in `job-eks-asff.yaml`.
+* Make sure that `job-eks-asff.yaml` specifies the container image you just pushed to your ECR registry.
 
-## Modify the job configuration
-
-* Modify `job-eks.yaml` to specify the `--asff` flag, so that kube-bench writes output in ASFF format to Security Hub
-* Make sure that `job-eks.yaml` specifies the container image you just pushed to your ECR registry.
-
-You can now run kube-bench as a pod in your cluster: `kubectl apply -f job-eks.yaml`
+You can now run kube-bench as a pod in your cluster: `kubectl apply -f job-eks-asff.yaml`
 
 Findings will be generated for any kube-bench test that generates a `[FAIL]` or `[WARN]` output. If all tests pass, no findings will be generated. However, it's recommended that you consult the pod log output to check whether any findings were generated but could not be written to Security Hub.
 
