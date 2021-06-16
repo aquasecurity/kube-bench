@@ -391,10 +391,10 @@ secrets management solution.
 5.7.1 Follow the documentation and create namespaces for objects in your deployment as you need
 them.
 
-5.7.2 Use security context to enable the docker/default seccomp profile in your pod definitions. 
-An example is as below: 
-  securityContext: 
-    seccompProfile: 
+5.7.2 Use security context to enable the docker/default seccomp profile in your pod definitions.
+An example is as below:
+  securityContext:
+    seccompProfile:
       type: RuntimeDefault
 
 5.7.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
