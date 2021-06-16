@@ -1,6 +1,6 @@
 module github.com/aquasecurity/kube-bench
 
-go 1.13
+go 1.16
 
 require (
 	github.com/aws/aws-sdk-go v1.35.28
@@ -9,7 +9,6 @@ require (
 	github.com/fatih/color v1.5.0
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
 	github.com/jinzhu/gorm v0.0.0-20160404144928-5174cc5c242a
 	github.com/jinzhu/inflection v0.0.0-20170102125226-1c35d901db3d // indirect
