@@ -65,7 +65,7 @@ groups:
         remediation: |
           Remove the system:masters group from all users in the cluster.
         scored: false
-      
+
       - id: 5.1.8
         text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
         type: "manual"
@@ -213,10 +213,10 @@ groups:
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         type: "manual"
         remediation: |
-          Use security context to enable the docker/default seccomp profile in your pod definitions. 
-          An example is as below: 
-            securityContext: 
-              seccompProfile: 
+          Use security context to enable the docker/default seccomp profile in your pod definitions.
+          An example is as below:
+            securityContext:
+              seccompProfile:
                 type: RuntimeDefault
         scored: false
 
