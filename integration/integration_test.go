@@ -80,11 +80,11 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 	}
 }
 
-func TestCheckCIS15WithKind(t *testing.T) {
+func TestCheckCIS16WithKind(t *testing.T) {
 	testCheckCISWithKind(t, "cis-1.6")
 }
 
-func TestCheckCIS16WithKind(t *testing.T) {
+func TestCheckCIS120WithKind(t *testing.T) {
 	testCheckCISWithKind(t, "cis-1.20")
 }
 
