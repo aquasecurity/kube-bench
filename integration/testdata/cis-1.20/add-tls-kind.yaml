@@ -16,4 +16,4 @@ kubeadmConfigPatchesJson6902:
 nodes:
   # the control plane node config
   - role: control-plane
-    image: "kindest/node:v1.15.0"
+    image: "kindest/node:v1.20.0"
