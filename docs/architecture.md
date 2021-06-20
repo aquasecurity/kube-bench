@@ -12,10 +12,12 @@ master.yaml, controlplane.yaml, node.yaml, etcd.yaml, policies.yaml and config.y
 Check the contents of the benchmark directory under `cfg` to see which targets are available for that benchmark. Each file except `config.yaml` represents a target (also known as a `control` in other parts of this documentation). 
 
 The following table shows the valid targets based on the CIS Benchmark version.
+
 | CIS Benchmark | Targets |
 |---|---|
 | cis-1.5| master, controlplane, node, etcd, policies |
 | cis-1.6| master, controlplane, node, etcd, policies |
+|cis-1.20| master, controlplane, node, etcd, policies |
 | gke-1.0| master, controlplane, node, etcd, policies, managedservices |
 | eks-1.0| controlplane, node, policies, managedservices |
 | ack-1.0| master, controlplane, node, etcd, policies, managedservices |
