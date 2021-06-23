@@ -437,13 +437,19 @@ func writeJSONOutput(controlsCollection []*check.Controls) {
 }
 
 func writeJunitOutput(controlsCollection []*check.Controls) {
+	// QuickFix for issue https://github.com/aquasecurity/kube-bench/issues/883
+	// Should consider to deprecate of switch to using Junit template
+	prefix := "<testsuites>\n"
+	suffix := "\n</testsuites>"
+	var outputAllControls []byte
 	for _, controls := range controlsCollection {
-		out, err := controls.JUnit()
+		tempOut, err := controls.JUnit()
+		outputAllControls = append(outputAllControls[:], tempOut[:]...)
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to output in JUnit format: %v", err))
 		}
-		printOutput(string(out), outputFile)
 	}
+	printOutput(prefix+string(outputAllControls)+suffix, outputFile)
 }
 
 func writePgsqlOutput(controlsCollection []*check.Controls) {
