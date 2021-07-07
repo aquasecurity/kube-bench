@@ -43,6 +43,7 @@ var (
 	jsonFmt              bool
 	junitFmt             bool
 	pgSQL                bool
+	sNS                  bool
 	aSFF                 bool
 	masterFile           = "master.yaml"
 	nodeFile             = "node.yaml"
@@ -168,6 +169,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&jsonFmt, "json", false, "Prints the results as JSON")
 	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
+	RootCmd.PersistentFlags().BoolVar(&sNS, "sns", false, "Prints the results to SNS topic")
 	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")

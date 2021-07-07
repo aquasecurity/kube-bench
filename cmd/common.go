@@ -416,7 +416,21 @@ func writeOutput(controlsCollection []*check.Controls) {
 		writeASFFOutput(controlsCollection)
 		return
 	}
+	if sNS {
+		writeSNSOutput(controlsCollection)
+		return
+	}
 	writeStdoutOutput(controlsCollection)
+}
+
+func writeSNSOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.JSON()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
+		}
+		writeFindingToSns(string(out))
+	}
 }
 
 func writeJSONOutput(controlsCollection []*check.Controls) {
