@@ -7,3 +7,5 @@ AWS_ACCOUNT: "<AWS_ACCT_NUMBER>"
 AWS_REGION: "<AWS_REGION>"
 ## EKS Cluster ARN is required.
 CLUSTER_ARN: "<AWS_CLUSTER_ARN>"
+## SNS Topic ARN ( optional if --sns flag is not set )
+SNSTOPIC_ARN: "<AWS_SNSTOPIC_ARN>"
