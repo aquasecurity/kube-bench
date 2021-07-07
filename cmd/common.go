@@ -427,7 +427,7 @@ func writeSNSOutput(controlsCollection []*check.Controls) {
 	for _, controls := range controlsCollection {
 		out, err := controls.JSON()
 		if err != nil {
-			exitWithError(fmt.Errorf("failed to output in Postgresql format: %v", err))
+			exitWithError(fmt.Errorf("failed to output in SNS format: %v", err))
 		}
 		writeFindingToSns(string(out))
 	}
