@@ -28,17 +28,17 @@ archives:
       - "cfg/config.yaml"
 nfpms:
   -
-    vendor: "Aqua Security"
-    maintainer: "Yoav Rotem <yoav.rotem@aquasec.com>"
+    vendor: Aqua Security
     description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
-    license: "Apache-2.0"
-    homepage: "https://github.com/aquasecurity/kube-bench"
+    maintainer: Yoav Rotem <yoav.rotem@aquasec.com>
+    license: Apache-2.0
+    homepage: https://github.com/aquasecurity/kube-bench
     file_name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
     contents:
       - src: "cfg/**/*"
         dst: "/etc/kube-bench/cfg"
       - src: "cfg/config.yaml"
-        dst: "/etc/kube-bench/cfg"
+        dst: "/etc/kube-bench/cfg/config.yaml"
     formats:
       - deb
       - rpm
