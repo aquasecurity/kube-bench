@@ -19,7 +19,6 @@ func getConfig(name string) (string, error) {
 }
 
 func writeFindingToSns(jsonInfo string) {
-	log.Printf("entering writeFindingToSns")
 	region, _ := getConfig("AWS_REGION")
 	snstopic, _ := getConfig("SNSTOPIC_ARN")
 
