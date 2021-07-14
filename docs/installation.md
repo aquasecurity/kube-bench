@@ -53,11 +53,22 @@ See previous section on [Running kube-bench](./running.md#running-kube-bench) fo
 
 ### Installing from sources
 
-If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [`GOPATH` is set](https://github.com/golang/go/wiki/GOPATH)):
+If Go is installed on the target machines, you can simply clone this repository and run as follows (assuming your [`GOPATH` is set](https://github.com/golang/go/wiki/GOPATH)) as per this example:
 
 ```shell
+# Create a target directory for the clone, inside the $GOPATH
+mkdir -p $GOPATH/src/github.com/aquasecurity/kube-bench
+
+# Clone this repository, using SSH
+git clone git@github.com:aquasecurity/kube-bench.git $GOPATH/src/github.com/aquasecurity/kube-bench
+
+# Install the pre-requisites
 go get github.com/aquasecurity/kube-bench
+
+# Change to the kube-bench directory
 cd $GOPATH/src/github.com/aquasecurity/kube-bench
+
+# Build the kube-bench binary
 go build -o kube-bench .
 
 # See all supported options
