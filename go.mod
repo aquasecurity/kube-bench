@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.35.28
 	github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
-	github.com/fatih/color v1.5.0
+	github.com/fatih/color v1.12.0
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/imdario/mergo v0.3.5 // indirect
@@ -15,8 +15,6 @@ require (
 	github.com/jinzhu/now v1.0.1 // indirect
 	github.com/lib/pq v0.0.0-20171126050459-83612a56d3dd // indirect
 	github.com/magiconair/properties v1.8.0
-	github.com/mattn/go-colorable v0.0.0-20170210172801-5411d3eea597 // indirect
-	github.com/mattn/go-isatty v0.0.0-20170307163044-57fdcb988a5c // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/pkg/errors v0.9.1
