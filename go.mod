@@ -14,7 +14,7 @@ require (
 	github.com/jinzhu/inflection v0.0.0-20170102125226-1c35d901db3d // indirect
 	github.com/jinzhu/now v1.0.1 // indirect
 	github.com/lib/pq v0.0.0-20171126050459-83612a56d3dd // indirect
-	github.com/magiconair/properties v1.8.0
+	github.com/magiconair/properties v1.8.5
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/pkg/errors v0.9.1
