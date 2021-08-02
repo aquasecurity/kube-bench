@@ -37,7 +37,7 @@ jobs:
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
-        uses: codecov/codecov-action@v2.0.2
+        uses: codecov/codecov-action@v2
         with:
           file: ./coverage.txt
       - name: Run integration tests
