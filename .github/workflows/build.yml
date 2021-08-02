@@ -14,7 +14,7 @@ on:
       - "LICENSE"
       - "NOTICE"
 
-env: 
+env:
   KIND_VERSION: "v0.11.1"
 
 jobs:
