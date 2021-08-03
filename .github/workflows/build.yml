@@ -57,7 +57,11 @@ jobs:
           kubectl get pods
           kubectl get nodes
           kubectl logs $POD > ./test.data
-          cat ./test.data
+      - uses: GuillaumeFalourd/diff-action@v1
+        with:
+          first_file_path: ./test.data
+          second_file_path: integration/Expected_output.data
+          expected_result: PASSED
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
