@@ -53,9 +53,6 @@ jobs:
         run: |
           kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s
           POD=$(kubectl get pods -o=name)
-          echo POD=$POD
-          kubectl get pods
-          kubectl get nodes
           kubectl logs $POD > ./test.data
       - name: Compare output with expected output
         uses: GuillaumeFalourd/diff-action@v1
