@@ -50,6 +50,7 @@ jobs:
         run: kubectl apply -f job.yaml
       - name: Run integration tests
         run: |
+          kubectl wait --for=condition=Ready pod/kube-bench
           POD=$(kubectl get pods -o=name)
           kubectl logs $POD > ./test.data
           cat ./test.data
