@@ -16,6 +16,10 @@ WORKDIR /opt/kube-bench/
 # https://github.com/aquasecurity/kube-bench/issues/109
 RUN apk --no-cache add procps
 
+# Upgrading apk-tools to remediate CVE-2021-36159 - https://snyk.io/vuln/SNYK-ALPINE314-APKTOOLS-1533752
+# https://github.com/aquasecurity/kube-bench/issues/943
+RUN apk --no-cache upgrade apk-tools
+
 # Openssl is used by OpenShift tests
 # https://github.com/aquasecurity/kube-bench/issues/535
 RUN apk --no-cache add openssl
