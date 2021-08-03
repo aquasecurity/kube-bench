@@ -44,12 +44,12 @@ jobs:
           image: ${{ env.KIND_IMAGE }}
       - name: Test connection to Kubernetes cluster
         run: |
-          make kind-test-cluster
           kubectl cluster-info
           kubectl describe node
+      - name: Apply jobs
+        run: kubectl apply -f job.yaml
       - name: Run integration tests
         run: |
-          kubectl apply -f job.yaml
           POD=$(kubectl get pods -o=name)
           kubectl logs $POD > ./test.data
           cat ./test.data
