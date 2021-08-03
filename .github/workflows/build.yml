@@ -42,14 +42,16 @@ jobs:
         with:
           version: ${{ env.KIND_VERSION }}
           image: ${{ env.KIND_IMAGE }}
+          name: kube-bench
       - name: Test connection to Kubernetes cluster
         run: |
           kubectl cluster-info
           kubectl describe node
       - name: Apply jobs
-        run: kubectl apply -f job.yaml --wait
+        run: kubectl apply -f job.yaml
       - name: Run integration tests
         run: |
+          kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s
           POD=$(kubectl get pods -o=name)
           echo POD=$POD
           kubectl get pods
