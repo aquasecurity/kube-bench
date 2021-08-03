@@ -47,11 +47,11 @@ jobs:
           kubectl cluster-info
           kubectl describe node
       - name: Apply jobs
-        run: kubectl apply -f job.yaml
+        run: kubectl apply -f job.yaml --wait
       - name: Run integration tests
         run: |
           POD=$(kubectl get pods -o=name)
-          kubectl wait --for=condition=Ready pod/$POD
+          echo POD=%POD
           kubectl logs $POD > ./test.data
           cat ./test.data
       - name: Dry-run release snapshot
