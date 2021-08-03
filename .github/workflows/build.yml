@@ -51,7 +51,7 @@ jobs:
       - name: Run integration tests
         run: |
           POD=$(kubectl get pods -o=name)
-          echo POD=%POD
+          echo POD=$POD
           kubectl logs $POD > ./test.data
           cat ./test.data
       - name: Dry-run release snapshot
