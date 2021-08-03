@@ -52,6 +52,8 @@ jobs:
         run: |
           POD=$(kubectl get pods -o=name)
           echo POD=$POD
+          kubectl get pods
+          kubectl get nodes
           kubectl logs $POD > ./test.data
           cat ./test.data
       - name: Dry-run release snapshot
