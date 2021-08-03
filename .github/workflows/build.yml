@@ -52,8 +52,7 @@ jobs:
       - name: Run integration tests
         run: |
           kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s
-          POD=$(kubectl get pods -o=name)
-          kubectl logs $POD > ./test.data
+          kubectl logs job/kube-bench > ./test.data
       - name: Compare output with expected output
         uses: GuillaumeFalourd/diff-action@v1
         with:
