@@ -59,10 +59,6 @@ build-docker:
 tests:
 	GO111MODULE=on go test -vet all -short -race -timeout 30s -coverprofile=coverage.txt -covermode=atomic ./...
 
-# integration tests using kind
-integration-tests: build-docker
-	GO111MODULE=on go test ./integration/... -v -tags integration -timeout 1200s -args -kubebenchImg=$(IMAGE_NAME)
-
 # creates a kind cluster to be used for development.
 HAS_KIND := $(shell command -v kind;)
 kind-test-cluster:

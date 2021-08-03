@@ -23,39 +23,40 @@
 [PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)
 [INFO] 1.2 API Server
 [WARN] 1.2.1 Ensure that the --anonymous-auth argument is set to false (Manual)
-[PASS] 1.2.2 Ensure that the --token-auth-file parameter is not set (Automated)
-[PASS] 1.2.3 Ensure that the --kubelet-https argument is set to true (Automated)
-[PASS] 1.2.4 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
-[FAIL] 1.2.5 Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)
-[PASS] 1.2.6 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
-[PASS] 1.2.7 Ensure that the --authorization-mode argument includes Node (Automated)
-[PASS] 1.2.8 Ensure that the --authorization-mode argument includes RBAC (Automated)
-[WARN] 1.2.9 Ensure that the admission control plugin EventRateLimit is set (Manual)
-[PASS] 1.2.10 Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
-[WARN] 1.2.11 Ensure that the admission control plugin AlwaysPullImages is set (Manual)
-[WARN] 1.2.12 Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
-[PASS] 1.2.13 Ensure that the admission control plugin ServiceAccount is set (Automated)
-[PASS] 1.2.14 Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
-[FAIL] 1.2.15 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
-[PASS] 1.2.16 Ensure that the admission control plugin NodeRestriction is set (Automated)
-[PASS] 1.2.17 Ensure that the --insecure-bind-address argument is not set (Automated)
-[PASS] 1.2.18 Ensure that the --insecure-port argument is set to 0 (Automated)
-[PASS] 1.2.19 Ensure that the --secure-port argument is not set to 0 (Automated)
-[FAIL] 1.2.20 Ensure that the --profiling argument is set to false (Automated)
-[FAIL] 1.2.21 Ensure that the --audit-log-path argument is set (Automated)
-[FAIL] 1.2.22 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
-[FAIL] 1.2.23 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
-[FAIL] 1.2.24 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
-[WARN] 1.2.25 Ensure that the --request-timeout argument is set as appropriate (Automated)
-[PASS] 1.2.26 Ensure that the --service-account-lookup argument is set to true (Automated)
-[PASS] 1.2.27 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
-[PASS] 1.2.28 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
-[PASS] 1.2.29 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
-[PASS] 1.2.30 Ensure that the --client-ca-file argument is set as appropriate (Automated)
-[PASS] 1.2.31 Ensure that the --etcd-cafile argument is set as appropriate (Automated)
-[WARN] 1.2.32 Ensure that the --encryption-provider-config argument is set as appropriate (Manual)
-[WARN] 1.2.33 Ensure that encryption providers are appropriately configured (Manual)
-[WARN] 1.2.34 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)
+[PASS] 1.2.2 Ensure that the --basic-auth-file argument is not set (Automated)
+[PASS] 1.2.3 Ensure that the --token-auth-file parameter is not set (Automated)
+[PASS] 1.2.4 Ensure that the --kubelet-https argument is set to true (Automated)
+[PASS] 1.2.5 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
+[FAIL] 1.2.6 Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)
+[PASS] 1.2.7 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
+[PASS] 1.2.8 Ensure that the --authorization-mode argument includes Node (Automated)
+[PASS] 1.2.9 Ensure that the --authorization-mode argument includes RBAC (Automated)
+[WARN] 1.2.10 Ensure that the admission control plugin EventRateLimit is set (Manual)
+[PASS] 1.2.11 Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
+[WARN] 1.2.12 Ensure that the admission control plugin AlwaysPullImages is set (Manual)
+[WARN] 1.2.13 Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
+[PASS] 1.2.14 Ensure that the admission control plugin ServiceAccount is set (Automated)
+[PASS] 1.2.15 Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
+[FAIL] 1.2.16 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
+[PASS] 1.2.17 Ensure that the admission control plugin NodeRestriction is set (Automated)
+[PASS] 1.2.18 Ensure that the --insecure-bind-address argument is not set (Automated)
+[PASS] 1.2.19 Ensure that the --insecure-port argument is set to 0 (Automated)
+[PASS] 1.2.20 Ensure that the --secure-port argument is not set to 0 (Automated)
+[FAIL] 1.2.21 Ensure that the --profiling argument is set to false (Automated)
+[FAIL] 1.2.22 Ensure that the --audit-log-path argument is set (Automated)
+[FAIL] 1.2.23 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
+[FAIL] 1.2.24 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
+[FAIL] 1.2.25 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
+[WARN] 1.2.26 Ensure that the --request-timeout argument is set as appropriate (Automated)
+[PASS] 1.2.27 Ensure that the --service-account-lookup argument is set to true (Automated)
+[PASS] 1.2.28 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
+[PASS] 1.2.29 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
+[PASS] 1.2.30 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
+[PASS] 1.2.31 Ensure that the --client-ca-file argument is set as appropriate (Automated)
+[PASS] 1.2.32 Ensure that the --etcd-cafile argument is set as appropriate (Automated)
+[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Manual)
+[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Manual)
+[WARN] 1.2.35 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)
 [INFO] 1.3 Controller Manager
 [WARN] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)
 [FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
@@ -87,71 +88,71 @@ For example, chown etcd:etcd /var/lib/etcd
 on the master node and set the below parameter.
 --anonymous-auth=false
 
-1.2.5 Follow the Kubernetes documentation and setup the TLS connection between
+1.2.6 Follow the Kubernetes documentation and setup the TLS connection between
 the apiserver and kubelets. Then, edit the API server pod specification file
 /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the
 --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.
 --kubelet-certificate-authority=<ca-string>
 
-1.2.9 Follow the Kubernetes documentation and set the desired limits in a configuration file.
+1.2.10 Follow the Kubernetes documentation and set the desired limits in a configuration file.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 and set the below parameters.
 --enable-admission-plugins=...,EventRateLimit,...
 --admission-control-config-file=<path/to/configuration/file>
 
-1.2.11 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.12 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to include
 AlwaysPullImages.
 --enable-admission-plugins=...,AlwaysPullImages,...
 
-1.2.12 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.13 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to include
 SecurityContextDeny, unless PodSecurityPolicy is already in place.
 --enable-admission-plugins=...,SecurityContextDeny,...
 
-1.2.15 Follow the documentation and create Pod Security Policy objects as per your environment.
+1.2.16 Follow the documentation and create Pod Security Policy objects as per your environment.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to a
 value that includes PodSecurityPolicy:
 --enable-admission-plugins=...,PodSecurityPolicy,...
 Then restart the API Server.
 
-1.2.20 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.21 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --profiling=false
 
-1.2.21 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.22 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-path parameter to a suitable path and
 file where you would like audit logs to be written, for example:
 --audit-log-path=/var/log/apiserver/audit.log
 
-1.2.22 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.23 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxage parameter to 30 or as an appropriate number of days:
 --audit-log-maxage=30
 
-1.2.23 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.24 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxbackup parameter to 10 or to an appropriate
 value.
 --audit-log-maxbackup=10
 
-1.2.24 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.25 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxsize parameter to an appropriate size in MB.
 For example, to set it as 100 MB:
 --audit-log-maxsize=100
 
-1.2.25 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.26 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 and set the below parameter as appropriate and if needed.
 For example,
 --request-timeout=300s
 
-1.2.32 Follow the Kubernetes documentation and configure a EncryptionConfig file.
+1.2.33 Follow the Kubernetes documentation and configure a EncryptionConfig file.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --encryption-provider-config parameter to the path of that file: --encryption-provider-config=</path/to/EncryptionConfig/File>
 
-1.2.33 Follow the Kubernetes documentation and configure a EncryptionConfig file.
+1.2.34 Follow the Kubernetes documentation and configure a EncryptionConfig file.
 In this file, choose aescbc, kms or secretbox as the encryption provider.
 
-1.2.34 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.35 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM
 _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM
@@ -173,7 +174,7 @@ on the master node and set the below parameter.
 
 
 == Summary master ==
-43 checks PASS
+44 checks PASS
 10 checks FAIL
 11 checks WARN
 0 checks INFO
@@ -219,10 +220,10 @@ minimum.
 
 [INFO] 4 Worker Node Security Configuration
 [INFO] 4.1 Worker Node Configuration Files
-[FAIL] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)
+[PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Automated)
 [PASS] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)
-[PASS] 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
+[PASS] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)
 [PASS] 4.1.5 Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.6 Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)
 [PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Manual)
@@ -242,13 +243,9 @@ minimum.
 [WARN] 4.2.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)
 [PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Manual)
 [PASS] 4.2.12 Verify that the RotateKubeletServerCertificate argument is set to true (Manual)
-[PASS] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)
+[WARN] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)
 
 == Remediations node ==
-4.1.1 Run the below command (based on the file location on your system) on the each worker node.
-For example,
-chmod 644 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -278,11 +275,22 @@ Based on your system, restart the kubelet service. For example:
 systemctl daemon-reload
 systemctl restart kubelet.service
 
+4.2.13 If using a Kubelet config file, edit the file to set TLSCipherSuites: to
+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+or to a subset of these values.
+If using executable arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the --tls-cipher-suites parameter as follows, or to a subset of these values.
+--tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
 
 == Summary node ==
 19 checks PASS
-2 checks FAIL
-2 checks WARN
+1 checks FAIL
+3 checks WARN
 0 checks INFO
 
 [INFO] 5 Kubernetes Policies
@@ -293,17 +301,15 @@ systemctl restart kubelet.service
 [WARN] 5.1.4 Minimize access to create pods (Manual)
 [WARN] 5.1.5 Ensure that default service accounts are not actively used. (Manual)
 [WARN] 5.1.6 Ensure that Service Account Tokens are only mounted where necessary (Manual)
-[WARN] 5.1.7 Avoid use of system:masters group (Manual)
-[WARN] 5.1.8 Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)
 [INFO] 5.2 Pod Security Policies
-[WARN] 5.2.1 Minimize the admission of privileged containers (Automated)
-[WARN] 5.2.2 Minimize the admission of containers wishing to share the host process ID namespace (Automated)
-[WARN] 5.2.3 Minimize the admission of containers wishing to share the host IPC namespace (Automated)
-[WARN] 5.2.4 Minimize the admission of containers wishing to share the host network namespace (Automated)
-[WARN] 5.2.5 Minimize the admission of containers with allowPrivilegeEscalation (Automated)
-[WARN] 5.2.6 Minimize the admission of root containers (Automated)
-[WARN] 5.2.7 Minimize the admission of containers with the NET_RAW capability (Automated)
-[WARN] 5.2.8 Minimize the admission of containers with added capabilities (Automated)
+[WARN] 5.2.1 Minimize the admission of privileged containers (Manual)
+[WARN] 5.2.2 Minimize the admission of containers wishing to share the host process ID namespace (Manual)
+[WARN] 5.2.3 Minimize the admission of containers wishing to share the host IPC namespace (Manual)
+[WARN] 5.2.4 Minimize the admission of containers wishing to share the host network namespace (Manual)
+[WARN] 5.2.5 Minimize the admission of containers with allowPrivilegeEscalation (Manual)
+[WARN] 5.2.6 Minimize the admission of root containers (Manual)
+[WARN] 5.2.7 Minimize the admission of containers with the NET_RAW capability (Manual)
+[WARN] 5.2.8 Minimize the admission of containers with added capabilities (Manual)
 [WARN] 5.2.9 Minimize the admission of containers with capabilities assigned (Manual)
 [INFO] 5.3 Network Policies and CNI
 [WARN] 5.3.1 Ensure that the CNI in use supports Network Policies (Manual)
@@ -340,10 +346,6 @@ automountServiceAccountToken: false
 
 5.1.6 Modify the definition of pods and service accounts which do not need to mount service
 account tokens to disable it.
-
-5.1.7 Remove the system:masters group from all users in the cluster.
-
-5.1.8 Where possible, remove the impersonate, bind and escalate rights from subjects.
 
 5.2.1 Create a PSP as described in the Kubernetes documentation, ensuring that
 the .spec.privileged field is omitted or set to false.
@@ -391,11 +393,26 @@ secrets management solution.
 5.7.1 Follow the documentation and create namespaces for objects in your deployment as you need
 them.
 
-5.7.2 Use security context to enable the docker/default seccomp profile in your pod definitions.
-An example is as below:
-  securityContext:
-    seccompProfile:
-      type: RuntimeDefault
+5.7.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+would need to enable alpha features in the apiserver by passing "--feature-
+gates=AllAlpha=true" argument.
+Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
+parameter to "--feature-gates=AllAlpha=true"
+KUBE_API_ARGS="--feature-gates=AllAlpha=true"
+Based on your system, restart the kube-apiserver service. For example:
+systemctl restart kube-apiserver.service
+Use annotations to enable the docker/default seccomp profile in your pod definitions. An
+example is as below:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: trustworthy-pod
+  annotations:
+    seccomp.security.alpha.kubernetes.io/pod: docker/default
+spec:
+  containers:
+    - name: trustworthy-container
+      image: sotrustworthy:latest
 
 5.7.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
 suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
@@ -408,11 +425,12 @@ resources and that all new resources are created in a specific namespace.
 == Summary policies ==
 0 checks PASS
 0 checks FAIL
-26 checks WARN
+24 checks WARN
 0 checks INFO
 
 == Summary total ==
-69 checks PASS
-12 checks FAIL
-42 checks WARN
+70 checks PASS
+11 checks FAIL
+41 checks WARN
 0 checks INFO
+
