@@ -30,10 +30,10 @@ var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
 var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 var TypeMap = map[string][]string{
-	"ca":         []string{"cafile", "defaultcafile"},
-	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
-	"service":    []string{"svc", "defaultsvc"},
-	"config":     []string{"confs", "defaultconf"},
+	"ca":         {"cafile", "defaultcafile"},
+	"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
+	"service":    {"svc", "defaultsvc"},
+	"config":     {"confs", "defaultconf"},
 }
 
 func init() {
