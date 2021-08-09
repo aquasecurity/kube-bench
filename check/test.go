@@ -237,21 +237,21 @@ func (t testItem) evaluate(s string) *testOutput {
 
 	result.flagFound = match
 	var isExist = "exists"
-	if !result.flagFound{
+	if !result.flagFound {
 		isExist = "does not exist"
 	}
 	switch t.auditUsed {
-        case "auditCommand": 
-			glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
-        case "auditConfig":
-			glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
-		case "auditEnv":
-			glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
-		default: 
+	case "auditCommand":
+		glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
+	case "auditConfig":
+		glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
+	case "auditEnv":
+		glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
+	default:
 		glog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
-    	}
-	
-    	return result
+	}
+
+	return result
 }
 
 func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName string) (string, bool) {
