@@ -143,6 +143,7 @@ node:
       - "/etc/kubernetes/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
     confs:
+      - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
