@@ -1,0 +1,68 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench
+spec:
+  template:
+    metadata:
+      labels:
+        app: kube-bench
+    spec:
+      hostPID: true
+      containers:
+        - name: kube-bench
+          image: aquasec/kube-bench:latest
+          command:
+            [
+              "kube-bench",
+              "run",
+              "--targets",
+              "master,node,etcd",
+              "--benchmark",
+              "pmk-1.0",
+            ]
+          env:
+            - name: "KUBECONFIG"
+              value: "/.kube/admin.yaml"
+          volumeMounts:
+            - name: var
+              mountPath: /var
+            - name: etc
+              mountPath: /etc
+            - name: run
+              mountPath: /run
+            - name: bin
+              mountPath: /usr/local/mount-from-host/bin
+              readOnly: true
+            - name: etc-cni-netd
+              mountPath: /etc/cni/net.d/
+              readOnly: true
+            - name: opt-cni-bin
+              mountPath: /opt/cni/bin/
+              readOnly: true
+            - name: kubeconfig
+              mountPath: /.kube/admin.yaml
+      restartPolicy: Never
+      volumes:
+        - name: var
+          hostPath:
+            path: "/var"
+        - name: etc
+          hostPath:
+            path: "/etc"
+        - name: run
+          hostPath:
+            path: "/run"
+        - name: bin
+          hostPath:
+            path: "/bin"
+        - name: etc-cni-netd
+          hostPath:
+            path: "/etc/cni/net.d/"
+        - name: opt-cni-bin
+          hostPath:
+            path: "/opt/cni/bin/"
+        - name: kubeconfig
+          hostPath:
+            path: /etc/pf9/kube.d/kubeconfigs/admin.yaml
