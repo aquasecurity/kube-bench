@@ -41,7 +41,7 @@ jobs:
           password: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
       - name: Get version
         id: get_version
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: crazy-max/ghaction-docker-meta@v3
         with:
           images: ${{ env.REP }}
           tag-semver: |
@@ -62,6 +62,5 @@ jobs:
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache/release
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
-
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

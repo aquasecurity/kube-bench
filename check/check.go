@@ -226,7 +226,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		// Try with the auditOutput first, and if that's not found, try the auditConfigOutput
 		t.auditUsed = AuditCommand
 		result := *(t.execute(c.AuditOutput))
-    
+
 		// Check for AuditConfigOutput only if AuditConfig is set
 		if !result.flagFound && c.AuditConfig != "" {
 			//t.isConfigSetting = true
