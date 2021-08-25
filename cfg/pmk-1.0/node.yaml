@@ -148,7 +148,7 @@ groups:
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
         tests:
           test_items:
-            - flag: root:root
+            - flag: pf9:pf9group
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
