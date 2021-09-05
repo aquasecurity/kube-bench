@@ -22,7 +22,8 @@ RUN apk --no-cache upgrade apk-tools
 
 # Openssl is used by OpenShift tests
 # https://github.com/aquasecurity/kube-bench/issues/535
-RUN apk --no-cache add openssl
+# Ensuring that we update/upgrade before installing openssl, to mitigate CVE-2021-3711 and CVE-2021-3712
+RUN apk update && apk upgrade && apk --no-cache add openssl
 
 # Add glibc for running oc command 
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
