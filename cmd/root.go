@@ -33,34 +33,37 @@ type FilterOpts struct {
 }
 
 var (
-	envVarsPrefix        = "KUBE_BENCH"
-	defaultKubeVersion   = "1.18"
-	kubeVersion          string
-	detecetedKubeVersion string
-	benchmarkVersion     string
-	cfgFile              string
-	cfgDir               = "./cfg/"
-	jsonFmt              bool
-	junitFmt             bool
-	pgSQL                bool
-	aSFF                 bool
-	masterFile           = "master.yaml"
-	nodeFile             = "node.yaml"
-	etcdFile             = "etcd.yaml"
-	controlplaneFile     = "controlplane.yaml"
-	policiesFile         = "policies.yaml"
-	managedservicesFile  = "managedservices.yaml"
-	exitCode             int
-	noResults            bool
-	noSummary            bool
-	noRemediations       bool
-	skipIds              string
-	noTotals             bool
-	filterOpts           FilterOpts
-	includeTestOutput    bool
-	outputFile           string
-	configFileError      error
-	controlsCollection   []*check.Controls
+	envVarsPrefix         = "KUBE_BENCH"
+	defaultKubeVersion    = "1.18"
+	kubeVersion           string
+	detecetedKubeVersion  string
+	benchmarkVersion      string
+	cfgFile               string
+	cfgDir                = "./cfg/"
+	jsonFmt               bool
+	junitFmt              bool
+	pgSQL                 bool
+	aSFF                  bool
+	httpServerFmt         bool
+	httpServerAddress     = ""
+	httpServerContentType = "application/json"
+	masterFile            = "master.yaml"
+	nodeFile              = "node.yaml"
+	etcdFile              = "etcd.yaml"
+	controlplaneFile      = "controlplane.yaml"
+	policiesFile          = "policies.yaml"
+	managedservicesFile   = "managedservices.yaml"
+	exitCode              int
+	noResults             bool
+	noSummary             bool
+	noRemediations        bool
+	skipIds               string
+	noTotals              bool
+	filterOpts            FilterOpts
+	includeTestOutput     bool
+	outputFile            string
+	configFileError       error
+	controlsCollection    []*check.Controls
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -169,6 +172,9 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
+	RootCmd.PersistentFlags().BoolVar(&httpServerFmt, "http-server", false, "Send the results to a HTTP Server")
+	RootCmd.PersistentFlags().StringVar(&httpServerAddress, "http-server-address", "", "HTTP Server address")
+	RootCmd.PersistentFlags().StringVar(&httpServerContentType, "http-server-content-type", "application/json", "Sent the results to a HTTP Server content type")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
 	RootCmd.PersistentFlags().StringVar(&skipIds, "skip", "", "List of comma separated values of checks to be skipped")

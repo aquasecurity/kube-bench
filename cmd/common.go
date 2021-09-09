@@ -16,9 +16,12 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -416,20 +419,14 @@ func writeOutput(controlsCollection []*check.Controls) {
 		writeASFFOutput(controlsCollection)
 		return
 	}
+	if httpServerFmt {
+		writeOutputToHttpServer(httpServerAddress, httpServerContentType)
+	}
 	writeStdoutOutput(controlsCollection)
 }
 
 func writeJSONOutput(controlsCollection []*check.Controls) {
-	var out []byte
-	var err error
-	if !noTotals {
-		var totals check.OverallControls
-		totals.Controls = controlsCollection
-		totals.Totals = getSummaryTotals(controlsCollection)
-		out, err = json.Marshal(totals)
-	} else {
-		out, err = json.Marshal(controlsCollection)
-	}
+	out, err := jsonMarshal()
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to output in JSON format: %v", err))
 	}
@@ -512,6 +509,60 @@ func writeOutputToFile(output string, outputFile string) error {
 	w := bufio.NewWriter(file)
 	fmt.Fprintln(w, output)
 	return w.Flush()
+}
+
+// Simple engagement:
+// 		kube-bench <POST + output> --send-> http-server
+// 		if error in http-server:
+//   		http-server <status-code, message> --response-->  kube-bench
+// 		if success in http-server:
+//   		http-server <200, ""> --response-->  kube-bench
+func writeOutputToHttpServer(server string, contentType string) error {
+	if server == "" {
+		exitWithError(errors.New("cannot write to http server, server address cannot be empty"))
+	}
+
+	var out []byte
+	var err error
+	switch contentType {
+	case "application/json":
+		out, err = jsonMarshal()
+		// TODO: support more type...
+	default:
+		exitWithError(fmt.Errorf("%s content-type not supported", contentType))
+	}
+
+	if err != nil {
+		exitWithError(fmt.Errorf("failed marshal to JSON format: %v", err))
+	}
+
+	resp, err := http.Post(server, contentType, bytes.NewReader(out))
+	if err != nil {
+		exitWithError(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		message, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			exitWithError(fmt.Errorf("failed read httpserver response: %v", err))
+		}
+		exitWithError(errors.New(string(message)))
+	}
+
+	fmt.Printf("write to %s http-server success\n", server)
+	return nil
+}
+
+func jsonMarshal() ([]byte, error) {
+	if !noTotals {
+		var totals check.OverallControls
+		totals.Controls = controlsCollection
+		totals.Totals = getSummaryTotals(controlsCollection)
+		return json.Marshal(totals)
+	} else {
+		return json.Marshal(controlsCollection)
+	}
 }
 
 func printOutput(output string, outputFile string) {

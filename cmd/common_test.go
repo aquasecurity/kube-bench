@@ -19,6 +19,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
 	"path/filepath"
@@ -748,6 +750,101 @@ func TestWriteStdoutOutputTotal(t *testing.T) {
 	os.Stdout = rescueStdout
 
 	assert.Contains(t, string(out), "49 checks PASS")
+}
+
+func TestWriteHttpServerOutputTotal(t *testing.T) {
+	defer func() {
+		controlsCollection = []*check.Controls{}
+		httpServerFmt = false
+		httpServerAddress = ""
+		httpServerContentType = "application/json"
+	}()
+	var err error
+	var expect JsonOutputFormat
+	var result JsonOutputFormat
+	mockServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			rw.Write([]byte(err.Error()))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err = json.Unmarshal(data, &result); err != nil {
+			rw.Write([]byte(err.Error()))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
+	}))
+
+	httpServerFmt = true
+	httpServerAddress = mockServer.URL
+	httpServerContentType = "application/json"
+
+	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	controlsCollection, err = parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+	writeOutput(controlsCollection)
+
+	expect, err = parseResultJsonFile("./testdata/result.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expect, result)
+}
+
+func TestWriteHttpServerOutputNoTotal(t *testing.T) {
+	defer func() {
+		controlsCollection = []*check.Controls{}
+		httpServerFmt = false
+		httpServerAddress = ""
+		httpServerContentType = "application/json"
+	}()
+	var err error
+	var expect []*check.Controls
+	var result []*check.Controls
+	mockServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			rw.Write([]byte(err.Error()))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err = json.Unmarshal(data, &result); err != nil {
+			rw.Write([]byte(err.Error()))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
+	}))
+
+	noTotals = true
+	httpServerFmt = true
+	httpServerAddress = mockServer.URL
+	httpServerContentType = "application/json"
+
+	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	controlsCollection, err = parseResultNoTotalsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+	writeOutput(controlsCollection)
+
+	expect, err = parseResultNoTotalsJsonFile("./testdata/result_no_totals.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, expect, result)
 }
 
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
