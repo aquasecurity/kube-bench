@@ -420,7 +420,7 @@ func writeOutput(controlsCollection []*check.Controls) {
 		return
 	}
 	if httpServerFmt {
-		writeOutputToHttpServer(httpServerAddress, httpServerContentType)
+		writeOutputToHttpServer(httpServerURL, httpServerContentType)
 	}
 	writeStdoutOutput(controlsCollection)
 }

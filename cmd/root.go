@@ -45,7 +45,7 @@ var (
 	pgSQL                 bool
 	aSFF                  bool
 	httpServerFmt         bool
-	httpServerAddress     = ""
+	httpServerURL         = ""
 	httpServerContentType = "application/json"
 	masterFile            = "master.yaml"
 	nodeFile              = "node.yaml"
@@ -173,7 +173,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
 	RootCmd.PersistentFlags().BoolVar(&httpServerFmt, "http-server", false, "Send the results to a HTTP Server")
-	RootCmd.PersistentFlags().StringVar(&httpServerAddress, "http-server-address", "", "HTTP Server address")
+	RootCmd.PersistentFlags().StringVar(&httpServerURL, "http-server-url", "", "Send to result to url of HTTP Server")
 	RootCmd.PersistentFlags().StringVar(&httpServerContentType, "http-server-content-type", "application/json", "Sent the results to a HTTP Server content type")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")

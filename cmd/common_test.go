@@ -756,7 +756,7 @@ func TestWriteHttpServerOutputTotal(t *testing.T) {
 	defer func() {
 		controlsCollection = []*check.Controls{}
 		httpServerFmt = false
-		httpServerAddress = ""
+		httpServerURL = ""
 		httpServerContentType = "application/json"
 	}()
 	var err error
@@ -780,7 +780,7 @@ func TestWriteHttpServerOutputTotal(t *testing.T) {
 	}))
 
 	httpServerFmt = true
-	httpServerAddress = mockServer.URL
+	httpServerURL = mockServer.URL
 	httpServerContentType = "application/json"
 
 	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
@@ -803,7 +803,7 @@ func TestWriteHttpServerOutputNoTotal(t *testing.T) {
 	defer func() {
 		controlsCollection = []*check.Controls{}
 		httpServerFmt = false
-		httpServerAddress = ""
+		httpServerURL = ""
 		httpServerContentType = "application/json"
 	}()
 	var err error
@@ -828,7 +828,7 @@ func TestWriteHttpServerOutputNoTotal(t *testing.T) {
 
 	noTotals = true
 	httpServerFmt = true
-	httpServerAddress = mockServer.URL
+	httpServerURL = mockServer.URL
 	httpServerContentType = "application/json"
 
 	outputFile = path.Join(os.TempDir(), fmt.Sprintf("%d", time.Now().UnixNano()))
