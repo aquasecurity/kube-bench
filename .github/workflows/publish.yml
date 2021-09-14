@@ -44,8 +44,8 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v3
         with:
           images: ${{ env.REP }}
-          tag-semver: |
-            {{version}}
+          tags: |
+            type=semver,pattern={{version}}
 
       - name: Build and push - Docker/ECR
         id: docker_build
