@@ -7,7 +7,7 @@ on:
       - "v*"
 env:
   ALIAS: jonshaffer
-  DOCKERHUB_ALIAS: jonshaffer
+  DOCKERHUB_ALIAS: hyperjon
   REP: kube-bench
 jobs:
   publish:
