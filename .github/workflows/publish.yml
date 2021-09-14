@@ -6,7 +6,7 @@ on:
     tags:
       - "v*"
 env:
-  ALIAS: jonshaffer
+  ALIAS: u7i1e6j3
   DOCKERHUB_ALIAS: hyperjon
   REP: kube-bench
 jobs:
