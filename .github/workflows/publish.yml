@@ -6,8 +6,8 @@ on:
     tags:
       - "v*"
 env:
-  ALIAS: aquasecurity
-  DOCKERHUB_ALIAS: aquasec
+  ALIAS: jonshaffer
+  DOCKERHUB_ALIAS: jonshaffer
   REP: kube-bench
 jobs:
   publish:
