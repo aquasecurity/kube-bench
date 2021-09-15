@@ -46,7 +46,7 @@ manifests:
 build: $(BINARY)
 
 $(BINARY): $(SOURCES)
-	GOOS=$(GOOS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+	GOOS=$(GOOS) go build -ldflags "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
 # builds the current dev docker version
 build-docker:
