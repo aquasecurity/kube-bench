@@ -34,7 +34,7 @@ jobs:
       - name: Check goreleaser config
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.169.0
+          version: v0.179.0
           args: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,5 +69,5 @@ jobs:
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.169.0
+          version: v0.179.0
           args: release --snapshot --skip-publish --rm-dist
