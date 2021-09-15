@@ -5,6 +5,8 @@ env:
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
 builds:
   - main: main.go
+    env:
+    - CGO_ENABLED=0
     binary: kube-bench
     goos:
       - linux
@@ -22,32 +24,37 @@ builds:
 dockers:
   -
     image_templates:
-    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
-    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
-    - "hyperjon/kube-bench:latest"
-    - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
+    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}-amd64"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}-amd64"
+    # - "hyperjon/kube-bench:latest"
+    # - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     goos: linux
     goarch: amd64
     dockerfile: Dockerfile
-    use: docker
+    use: buildx
     build_flag_templates:
     - "--build-arg=GOOS=linux"
     - "--build-arg=GOARCH=amd64"
     - "--platform=linux/amd64"
   -
     image_templates:
-    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
-    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
-    - "hyperjon/kube-bench:latest"
-    - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
+    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}-arm64v8"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}-arm64v8"
+    # - "hyperjon/kube-bench:latest"
+    # - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     goos: linux
     goarch: arm64
     dockerfile: Dockerfile
-    use: docker
+    use: buildx
     build_flag_templates:
     - "--build-arg=GOOS=linux"
     - "--build-arg=GOARCH=arm64"
-    - "--platform=linux/arm64"
+    - "--platform=linux/arm64/v8"
+docker_manifests:
+- name_template: hyperjon/kube-bench:v{{.Version}}
+  image_templates:
+  - hyperjon/kube-bench:v{{.Version}}-amd64
+  - gyperjon/kube-bench:v{{.Version}}-arm64v8
 archives:
   - id: default
     format: tar.gz
