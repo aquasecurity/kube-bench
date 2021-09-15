@@ -1,13 +1,3 @@
-FROM golang:1.17.0 AS build
-WORKDIR /go/src/github.com/jonshaffer/kube-bench/
-COPY go.mod go.sum ./
-COPY main.go .
-COPY check/ check/
-COPY cmd/ cmd/
-COPY internal/ internal/
-
-COPY kube-bench /go/bin/kube-bench
-
 FROM alpine:3.14.2 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
@@ -31,7 +21,7 @@ RUN apk add jq
 
 ENV PATH=$PATH:/usr/local/mount-from-host/bin
 
-COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
+COPY kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
 COPY cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
