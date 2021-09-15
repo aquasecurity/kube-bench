@@ -5,6 +5,7 @@ dist
 .vscode/
 hack/kind.test.yaml
 coverage.txt
+test.data
 
 .idea/
 
