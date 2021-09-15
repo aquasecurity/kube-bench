@@ -49,12 +49,41 @@ dockers:
     extra_files:
       - cfg
       - entrypoint.sh
+  -
+    image_templates:
+      - "hyperjon/kube-bench:v{{.Version}}-armv6"
+      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv6"
+      - "hyperjon/kube-bench:latest"
+      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm/v6"
+    extra_files:
+      - cfg
+      - entrypoint.sh
+  -
+    image_templates:
+      - "hyperjon/kube-bench:v{{.Version}}-armv7"
+      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv7"
+      - "hyperjon/kube-bench:latest"
+      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+    extra_files:
+      - cfg
+      - entrypoint.sh
 docker_manifests:
   -
     name_template: hyperjon/kube-bench:v{{.Version}}
     image_templates:
+      - "hyperjon/kube-bench:latest"
       - "hyperjon/kube-bench:v{{.Version}}-amd64"
       - "hyperjon/kube-bench:v{{.Version}}-arm64v8"
+      - "hyperjon/kube-bench:v{{.Version}}-armv6"
+      - "hyperjon/kube-bench:v{{.Version}}-armv7"
 archives:
   - id: default
     format: tar.gz
