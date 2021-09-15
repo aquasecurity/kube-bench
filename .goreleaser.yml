@@ -31,6 +31,8 @@ dockers:
       - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     dockerfile: Dockerfile
     use: buildx
+    goos: linux
+    goarch: amd64
     build_flag_templates:
       - "--platform=linux/amd64"
     extra_files:
@@ -40,10 +42,10 @@ dockers:
     image_templates:
       - "hyperjon/kube-bench:v{{.Version}}-arm64v8"
       - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-arm64v8"
-      - "hyperjon/kube-bench:latest"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     dockerfile: Dockerfile
     use: buildx
+    goos: linux
+    goarch: arm64
     build_flag_templates:
       - "--platform=linux/arm64/v8"
     extra_files:
@@ -53,10 +55,11 @@ dockers:
     image_templates:
       - "hyperjon/kube-bench:v{{.Version}}-armv6"
       - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv6"
-      - "hyperjon/kube-bench:latest"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     dockerfile: Dockerfile
     use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 6
     build_flag_templates:
       - "--platform=linux/arm/v6"
     extra_files:
@@ -66,10 +69,11 @@ dockers:
     image_templates:
       - "hyperjon/kube-bench:v{{.Version}}-armv7"
       - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv7"
-      - "hyperjon/kube-bench:latest"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     dockerfile: Dockerfile
     use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
     build_flag_templates:
       - "--platform=linux/arm/v7"
     extra_files:
@@ -79,7 +83,6 @@ docker_manifests:
   -
     name_template: hyperjon/kube-bench:v{{.Version}}
     image_templates:
-      - "hyperjon/kube-bench:latest"
       - "hyperjon/kube-bench:v{{.Version}}-amd64"
       - "hyperjon/kube-bench:v{{.Version}}-arm64v8"
       - "hyperjon/kube-bench:v{{.Version}}-armv6"
