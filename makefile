@@ -1,6 +1,6 @@
 SOURCES := $(shell find . -name '*.go')
 BINARY := kube-bench
-DOCKER_ORG ?= aquasec
+DOCKER_ORG ?= hyperjon
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)

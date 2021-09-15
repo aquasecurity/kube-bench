@@ -7,8 +7,10 @@ COPY cmd/ cmd/
 COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 ARG GOOS=linux
+ENV ENV_GOOS=${GOOS}
 ARG GOARCH=amd64
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH go build -a -ldflags "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w" -o /go/bin/kube-bench
+ENV ENV_GOARCH=${ENV_GOARCH}
+RUN GO111MODULE=on CGO_ENABLED=0 GOOS=$ENV_GOOS GOARCH=$ENV_GOARCH go build -a -ldflags "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion=${KUBEBENCH_VERSION} -w" -o /go/bin/kube-bench
 
 FROM alpine:3.14.2 AS run
 WORKDIR /opt/kube-bench/

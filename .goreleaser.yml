@@ -16,9 +16,34 @@ builds:
       - 6
       - 7
     ldflags:
-      - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
-      - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
+      - "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion={{.Version}}"
+      - "-X github.com/jonshaffer/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
 # Archive customization
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile
+    use: docker
+    build_flag_templates:
+    - "--build-arg=GOOS=linux"
+    - "--build-arg=GOARCH=amd64"
+  -
+    goos: linux
+    goarch: arm
+    dockerfile: Dockerfile
+    use: docker
+    build_flag_templates:
+    - "--build-arg=GOOS=linux"
+    - "--build-arg=GOARCH=arm"
+  -
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    use: docker
+    build_flag_templates:
+    - "--build-arg=GOOS=linux"
+    - "--build-arg=GOARCH=arm64"
 archives:
   - id: default
     format: tar.gz
