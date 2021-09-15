@@ -21,6 +21,11 @@ builds:
 # Archive customization
 dockers:
   -
+    image_templates:
+    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
+    - "hyperjon/kube-bench:latest"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     goos: linux
     goarch: amd64
     dockerfile: Dockerfile
@@ -28,15 +33,13 @@ dockers:
     build_flag_templates:
     - "--build-arg=GOOS=linux"
     - "--build-arg=GOARCH=amd64"
+    - "--platform=linux/amd64"
   -
-    goos: linux
-    goarch: arm
-    dockerfile: Dockerfile
-    use: docker
-    build_flag_templates:
-    - "--build-arg=GOOS=linux"
-    - "--build-arg=GOARCH=arm"
-  -
+    image_templates:
+    - "hyperjon/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-SNAPSHOT-{{.ShortCommit}}"
+    - "hyperjon/kube-bench:latest"
+    - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
     goos: linux
     goarch: arm64
     dockerfile: Dockerfile
@@ -44,6 +47,7 @@ dockers:
     build_flag_templates:
     - "--build-arg=GOOS=linux"
     - "--build-arg=GOARCH=arm64"
+    - "--platform=linux/arm64"
 archives:
   - id: default
     format: tar.gz
