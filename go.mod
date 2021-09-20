@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo v1.16.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.2.1
-	github.com/spf13/viper v1.8.1
+	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.1.1
