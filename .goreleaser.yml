@@ -19,16 +19,16 @@ builds:
       - 6
       - 7
     ldflags:
-      - "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion={{.Version}}"
-      - "-X github.com/jonshaffer/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
+      - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
+      - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
 # Archive customization
 dockers:
   -
     image_templates:
-      - "hyperjon/kube-bench:v{{.Version}}-amd64"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-amd64"
-      - "hyperjon/kube-bench:latest"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:latest"
+      - "aquasec/kube-bench:v{{.Version}}-amd64"
+      - "public.ecr.aws/aquasecurity/kube-bench:v{{.Version}}-amd64"
+      - "aquasec/kube-bench:latest"
+      - "public.ecr.aws/aquasecurity/kube-bench:latest"
     dockerfile: Dockerfile
     use: buildx
     goos: linux
@@ -40,8 +40,8 @@ dockers:
       - entrypoint.sh
   -
     image_templates:
-      - "hyperjon/kube-bench:v{{.Version}}-arm64v8"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-arm64v8"
+      - "aquasec/kube-bench:v{{.Version}}-arm64v8"
+      - "public.ecr.aws/aquasecurity/kube-bench:v{{.Version}}-arm64v8"
     dockerfile: Dockerfile
     use: buildx
     goos: linux
@@ -53,8 +53,8 @@ dockers:
       - entrypoint.sh
   -
     image_templates:
-      - "hyperjon/kube-bench:v{{.Version}}-armv6"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv6"
+      - "aquasec/kube-bench:v{{.Version}}-armv6"
+      - "public.ecr.aws/aquasecurity/kube-bench:v{{.Version}}-armv6"
     dockerfile: Dockerfile
     use: buildx
     goos: linux
@@ -67,8 +67,8 @@ dockers:
       - entrypoint.sh
   -
     image_templates:
-      - "hyperjon/kube-bench:v{{.Version}}-armv7"
-      - "public.ecr.aws/u7i1e6j3/kube-bench:v{{.Version}}-armv7"
+      - "aquasec/kube-bench:v{{.Version}}-armv7"
+      - "public.ecr.aws/aquasecurity/kube-bench:v{{.Version}}-armv7"
     dockerfile: Dockerfile
     use: buildx
     goos: linux
@@ -81,12 +81,12 @@ dockers:
       - entrypoint.sh
 docker_manifests:
   -
-    name_template: hyperjon/kube-bench:v{{.Version}}
+    name_template: aquasec/kube-bench:v{{.Version}}
     image_templates:
-      - "hyperjon/kube-bench:v{{.Version}}-amd64"
-      - "hyperjon/kube-bench:v{{.Version}}-arm64v8"
-      - "hyperjon/kube-bench:v{{.Version}}-armv6"
-      - "hyperjon/kube-bench:v{{.Version}}-armv7"
+      - "aquasec/kube-bench:v{{.Version}}-amd64"
+      - "aquasec/kube-bench:v{{.Version}}-arm64v8"
+      - "aquasec/kube-bench:v{{.Version}}-armv6"
+      - "aquasec/kube-bench:v{{.Version}}-armv7"
 archives:
   - id: default
     format: tar.gz

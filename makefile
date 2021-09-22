@@ -1,6 +1,6 @@
 SOURCES := $(shell find . -name '*.go')
 BINARY := kube-bench
-DOCKER_ORG ?= hyperjon
+DOCKER_ORG ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
@@ -46,7 +46,7 @@ manifests:
 build: $(BINARY)
 
 $(BINARY): $(SOURCES)
-	GOOS=$(GOOS) go build -ldflags "-X github.com/jonshaffer/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+	GOOS=$(GOOS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
 # builds the current dev docker version
 build-docker:
