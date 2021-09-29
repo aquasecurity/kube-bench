@@ -648,7 +648,7 @@ func Test_getOcpValidVersion(t *testing.T) {
 		{openShiftVersion: "invalid", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
-		ocpVer,_ := getOcpValidVersion(c.openShiftVersion)
+		ocpVer, _ := getOcpValidVersion(c.openShiftVersion)
 		if c.succeed {
 			if c.exp != ocpVer {
 				t.Errorf("getOcpValidVersion(%q) - Got %q expected %s", c.openShiftVersion, ocpVer, c.exp)
