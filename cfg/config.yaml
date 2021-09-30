@@ -35,6 +35,7 @@ master:
       - /var/snap/kube-apiserver/current/args
       - /var/snap/microk8s/current/args/kube-apiserver
       - /etc/origin/master/master-config.yaml
+      - /etc/kubernetes/manifests/talos-kube-apiserver.yaml
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -51,11 +52,13 @@ master:
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
       - /etc/origin/master/scheduler.json
+      - /etc/kubernetes/manifests/talos-kube-scheduler.yaml
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
       - /var/lib/kube-scheduler/kubeconfig
       - /var/lib/kube-scheduler/config.yaml
+      - /system/secrets/kubernetes/kube-scheduler/kubeconfig
     defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
@@ -73,10 +76,12 @@ master:
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
       - /var/snap/kube-controller-manager/current/args
       - /var/snap/microk8s/current/args/kube-controller-manager
+      - /etc/kubernetes/manifests/talos-kube-controller-manager.yaml
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
       - /var/lib/kube-controller-manager/kubeconfig
+      - /system/secrets/kubernetes/kube-controller-manager/kubeconfig
     defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
@@ -142,6 +147,7 @@ node:
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/etc/kubernetes/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
+      - "/etc/kubernetes/kubeconfig-kubelet"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
@@ -165,6 +171,7 @@ node:
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
+      - "/etc/kubernetes/kubelet.yaml"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
