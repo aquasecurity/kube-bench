@@ -699,7 +699,7 @@ groups:
         scored: true
 
       - id: 1.2.25
-        text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
+        text: "Ensure that the --request-timeout argument is set as appropriate (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         type: manual
         remediation: |
@@ -707,7 +707,7 @@ groups:
           and set the below parameter as appropriate and if needed.
           For example,
           --request-timeout=300s
-        scored: true
+        scored: false
 
       - id: 1.2.26
         text: "Ensure that the --service-account-lookup argument is set to true (Automated)"

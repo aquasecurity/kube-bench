@@ -46,7 +46,7 @@
 [FAIL] 1.2.22 Ensure that the --audit-log-path argument is set (Automated)
 [FAIL] 1.2.23 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
 [FAIL] 1.2.24 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
-[FAIL] 1.2.25 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
+[WARN] 1.2.25 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Manual)
 [WARN] 1.2.26 Ensure that the --request-timeout argument is set as appropriate (Automated)
 [PASS] 1.2.27 Ensure that the --service-account-lookup argument is set to true (Automated)
 [PASS] 1.2.28 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
@@ -175,8 +175,8 @@ on the master node and set the below parameter.
 
 == Summary master ==
 44 checks PASS
-10 checks FAIL
-11 checks WARN
+9 checks FAIL
+12 checks WARN
 0 checks INFO
 
 [INFO] 2 Etcd Node Configuration
@@ -430,7 +430,7 @@ resources and that all new resources are created in a specific namespace.
 
 == Summary total ==
 70 checks PASS
-11 checks FAIL
-41 checks WARN
+10 checks FAIL
+42 checks WARN
 0 checks INFO
 
