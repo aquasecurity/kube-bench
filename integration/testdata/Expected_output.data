@@ -23,40 +23,39 @@
 [PASS] 1.1.21 Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)
 [INFO] 1.2 API Server
 [WARN] 1.2.1 Ensure that the --anonymous-auth argument is set to false (Manual)
-[PASS] 1.2.2 Ensure that the --basic-auth-file argument is not set (Automated)
-[PASS] 1.2.3 Ensure that the --token-auth-file parameter is not set (Automated)
-[PASS] 1.2.4 Ensure that the --kubelet-https argument is set to true (Automated)
-[PASS] 1.2.5 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
-[FAIL] 1.2.6 Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)
-[PASS] 1.2.7 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
-[PASS] 1.2.8 Ensure that the --authorization-mode argument includes Node (Automated)
-[PASS] 1.2.9 Ensure that the --authorization-mode argument includes RBAC (Automated)
-[WARN] 1.2.10 Ensure that the admission control plugin EventRateLimit is set (Manual)
-[PASS] 1.2.11 Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
-[WARN] 1.2.12 Ensure that the admission control plugin AlwaysPullImages is set (Manual)
-[WARN] 1.2.13 Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
-[PASS] 1.2.14 Ensure that the admission control plugin ServiceAccount is set (Automated)
-[PASS] 1.2.15 Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
-[FAIL] 1.2.16 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
-[PASS] 1.2.17 Ensure that the admission control plugin NodeRestriction is set (Automated)
-[PASS] 1.2.18 Ensure that the --insecure-bind-address argument is not set (Automated)
-[PASS] 1.2.19 Ensure that the --insecure-port argument is set to 0 (Automated)
-[PASS] 1.2.20 Ensure that the --secure-port argument is not set to 0 (Automated)
-[FAIL] 1.2.21 Ensure that the --profiling argument is set to false (Automated)
-[FAIL] 1.2.22 Ensure that the --audit-log-path argument is set (Automated)
-[FAIL] 1.2.23 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
-[FAIL] 1.2.24 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
-[WARN] 1.2.25 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Manual)
-[WARN] 1.2.26 Ensure that the --request-timeout argument is set as appropriate (Automated)
-[PASS] 1.2.27 Ensure that the --service-account-lookup argument is set to true (Automated)
-[PASS] 1.2.28 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
-[PASS] 1.2.29 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
-[PASS] 1.2.30 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
-[PASS] 1.2.31 Ensure that the --client-ca-file argument is set as appropriate (Automated)
-[PASS] 1.2.32 Ensure that the --etcd-cafile argument is set as appropriate (Automated)
-[WARN] 1.2.33 Ensure that the --encryption-provider-config argument is set as appropriate (Manual)
-[WARN] 1.2.34 Ensure that encryption providers are appropriately configured (Manual)
-[WARN] 1.2.35 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)
+[PASS] 1.2.2 Ensure that the --token-auth-file parameter is not set (Automated)
+[PASS] 1.2.3 Ensure that the --kubelet-https argument is set to true (Automated)
+[PASS] 1.2.4 Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
+[FAIL] 1.2.5 Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)
+[PASS] 1.2.6 Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
+[PASS] 1.2.7 Ensure that the --authorization-mode argument includes Node (Automated)
+[PASS] 1.2.8 Ensure that the --authorization-mode argument includes RBAC (Automated)
+[WARN] 1.2.9 Ensure that the admission control plugin EventRateLimit is set (Manual)
+[PASS] 1.2.10 Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
+[WARN] 1.2.11 Ensure that the admission control plugin AlwaysPullImages is set (Manual)
+[WARN] 1.2.12 Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
+[PASS] 1.2.13 Ensure that the admission control plugin ServiceAccount is set (Automated)
+[PASS] 1.2.14 Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
+[FAIL] 1.2.15 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
+[PASS] 1.2.16 Ensure that the admission control plugin NodeRestriction is set (Automated)
+[PASS] 1.2.17 Ensure that the --insecure-bind-address argument is not set (Automated)
+[PASS] 1.2.18 Ensure that the --insecure-port argument is set to 0 (Automated)
+[PASS] 1.2.19 Ensure that the --secure-port argument is not set to 0 (Automated)
+[FAIL] 1.2.20 Ensure that the --profiling argument is set to false (Automated)
+[FAIL] 1.2.21 Ensure that the --audit-log-path argument is set (Automated)
+[FAIL] 1.2.22 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
+[FAIL] 1.2.23 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
+[FAIL] 1.2.24 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
+[WARN] 1.2.25 Ensure that the --request-timeout argument is set as appropriate (Manual)
+[PASS] 1.2.26 Ensure that the --service-account-lookup argument is set to true (Automated)
+[PASS] 1.2.27 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
+[PASS] 1.2.28 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
+[PASS] 1.2.29 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
+[PASS] 1.2.30 Ensure that the --client-ca-file argument is set as appropriate (Automated)
+[PASS] 1.2.31 Ensure that the --etcd-cafile argument is set as appropriate (Automated)
+[WARN] 1.2.32 Ensure that the --encryption-provider-config argument is set as appropriate (Manual)
+[WARN] 1.2.33 Ensure that encryption providers are appropriately configured (Manual)
+[WARN] 1.2.34 Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)
 [INFO] 1.3 Controller Manager
 [WARN] 1.3.1 Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)
 [FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
@@ -174,9 +173,9 @@ on the master node and set the below parameter.
 
 
 == Summary master ==
-44 checks PASS
-9 checks FAIL
-12 checks WARN
+43 checks PASS
+10 checks FAIL
+11 checks WARN
 0 checks INFO
 
 [INFO] 2 Etcd Node Configuration
@@ -420,8 +419,8 @@ resources and that all new resources are created in a specific namespace.
 0 checks INFO
 
 == Summary total ==
-70 checks PASS
-10 checks FAIL
-42 checks WARN
+69 checks PASS
+11 checks FAIL
+43 checks WARN
 0 checks INFO
 
