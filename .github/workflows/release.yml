@@ -5,8 +5,10 @@ on:
     tags:
       - "v*"
 env:
+  GO_VERSION: "1.16"
   KIND_VERSION: "v0.11.1"
   KIND_IMAGE: "kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6"
+
 jobs:
   release:
     name: Release
@@ -30,12 +32,9 @@ jobs:
         run: |
           kubectl cluster-info
           kubectl describe node
-      - name: Apply jobs
-        run: kubectl apply -f job.yaml
       - name: Run integration tests
         run: |
-          kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s
-          kubectl logs job/kube-bench > ./test.data
+          make integration-test
       - name: Compare output with expected output
         uses: GuillaumeFalourd/diff-action@v1
         with:
