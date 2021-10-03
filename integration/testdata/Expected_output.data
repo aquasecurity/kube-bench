@@ -46,7 +46,7 @@
 [FAIL] 1.2.22 Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)
 [FAIL] 1.2.23 Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
 [FAIL] 1.2.24 Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
-[WARN] 1.2.25 Ensure that the --request-timeout argument is set as appropriate (Automated)
+[WARN] 1.2.25 Ensure that the --request-timeout argument is set as appropriate (Manual)
 [PASS] 1.2.26 Ensure that the --service-account-lookup argument is set to true (Automated)
 [PASS] 1.2.27 Ensure that the --service-account-key-file argument is set as appropriate (Automated)
 [PASS] 1.2.28 Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
