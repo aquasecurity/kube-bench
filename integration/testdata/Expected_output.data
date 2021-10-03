@@ -88,71 +88,71 @@ For example, chown etcd:etcd /var/lib/etcd
 on the master node and set the below parameter.
 --anonymous-auth=false
 
-1.2.6 Follow the Kubernetes documentation and setup the TLS connection between
+1.2.5 Follow the Kubernetes documentation and setup the TLS connection between
 the apiserver and kubelets. Then, edit the API server pod specification file
 /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the
 --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.
 --kubelet-certificate-authority=<ca-string>
 
-1.2.10 Follow the Kubernetes documentation and set the desired limits in a configuration file.
+1.2.9 Follow the Kubernetes documentation and set the desired limits in a configuration file.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 and set the below parameters.
 --enable-admission-plugins=...,EventRateLimit,...
 --admission-control-config-file=<path/to/configuration/file>
 
-1.2.12 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.11 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to include
 AlwaysPullImages.
 --enable-admission-plugins=...,AlwaysPullImages,...
 
-1.2.13 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.12 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to include
 SecurityContextDeny, unless PodSecurityPolicy is already in place.
 --enable-admission-plugins=...,SecurityContextDeny,...
 
-1.2.16 Follow the documentation and create Pod Security Policy objects as per your environment.
+1.2.15 Follow the documentation and create Pod Security Policy objects as per your environment.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --enable-admission-plugins parameter to a
 value that includes PodSecurityPolicy:
 --enable-admission-plugins=...,PodSecurityPolicy,...
 Then restart the API Server.
 
-1.2.21 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.20 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --profiling=false
 
-1.2.22 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.21 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-path parameter to a suitable path and
 file where you would like audit logs to be written, for example:
 --audit-log-path=/var/log/apiserver/audit.log
 
-1.2.23 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.22 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxage parameter to 30 or as an appropriate number of days:
 --audit-log-maxage=30
 
-1.2.24 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.23 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxbackup parameter to 10 or to an appropriate
 value.
 --audit-log-maxbackup=10
 
-1.2.25 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.24 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --audit-log-maxsize parameter to an appropriate size in MB.
 For example, to set it as 100 MB:
 --audit-log-maxsize=100
 
-1.2.26 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.25 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 and set the below parameter as appropriate and if needed.
 For example,
 --request-timeout=300s
 
-1.2.33 Follow the Kubernetes documentation and configure a EncryptionConfig file.
+1.2.32 Follow the Kubernetes documentation and configure a EncryptionConfig file.
 Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the --encryption-provider-config parameter to the path of that file: --encryption-provider-config=</path/to/EncryptionConfig/File>
 
-1.2.34 Follow the Kubernetes documentation and configure a EncryptionConfig file.
+1.2.33 Follow the Kubernetes documentation and configure a EncryptionConfig file.
 In this file, choose aescbc, kms or secretbox as the encryption provider.
 
-1.2.35 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+1.2.34 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM
 _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM
@@ -223,7 +223,7 @@ minimum.
 [PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Automated)
 [PASS] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)
-[PASS] 4.1.4 Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)
+[PASS] 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
 [PASS] 4.1.5 Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.6 Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)
 [PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Manual)
@@ -301,15 +301,17 @@ systemctl restart kubelet.service
 [WARN] 5.1.4 Minimize access to create pods (Manual)
 [WARN] 5.1.5 Ensure that default service accounts are not actively used. (Manual)
 [WARN] 5.1.6 Ensure that Service Account Tokens are only mounted where necessary (Manual)
+[WARN] 5.1.7 Avoid use of system:masters group (Manual)
+[WARN] 5.1.8 Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)
 [INFO] 5.2 Pod Security Policies
-[WARN] 5.2.1 Minimize the admission of privileged containers (Manual)
-[WARN] 5.2.2 Minimize the admission of containers wishing to share the host process ID namespace (Manual)
-[WARN] 5.2.3 Minimize the admission of containers wishing to share the host IPC namespace (Manual)
-[WARN] 5.2.4 Minimize the admission of containers wishing to share the host network namespace (Manual)
-[WARN] 5.2.5 Minimize the admission of containers with allowPrivilegeEscalation (Manual)
-[WARN] 5.2.6 Minimize the admission of root containers (Manual)
-[WARN] 5.2.7 Minimize the admission of containers with the NET_RAW capability (Manual)
-[WARN] 5.2.8 Minimize the admission of containers with added capabilities (Manual)
+[WARN] 5.2.1 Minimize the admission of privileged containers (Automated)
+[WARN] 5.2.2 Minimize the admission of containers wishing to share the host process ID namespace (Automated)
+[WARN] 5.2.3 Minimize the admission of containers wishing to share the host IPC namespace (Automated)
+[WARN] 5.2.4 Minimize the admission of containers wishing to share the host network namespace (Automated)
+[WARN] 5.2.5 Minimize the admission of containers with allowPrivilegeEscalation (Automated)
+[WARN] 5.2.6 Minimize the admission of root containers (Automated)
+[WARN] 5.2.7 Minimize the admission of containers with the NET_RAW capability (Automated)
+[WARN] 5.2.8 Minimize the admission of containers with added capabilities (Automated)
 [WARN] 5.2.9 Minimize the admission of containers with capabilities assigned (Manual)
 [INFO] 5.3 Network Policies and CNI
 [WARN] 5.3.1 Ensure that the CNI in use supports Network Policies (Manual)
@@ -346,6 +348,10 @@ automountServiceAccountToken: false
 
 5.1.6 Modify the definition of pods and service accounts which do not need to mount service
 account tokens to disable it.
+
+5.1.7 Remove the system:masters group from all users in the cluster.
+
+5.1.8 Where possible, remove the impersonate, bind and escalate rights from subjects.
 
 5.2.1 Create a PSP as described in the Kubernetes documentation, ensuring that
 the .spec.privileged field is omitted or set to false.
@@ -393,26 +399,11 @@ secrets management solution.
 5.7.1 Follow the documentation and create namespaces for objects in your deployment as you need
 them.
 
-5.7.2 Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
-would need to enable alpha features in the apiserver by passing "--feature-
-gates=AllAlpha=true" argument.
-Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
-parameter to "--feature-gates=AllAlpha=true"
-KUBE_API_ARGS="--feature-gates=AllAlpha=true"
-Based on your system, restart the kube-apiserver service. For example:
-systemctl restart kube-apiserver.service
-Use annotations to enable the docker/default seccomp profile in your pod definitions. An
-example is as below:
-apiVersion: v1
-kind: Pod
-metadata:
-  name: trustworthy-pod
-  annotations:
-    seccomp.security.alpha.kubernetes.io/pod: docker/default
-spec:
-  containers:
-    - name: trustworthy-container
-      image: sotrustworthy:latest
+5.7.2 Use security context to enable the docker/default seccomp profile in your pod definitions.
+An example is as below:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
 
 5.7.3 Follow the Kubernetes documentation and apply security contexts to your pods. For a
 suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
@@ -425,7 +416,7 @@ resources and that all new resources are created in a specific namespace.
 == Summary policies ==
 0 checks PASS
 0 checks FAIL
-24 checks WARN
+26 checks WARN
 0 checks INFO
 
 == Summary total ==
