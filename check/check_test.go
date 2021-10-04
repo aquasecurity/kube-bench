@@ -81,7 +81,7 @@ func TestCheck_Run(t *testing.T) {
 	}
 }
 
-func TestCheckAuditEnv(t *testing.T){
+func TestCheckAuditEnv(t *testing.T) {
 	passingCases := []*Check{
 		controls.Groups[2].Checks[0],
 		controls.Groups[2].Checks[2],
