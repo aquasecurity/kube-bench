@@ -97,12 +97,12 @@ type VersionResponse struct {
 
 func extractVersion(data []byte) (*KubeVersion, error) {
 	vrObj := &VersionResponse{}
-	klog.V(2).Info(fmt.Sprintf("vd: %s\n", string(data)))
+	klog.V(2).Infof("vd: %s\n", string(data))
 	err := json.Unmarshal(data, vrObj)
 	if err != nil {
 		return nil, err
 	}
-	klog.V(2).Info(fmt.Sprintf("vrObj: %#v\n", vrObj))
+	klog.V(2).Infof("vrObj: %#v\n", vrObj)
 
 	return &KubeVersion{
 		Major:      vrObj.Major,
@@ -112,7 +112,7 @@ func extractVersion(data []byte) (*KubeVersion, error) {
 }
 
 func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
-	klog.V(2).Info(fmt.Sprintf("getWebData srvURL: %s\n", srvURL))
+	klog.V(2).Infof("getWebData srvURL: %s\n", srvURL)
 
 	tlsConf := &tls.Config{
 		Certificates:       []tls.Certificate{*cacert},
@@ -128,18 +128,18 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	}
 
 	authToken := fmt.Sprintf("Bearer %s", token)
-	klog.V(2).Info(fmt.Sprintf("getWebData AUTH TOKEN --[%q]--\n", authToken))
+	klog.V(2).Infof("getWebData AUTH TOKEN --[%q]--\n", authToken)
 	req.Header.Set("Authorization", authToken)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		klog.V(2).Info(fmt.Sprintf("HTTP ERROR: %v\n", err))
+		klog.V(2).Infof("HTTP ERROR: %v\n", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		klog.V(2).Info(fmt.Sprintf("URL:[%s], StatusCode:[%d] \n Headers: %#v\n", srvURL, resp.StatusCode, resp.Header))
+		klog.V(2).Infof("URL:[%s], StatusCode:[%d] \n Headers: %#v\n", srvURL, resp.StatusCode, resp.Header)
 		err = fmt.Errorf("URL:[%s], StatusCode:[%d]", srvURL, resp.StatusCode)
 		return nil, err
 	}

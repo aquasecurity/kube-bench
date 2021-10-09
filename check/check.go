@@ -251,7 +251,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 	// If no binary operation is specified, default to AND
 	switch ts.BinOp {
 	default:
-		klog.V(2).Info(fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp))
+		klog.V(2).Infof("unknown binary operator for tests %s\n", ts.BinOp)
 		finalOutput.actualResult = fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp)
 		return finalOutput, fmt.Errorf("unknown binary operator for tests %s", ts.BinOp)
 	case and, "":

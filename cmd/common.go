@@ -76,7 +76,7 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 		exitWithError(fmt.Errorf("error opening %s test file: %v", testYamlFile, err))
 	}
 
-	klog.V(1).Info(fmt.Sprintf("Using test file: %s\n", testYamlFile))
+	klog.V(1).Infof("Using test file: %s\n", testYamlFile)
 
 	// Get the viper config for this section of tests
 	typeConf := viper.Sub(string(nodetype))
@@ -89,7 +89,7 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 	binmap, err := getBinaries(typeConf, nodetype)
 	// Checks that the executables we need for the section are running.
 	if err != nil {
-		klog.V(1).Info(fmt.Sprintf("failed to get a set of executables needed for tests: %v", err))
+		klog.V(1).Infof("failed to get a set of executables needed for tests: %v", err)
 	}
 
 	confmap := getFiles(typeConf, "config")
@@ -264,13 +264,13 @@ func mergeConfig(path string) error {
 	err := viper.MergeInConfig()
 	if err != nil {
 		if os.IsNotExist(err) {
-			klog.V(2).Info(fmt.Sprintf("No version-specific config.yaml file in %s", path))
+			klog.V(2).Infof("No version-specific config.yaml file in %s", path)
 		} else {
 			return fmt.Errorf("couldn't read config file %s: %v", path+"/config.yaml", err)
 		}
 	}
 
-	klog.V(1).Info(fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+	klog.V(1).Infof("Using config file: %s\n", viper.ConfigFileUsed())
 
 	return nil
 }
@@ -278,16 +278,16 @@ func mergeConfig(path string) error {
 func mapToBenchmarkVersion(kubeToBenchmarkMap map[string]string, kv string) (string, error) {
 	kvOriginal := kv
 	cisVersion, found := kubeToBenchmarkMap[kv]
-	klog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
+	klog.V(2).Infof("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found)
 	for !found && (kv != defaultKubeVersion && !isEmpty(kv)) {
 		kv = decrementVersion(kv)
 		cisVersion, found = kubeToBenchmarkMap[kv]
-		klog.V(2).Info(fmt.Sprintf("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found))
+		klog.V(2).Infof("mapToBenchmarkVersion for k8sVersion: %q cisVersion: %q found: %t\n", kv, cisVersion, found)
 	}
 
 	if !found {
-		klog.V(1).Info(fmt.Sprintf("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal))
-		klog.V(3).Info(fmt.Sprintf("mapToBenchmarkVersion kubeToBenchmarkMap: %#v", kubeToBenchmarkMap))
+		klog.V(1).Infof("mapToBenchmarkVersion unable to find a match for: %q", kvOriginal)
+		klog.V(3).Infof("mapToBenchmarkVersion kubeToBenchmarkMap: %#v", kubeToBenchmarkMap)
 		return "", fmt.Errorf("unable to find a matching Benchmark Version match for kubernetes version: %s", kvOriginal)
 	}
 
@@ -344,10 +344,10 @@ func getBenchmarkVersion(kubeVersion, benchmarkVersion, platformName string, v *
 			return "", err
 		}
 
-		klog.V(2).Info(fmt.Sprintf("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion))
+		klog.V(2).Infof("Mapped Kubernetes version: %s to Benchmark version: %s", kubeVersion, benchmarkVersion)
 	}
 
-	klog.V(1).Info(fmt.Sprintf("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion))
+	klog.V(1).Infof("Kubernetes version: %q to Benchmark version: %q", kubeVersion, benchmarkVersion)
 	return benchmarkVersion, nil
 }
 

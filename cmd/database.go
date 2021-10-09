@@ -55,5 +55,5 @@ func savePgsql(jsonInfo string) {
 
 	db.Debug().AutoMigrate(&ScanResult{})
 	db.Save(&ScanResult{ScanHost: hostname, ScanTime: timestamp, ScanInfo: jsonInfo})
-	klog.V(2).Info(fmt.Sprintf("successfully stored result to: %s", envVars["PGSQL_HOST"]))
+	klog.V(2).Infof("successfully stored result to: %s", envVars["PGSQL_HOST"])
 }
