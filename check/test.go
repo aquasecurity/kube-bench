@@ -285,7 +285,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
 			expectedResultPattern = "Invalid Number(s) used for comparison: '%s' '%s'"
-			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), false
 		}
 		switch tCompareOp {
@@ -329,12 +329,12 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		expectedResultPattern = "%s has permissions " + flagVal + ", expected %s or more restrictive"
 		requested, err := strconv.ParseInt(flagVal, 8, 64)
 		if err != nil {
-			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			return fmt.Sprintf("Not numeric value - flag: %s", flagVal), false
 		}
 		max, err := strconv.ParseInt(tCompareValue, 8, 64)
 		if err != nil {
-			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err)
 			return fmt.Sprintf("Not numeric value - flag: %s", tCompareValue), false
 		}
 		testResult = (max & requested) == requested
