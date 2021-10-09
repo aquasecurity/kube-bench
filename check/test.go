@@ -23,9 +23,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/golang/glog"
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/jsonpath"
+	"k8s.io/klog/v2"
 )
 
 // test:
@@ -68,9 +68,11 @@ type testItem struct {
 	auditUsed        AuditUsed
 }
 
-type envTestItem testItem
-type pathTestItem testItem
-type flagTestItem testItem
+type (
+	envTestItem  testItem
+	pathTestItem testItem
+	flagTestItem testItem
+)
 
 type compare struct {
 	Op    string
@@ -148,7 +150,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 			err = fmt.Errorf("invalid flag in testItem definition: %s", s)
 		}
 	}
-	glog.V(3).Infof("In flagTestItem.findValue %s", value)
+	klog.V(3).Infof("In flagTestItem.findValue %s", value)
 
 	return match, value, err
 }
@@ -166,7 +168,7 @@ func (t pathTestItem) findValue(s string) (match bool, value string, err error) 
 		return false, "", fmt.Errorf("unable to parse path expression \"%s\": %v", t.Path, err)
 	}
 
-	glog.V(3).Infof("In pathTestItem.findValue %s", value)
+	klog.V(3).Infof("In pathTestItem.findValue %s", value)
 	match = value != ""
 	return match, value, err
 }
@@ -186,7 +188,7 @@ func (t envTestItem) findValue(s string) (match bool, value string, err error) {
 			value = ""
 		}
 	}
-	glog.V(3).Infof("In envTestItem.findValue %s", value)
+	klog.V(3).Infof("In envTestItem.findValue %s", value)
 	return match, value, nil
 }
 
@@ -236,26 +238,25 @@ func (t testItem) evaluate(s string) *testOutput {
 	}
 
 	result.flagFound = match
-	var isExist = "exists"
+	isExist := "exists"
 	if !result.flagFound {
 		isExist = "does not exist"
 	}
 	switch t.auditUsed {
 	case "auditCommand":
-		glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
+		klog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
 	case "auditConfig":
-		glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
+		klog.V(3).Infof("Path '%s' %s", t.Path, isExist)
 	case "auditEnv":
-		glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
+		klog.V(3).Infof("Env '%s' %s", t.Env, isExist)
 	default:
-		glog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
+		klog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
 	}
 
 	return result
 }
 
 func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName string) (string, bool) {
-
 	expectedResultPattern := ""
 	testResult := false
 
@@ -284,7 +285,7 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		a, b, err := toNumeric(flagVal, tCompareValue)
 		if err != nil {
 			expectedResultPattern = "Invalid Number(s) used for comparison: '%s' '%s'"
-			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
 			return fmt.Sprintf(expectedResultPattern, flagVal, tCompareValue), false
 		}
 		switch tCompareOp {
@@ -328,12 +329,12 @@ func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName
 		expectedResultPattern = "%s has permissions " + flagVal + ", expected %s or more restrictive"
 		requested, err := strconv.ParseInt(flagVal, 8, 64)
 		if err != nil {
-			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
 			return fmt.Sprintf("Not numeric value - flag: %s", flagVal), false
 		}
 		max, err := strconv.ParseInt(tCompareValue, 8, 64)
 		if err != nil {
-			glog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
+			klog.V(1).Infof(fmt.Sprintf("Not numeric value - flag: %q - compareValue: %q %v\n", flagVal, tCompareValue, err))
 			return fmt.Sprintf("Not numeric value - flag: %s", tCompareValue), false
 		}
 		testResult = (max & requested) == requested

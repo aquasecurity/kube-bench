@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/aquasecurity/kube-bench/check"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
 )
 
 func init() {
@@ -37,7 +37,7 @@ var runCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("unable to get benchmark version. error: %v", err))
 		}
 
-		glog.V(2).Infof("Checking targets %v for %v", targets, bv)
+		klog.V(2).Infof("Checking targets %v for %v", targets, bv)
 		benchmarkVersionToTargetsMap, err := loadTargetMapping(viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("error loading targets: %v", err))
@@ -70,7 +70,7 @@ func run(targets []string, benchmarkVersion string) (err error) {
 		return err
 	}
 
-	glog.V(3).Infof("Running tests from files %v\n", yamlFiles)
+	klog.V(3).Infof("Running tests from files %v\n", yamlFiles)
 
 	for _, yamlFile := range yamlFiles {
 		_, name := filepath.Split(yamlFile)

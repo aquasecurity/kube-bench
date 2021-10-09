@@ -20,9 +20,9 @@ import (
 	"os"
 
 	"github.com/aquasecurity/kube-bench/check"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
 )
 
 type FilterOpts struct {
@@ -73,10 +73,10 @@ var RootCmd = &cobra.Command{
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
-		glog.V(1).Infof("Running checks for benchmark %v", bv)
+		klog.V(1).Infof("Running checks for benchmark %v", bv)
 
 		if isMaster() {
-			glog.V(1).Info("== Running master checks ==")
+			klog.V(1).Info("== Running master checks ==")
 			runChecks(check.MASTER, loadConfig(check.MASTER, bv), detecetedKubeVersion)
 
 			// Control Plane is only valid for CIS 1.5 and later,
@@ -86,11 +86,11 @@ var RootCmd = &cobra.Command{
 				exitWithError(fmt.Errorf("error validating targets: %v", err))
 			}
 			if valid {
-				glog.V(1).Info("== Running control plane checks ==")
+				klog.V(1).Info("== Running control plane checks ==")
 				runChecks(check.CONTROLPLANE, loadConfig(check.CONTROLPLANE, bv), detecetedKubeVersion)
 			}
 		} else {
-			glog.V(1).Info("== Skipping master checks ==")
+			klog.V(1).Info("== Skipping master checks ==")
 		}
 
 		// Etcd is only valid for CIS 1.5 and later,
@@ -100,13 +100,13 @@ var RootCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if valid && isEtcd() {
-			glog.V(1).Info("== Running etcd checks ==")
+			klog.V(1).Info("== Running etcd checks ==")
 			runChecks(check.ETCD, loadConfig(check.ETCD, bv), detecetedKubeVersion)
 		} else {
-			glog.V(1).Info("== Skipping etcd checks ==")
+			klog.V(1).Info("== Skipping etcd checks ==")
 		}
 
-		glog.V(1).Info("== Running node checks ==")
+		klog.V(1).Info("== Running node checks ==")
 		runChecks(check.NODE, loadConfig(check.NODE, bv), detecetedKubeVersion)
 
 		// Policies is only valid for CIS 1.5 and later,
@@ -116,10 +116,10 @@ var RootCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if valid {
-			glog.V(1).Info("== Running policies checks ==")
+			klog.V(1).Info("== Running policies checks ==")
 			runChecks(check.POLICIES, loadConfig(check.POLICIES, bv), detecetedKubeVersion)
 		} else {
-			glog.V(1).Info("== Skipping policies checks ==")
+			klog.V(1).Info("== Skipping policies checks ==")
 		}
 
 		// Managedservices is only valid for GKE 1.0 and later,
@@ -129,10 +129,10 @@ var RootCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if valid {
-			glog.V(1).Info("== Running managed services checks ==")
+			klog.V(1).Info("== Running managed services checks ==")
 			runChecks(check.MANAGEDSERVICES, loadConfig(check.MANAGEDSERVICES, bv), detecetedKubeVersion)
 		} else {
-			glog.V(1).Info("== Skipping managed services checks ==")
+			klog.V(1).Info("== Skipping managed services checks ==")
 		}
 
 		writeOutput(controlsCollection)
@@ -149,11 +149,11 @@ func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		// flush before exit non-zero
-		glog.Flush()
+		klog.Flush()
 		os.Exit(-1)
 	}
 	// flush before exit
-	glog.Flush()
+	klog.Flush()
 }
 
 func init() {
@@ -194,14 +194,16 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&kubeVersion, "version", "", "Manually specify Kubernetes version, automatically detected if unset")
 	RootCmd.PersistentFlags().StringVar(&benchmarkVersion, "benchmark", "", "Manually specify CIS benchmark version. It would be an error to specify both --version and --benchmark flags")
 
+	klog.InitFlags(nil)
+
 	if err := goflag.Set("logtostderr", "true"); err != nil {
 		fmt.Printf("unable to set logtostderr: %+v\n", err)
 		os.Exit(-1)
 	}
+
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
 	})
-
 }
 
 // initConfig reads in config file and ENV variables if set.

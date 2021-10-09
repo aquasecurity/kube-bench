@@ -12,29 +12,29 @@ import (
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
-	"github.com/golang/glog"
 	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
 )
+
+// Print colors
+var colors = map[check.State]*color.Color{
+	check.PASS: color.New(color.FgGreen),
+	check.FAIL: color.New(color.FgRed),
+	check.WARN: color.New(color.FgYellow),
+	check.INFO: color.New(color.FgBlue),
+}
 
 var (
-	// Print colors
-	colors = map[check.State]*color.Color{
-		check.PASS: color.New(color.FgGreen),
-		check.FAIL: color.New(color.FgRed),
-		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgBlue),
+	psFunc          func(string) string
+	statFunc        func(string) (os.FileInfo, error)
+	getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
+	TypeMap         = map[string][]string{
+		"ca":         {"cafile", "defaultcafile"},
+		"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
+		"service":    {"svc", "defaultsvc"},
+		"config":     {"confs", "defaultconf"},
 	}
 )
-
-var psFunc func(string) string
-var statFunc func(string) (os.FileInfo, error)
-var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
-var TypeMap = map[string][]string{
-	"ca":         {"cafile", "defaultcafile"},
-	"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
-	"service":    {"svc", "defaultsvc"},
-	"config":     {"confs", "defaultconf"},
-}
 
 func init() {
 	psFunc = ps
@@ -45,7 +45,7 @@ func init() {
 func exitWithError(err error) {
 	fmt.Fprintf(os.Stderr, "\n%v\n", err)
 	// flush before exit non-zero
-	glog.Flush()
+	klog.Flush()
 	os.Exit(1)
 }
 
@@ -67,14 +67,14 @@ func cleanIDs(list string) map[string]bool {
 func ps(proc string) string {
 	// TODO: truncate proc to 15 chars
 	// See https://github.com/aquasecurity/kube-bench/issues/328#issuecomment-506813344
-	glog.V(2).Info(fmt.Sprintf("ps - proc: %q", proc))
+	klog.V(2).Info(fmt.Sprintf("ps - proc: %q", proc))
 	cmd := exec.Command("/bin/ps", "-C", proc, "-o", "cmd", "--no-headers")
 	out, err := cmd.Output()
 	if err != nil {
-		glog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
+		klog.V(2).Info(fmt.Errorf("%s: %s", cmd.Args, err))
 	}
 
-	glog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
+	klog.V(2).Info(fmt.Sprintf("ps - returning: %q", string(out)))
 	return string(out)
 }
 
@@ -94,16 +94,16 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 		if len(bins) > 0 {
 			bin, err := findExecutable(bins)
 			if err != nil && !optional {
-				glog.V(1).Info(buildComponentMissingErrorMessage(nodetype, component, bins))
+				klog.V(1).Info(buildComponentMissingErrorMessage(nodetype, component, bins))
 				return nil, fmt.Errorf("unable to detect running programs for component %q", component)
 			}
 
 			// Default the executable name that we'll substitute to the name of the component
 			if bin == "" {
 				bin = component
-				glog.V(2).Info(fmt.Sprintf("Component %s not running", component))
+				klog.V(2).Info(fmt.Sprintf("Component %s not running", component))
 			} else {
-				glog.V(2).Info(fmt.Sprintf("Component %s uses running binary %s", component, bin))
+				klog.V(2).Info(fmt.Sprintf("Component %s uses running binary %s", component, bin))
 			}
 			binmap[component] = bin
 		}
@@ -114,14 +114,14 @@ func getBinaries(v *viper.Viper, nodetype check.NodeType) (map[string]string, er
 
 // getConfigFilePath locates the config files we should be using for CIS version
 func getConfigFilePath(benchmarkVersion string, filename string) (path string, err error) {
-	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
+	klog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
 	path = filepath.Join(cfgDir, benchmarkVersion)
 	file := filepath.Join(path, string(filename))
-	glog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
+	klog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
 
 	if _, err := os.Stat(file); err != nil {
-		glog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
+		klog.V(2).Infof("error accessing config file: %q error: %v\n", file, err)
 		return "", fmt.Errorf("no test files found <= benchmark version: %s", benchmarkVersion)
 	}
 
@@ -181,14 +181,14 @@ func getFiles(v *viper.Viper, fileType string) map[string]string {
 		if file == "" {
 			if s.IsSet(defaultOpt) {
 				file = s.GetString(defaultOpt)
-				glog.V(2).Info(fmt.Sprintf("Using default %s file name '%s' for component %s", fileType, file, component))
+				klog.V(2).Info(fmt.Sprintf("Using default %s file name '%s' for component %s", fileType, file, component))
 			} else {
 				// Default the file name that we'll substitute to the name of the component
-				glog.V(2).Info(fmt.Sprintf("Missing %s file for %s", fileType, component))
+				klog.V(2).Info(fmt.Sprintf("Missing %s file for %s", fileType, component))
 				file = component
 			}
 		} else {
-			glog.V(2).Info(fmt.Sprintf("Component %s uses %s file '%s'", component, fileType, file))
+			klog.V(2).Info(fmt.Sprintf("Component %s uses %s file '%s'", component, fileType, file))
 		}
 
 		filemap[component] = file
@@ -199,7 +199,6 @@ func getFiles(v *viper.Viper, fileType string) map[string]string {
 
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
-
 	// Strip any quotes
 	bin = strings.Trim(bin, "'\"")
 
@@ -216,7 +215,7 @@ func verifyBin(bin string) bool {
 	reFirstWord := regexp.MustCompile(`^(\S*\/)*` + bin)
 	lines := strings.Split(out, "\n")
 	for _, l := range lines {
-		glog.V(3).Info(fmt.Sprintf("reFirstWord.Match(%s)", l))
+		klog.V(3).Info(fmt.Sprintf("reFirstWord.Match(%s)", l))
 		if reFirstWord.Match([]byte(l)) {
 			return true
 		}
@@ -246,7 +245,7 @@ func findExecutable(candidates []string) (string, error) {
 		if verifyBin(c) {
 			return c, nil
 		}
-		glog.V(1).Info(fmt.Sprintf("executable '%s' not running", c))
+		klog.V(1).Info(fmt.Sprintf("executable '%s' not running", c))
 	}
 
 	return "", fmt.Errorf("no candidates running")
@@ -281,31 +280,29 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (*KubeVersion, error) {
-
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
-		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
+		klog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
 		return k8sVer, nil
 	}
 
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
-
 	if err != nil {
-		glog.V(3).Infof("Error locating kubectl: %s", err)
+		klog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
 		if err != nil {
-			glog.V(3).Infof("Error locating kubelet: %s", err)
+			klog.V(3).Infof("Error locating kubelet: %s", err)
 			// Search for the kubelet binary all over the filesystem and run the first match to get the kubernetes version
 			cmd := exec.Command("/bin/sh", "-c", "`find / -type f -executable -name kubelet 2>/dev/null | grep -m1 .` --version")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
-				glog.V(3).Infof("Found kubelet and query kubernetes version is: %s", string(out))
+				klog.V(3).Infof("Found kubelet and query kubernetes version is: %s", string(out))
 				return getVersionFromKubeletOutput(string(out)), nil
 			}
 
-			glog.Warning(missingKubectlKubeletMessage)
-			glog.V(1).Info("unable to find the programs kubectl or kubelet in the PATH")
-			glog.V(1).Infof("Cant detect version, assuming default %s", defaultKubeVersion)
+			klog.Warning(missingKubectlKubeletMessage)
+			klog.V(1).Info("unable to find the programs kubectl or kubelet in the PATH")
+			klog.V(1).Infof("Cant detect version, assuming default %s", defaultKubeVersion)
 			return &KubeVersion{baseVersion: defaultKubeVersion}, nil
 		}
 		return getKubeVersionFromKubelet(), nil
@@ -318,8 +315,8 @@ func getKubeVersionFromKubectl() *KubeVersion {
 	cmd := exec.Command("kubectl", "version", "-o", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		glog.V(2).Infof("Failed to query kubectl: %s", err)
-		glog.V(2).Info(err)
+		klog.V(2).Infof("Failed to query kubectl: %s", err)
+		klog.V(2).Info(err)
 	}
 
 	return getVersionFromKubectlOutput(string(out))
@@ -328,28 +325,27 @@ func getKubeVersionFromKubectl() *KubeVersion {
 func getKubeVersionFromKubelet() *KubeVersion {
 	cmd := exec.Command("kubelet", "--version")
 	out, err := cmd.CombinedOutput()
-
 	if err != nil {
-		glog.V(2).Infof("Failed to query kubelet: %s", err)
-		glog.V(2).Info(err)
+		klog.V(2).Infof("Failed to query kubelet: %s", err)
+		klog.V(2).Info(err)
 	}
 
 	return getVersionFromKubeletOutput(string(out))
 }
 
 func getVersionFromKubectlOutput(s string) *KubeVersion {
-	glog.V(2).Infof("Kubectl output: %s", s)
+	klog.V(2).Infof("Kubectl output: %s", s)
 	type versionResult struct {
 		ServerVersion VersionResponse
 	}
 	vrObj := &versionResult{}
 	if err := json.Unmarshal([]byte(s), vrObj); err != nil {
-		glog.V(2).Info(err)
+		klog.V(2).Info(err)
 		if strings.Contains(s, "The connection to the server") {
 			msg := fmt.Sprintf(`Warning: Kubernetes version was not auto-detected because kubectl could not connect to the Kubernetes server. This may be because the kubeconfig information is missing or has credentials that do not match the server. Assuming default version %s`, defaultKubeVersion)
 			fmt.Fprintln(os.Stderr, msg)
 		}
-		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
+		klog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubectl, using default version: %s", defaultKubeVersion))
 		return &KubeVersion{baseVersion: defaultKubeVersion}
 	}
 	sv := vrObj.ServerVersion
@@ -361,11 +357,11 @@ func getVersionFromKubectlOutput(s string) *KubeVersion {
 }
 
 func getVersionFromKubeletOutput(s string) *KubeVersion {
-	glog.V(2).Infof("Kubelet output: %s", s)
+	klog.V(2).Infof("Kubelet output: %s", s)
 	serverVersionRe := regexp.MustCompile(`Kubernetes v(\d+.\d+)`)
 	subs := serverVersionRe.FindStringSubmatch(s)
 	if len(subs) < 2 {
-		glog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubelet, using default version: %s", defaultKubeVersion))
+		klog.V(1).Info(fmt.Sprintf("Unable to get Kubernetes version from kubelet, using default version: %s", defaultKubeVersion))
 		return &KubeVersion{baseVersion: defaultKubeVersion}
 	}
 	return &KubeVersion{baseVersion: subs[1]}
@@ -376,10 +372,10 @@ func makeSubstitutions(s string, ext string, m map[string]string) (string, []str
 	for k, v := range m {
 		subst := "$" + k + ext
 		if v == "" {
-			glog.V(2).Info(fmt.Sprintf("No substitution for '%s'\n", subst))
+			klog.V(2).Info(fmt.Sprintf("No substitution for '%s'\n", subst))
 			continue
 		}
-		glog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
+		klog.V(2).Info(fmt.Sprintf("Substituting %s with '%s'\n", subst, v))
 		beforeS := s
 		s = multiWordReplace(s, subst, v)
 		if beforeS != s {
@@ -392,11 +388,9 @@ func makeSubstitutions(s string, ext string, m map[string]string) (string, []str
 
 func isEmpty(str string) bool {
 	return strings.TrimSpace(str) == ""
-
 }
 
 func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
-
 	errMessageTemplate := `
 Unable to detect running programs for component %q
 The following %q programs have been searched, but none of them have been found:
@@ -428,7 +422,6 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 }
 
 func getPlatformName() string {
-
 	openShiftVersion := getOpenShiftVersion()
 	if openShiftVersion != "" {
 		return openShiftVersion
@@ -436,7 +429,7 @@ func getPlatformName() string {
 
 	kv, err := getKubeVersion()
 	if err != nil {
-		glog.V(2).Info(err)
+		klog.V(2).Info(err)
 		return ""
 	}
 	return getPlatformNameFromVersion(kv.GitVersion)
@@ -452,7 +445,7 @@ func getPlatformNameFromVersion(s string) string {
 }
 
 func getPlatformBenchmarkVersion(platform string) string {
-	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
+	klog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform {
 	case "eks":
 		return "eks-1.0"
@@ -469,7 +462,7 @@ func getPlatformBenchmarkVersion(platform string) string {
 }
 
 func getOpenShiftVersion() string {
-	glog.V(1).Info("Checking for oc")
+	klog.V(1).Info("Checking for oc")
 	_, err := exec.LookPath("oc")
 
 	if err == nil {
@@ -484,21 +477,21 @@ func getOpenShiftVersion() string {
 				subs = versionRe.FindStringSubmatch(string(out))
 			}
 			if len(subs) > 1 {
-				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformNameFromVersion(string(out)), subs[1])
+				klog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformNameFromVersion(string(out)), subs[1])
 				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
 				if err == nil {
 					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
 				} else {
-					glog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
+					klog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
 				}
 			} else {
-				glog.V(1).Infof("Can't parse version output: %v", subs)
+				klog.V(1).Infof("Can't parse version output: %v", subs)
 			}
 		} else {
-			glog.V(1).Infof("Can't use oc command: %v", err)
+			klog.V(1).Infof("Can't use oc command: %v", err)
 		}
 	} else {
-		glog.V(1).Infof("Can't find oc command: %v", err)
+		klog.V(1).Infof("Can't find oc command: %v", err)
 	}
 	return ""
 }
@@ -507,14 +500,14 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
 
 	for !isEmpty(ocpVer) {
-		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
+		klog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
 		if ocpVer == "3.10" || ocpVer == "4.1" {
-			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
+			klog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}
 		ocpVer = decrementVersion(ocpVer)
 	}
 
-	glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
+	klog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
 	return "", fmt.Errorf("unable to find a matching Benchmark Version match for ocp version: %s", ocpOriginal)
 }

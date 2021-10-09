@@ -20,7 +20,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/golang/glog"
+	"k8s.io/klog/v2"
 )
 
 // NodeType indicates the type of node (master, node).
@@ -107,14 +107,14 @@ func (r *defaultRunner) Run(c *Check) State {
 // Run executes the audit commands specified in a check and outputs
 // the results.
 func (c *Check) run() State {
-	glog.V(3).Infof("-----   Running check %v   -----", c.ID)
+	klog.V(3).Infof("-----   Running check %v   -----", c.ID)
 	// Since this is an Scored check
 	// without tests return a 'WARN' to alert
 	// the user that this check needs attention
 	if c.Scored && strings.TrimSpace(c.Type) == "" && c.Tests == nil {
 		c.Reason = "There are no tests"
 		c.State = WARN
-		glog.V(3).Info(c.Reason)
+		klog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -122,7 +122,7 @@ func (c *Check) run() State {
 	if c.Type == SKIP {
 		c.Reason = "Test marked as skip"
 		c.State = INFO
-		glog.V(3).Info(c.Reason)
+		klog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -130,7 +130,7 @@ func (c *Check) run() State {
 	if c.Type == MANUAL {
 		c.Reason = "Test marked as a manual test"
 		c.State = WARN
-		glog.V(3).Info(c.Reason)
+		klog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -142,7 +142,7 @@ func (c *Check) run() State {
 		} else {
 			c.State = WARN
 		}
-		glog.V(3).Info(c.Reason)
+		klog.V(3).Info(c.Reason)
 		return c.State
 	}
 
@@ -177,17 +177,17 @@ func (c *Check) run() State {
 		} else {
 			c.State = WARN
 		}
-		glog.V(3).Info(c.Reason)
+		klog.V(3).Info(c.Reason)
 	}
 
 	if finalOutput != nil {
-		glog.V(3).Infof("Command: %q TestResult: %t State: %q \n", lastCommand, finalOutput.testResult, c.State)
+		klog.V(3).Infof("Command: %q TestResult: %t State: %q \n", lastCommand, finalOutput.testResult, c.State)
 	} else {
-		glog.V(3).Infof("Command: %q TestResult: <<EMPTY>> \n", lastCommand)
+		klog.V(3).Infof("Command: %q TestResult: <<EMPTY>> \n", lastCommand)
 	}
 
 	if c.Reason != "" {
-		glog.V(2).Info(c.Reason)
+		klog.V(2).Info(c.Reason)
 	}
 	return c.State
 }
@@ -218,7 +218,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 	res := make([]testOutput, len(ts.TestItems))
 	expectedResultArr := make([]string, len(res))
 
-	glog.V(3).Infof("Running %d test_items", len(ts.TestItems))
+	klog.V(3).Infof("Running %d test_items", len(ts.TestItems))
 	for i, t := range ts.TestItems {
 
 		t.isMultipleOutput = c.IsMultiple
@@ -229,7 +229,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 
 		// Check for AuditConfigOutput only if AuditConfig is set
 		if !result.flagFound && c.AuditConfig != "" {
-			//t.isConfigSetting = true
+			// t.isConfigSetting = true
 			t.auditUsed = AuditConfig
 			result = *(t.execute(c.AuditConfigOutput))
 			if !result.flagFound && t.Env != "" {
@@ -242,7 +242,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 			t.auditUsed = AuditEnv
 			result = *(t.execute(c.AuditEnvOutput))
 		}
-		glog.V(2).Infof("Used %s", t.auditUsed)
+		klog.V(2).Infof("Used %s", t.auditUsed)
 		res[i] = result
 		expectedResultArr[i] = res[i].ExpectedResult
 	}
@@ -251,7 +251,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 	// If no binary operation is specified, default to AND
 	switch ts.BinOp {
 	default:
-		glog.V(2).Info(fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp))
+		klog.V(2).Info(fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp))
 		finalOutput.actualResult = fmt.Sprintf("unknown binary operator for tests %s\n", ts.BinOp)
 		return finalOutput, fmt.Errorf("unknown binary operator for tests %s", ts.BinOp)
 	case and, "":
@@ -274,7 +274,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 	finalOutput.testResult = result
 	finalOutput.actualResult = res[0].actualResult
 
-	glog.V(3).Infof("Returning from execute on tests: finalOutput %#v", finalOutput)
+	klog.V(3).Infof("Returning from execute on tests: finalOutput %#v", finalOutput)
 	return finalOutput, nil
 }
 
@@ -296,8 +296,8 @@ func runAudit(audit string) (output string, err error) {
 	if err != nil {
 		err = fmt.Errorf("failed to run: %q, output: %q, error: %s", audit, output, err)
 	} else {
-		glog.V(3).Infof("Command: %q", audit)
-		glog.V(3).Infof("Output:\n %q", output)
+		klog.V(3).Infof("Command: %q", audit)
+		klog.V(3).Infof("Output:\n %q", output)
 	}
 	return output, err
 }

@@ -23,10 +23,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/securityhub"
-	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -187,7 +187,7 @@ func (controls *Controls) JUnit() ([]byte, error) {
 				tc.Skipped = &reporters.JUnitSkipped{}
 			case PASS:
 			default:
-				glog.Warningf("Unrecognized state %s", check.State)
+				klog.Warningf("Unrecognized state %s", check.State)
 			}
 
 			suite.TestCases = append(suite.TestCases, tc)
@@ -285,6 +285,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	}
 	return fs, nil
 }
+
 func getConfig(name string) (string, error) {
 	r := viper.GetString(name)
 	if len(r) == 0 {
@@ -292,6 +293,7 @@ func getConfig(name string) (string, error) {
 	}
 	return r, nil
 }
+
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:
@@ -303,7 +305,7 @@ func summarize(controls *Controls, state State) {
 	case INFO:
 		controls.Summary.Info++
 	default:
-		glog.Warningf("Unrecognized state %s", state)
+		klog.Warningf("Unrecognized state %s", state)
 	}
 }
 
@@ -318,6 +320,6 @@ func summarizeGroup(group *Group, state State) {
 	case INFO:
 		group.Info++
 	default:
-		glog.Warningf("Unrecognized state %s", state)
+		klog.Warningf("Unrecognized state %s", state)
 	}
 }

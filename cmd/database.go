@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 func savePgsql(jsonInfo string) {
@@ -55,5 +55,5 @@ func savePgsql(jsonInfo string) {
 
 	db.Debug().AutoMigrate(&ScanResult{})
 	db.Save(&ScanResult{ScanHost: hostname, ScanTime: timestamp, ScanInfo: jsonInfo})
-	glog.V(2).Info(fmt.Sprintf("successfully stored result to: %s", envVars["PGSQL_HOST"]))
+	klog.V(2).Info(fmt.Sprintf("successfully stored result to: %s", envVars["PGSQL_HOST"]))
 }
