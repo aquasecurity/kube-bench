@@ -138,7 +138,7 @@ func generateDefaultEnvAudit(controls *check.Controls, binSubs []string) {
 						}
 
 						if test.Env != "" && checkItem.AuditEnv == "" {
-							checkItem.AuditEnv = fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binPath)
+							checkItem.AuditEnv = fmt.Sprintf("cat \"/proc/$(/bin/pidof %s)/environ\" | tr '\\0' '\\n'", binPath)
 						}
 					}
 				}

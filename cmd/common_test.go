@@ -638,7 +638,7 @@ groups:
 	binSubs := []string{"TestBinPath"}
 	generateDefaultEnvAudit(controls, binSubs)
 
-	expectedAuditEnv := fmt.Sprintf("cat \"/proc/$(/bin/ps -C %s -o pid= | tr -d ' ')/environ\" | tr '\\0' '\\n'", binSubs[0])
+	expectedAuditEnv := fmt.Sprintf("cat \"/proc/$(/bin/pidof %s)/environ\" | tr '\\0' '\\n'", binSubs[0])
 	assert.Equal(t, expectedAuditEnv, controls.Groups[1].Checks[0].AuditEnv)
 }
 
