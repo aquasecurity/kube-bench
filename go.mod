@@ -6,14 +6,14 @@ require (
 	github.com/aws/aws-sdk-go v1.40.55
 	github.com/fatih/color v1.13.0
 	github.com/magiconair/properties v1.8.5
-	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/ginkgo v1.16.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.1.2
-	gorm.io/gorm v1.21.15
+	gorm.io/gorm v1.21.16
 	k8s.io/client-go v0.22.2
 	k8s.io/klog/v2 v2.20.0
 )
