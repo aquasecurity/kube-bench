@@ -77,7 +77,7 @@ func (c *PsqlConnInfo) toString() string {
 func savePgsql(jsonInfo string) {
 	var hostname string
 	if value := viper.GetString("K8S_HOST"); value != "" {
-		// Adhere to the ScanHost column definition bellow
+		// Adhere to the ScanHost column definition below
 		if len(value) > 63 {
 			exitWithError(fmt.Errorf("%s_K8S_HOST value's length must be less than 63 chars", envVarsPrefix))
 		}
