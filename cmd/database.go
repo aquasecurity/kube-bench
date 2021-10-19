@@ -24,7 +24,7 @@ func getPsqlConnInfo() (PsqlConnInfo, error) {
 	if value := viper.GetString("PGSQL_HOST"); value != "" {
 		host = value
 	} else {
-		return PsqlConnInfo{}, fmt.Errorf("%s_PGSQL_HOST env var is require", envVarsPrefix)
+		return PsqlConnInfo{}, fmt.Errorf("%s_PGSQL_HOST env var is required", envVarsPrefix)
 	}
 
 	var user string
