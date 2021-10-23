@@ -750,6 +750,55 @@ func TestWriteStdoutOutputTotal(t *testing.T) {
 	assert.Contains(t, string(out), "49 checks PASS")
 }
 
+func TestWriteStdoutOutputStatusList(t *testing.T) {
+	type testCase struct {
+		name       string
+		statusList string
+
+		notContains []string
+	}
+	testCases := []testCase{
+		{
+			name:        "statusList PASS",
+			statusList:  "PASS",
+			notContains: []string{"INFO", "WARN", "ERRO"},
+		},
+		{
+			name:        "statusList PASS,INFO",
+			statusList:  "PASS,INFO",
+			notContains: []string{"WARN", "ERRO"},
+		},
+		{
+			name:        "statusList empty",
+			statusList:  "",
+			notContains: nil,
+		},
+	}
+
+	controlsCollection, err := parseControlsJsonFile("./testdata/controlsCollection.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, tt := range testCases {
+		rescueStdout := os.Stdout
+
+		r, w, _ := os.Pipe()
+
+		os.Stdout = w
+		statusList = tt.statusList
+		writeStdoutOutput(controlsCollection)
+		w.Close()
+		out, _ := ioutil.ReadAll(r)
+
+		os.Stdout = rescueStdout
+
+		for _, n := range tt.notContains {
+			assert.NotContains(t, string(out), fmt.Sprintf("[%s]", n))
+		}
+	}
+}
+
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 

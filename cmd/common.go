@@ -157,8 +157,29 @@ func parseSkipIds(skipIds string) map[string]bool {
 	return skipIdMap
 }
 
+func parseStatus(statusList string) map[check.State]bool {
+	var statusMap = make(map[check.State]bool, 0)
+	if statusList != "" {
+		for _, status := range strings.Split(statusList, ",") {
+			statusMap[check.State(strings.ToUpper(strings.Trim(status, " ")))] = true
+		}
+	}
+	return statusMap
+}
+
+func printStatus(state check.State) bool {
+	if statusList == "" {
+		return true
+	}
+	statusMap := parseStatus(statusList)
+	return statusMap[state]
+}
+
 // colorPrint outputs the state in a specific colour, along with a message string
 func colorPrint(state check.State, s string) {
+	if !printStatus(state) {
+		return
+	}
 	colors[state].Printf("[%s] ", state)
 	fmt.Printf("%s", s)
 }
