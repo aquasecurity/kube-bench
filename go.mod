@@ -3,7 +3,7 @@ module github.com/aquasecurity/kube-bench
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.41.0
+	github.com/aws/aws-sdk-go v1.41.6
 	github.com/fatih/color v1.13.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/magiconair/properties v1.8.5
@@ -14,6 +14,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.1.2
-	gorm.io/gorm v1.21.16
+	gorm.io/gorm v1.22.0
 	k8s.io/client-go v0.22.2
 )
