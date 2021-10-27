@@ -591,11 +591,16 @@ groups:
 
         audit_config: "grep -A1 experimental-encryption-provider-config /etc/origin/master/master-config.yaml | sed -n '2p' | awk '{ print $2 }' | xargs cat"
         tests:
+          bin_op: and
           test_items:
-            - path: "{.providers.aescbc.experimental-encryption-provider-config}"
+            - path: "{.resources[*].providers[*].aescbc.keys[*]}}"
               compare:
                 op: has
-                value: "aescbc"
+                value: "secret"
+            - path: "{.resources[*].providers[*].aescbc.keys[*]}}"
+              compare:
+                op: has
+                value: "name"
         remediation: |
           Edit the Openshift master config file /etc/origin/master/master-config.yaml and set aescbc as the first provider in encryption provider config.
           See https://docs.openshift.com/container-platform/3.10/admin_guide/encrypting_data.html.
