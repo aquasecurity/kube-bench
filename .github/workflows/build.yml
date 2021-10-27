@@ -47,12 +47,9 @@ jobs:
         run: |
           kubectl cluster-info
           kubectl describe node
-      - name: Apply jobs
-        run: kubectl apply -f job.yaml
       - name: Run integration tests
         run: |
-          kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s
-          kubectl logs job/kube-bench > ./test.data
+          make integration-test
       - name: Compare output with expected output
         uses: GuillaumeFalourd/diff-action@v1
         with:
