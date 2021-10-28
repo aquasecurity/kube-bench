@@ -427,7 +427,7 @@ func TestExecuteJSONPath(t *testing.T) {
 	}{
 		{
 			"JSONPath parse works, results don't match",
-			"{.Kind}",
+			"{.resourcesproviders.aescbc}",
 			kubeletConfig{
 				Kind:       "KubeletConfiguration",
 				ApiVersion: "kubelet.config.k8s.io/v1beta1",
@@ -1130,6 +1130,132 @@ func TestToNumeric(t *testing.T) {
 
 			if !c.expectedToFail && (f != 5 || s != 6) {
 				t.Errorf("Expected to return %d,%d - got %d,%d", 5, 6, f, s)
+			}
+		})
+	}
+}
+
+func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
+
+	type Resources struct {
+		Resources	[]string	`json:"resources"`
+		Providers	[]map[string]interface{}		`json:"providers"`
+	}
+
+	type EncryptionConfig struct {
+		Kind		string		`json:"kind"`
+		ApiVersion	string		`json:"apiVersion"`
+		Resources	[]Resources	`json:"resources"`
+	}
+
+	type Key struct {
+		Secret	string `json:"secret"`
+		Name	string `json:"name"`
+	}
+
+	type Aescbc struct {
+		Keys	[]Key	`json:"keys"`
+	}
+
+	type SecretBox struct {
+		Keys	[]Key	`json:"keys"`
+	}
+
+	type Aesgcm	struct {
+		Keys	[]Key	`json:"keys"`
+	}
+
+	// identity disable encryption when set as the first parameter
+	type Identity struct {}
+
+	cases := []struct {
+		name           string
+		jsonPath       string
+		jsonInterface  EncryptionConfig
+		expectedResult string
+		expectedToFail bool
+	}{
+		{
+			"JSONPath parse works, results match",
+			"{.resources[*].providers[*].aescbc.keys[*].secret}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
+				}}}},
+			"secret1",
+			false,
+		},
+		{
+			"JSONPath parse works, results match",
+			"{.resources[*].providers[*].aescbc.keys[*].name}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
+				}}}},
+			"name1",
+			false,
+		},
+		{
+			"JSONPath parse works, results don't match",
+			"{.resources[*].providers[*].aescbc.keys[*].secret}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"aesgcm": Aesgcm{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
+				}}}},
+			"secret1",
+			true,
+		},
+		{
+			"JSONPath parse works, results match",
+			"{.resources[*].providers[*].aesgcm.keys[*].secret}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"aesgcm": Aesgcm{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
+				}}}},
+			"secret1",
+			false,
+		},
+		{
+			"JSONPath parse works, results match",
+			"{.resources[*].providers[*].secretbox.keys[*].secret}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"secretbox": SecretBox{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
+				}}}},
+			"secret1",
+			false,
+		},
+		{
+			"JSONPath parse works, results match",
+			"{.resources[*].providers[*].aescbc.keys[*].secret}",
+			EncryptionConfig{
+				Kind: "EncryptionConfig",
+				ApiVersion: "v1",
+				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
+					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}, Key{Secret: "secret2", Name: "name2"}}}},
+				}}}},
+			"secret1 secret2",
+			false,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			result, err := executeJSONPath(c.jsonPath, c.jsonInterface)
+			if err != nil && !c.expectedToFail {
+				t.Fatalf("jsonPath:%q, expectedResult:%q got:%v", c.jsonPath, c.expectedResult, err)
+			}
+			if c.expectedResult != result && !c.expectedToFail {
+				t.Errorf("jsonPath:%q, expectedResult:%q got:%q", c.jsonPath, c.expectedResult, result)
 			}
 		})
 	}
