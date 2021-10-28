@@ -19,8 +19,8 @@ env:
   KIND_IMAGE: "kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6"
 
 jobs:
-  build:
-    name: Build
+  lint:
+    name: Lint
     runs-on: ubuntu-18.04
     steps:
       - name: Setup Go
@@ -31,12 +31,32 @@ jobs:
         uses: actions/checkout@v2
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
         uses: codecov/codecov-action@v2
         with:
           file: ./coverage.txt
+  e2e:
+    name: E2e tests
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Setup Kubernetes cluster (KIND)
         uses: engineerd/setup-kind@v0.5.0
         with:
@@ -56,6 +76,17 @@ jobs:
           first_file_path: ./test.data
           second_file_path: integration/testdata/Expected_output.data
           expected_result: PASSED
+  release:
+    name: Release snapshot
+    runs-on: ubuntu-18.04
+    needs: [e2e, unit]
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
