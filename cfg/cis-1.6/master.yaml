@@ -278,7 +278,7 @@ groups:
 
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Manual)"
-        audit: "find /etc/kubernetes/pki -name '*.crt' | xargs stat -c permissions=%a"
+        audit: "find /etc/kubernetes/pki/ -name '*.crt' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -294,7 +294,7 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
-        audit: "find /etc/kubernetes/pki -name '*.key' | xargs stat -c permissions=%a"
+        audit: "find /etc/kubernetes/pki/ -name '*.key' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
