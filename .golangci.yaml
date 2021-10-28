@@ -1,0 +1,8 @@
+linters:
+  disable-all: true
+  enable:
+    - typecheck
+    - govet
+    - varcheck
+    - deadcode
+    - gocyclo
