@@ -11,3 +11,5 @@ coverage.txt
 # Directory junk file
 .DS_Store
 thumbs.db
+/kubeconfig.kube-bench
+/test.data

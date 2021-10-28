@@ -78,7 +78,7 @@ groups:
             - flag: "permissions"
               set: true
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
@@ -167,24 +167,8 @@ groups:
 
       - id: 4.2.4
         text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          test_items:
-            - flag: "--read-only-port"
-              path: '{.readOnlyPort}'
-              compare:
-                op: eq
-                value: 0
-        remediation: |
-          If using a Kubelet config file, edit the file to set readOnlyPort to 0.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          --read-only-port=0
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+        type: skip
+        remediation: "This control cannot be modified in GKE."
         scored: true
 
       - id: 4.2.5
@@ -216,25 +200,8 @@ groups:
 
       - id: 4.2.6
         text: "Ensure that the --protect-kernel-defaults argument is set to true (Scored)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          test_items:
-            - flag: --protect-kernel-defaults
-              path: '{.protectKernelDefaults}'
-              compare:
-                op: eq
-                value: true
-        remediation: |
-          If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          --protect-kernel-defaults=true
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: true
+        type: skip
+        remediation: "This control cannot be modified in GKE."
 
       - id: 4.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored) "
@@ -280,50 +247,13 @@ groups:
 
       - id: 4.2.9
         text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Scored)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          test_items:
-            - flag: --event-qps
-              path: '{.eventRecordQPS}'
-              set: true
-              compare:
-                op: eq
-                value: 0
-        remediation: |
-          If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: true
+        type: skip
+        remediation: "This control cannot be modified in GKE."
 
       - id: 4.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          bin_op: and
-          test_items:
-            - flag: --tls-cert-file
-              path: '{.tlsCertFile}'
-            - flag: --tls-private-key-file
-              path: '{.tlsPrivateKeyFile}'
-        remediation: |
-          If using a Kubelet config file, edit the file to set tlsCertFile to the location
-          of the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile
-          to the location of the corresponding private key file.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
-          --tls-cert-file=<path/to/tls-certificate-file>
-          --tls-private-key-file=<path/to/tls-key-file>
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: true
+        type: skip
+        remediation: "This control cannot be modified in GKE."
 
       - id: 4.2.11
         text: "Ensure that the --rotate-certificates argument is not set to false (Scored)"
