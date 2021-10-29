@@ -46,7 +46,6 @@ func init() {
 }
 
 func TestTestExecute(t *testing.T) {
-
 	cases := []struct {
 		check              *Check
 		str                string
@@ -305,7 +304,6 @@ func TestTestExecute(t *testing.T) {
 }
 
 func TestTestExecuteExceptions(t *testing.T) {
-
 	cases := []struct {
 		*Check
 		str string
@@ -366,7 +364,8 @@ func TestTestUnmarshal(t *testing.T) {
 			`,
 			kubeletConfig{},
 			false,
-		}, {
+		},
+		{
 			`
 kind: KubeletConfiguration
 address: 0.0.0.0
@@ -490,34 +489,42 @@ func TestAllElementsValid(t *testing.T) {
 		},
 		{
 			source: []string{},
-			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			target: []string{
+				"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
 				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
 				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+			},
 			valid: false,
 		},
 		{
 			source: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"},
-			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			target: []string{
+				"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
 				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
 				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+			},
 			valid: true,
 		},
 		{
 			source: []string{"blah"},
-			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			target: []string{
+				"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
 				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
 				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+			},
 			valid: false,
 		},
 		{
 			source: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "blah"},
-			target: []string{"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+			target: []string{
+				"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
 				"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
 				"TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256"},
+				"TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+			},
 			valid: false,
 		},
 	}
@@ -594,494 +601,628 @@ func TestCompareOp(t *testing.T) {
 		// Test Op "eq"
 		{label: "op=eq, both empty", op: "eq", flagVal: "", compareValue: "", expectedResultPattern: "'' is equal to ''", testResult: true, flagName: ""},
 
-		{label: "op=eq, true==true", op: "eq", flagVal: "true",
+		{
+			label: "op=eq, true==true", op: "eq", flagVal: "true",
 			compareValue:          "true",
 			expectedResultPattern: "'parameterTrue' is equal to 'true'",
 			testResult:            true,
-			flagName:              "parameterTrue"},
+			flagName:              "parameterTrue",
+		},
 
-		{label: "op=eq, false==false", op: "eq", flagVal: "false",
+		{
+			label: "op=eq, false==false", op: "eq", flagVal: "false",
 			compareValue:          "false",
 			expectedResultPattern: "'parameterFalse' is equal to 'false'",
 			testResult:            true,
-			flagName:              "parameterFalse"},
+			flagName:              "parameterFalse",
+		},
 
-		{label: "op=eq, false==true", op: "eq", flagVal: "false",
+		{
+			label: "op=eq, false==true", op: "eq", flagVal: "false",
 			compareValue:          "true",
 			expectedResultPattern: "'parameterFalse' is equal to 'true'",
 			testResult:            false,
-			flagName:              "parameterFalse"},
+			flagName:              "parameterFalse",
+		},
 
-		{label: "op=eq, strings match", op: "eq", flagVal: "KubeletConfiguration",
+		{
+			label: "op=eq, strings match", op: "eq", flagVal: "KubeletConfiguration",
 			compareValue:          "KubeletConfiguration",
 			expectedResultPattern: "'--FlagNameKubeletConf' is equal to 'KubeletConfiguration'",
 			testResult:            true,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
-		{label: "op=eq, flagVal=empty", op: "eq", flagVal: "",
+		{
+			label: "op=eq, flagVal=empty", op: "eq", flagVal: "",
 			compareValue:          "KubeletConfiguration",
 			expectedResultPattern: "'--FlagNameKubeletConf' is equal to 'KubeletConfiguration'",
 			testResult:            false,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
-		{label: "op=eq, compareValue=empty",
+		{
+			label:                 "op=eq, compareValue=empty",
 			op:                    "eq",
 			flagVal:               "KubeletConfiguration",
 			compareValue:          "",
 			expectedResultPattern: "'--FlagNameKubeletConf' is equal to ''",
 			testResult:            false,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
 		// Test Op "noteq"
-		{label: "op=noteq, both empty",
+		{
+			label:                 "op=noteq, both empty",
 			op:                    "noteq",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "'parameter' is not equal to ''",
 			testResult:            false,
-			flagName:              "parameter"},
+			flagName:              "parameter",
+		},
 
-		{label: "op=noteq, true!=true",
+		{
+			label:                 "op=noteq, true!=true",
 			op:                    "noteq",
 			flagVal:               "true",
 			compareValue:          "true",
 			expectedResultPattern: "'parameterTrue' is not equal to 'true'",
 			testResult:            false,
-			flagName:              "parameterTrue"},
+			flagName:              "parameterTrue",
+		},
 
-		{label: "op=noteq, false!=false",
+		{
+			label:                 "op=noteq, false!=false",
 			op:                    "noteq",
 			flagVal:               "false",
 			compareValue:          "false",
 			expectedResultPattern: "'parameterFalse' is not equal to 'false'",
 			testResult:            false,
-			flagName:              "parameterFalse"},
+			flagName:              "parameterFalse",
+		},
 
-		{label: "op=noteq, false!=true",
+		{
+			label:                 "op=noteq, false!=true",
 			op:                    "noteq",
 			flagVal:               "false",
 			compareValue:          "true",
 			expectedResultPattern: "'parameterFalse' is not equal to 'true'",
 			testResult:            true,
-			flagName:              "parameterFalse"},
+			flagName:              "parameterFalse",
+		},
 
-		{label: "op=noteq, strings match",
+		{
+			label:                 "op=noteq, strings match",
 			op:                    "noteq",
 			flagVal:               "KubeletConfiguration",
 			compareValue:          "KubeletConfiguration",
 			expectedResultPattern: "'--FlagNameKubeletConf' is not equal to 'KubeletConfiguration'",
 			testResult:            false,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
-		{label: "op=noteq, flagVal=empty",
+		{
+			label:                 "op=noteq, flagVal=empty",
 			op:                    "noteq",
 			flagVal:               "",
 			compareValue:          "KubeletConfiguration",
 			expectedResultPattern: "'--FlagNameKubeletConf' is not equal to 'KubeletConfiguration'",
 			testResult:            true,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
-		{label: "op=noteq, compareValue=empty",
+		{
+			label:                 "op=noteq, compareValue=empty",
 			op:                    "noteq",
 			flagVal:               "KubeletConfiguration",
 			compareValue:          "",
 			expectedResultPattern: "'--FlagNameKubeletConf' is not equal to ''",
 			testResult:            true,
-			flagName:              "--FlagNameKubeletConf"},
+			flagName:              "--FlagNameKubeletConf",
+		},
 
 		// Test Op "gt"
-		{label: "op=gt, both empty",
+		{
+			label:                 "op=gt, both empty",
 			op:                    "gt",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '' ''",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gt, 0 > 0",
+			flagName:              "flagName",
+		},
+		{
+			label:        "op=gt, 0 > 0",
 			op:           "gt",
 			flagVal:      "0",
 			compareValue: "0", expectedResultPattern: "'flagName' is greater than 0",
 			testResult: false,
-			flagName:   "flagName"},
-		{label: "op=gt, 4 > 5",
+			flagName:   "flagName",
+		},
+		{
+			label:                 "op=gt, 4 > 5",
 			op:                    "gt",
 			flagVal:               "4",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is greater than 5",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gt, 5 > 4",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gt, 5 > 4",
 			op:                    "gt",
 			flagVal:               "5",
 			compareValue:          "4",
 			expectedResultPattern: "'flagName' is greater than 4",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=gt, 5 > 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gt, 5 > 5",
 			op:                    "gt",
 			flagVal:               "5",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is greater than 5",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gt, Pikachu > 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gt, Pikachu > 5",
 			op:                    "gt",
 			flagVal:               "Pikachu",
 			compareValue:          "5",
 			expectedResultPattern: "Invalid Number(s) used for comparison: 'Pikachu' '5'",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gt, 5 > Bulbasaur",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gt, 5 > Bulbasaur",
 			op:                    "gt",
 			flagVal:               "5",
 			compareValue:          "Bulbasaur",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '5' 'Bulbasaur'",
 			testResult:            false,
-			flagName:              "flagName"},
+			flagName:              "flagName",
+		},
 		// Test Op "lt"
-		{label: "op=lt, both empty",
+		{
+			label:                 "op=lt, both empty",
 			op:                    "lt",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '' ''",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lt, 0 < 0",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, 0 < 0",
 			op:                    "lt",
 			flagVal:               "0",
 			compareValue:          "0",
 			expectedResultPattern: "'flagName' is lower than 0",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lt, 4 < 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, 4 < 5",
 			op:                    "lt",
 			flagVal:               "4",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is lower than 5",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=lt, 5 < 4",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, 5 < 4",
 			op:                    "lt",
 			flagVal:               "5",
 			compareValue:          "4",
 			expectedResultPattern: "'flagName' is lower than 4",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lt, 5 < 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, 5 < 5",
 			op:                    "lt",
 			flagVal:               "5",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is lower than 5",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lt, Charmander < 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, Charmander < 5",
 			op:                    "lt",
 			flagVal:               "Charmander",
 			compareValue:          "5",
 			expectedResultPattern: "Invalid Number(s) used for comparison: 'Charmander' '5'",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lt, 5 < Charmeleon",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lt, 5 < Charmeleon",
 			op:                    "lt",
 			flagVal:               "5",
 			compareValue:          "Charmeleon",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '5' 'Charmeleon'",
 			testResult:            false,
-			flagName:              "flagName"},
+			flagName:              "flagName",
+		},
 		// Test Op "gte"
-		{label: "op=gte, both empty",
+		{
+			label:                 "op=gte, both empty",
 			op:                    "gte",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '' ''",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gte, 0 >= 0",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, 0 >= 0",
 			op:                    "gte",
 			flagVal:               "0",
 			compareValue:          "0",
 			expectedResultPattern: "'flagName' is greater or equal to 0",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=gte, 4 >= 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, 4 >= 5",
 			op:                    "gte",
 			flagVal:               "4",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is greater or equal to 5",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gte, 5 >= 4",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, 5 >= 4",
 			op:                    "gte",
 			flagVal:               "5",
 			compareValue:          "4",
 			expectedResultPattern: "'flagName' is greater or equal to 4",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=gte, 5 >= 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, 5 >= 5",
 			op:                    "gte",
 			flagVal:               "5",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is greater or equal to 5",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=gte, Ekans >= 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, Ekans >= 5",
 			op:                    "gte",
 			flagVal:               "Ekans",
 			compareValue:          "5",
 			expectedResultPattern: "Invalid Number(s) used for comparison: 'Ekans' '5'",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=gte, 4 >= Zubat",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=gte, 4 >= Zubat",
 			op:                    "gte",
 			flagVal:               "4",
 			compareValue:          "Zubat",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '4' 'Zubat'",
 			testResult:            false,
-			flagName:              "flagName"},
+			flagName:              "flagName",
+		},
 		// Test Op "lte"
-		{label: "op=lte, both empty",
+		{
+			label:                 "op=lte, both empty",
 			op:                    "lte",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '' ''",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lte, 0 <= 0",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, 0 <= 0",
 			op:                    "lte",
 			flagVal:               "0",
 			compareValue:          "0",
 			expectedResultPattern: "'flagName' is lower or equal to 0",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=lte, 4 <= 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, 4 <= 5",
 			op:                    "lte",
 			flagVal:               "4",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is lower or equal to 5",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=lte, 5 <= 4",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, 5 <= 4",
 			op:                    "lte",
 			flagVal:               "5",
 			compareValue:          "4",
 			expectedResultPattern: "'flagName' is lower or equal to 4",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lte, 5 <= 5",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, 5 <= 5",
 			op:                    "lte",
 			flagVal:               "5",
 			compareValue:          "5",
 			expectedResultPattern: "'flagName' is lower or equal to 5",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=lte, Venomoth <= 4",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, Venomoth <= 4",
 			op:                    "lte",
 			flagVal:               "Venomoth",
 			compareValue:          "4",
 			expectedResultPattern: "Invalid Number(s) used for comparison: 'Venomoth' '4'",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=lte, 5 <= Meowth",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=lte, 5 <= Meowth",
 			op:                    "lte",
 			flagVal:               "5",
 			compareValue:          "Meowth",
 			expectedResultPattern: "Invalid Number(s) used for comparison: '5' 'Meowth'",
 			testResult:            false,
-			flagName:              "flagName"},
+			flagName:              "flagName",
+		},
 
 		// Test Op "has"
-		{label: "op=has, both empty",
+		{
+			label:                 "op=has, both empty",
 			op:                    "has",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "'flagName' has ''",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=has, flagVal=empty",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=has, flagVal=empty",
 			op:                    "has",
 			flagVal:               "",
 			compareValue:          "blah",
 			expectedResultPattern: "'flagName' has 'blah'",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=has, compareValue=empty",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=has, compareValue=empty",
 			op:                    "has",
 			flagVal:               "blah",
 			compareValue:          "",
 			expectedResultPattern: "'flagName-blah' has ''",
 			testResult:            true,
-			flagName:              "flagName-blah"},
-		{label: "op=has, 'blah' has 'la'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=has, 'blah' has 'la'",
 			op:                    "has",
 			flagVal:               "blah",
 			compareValue:          "la",
 			expectedResultPattern: "'flagName-blah' has 'la'",
 			testResult:            true,
-			flagName:              "flagName-blah"},
-		{label: "op=has, 'blah' has 'LA'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=has, 'blah' has 'LA'",
 			op:                    "has",
 			flagVal:               "blah",
 			compareValue:          "LA",
 			expectedResultPattern: "'flagName-blah' has 'LA'",
 			testResult:            false,
-			flagName:              "flagName-blah"},
-		{label: "op=has, 'blah' has 'lo'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=has, 'blah' has 'lo'",
 			op:                    "has",
 			flagVal:               "blah",
 			compareValue:          "lo",
 			expectedResultPattern: "'flagName-blah' has 'lo'",
 			testResult:            false,
-			flagName:              "flagName-blah"},
+			flagName:              "flagName-blah",
+		},
 
 		// Test Op "nothave"
-		{label: "op=nothave, both empty",
+		{
+			label:                 "op=nothave, both empty",
 			op:                    "nothave",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "'flagName' does not have ''",
 			testResult:            false,
-			flagName:              "flagName"},
-		{label: "op=nothave, flagVal=empty",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=nothave, flagVal=empty",
 			op:                    "nothave",
 			flagVal:               "",
 			compareValue:          "blah",
 			expectedResultPattern: "'flagName' does not have 'blah'",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=nothave, compareValue=empty",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=nothave, compareValue=empty",
 			op:                    "nothave",
 			flagVal:               "blah",
 			compareValue:          "",
 			expectedResultPattern: "'flagName-blah' does not have ''",
 			testResult:            false,
-			flagName:              "flagName-blah"},
-		{label: "op=nothave, 'blah' not have 'la'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=nothave, 'blah' not have 'la'",
 			op:                    "nothave",
 			flagVal:               "blah",
 			compareValue:          "la",
 			expectedResultPattern: "'flagName-blah' does not have 'la'",
 			testResult:            false,
-			flagName:              "flagName-blah"},
-		{label: "op=nothave, 'blah' not have 'LA'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=nothave, 'blah' not have 'LA'",
 			op:                    "nothave",
 			flagVal:               "blah",
 			compareValue:          "LA",
 			expectedResultPattern: "'flagName-blah' does not have 'LA'",
 			testResult:            true,
-			flagName:              "flagName-blah"},
-		{label: "op=nothave, 'blah' not have 'lo'",
+			flagName:              "flagName-blah",
+		},
+		{
+			label:                 "op=nothave, 'blah' not have 'lo'",
 			op:                    "nothave",
 			flagVal:               "blah",
 			compareValue:          "lo",
 			expectedResultPattern: "'flagName-blah' does not have 'lo'",
 			testResult:            true,
-			flagName:              "flagName-blah"},
+			flagName:              "flagName-blah",
+		},
 
 		// Test Op "regex"
-		{label: "op=regex, both empty",
+		{
+			label:                 "op=regex, both empty",
 			op:                    "regex",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "'flagName' matched by regex expression ''",
 			testResult:            true,
-			flagName:              "flagName"},
-		{label: "op=regex, flagVal=empty",
+			flagName:              "flagName",
+		},
+		{
+			label:                 "op=regex, flagVal=empty",
 			op:                    "regex",
 			flagVal:               "",
 			compareValue:          "blah",
 			expectedResultPattern: "'flagName' matched by regex expression 'blah'",
 			testResult:            false,
-			flagName:              "flagName"},
+			flagName:              "flagName",
+		},
 
 		// Test Op "valid_elements"
-		{label: "op=valid_elements, valid_elements both empty",
+		{
+			label:                 "op=valid_elements, valid_elements both empty",
 			op:                    "valid_elements",
 			flagVal:               "",
 			compareValue:          "",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from ''",
 			testResult:            true,
-			flagName:              "flagWithMultipleElements"},
+			flagName:              "flagWithMultipleElements",
+		},
 
-		{label: "op=valid_elements, valid_elements flagVal empty",
+		{
+			label:                 "op=valid_elements, valid_elements flagVal empty",
 			op:                    "valid_elements",
 			flagVal:               "",
 			compareValue:          "a,b",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from 'a,b'",
 			testResult:            false,
-			flagName:              "flagWithMultipleElements"},
+			flagName:              "flagWithMultipleElements",
+		},
 
-		{label: "op=valid_elements, valid_elements compareValue empty",
+		{
+			label:                 "op=valid_elements, valid_elements compareValue empty",
 			op:                    "valid_elements",
 			flagVal:               "a,b",
 			compareValue:          "",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from ''",
 			testResult:            false,
-			flagName:              "flagWithMultipleElements"},
-		{label: "op=valid_elements, valid_elements two list equals",
+			flagName:              "flagWithMultipleElements",
+		},
+		{
+			label:                 "op=valid_elements, valid_elements two list equals",
 			op:                    "valid_elements",
 			flagVal:               "a,b,c",
 			compareValue:          "a,b,c",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from 'a,b,c'",
 			testResult:            true,
-			flagName:              "flagWithMultipleElements"},
-		{label: "op=valid_elements, valid_elements partial flagVal valid",
+			flagName:              "flagWithMultipleElements",
+		},
+		{
+			label:                 "op=valid_elements, valid_elements partial flagVal valid",
 			op:                    "valid_elements",
 			flagVal:               "a,c",
 			compareValue:          "a,b,c",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from 'a,b,c'",
 			testResult:            true,
-			flagName:              "flagWithMultipleElements"},
-		{label: "op=valid_elements, valid_elements partial compareValue valid",
+			flagName:              "flagWithMultipleElements",
+		},
+		{
+			label:                 "op=valid_elements, valid_elements partial compareValue valid",
 			op:                    "valid_elements",
 			flagVal:               "a,b,c",
 			compareValue:          "a,c",
 			expectedResultPattern: "'flagWithMultipleElements' contains valid elements from 'a,c'",
 			testResult:            false,
-			flagName:              "flagWithMultipleElements"},
+			flagName:              "flagWithMultipleElements",
+		},
 
 		// Test Op "bitmask"
-		{label: "op=bitmask, 644 AND 640",
+		{
+			label:                 "op=bitmask, 644 AND 640",
 			op:                    "bitmask",
 			flagVal:               "640",
 			compareValue:          "644",
 			expectedResultPattern: "etc/fileExamplePermission640 has permissions 640, expected 644 or more restrictive",
 			testResult:            true,
-			flagName:              "etc/fileExamplePermission640"},
-		{label: "op=bitmask, 644 AND 777",
+			flagName:              "etc/fileExamplePermission640",
+		},
+		{
+			label:                 "op=bitmask, 644 AND 777",
 			op:                    "bitmask",
 			flagVal:               "777",
 			compareValue:          "644",
 			expectedResultPattern: "etc/fileExamplePermission777 has permissions 777, expected 644 or more restrictive",
 			testResult:            false,
-			flagName:              "etc/fileExamplePermission777"},
-		{label: "op=bitmask, 644 AND 444",
+			flagName:              "etc/fileExamplePermission777",
+		},
+		{
+			label:                 "op=bitmask, 644 AND 444",
 			op:                    "bitmask",
 			flagVal:               "444",
 			compareValue:          "644",
 			expectedResultPattern: "etc/fileExamplePermission444 has permissions 444, expected 644 or more restrictive",
 			testResult:            true,
-			flagName:              "etc/fileExamplePermission444"},
-		{label: "op=bitmask, 644 AND 211",
+			flagName:              "etc/fileExamplePermission444",
+		},
+		{
+			label:                 "op=bitmask, 644 AND 211",
 			op:                    "bitmask",
 			flagVal:               "211",
 			compareValue:          "644",
 			expectedResultPattern: "etc/fileExamplePermission211 has permissions 211, expected 644 or more restrictive",
 			testResult:            false,
-			flagName:              "etc/fileExamplePermission211"},
-		{label: "op=bitmask, Harry AND 211",
+			flagName:              "etc/fileExamplePermission211",
+		},
+		{
+			label:                 "op=bitmask, Harry AND 211",
 			op:                    "bitmask",
 			flagVal:               "Harry",
 			compareValue:          "644",
 			expectedResultPattern: "Not numeric value - flag: Harry",
 			testResult:            false,
-			flagName:              "etc/fileExample"},
-		{label: "op=bitmask, 644 AND Potter",
+			flagName:              "etc/fileExample",
+		},
+		{
+			label:                 "op=bitmask, 644 AND Potter",
 			op:                    "bitmask",
 			flagVal:               "211",
 			compareValue:          "Potter",
 			expectedResultPattern: "Not numeric value - flag: Potter",
 			testResult:            false,
-			flagName:              "etc/fileExample"},
+			flagName:              "etc/fileExample",
+		},
 	}
 
 	for _, c := range cases {
@@ -1136,37 +1277,36 @@ func TestToNumeric(t *testing.T) {
 }
 
 func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
-
 	type Resources struct {
-		Resources	[]string	`json:"resources"`
-		Providers	[]map[string]interface{}		`json:"providers"`
+		Resources []string                 `json:"resources"`
+		Providers []map[string]interface{} `json:"providers"`
 	}
 
 	type EncryptionConfig struct {
-		Kind		string		`json:"kind"`
-		ApiVersion	string		`json:"apiVersion"`
-		Resources	[]Resources	`json:"resources"`
+		Kind       string      `json:"kind"`
+		ApiVersion string      `json:"apiVersion"`
+		Resources  []Resources `json:"resources"`
 	}
 
 	type Key struct {
-		Secret	string `json:"secret"`
-		Name	string `json:"name"`
+		Secret string `json:"secret"`
+		Name   string `json:"name"`
 	}
 
 	type Aescbc struct {
-		Keys	[]Key	`json:"keys"`
+		Keys []Key `json:"keys"`
 	}
 
 	type SecretBox struct {
-		Keys	[]Key	`json:"keys"`
+		Keys []Key `json:"keys"`
 	}
 
-	type Aesgcm	struct {
-		Keys	[]Key	`json:"keys"`
+	type Aesgcm struct {
+		Keys []Key `json:"keys"`
 	}
 
 	// identity disable encryption when set as the first parameter
-	type Identity struct {}
+	type Identity struct{}
 
 	cases := []struct {
 		name           string
@@ -1179,11 +1319,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results match",
 			"{.resources[*].providers[*].aescbc.keys[*].secret}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
-				}}}},
+					{"aescbc": Aescbc{Keys: []Key{{Secret: "secret1", Name: "name1"}}}},
+				}}},
+			},
 			"secret1",
 			false,
 		},
@@ -1191,11 +1332,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results match",
 			"{.resources[*].providers[*].aescbc.keys[*].name}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
-				}}}},
+					{"aescbc": Aescbc{Keys: []Key{{Secret: "secret1", Name: "name1"}}}},
+				}}},
+			},
 			"name1",
 			false,
 		},
@@ -1203,11 +1345,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results don't match",
 			"{.resources[*].providers[*].aescbc.keys[*].secret}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"aesgcm": Aesgcm{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
-				}}}},
+					{"aesgcm": Aesgcm{Keys: []Key{{Secret: "secret1", Name: "name1"}}}},
+				}}},
+			},
 			"secret1",
 			true,
 		},
@@ -1215,11 +1358,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results match",
 			"{.resources[*].providers[*].aesgcm.keys[*].secret}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"aesgcm": Aesgcm{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
-				}}}},
+					{"aesgcm": Aesgcm{Keys: []Key{{Secret: "secret1", Name: "name1"}}}},
+				}}},
+			},
 			"secret1",
 			false,
 		},
@@ -1227,11 +1371,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results match",
 			"{.resources[*].providers[*].secretbox.keys[*].secret}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"secretbox": SecretBox{Keys: []Key{Key{Secret: "secret1", Name: "name1"}}}},
-				}}}},
+					{"secretbox": SecretBox{Keys: []Key{{Secret: "secret1", Name: "name1"}}}},
+				}}},
+			},
 			"secret1",
 			false,
 		},
@@ -1239,11 +1384,12 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 			"JSONPath parse works, results match",
 			"{.resources[*].providers[*].aescbc.keys[*].secret}",
 			EncryptionConfig{
-				Kind: "EncryptionConfig",
+				Kind:       "EncryptionConfig",
 				ApiVersion: "v1",
 				Resources: []Resources{{Resources: []string{"secrets"}, Providers: []map[string]interface{}{
-					{"aescbc": Aescbc{Keys: []Key{Key{Secret: "secret1", Name: "name1"}, Key{Secret: "secret2", Name: "name2"}}}},
-				}}}},
+					{"aescbc": Aescbc{Keys: []Key{{Secret: "secret1", Name: "name1"}, {Secret: "secret2", Name: "name2"}}}},
+				}}},
+			},
 			"secret1 secret2",
 			false,
 		},

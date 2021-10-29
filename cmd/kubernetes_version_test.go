@@ -72,7 +72,6 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 					t.Errorf("Expected error")
 				}
 			}
-
 		})
 	}
 }
@@ -124,8 +123,8 @@ func TestGetWebData(t *testing.T) {
 			}
 		})
 	}
-
 }
+
 func TestGetWebDataWithRetry(t *testing.T) {
 	okfn := func(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprintln(w, `{
@@ -173,8 +172,8 @@ func TestGetWebDataWithRetry(t *testing.T) {
 			}
 		})
 	}
-
 }
+
 func TestExtractVersion(t *testing.T) {
 	okJSON := []byte(`{
 	"major": "1",
@@ -231,7 +230,6 @@ func TestExtractVersion(t *testing.T) {
 }
 
 func TestGetKubernetesURL(t *testing.T) {
-
 	resetEnvs := func() {
 		os.Unsetenv("KUBE_BENCH_K8S_ENV")
 		os.Unsetenv("KUBERNETES_SERVICE_HOST")
@@ -277,5 +275,4 @@ func TestGetKubernetesURL(t *testing.T) {
 			}
 		})
 	}
-
 }

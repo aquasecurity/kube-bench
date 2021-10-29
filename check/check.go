@@ -229,7 +229,7 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 
 		// Check for AuditConfigOutput only if AuditConfig is set
 		if !result.flagFound && c.AuditConfig != "" {
-			//t.isConfigSetting = true
+			// t.isConfigSetting = true
 			t.auditUsed = AuditConfig
 			result = *(t.execute(c.AuditConfigOutput))
 			if !result.flagFound && t.Env != "" {
