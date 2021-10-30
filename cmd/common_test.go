@@ -761,12 +761,12 @@ func TestWriteStdoutOutputStatusList(t *testing.T) {
 		{
 			name:        "statusList PASS",
 			statusList:  "PASS",
-			notContains: []string{"INFO", "WARN", "ERRO"},
+			notContains: []string{"INFO", "WARN", "FAIL"},
 		},
 		{
 			name:        "statusList PASS,INFO",
 			statusList:  "PASS,INFO",
-			notContains: []string{"WARN", "ERRO"},
+			notContains: []string{"WARN", "FAIL"},
 		},
 		{
 			name:        "statusList empty",
