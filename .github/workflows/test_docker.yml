@@ -1,13 +1,13 @@
 ---
-name: Publish
+name: test-arm
 on:
   workflow_dispatch:
   push:
-    tags:
-      - "v*"
+    branches:
+      - "support-arm"
 env:
   ALIAS: aquasecurity
-  DOCKERHUB_ALIAS: aquasec
+  DOCKERHUB_ALIAS: mozillazg
   REP: kube-bench
 jobs:
   publish:
@@ -31,14 +31,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Login to ECR
-        uses: docker/login-action@v1
-        with:
-          registry: public.ecr.aws
-          username: ${{ secrets.ECR_ACCESS_KEY_ID }}
-          password: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+          username: mozillazg
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Get version
         id: get_version
         uses: crazy-max/ghaction-docker-meta@v3
@@ -59,9 +53,7 @@ jobs:
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
-            public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:latest
-            public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache/release
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
       - name: Image digest
