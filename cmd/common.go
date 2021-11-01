@@ -243,9 +243,19 @@ func printSummary(summary check.Summary, sectionName string) {
 	}
 
 	colors[res].Printf("== Summary %s ==\n", sectionName)
-	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
-		summary.Pass, summary.Fail, summary.Warn, summary.Info,
-	)
+	if statusList == "" {
+		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n", summary.Pass, summary.Fail, summary.Warn, summary.Info)
+		return
+	}
+	statusMap := parseStatus(statusList)
+	var summaryBuilder strings.Builder
+	for s, b := range statusMap {
+		if b {
+			summaryBuilder.WriteString(fmt.Sprintf("%d checks %v\n", summary.Results(s), s))
+		}
+	}
+	summaryBuilder.WriteString("\n")
+	fmt.Printf(summaryBuilder.String())
 }
 
 // loadConfig finds the correct config dir based on the kubernetes version,

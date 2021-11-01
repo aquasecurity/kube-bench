@@ -799,7 +799,7 @@ func TestWriteStdoutOutputStatusList(t *testing.T) {
 		os.Stdout = rescueStdout
 
 		for _, n := range tt.notContains {
-			assert.NotContains(t, string(out), fmt.Sprintf("[%s]", n))
+			assert.NotContains(t, string(out), n)
 		}
 	}
 }
