@@ -27,9 +27,27 @@ func TestCheck_Run(t *testing.T) {
 	}
 
 	testCases := []TestCase{
-		{name: "Manual check should WARN", check: Check{Type: MANUAL}, Expected: WARN},
-		{name: "Skip check should INFO", check: Check{Type: "skip"}, Expected: INFO},
-		{name: "Unscored check (with no type) should WARN on failure", check: Check{Scored: false}, Expected: WARN},
+		{
+			name: "Manual check should MANU",
+			check: Check{
+				Type: TypeManual,
+			},
+			Expected: MANU,
+		},
+		{
+			name: "Skip check should SKIP",
+			check: Check{
+				Type: TypeSkip,
+			},
+			Expected: SKIP,
+		},
+		{
+			name: "Unscored check (with no type) should WARN on failure",
+			check: Check{
+				Scored: false,
+			},
+			Expected: WARN,
+		},
 		{
 			name: "Unscored check that pass should PASS",
 			check: Check{
@@ -42,9 +60,21 @@ func TestCheck_Run(t *testing.T) {
 			},
 			Expected: PASS,
 		},
-
-		{name: "Check with no tests should WARN", check: Check{Scored: true}, Expected: WARN},
-		{name: "Scored check with empty tests should FAIL", check: Check{Scored: true, Tests: &tests{}}, Expected: FAIL},
+		{
+			name: "Check with no tests should WARN",
+			check: Check{
+				Scored: true,
+			},
+			Expected: WARN,
+		},
+		{
+			name: "Scored check with empty tests should FAIL",
+			check: Check{
+				Scored: true,
+				Tests:  &tests{},
+			},
+			Expected: FAIL,
+		},
 		{
 			name: "Scored check that doesn't pass should FAIL",
 			check: Check{

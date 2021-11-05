@@ -173,7 +173,9 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 			for _, c := range g.Checks {
 				colorPrint(c.State, fmt.Sprintf("%s %s\n", c.ID, c.Text))
 
-				if includeTestOutput && c.State == check.FAIL && len(c.ActualValue) > 0 {
+				if includeTestOutput &&
+					(c.State == check.FAIL || c.State == check.WARN || c.State == check.ERRO) &&
+					len(c.ActualValue) > 0 {
 					printRawOutput(c.ActualValue)
 				}
 			}
@@ -184,20 +186,22 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print remediations.
 	if !noRemediations {
-		if summary.Fail > 0 || summary.Warn > 0 {
+		if summary.Fail > 0 || summary.Warn > 0 || summary.Manu > 0 || summary.Erro > 0 {
 			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State == check.FAIL {
+					if c.State == check.FAIL || c.State == check.WARN {
 						fmt.Printf("%s %s\n", c.ID, c.Remediation)
 					}
-					if c.State == check.WARN {
-						// Print the error if test failed due to problem with the audit command
-						if c.Reason != "" && c.Type != "manual" {
-							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
-						} else {
-							fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					if c.State == check.ERRO {
+						fmt.Printf("%s audit test error: %s\n", c.ID, c.Reason)
+					}
+					if c.State == check.MANU {
+						fmt.Printf("%s audit test is a manual test", c.ID)
+						if c.Remediation != "" {
+							fmt.Printf(": %s", c.Remediation)
 						}
+						fmt.Println()
 					}
 				}
 			}
@@ -213,7 +217,9 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 func printSummary(summary check.Summary, sectionName string) {
 	var res check.State
-	if summary.Fail > 0 {
+	if summary.Erro > 0 {
+		res = check.ERRO
+	} else if summary.Fail > 0 {
 		res = check.FAIL
 	} else if summary.Warn > 0 {
 		res = check.WARN
@@ -222,8 +228,14 @@ func printSummary(summary check.Summary, sectionName string) {
 	}
 
 	colors[res].Printf("== Summary %s ==\n", sectionName)
-	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
-		summary.Pass, summary.Fail, summary.Warn, summary.Info,
+	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n%d checks SKIP\n%d checks MANU\n%d checks ERRO\n\n",
+		summary.Pass,
+		summary.Fail,
+		summary.Warn,
+		summary.Info,
+		summary.Skip,
+		summary.Manu,
+		summary.Erro,
 	)
 }
 
@@ -386,7 +398,7 @@ func isThisNodeRunning(nodeType check.NodeType) bool {
 
 func exitCodeSelection(controlsCollection []*check.Controls) int {
 	for _, control := range controlsCollection {
-		if control.Fail > 0 {
+		if control.Fail > 0 || control.Erro > 0 {
 			return exitCode
 		}
 	}
@@ -492,6 +504,9 @@ func getSummaryTotals(controlsCollection []*check.Controls) check.Summary {
 		totalSummary.Warn = totalSummary.Warn + summary.Warn
 		totalSummary.Pass = totalSummary.Pass + summary.Pass
 		totalSummary.Info = totalSummary.Info + summary.Info
+		totalSummary.Skip = totalSummary.Skip + summary.Skip
+		totalSummary.Manu = totalSummary.Manu + summary.Manu
+		totalSummary.Erro = totalSummary.Erro + summary.Erro
 	}
 	return totalSummary
 }

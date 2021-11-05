@@ -38,9 +38,12 @@ const (
 	WARN State = "WARN"
 	// INFO informational message
 	INFO State = "INFO"
-
 	// SKIP for when a check should be skipped.
-	SKIP = "skip"
+	SKIP State = "SKIP"
+	// MANU for when a check is manual.
+	MANU State = "MANU"
+	// ERRO for errors in tests.
+	ERRO State = "ERRO"
 
 	// MASTER a master node
 	MASTER NodeType = "master"
@@ -58,8 +61,11 @@ const (
 	// MANAGEDSERVICES a node to run managedservices from
 	MANAGEDSERVICES = "managedservices"
 
-	// MANUAL Check Type
-	MANUAL string = "manual"
+	// TypeSkip is skip check type.
+	TypeSkip = "skip"
+
+	// TypeManual is manual check type.
+	TypeManual = "manual"
 )
 
 // Check contains information about a recommendation in the
@@ -118,18 +124,18 @@ func (c *Check) run() State {
 		return c.State
 	}
 
-	// If check type is skip, force result to INFO
-	if c.Type == SKIP {
+	// If check type is skip, force result to SKIP
+	if c.Type == TypeSkip {
 		c.Reason = "Test marked as skip"
-		c.State = INFO
+		c.State = SKIP
 		glog.V(3).Info(c.Reason)
 		return c.State
 	}
 
-	// If check type is manual force result to WARN
-	if c.Type == MANUAL {
+	// If check type is manual, force result to MANU
+	if c.Type == TypeManual {
 		c.Reason = "Test marked as a manual test"
-		c.State = WARN
+		c.State = MANU
 		glog.V(3).Info(c.Reason)
 		return c.State
 	}
@@ -172,11 +178,7 @@ func (c *Check) run() State {
 
 	if err != nil {
 		c.Reason = err.Error()
-		if c.Scored {
-			c.State = FAIL
-		} else {
-			c.State = WARN
-		}
+		c.State = ERRO
 		glog.V(3).Info(c.Reason)
 	}
 

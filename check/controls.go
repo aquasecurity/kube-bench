@@ -64,6 +64,9 @@ type Group struct {
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
 	Info   int      `json:"info"`
+	Skip   int      `json:"skip"`
+	Manu   int      `json:"manu"`
+	Erro   int      `json:"erro"`
 	Text   string   `json:"desc"`
 	Checks []*Check `json:"results"`
 }
@@ -74,6 +77,9 @@ type Summary struct {
 	Fail int `json:"total_fail"`
 	Warn int `json:"total_warn"`
 	Info int `json:"total_info"`
+	Skip int `json:"total_skip"`
+	Manu int `json:"total_manu"`
+	Erro int `json:"total_erro"`
 }
 
 // Predicate a predicate on the given Group and Check arguments.
@@ -99,7 +105,7 @@ func NewControls(t NodeType, in []byte, detectedVersion string) (*Controls, erro
 func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
+	controls.Summary = Summary{}
 
 	for _, group := range controls.Groups {
 		for _, check := range group.Checks {
@@ -111,8 +117,8 @@ func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap m
 			_, groupSkippedViaCmd := skipIDMap[group.ID]
 			_, checkSkippedViaCmd := skipIDMap[check.ID]
 
-			if group.Type == SKIP || groupSkippedViaCmd || checkSkippedViaCmd {
-				check.Type = SKIP
+			if group.Type == TypeSkip || groupSkippedViaCmd || checkSkippedViaCmd {
+				check.Type = TypeSkip
 			}
 
 			state := runner.Run(check)
@@ -158,8 +164,14 @@ func (controls *Controls) JUnit() ([]byte, error) {
 	suite := reporters.JUnitTestSuite{
 		Name:      controls.Text,
 		TestCases: []reporters.JUnitTestCase{},
-		Tests:     controls.Summary.Pass + controls.Summary.Fail + controls.Summary.Info + controls.Summary.Warn,
-		Failures:  controls.Summary.Fail,
+		Tests: controls.Summary.Pass +
+			controls.Summary.Fail +
+			controls.Summary.Info +
+			controls.Summary.Warn +
+			controls.Summary.Skip +
+			controls.Summary.Manu +
+			controls.Summary.Erro,
+		Failures: controls.Summary.Fail,
 	}
 	for _, g := range controls.Groups {
 		for _, check := range g.Checks {
@@ -179,11 +191,10 @@ func (controls *Controls) JUnit() ([]byte, error) {
 			}
 
 			switch check.State {
-			case FAIL:
+			case FAIL, ERRO:
 				tc.FailureMessage = &reporters.JUnitFailureMessage{Message: check.Remediation}
-			case WARN, INFO:
-				// WARN and INFO are two different versions of skipped tests. Either way it would be a false positive/negative to report
-				// it any other way.
+			case WARN, INFO, SKIP, MANU:
+				// Different versions of skipped tests. It would be a false positive/negative to report it any other way.
 				tc.Skipped = &reporters.JUnitSkipped{}
 			case PASS:
 			default:
@@ -226,7 +237,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	tf := ti.Format(time.RFC3339)
 	for _, g := range controls.Groups {
 		for _, check := range g.Checks {
-			if check.State == FAIL || check.State == WARN {
+			if check.State == FAIL || check.State == WARN || check.State == MANU || check.State == ERRO {
 				// ASFF ProductFields['Actual result'] can't be longer than 1024 characters
 				actualValue := check.ActualValue
 				remediation := check.Remediation
@@ -292,6 +303,7 @@ func getConfig(name string) (string, error) {
 	}
 	return r, nil
 }
+
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:
@@ -302,6 +314,12 @@ func summarize(controls *Controls, state State) {
 		controls.Summary.Warn++
 	case INFO:
 		controls.Summary.Info++
+	case SKIP:
+		controls.Summary.Skip++
+	case MANU:
+		controls.Summary.Manu++
+	case ERRO:
+		controls.Summary.Erro++
 	default:
 		glog.Warningf("Unrecognized state %s", state)
 	}
@@ -317,6 +335,12 @@ func summarizeGroup(group *Group, state State) {
 		group.Warn++
 	case INFO:
 		group.Info++
+	case SKIP:
+		group.Skip++
+	case MANU:
+		group.Manu++
+	case ERRO:
+		group.Erro++
 	default:
 		glog.Warningf("Unrecognized state %s", state)
 	}

@@ -22,7 +22,10 @@ var (
 		check.PASS: color.New(color.FgGreen),
 		check.FAIL: color.New(color.FgRed),
 		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgBlue),
+		check.INFO: color.New(color.FgCyan),
+		check.SKIP: color.New(color.FgBlue),
+		check.MANU: color.New(color.FgWhite),
+		check.ERRO: color.New(color.FgMagenta),
 	}
 )
 

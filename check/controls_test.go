@@ -132,10 +132,10 @@ groups:
 		controls.RunChecks(normalRunner, allChecks, skipMap)
 
 		G1 := controls.Groups[0]
-		assertEqualGroupSummary(t, 0, 0, 3, 0, G1)
+		assertEqualGroupSummary(t, 0, 0, 0, 0, 3, 0, 0, G1)
 
 		G2 := controls.Groups[1]
-		assertEqualGroupSummary(t, 0, 0, 2, 0, G2)
+		assertEqualGroupSummary(t, 0, 0, 0, 0, 2, 0, 0, G2)
 	})
 }
 
@@ -163,7 +163,7 @@ groups:
 		controls.RunChecks(normalRunner, allChecks, emptySkipList)
 
 		G1 := controls.Groups[0]
-		assertEqualGroupSummary(t, 0, 0, 1, 0, G1)
+		assertEqualGroupSummary(t, 0, 0, 0, 0, 1, 0, 0, G1)
 	})
 }
 
@@ -214,7 +214,7 @@ groups:
 		G1 := controls.Groups[0]
 		assert.Equal(t, "G1", G1.ID)
 		assert.Equal(t, "G1/C1", G1.Checks[0].ID)
-		assertEqualGroupSummary(t, 1, 0, 0, 0, G1)
+		assertEqualGroupSummary(t, 1, 0, 0, 0, 0, 0, 0, G1)
 		// and
 		G2 := controls.Groups[1]
 		assert.Equal(t, "G2", G2.ID)
@@ -225,12 +225,15 @@ groups:
 		assert.Equal(t, "SomeSampleFlag=true", G2.Checks[0].Tests.TestItems[0].Flag)
 		assert.Equal(t, "Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.\n", G2.Checks[0].Remediation)
 		assert.Equal(t, true, G2.Checks[0].Scored)
-		assertEqualGroupSummary(t, 0, 1, 0, 0, G2)
+		assertEqualGroupSummary(t, 0, 1, 0, 0, 0, 0, 0, G2)
 		// and
 		assert.Equal(t, 1, controls.Summary.Pass)
 		assert.Equal(t, 1, controls.Summary.Fail)
 		assert.Equal(t, 0, controls.Summary.Info)
 		assert.Equal(t, 0, controls.Summary.Warn)
+		assert.Equal(t, 0, controls.Summary.Skip)
+		assert.Equal(t, 0, controls.Summary.Manu)
+		assert.Equal(t, 0, controls.Summary.Erro)
 		// and
 		runner.AssertExpectations(t)
 	})
@@ -267,6 +270,9 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
 					Pass: 100,
 					Warn: 101,
 					Info: 102,
+					Skip: 0,
+					Manu: 0,
+					Erro: 0,
 				},
 				Groups: []*Group{
 					{
@@ -283,7 +289,7 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
     </testcase>
 </testsuite>`),
 		}, {
-			desc: "Warn and Info are considered skips and failed tests properly reported",
+			desc: "WARN, INFO, SKIP, MANU are considered skips and failed tests properly reported",
 			input: &Controls{
 				Groups: []*Group{
 					{
@@ -293,6 +299,9 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
 							{ID: "check2id", Text: "check2text", State: INFO},
 							{ID: "check3id", Text: "check3text", State: WARN},
 							{ID: "check4id", Text: "check4text", State: FAIL},
+							{ID: "check5id", Text: "check5text", State: SKIP},
+							{ID: "check6id", Text: "check6text", State: MANU},
+							{ID: "check7id", Text: "check7text", State: ERRO},
 						},
 					},
 				},
@@ -312,6 +321,18 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
     <testcase name="check4id check4text" classname="" time="0">
         <failure type=""></failure>
         <system-out>{&#34;test_number&#34;:&#34;check4id&#34;,&#34;test_desc&#34;:&#34;check4text&#34;,&#34;audit&#34;:&#34;&#34;,&#34;AuditEnv&#34;:&#34;&#34;,&#34;AuditConfig&#34;:&#34;&#34;,&#34;type&#34;:&#34;&#34;,&#34;remediation&#34;:&#34;&#34;,&#34;test_info&#34;:null,&#34;status&#34;:&#34;FAIL&#34;,&#34;actual_value&#34;:&#34;&#34;,&#34;scored&#34;:false,&#34;IsMultiple&#34;:false,&#34;expected_result&#34;:&#34;&#34;}</system-out>
+    </testcase>
+    <testcase name="check5id check5text" classname="" time="0">
+        <skipped></skipped>
+        <system-out>{&#34;test_number&#34;:&#34;check5id&#34;,&#34;test_desc&#34;:&#34;check5text&#34;,&#34;audit&#34;:&#34;&#34;,&#34;AuditEnv&#34;:&#34;&#34;,&#34;AuditConfig&#34;:&#34;&#34;,&#34;type&#34;:&#34;&#34;,&#34;remediation&#34;:&#34;&#34;,&#34;test_info&#34;:null,&#34;status&#34;:&#34;SKIP&#34;,&#34;actual_value&#34;:&#34;&#34;,&#34;scored&#34;:false,&#34;IsMultiple&#34;:false,&#34;expected_result&#34;:&#34;&#34;}</system-out>
+    </testcase>
+    <testcase name="check6id check6text" classname="" time="0">
+        <skipped></skipped>
+        <system-out>{&#34;test_number&#34;:&#34;check6id&#34;,&#34;test_desc&#34;:&#34;check6text&#34;,&#34;audit&#34;:&#34;&#34;,&#34;AuditEnv&#34;:&#34;&#34;,&#34;AuditConfig&#34;:&#34;&#34;,&#34;type&#34;:&#34;&#34;,&#34;remediation&#34;:&#34;&#34;,&#34;test_info&#34;:null,&#34;status&#34;:&#34;MANU&#34;,&#34;actual_value&#34;:&#34;&#34;,&#34;scored&#34;:false,&#34;IsMultiple&#34;:false,&#34;expected_result&#34;:&#34;&#34;}</system-out>
+    </testcase>
+    <testcase name="check7id check7text" classname="" time="0">
+        <failure type=""></failure>
+        <system-out>{&#34;test_number&#34;:&#34;check7id&#34;,&#34;test_desc&#34;:&#34;check7text&#34;,&#34;audit&#34;:&#34;&#34;,&#34;AuditEnv&#34;:&#34;&#34;,&#34;AuditConfig&#34;:&#34;&#34;,&#34;type&#34;:&#34;&#34;,&#34;remediation&#34;:&#34;&#34;,&#34;test_info&#34;:null,&#34;status&#34;:&#34;ERRO&#34;,&#34;actual_value&#34;:&#34;&#34;,&#34;scored&#34;:false,&#34;IsMultiple&#34;:false,&#34;expected_result&#34;:&#34;&#34;}</system-out>
     </testcase>
 </testsuite>`),
 		},
@@ -355,12 +376,15 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
 	}
 }
 
-func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn int, actual *Group) {
+func assertEqualGroupSummary(t *testing.T, pass, fail, info, warn, skip, manu, erro int, actual *Group) {
 	t.Helper()
 	assert.Equal(t, pass, actual.Pass)
 	assert.Equal(t, fail, actual.Fail)
 	assert.Equal(t, info, actual.Info)
 	assert.Equal(t, warn, actual.Warn)
+	assert.Equal(t, skip, actual.Skip)
+	assert.Equal(t, manu, actual.Manu)
+	assert.Equal(t, erro, actual.Erro)
 }
 
 func TestControls_ASFF(t *testing.T) {
@@ -388,6 +412,9 @@ func TestControls_ASFF(t *testing.T) {
 					Pass: 100,
 					Warn: 101,
 					Info: 102,
+					Skip: 0,
+					Manu: 0,
+					Erro: 0,
 				},
 				Groups: []*Group{
 					{
