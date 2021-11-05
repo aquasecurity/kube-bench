@@ -205,24 +205,29 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print remediations.
 	if !noRemediations {
+		var remediationOutput strings.Builder
 		if summary.Fail > 0 || summary.Warn > 0 {
-			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State == check.FAIL {
-						fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					if c.State == check.FAIL && printStatus(check.FAIL) {
+						remediationOutput.WriteString(fmt.Sprintf("%s %s\n", c.ID, c.Remediation))
 					}
-					if c.State == check.WARN {
+					if c.State == check.WARN && printStatus(check.WARN) {
 						// Print the error if test failed due to problem with the audit command
 						if c.Reason != "" && c.Type != "manual" {
-							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
+							remediationOutput.WriteString(fmt.Sprintf("%s audit test did not run: %s\n", c.ID, c.Reason))
 						} else {
-							fmt.Printf("%s %s\n", c.ID, c.Remediation)
+							remediationOutput.WriteString(fmt.Sprintf("%s %s\n", c.ID, c.Remediation))
 						}
 					}
 				}
 			}
-			fmt.Println()
+			output := remediationOutput.String()
+			if len(output) > 0 {
+				remediationOutput.WriteString("\n")
+				fmt.Printf(colors[check.WARN].Sprintf("== Remediations %s ==\n", r.Type))
+				fmt.Printf(remediationOutput.String())
+			}
 		}
 	}
 

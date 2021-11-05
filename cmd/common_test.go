@@ -756,27 +756,35 @@ func TestWriteStdoutOutputStatusList(t *testing.T) {
 		statusList string
 
 		notContains []string
+		contains    []string
 	}
 	testCases := []testCase{
 		{
 			name:        "statusList PASS",
 			statusList:  "PASS",
-			notContains: []string{"INFO", "WARN", "FAIL"},
+			notContains: []string{"INFO", "WARN", "FAIL", "== Remediations controlplane =="},
 		},
 		{
 			name:        "statusList PASS,INFO",
 			statusList:  "PASS,INFO",
-			notContains: []string{"WARN", "FAIL"},
+			notContains: []string{"WARN", "FAIL", "== Remediations controlplane =="},
+		},
+		{
+			name:        "statusList WARN",
+			statusList:  "WARN",
+			notContains: []string{"INFO", "FAIL", "PASS"},
+			contains:    []string{"== Remediations controlplane =="},
 		},
 		{
 			name:        "statusList FAIL",
 			statusList:  "FAIL",
-			notContains: []string{"INFO", "WARN", "PASS"},
+			notContains: []string{"INFO", "WARN", "PASS", "== Remediations controlplane =="},
 		},
 		{
 			name:        "statusList empty",
 			statusList:  "",
 			notContains: nil,
+			contains:    []string{"== Remediations controlplane =="},
 		},
 	}
 
@@ -800,6 +808,10 @@ func TestWriteStdoutOutputStatusList(t *testing.T) {
 
 		for _, n := range tt.notContains {
 			assert.NotContains(t, string(out), n)
+		}
+
+		for _, c := range tt.contains {
+			assert.Contains(t, string(out), c)
 		}
 	}
 }
