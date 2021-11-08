@@ -84,7 +84,7 @@ groups:
         scored: true
 
       - id: 4.1.6
-        text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)"
+        text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
         tests:
           test_items:
@@ -93,7 +93,7 @@ groups:
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
           chown root:root $kubeletkubeconfig
-        scored: false
+        scored: true
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Manual)"
