@@ -1,6 +1,6 @@
 ---
 controls:
-version: "eks-1.0"
+version: "aks-1.0"
 id: 5
 text: "Managed Services"
 type: "managedservices"
