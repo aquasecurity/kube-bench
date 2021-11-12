@@ -336,6 +336,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
+        scored: true
 
       - id: 3.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (Scored)"
