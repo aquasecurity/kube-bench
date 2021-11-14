@@ -7,7 +7,8 @@ IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
 GOOS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
-ARCHS ?= amd64 arm64
+BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm
+DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
@@ -25,29 +26,17 @@ KIND_IMAGE ?= kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618
 
 # build a multi-arch image and push to Docker hub
 .PHONY: docker
-docker: publish manifests
-
-# build and push an arch-specific image
-.PHONY: $(ARCHS) manifests publish
-publish: $(ARCHS)
-$(ARCHS):
-	@echo "Building Docker image for $@"
-	docker build -t ${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION} \
-	--build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH) ./
-	@echo "Push $@ Docker image to ${DOCKER_ORG}/${BINARY}"
-	docker push ${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}
-	docker manifest create --amend "${DOCKER_ORG}/${BINARY}:${VERSION}" "${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}"
-	docker manifest annotate "${DOCKER_ORG}/${BINARY}:${VERSION}" "${DOCKER_ORG}/${BINARY}:$(GOOS)-$(GOARCH)-${VERSION}" --os=$(GOOS) --arch=$(GOARCH)
-
-# push the multi-arch manifest
-manifests:
-	@echo "Push manifest for ${DOCKER_ORG}/${BINARY}:${VERSION}"
-	docker manifest push "${DOCKER_ORG}/${BINARY}:${VERSION}"
+docker:
+	set -xe; \
+	for org in $(DOCKER_ORGS); do \
+		docker buildx build --tag $${org}/kube-bench:${VERSION} \
+		--platform $(BUILDX_PLATFORM) --push . ; \
+	done
 
 build: $(BINARY)
 
 $(BINARY): $(SOURCES)
-	GOOS=$(GOOS) go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+	GOOS=$(GOOS) CGO_ENABLED=0 go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
 # builds the current dev docker version
 build-docker:

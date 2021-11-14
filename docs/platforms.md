@@ -13,5 +13,6 @@ Some defined by other hardenening guides.
 | CIS | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
 | CIS | [EKS 1.0.0](https://workbench.cisecurity.org/benchmarks/5190) | eks-1.0 | EKS |
 | CIS | [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467) | ack-1.0 | ACK |
+| CIS | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347) | aks-1.0 | AKS |
 | RHEL | RedHat OpenShift hardening guide | rh-0.7 | OCP 3.10-3.11 |
 | CIS | [OCP4 1.1.0](https://workbench.cisecurity.org/benchmarks/6778) | rh-1.0 | OCP 4.1- |
