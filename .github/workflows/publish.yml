@@ -52,9 +52,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           builder: ${{ steps.buildx.outputs.name }}
           push: true
+          build-args: |
+            KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
