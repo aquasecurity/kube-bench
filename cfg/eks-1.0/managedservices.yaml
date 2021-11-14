@@ -9,25 +9,25 @@ groups:
     text: "Image Registry and Image Scanning"
     checks:
       - id: 5.1.1
-        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Not Scored)"
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.1.2
-        text: "Minimize user access to Amazon ECR (Not Scored)"
+        text: "Minimize user access to Amazon ECR (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.1.3
-        text: "Minimize cluster access to read-only for Amazon ECR (Not Scored)"
+        text: "Minimize cluster access to read-only for Amazon ECR (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.1.4
-        text: "Minimize Container Registries to only those approved (Not Scored)"
+        text: "Minimize Container Registries to only those approved (Manual)"
         type: "manual"
         remediation:
         scored: false
@@ -36,16 +36,16 @@ groups:
     text: "Identity and Access Management (IAM)"
     checks:
       - id: 5.2.1
-        text: "Prefer using dedicated Amazon EKS Service Accounts (Not Scored)"
+        text: "Prefer using dedicated Amazon EKS Service Accounts (Manual)"
         type: "manual"
         remediation:
         scored: false
 
   - id: 5.3
-    text: "AWS Key Management Service (AWS KMS)"
+    text: "AWS Key Management Service (KMS)"
     checks:
       - id: 5.3.1
-        text: "Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS (Not Scored)"
+        text: "Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS (Manual)"
         type: "manual"
         remediation:
         scored: false
@@ -54,31 +54,31 @@ groups:
     text: "Cluster Networking"
     checks:
       - id: 5.4.1
-        text: "Restrict Access to the Control Plane Endpoint (Not Scored)"
+        text: "Restrict Access to the Control Plane Endpoint (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.4.2
-        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Not Scored)"
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.4.3
-        text: "Ensure clusters are created with Private Nodes (Not Scored)"
+        text: "Ensure clusters are created with Private Nodes (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.4.4
-        text: "Ensure Network Policy is Enabled and set as appropriate (Not Scored)"
+        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
         type: "manual"
         remediation:
         scored: false
 
       - id: 5.4.5
-        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Not Scored)"
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
         type: "manual"
         remediation:
         scored: false
@@ -88,7 +88,7 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 5.5.1
-        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes (Not Scored)"
+        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes (Manual)"
         type: "manual"
         remediation:
         scored: false
@@ -98,7 +98,7 @@ groups:
     text: "Other Cluster Configurations"
     checks:
       - id: 5.6.1
-        text: "Consider Fargate for running untrusted workloads (Not Scored)"
+        text: "Consider Fargate for running untrusted workloads (Manual)"
         type: "manual"
         remediation:
         scored: false
