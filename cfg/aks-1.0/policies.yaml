@@ -182,7 +182,7 @@ groups:
       - id: 4.6.1
         text: "Verify that admission controllers are working as expected (Manual)"
         type: "manual"
-        remediation:
+        remediation: "No remediation"
         scored: false
 
   - id: 4.7
