@@ -1,6 +1,6 @@
 ---
 controls:
-version: "eks-1.0"
+version: "eks-1.0.1"
 id: 2
 text: "Control Plane Configuration"
 type: "controlplane"

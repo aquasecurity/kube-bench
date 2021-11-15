@@ -455,7 +455,7 @@ func getPlatformBenchmarkVersion(platform string) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform {
 	case "eks":
-		return "eks-1.0"
+		return "eks-1.0.1"
 	case "gke":
 		return "gke-1.0"
 	case "aliyun":
