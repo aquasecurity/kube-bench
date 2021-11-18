@@ -13,7 +13,7 @@ spec:
           # image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
           image: aquasec/kube-bench:latest
           # To send findings to AWS Security Hub, refer to `job-eks-asff.yaml` instead
-          command: ["kube-bench", "run", "--targets", "node", "--benchmark", "eks-1.0"]
+          command: ["kube-bench", "run", "--targets", "node", "--benchmark", "eks-1.0.1"]
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
