@@ -1,6 +1,6 @@
 ---
 controls:
-version: "eks-1.0"
+version: "eks-1.0.1"
 id: 3
 text: "Worker Node Security Configuration"
 type: "node"
@@ -9,127 +9,62 @@ groups:
     text: "Worker Node Configuration Files"
     checks:
       - id: 3.1.1
-        text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %a $proxykubeconfig; fi'' '
+        text: "Ensure that the kubeconfig file permissions are set to 644 or more restrictive (Manual)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
         tests:
           test_items:
-            - flag: "644"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-              set: true
-            - flag: "640"
-              compare:
-                op: eq
-                value: "640"
-              set: true
-            - flag: "600"
-              compare:
-                op: eq
-                value: "600"
-              set: true
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
-          Run the below command (based on the file location on your system) on each worker node.
+          Run the below command (based on the file location on your system) on the each worker node.
           For example,
-          chmod 644 $proxykubeconfig
-        scored: true
+          chmod 644 $kubeletkubeconfig
+        scored: false
 
       - id: 3.1.2
-        text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        text: "Ensure that the kubelet kubeconfig file ownership is set to root:root (Manual)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
         tests:
           test_items:
             - flag: root:root
-              set: true
         remediation: |
-          Run the below command (based on the file location on your system) on each worker node.
-          For example, chown root:root $proxykubeconfig
-        scored: true
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chown root:root $kubeletkubeconfig
+        scored: false
 
       - id: 3.1.3
-        text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %a $kubeletconf; fi'' '
+        text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Manual)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
-            - flag: "644"
-              set: true
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
-            - flag: "640"
-              set: true
-              compare:
-                op: eq
-                value: "640"
-            - flag: "600"
-              set: true
-              compare:
-                op: eq
-                value: "600"
-            - flag: "444"
-              compare:
-                op: eq
-                value: "444"
-              set: true
-            - flag: "440"
-              compare:
-                op: eq
-                value: "440"
-              set: true
-            - flag: "400"
-              compare:
-                op: eq
-                value: "400"
-              set: true
-            - flag: "000"
-              compare:
-                op: eq
-                value: "000"
-              set: true
-          bin_op: or
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chmod 644 $kubeletconf
-        scored: true
+        scored: false
 
       - id: 3.1.4
-        text: "Ensure that the kubelet configuration file ownership is set to root:root (Scored)"
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Manual)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
         tests:
           test_items:
             - flag: root:root
-              set: true
         remediation: |
-          Run the following command (using the config file location identied in the Audit step)
+          Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
-        scored: true
+        scored: false
 
   - id: 3.2
     text: "Kubelet"
     checks:
       - id: 3.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Scored)"
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -153,7 +88,7 @@ groups:
         scored: true
 
       - id: 3.2.2
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)"
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -176,7 +111,7 @@ groups:
         scored: true
 
       - id: 3.2.3
-        text: "Ensure that the --client-ca-file argument is set as appropriate (Scored)"
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -194,10 +129,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
 
       - id: 3.2.4
-        text: "Ensure that the --read-only-port argument is set to 0 (Scored)"
+        text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -217,10 +152,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
 
       - id: 3.2.5
-        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)"
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -245,10 +180,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
 
       - id: 3.2.6
-        text: "Ensure that the --protect-kernel-defaults argument is set to true (Scored)"
+        text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -271,7 +206,7 @@ groups:
         scored: true
 
       - id: 3.2.7
-        text: "Ensure that the --make-iptables-util-chains argument is set to true (Scored) "
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated) "
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -298,7 +233,7 @@ groups:
         scored: true
 
       - id: 3.2.8
-        text: "Ensure that the --hostname-override argument is not set (Scored)"
+        text: "Ensure that the --hostname-override argument is not set (Manual)"
         # This is one of those properties that can only be set as a command line argument.
         # To check if the property is set as expected, we need to parse the kubelet command
         # instead reading the Kubelet Configuration file.
@@ -314,10 +249,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
 
       - id: 3.2.9
-        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Scored)"
+        text: "Ensure that the --eventRecordQPS argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -339,7 +274,7 @@ groups:
         scored: false
 
       - id: 3.2.10
-        text: "Ensure that the --rotate-certificates argument is not set to false (Scored)"
+        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -364,10 +299,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
 
       - id: 3.2.11
-        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
+        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -385,4 +320,4 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: true
+        scored: false
