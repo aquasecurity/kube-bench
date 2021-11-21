@@ -1,25 +1,25 @@
 ---
 controls:
-version: "gke-1.0"
-id: 6
+version: "gke-1.2.0"
+id: 5
 text: "Managed Services"
 type: "managedservices"
 groups:
-  - id: 6.1
+  - id: 5.1
     text: "Image Registry and Image Scanning"
     checks:
-      - id: 6.1.1
+      - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
-        or a third-party provider (Scored)"
+        or a third-party provider (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
 
             gcloud services enable containerscanning.googleapis.com
-        scored: true
+        scored: false
 
-      - id: 6.1.2
-        text: "Minimize user access to GCR (Scored)"
+      - id: 5.1.2
+        text: "Minimize user access to GCR (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -47,10 +47,10 @@ groups:
             and apply it using:
 
               gcloud projects set-iam-policy [PROJECT_ID] [POLICY_FILE]
-        scored: true
+        scored: false
 
-      - id: 6.1.3
-        text: "Minimize cluster access to read-only for GCR (Scored)"
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for GCR (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -78,10 +78,10 @@ groups:
               modify the Projects IAM policy file accordingly, then upload it using:
 
                 gcloud projects set-iam-policy [PROJECT_ID] [POLICY_FILE]
-        scored: true
+        scored: false
 
-      - id: 6.1.4
-        text: "Minimize Container Registries to only those approved (Not Scored)"
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -97,12 +97,12 @@ groups:
               gcloud container binauthz policy import [YAML_POLICY]
         scored: false
 
-  - id: 6.2
+  - id: 5.2
     text: "Identity and Access Management (IAM)"
     checks:
-      - id: 6.2.1
+      - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine
-        default service account (Scored)"
+        default service account (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -135,10 +135,10 @@ groups:
 
             You will need to migrate your workloads to the new Node pool, and delete Node pools that
             use the default service account to complete the remediation.
-        scored: true
+        scored: false
 
-      - id: 6.2.2
-        text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Not Scored)"
+      - id: 5.2.2
+        text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -161,11 +161,11 @@ groups:
             pools are updated, it may be more appropriate to create new Node Pools.
         scored: false
 
-  - id: 6.3
+  - id: 5.3
     text: "Cloud Key Management Service (Cloud KMS)"
     checks:
-      - id: 6.3.1
-        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Scored)"
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -209,13 +209,13 @@ groups:
                 --zone [ZONE] \
                 --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME] \
                 --project [CLUSTER_PROJECT_ID]
-        scored: true
+        scored: false
 
-  - id: 6.4
+  - id: 5.4
     text: "Node Metadata"
     checks:
-      - id: 6.4.1
-        text: "Ensure legacy Compute Engine instance metadata APIs are Disabled (Scored)"
+      - id: 5.4.1
+        text: "Ensure legacy Compute Engine instance metadata APIs are Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -229,10 +229,10 @@ groups:
 
             You will need to migrate workloads from any existing non-conforming Node pools, to the
             new Node pool, then delete non-conforming Node pools to complete the remediation.
-        scored: true
+        scored: false
 
-      - id: 6.4.2
-        text: "Ensure the GKE Metadata Server is Enabled (Not Scored)"
+      - id: 5.4.2
+        text: "Ensure the GKE Metadata Server is Enabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -252,11 +252,11 @@ groups:
             identity.
         scored: false
 
-  - id: 6.5
+  - id: 5.5
     text: "Node Configuration and Maintenance"
     checks:
-      - id: 6.5.1
-        text: "Ensure Container-Optimized OS (COS) is used for GKE node images (Scored)"
+      - id: 5.5.1
+        text: "Ensure Container-Optimized OS (COS) is used for GKE node images (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -265,10 +265,10 @@ groups:
               gcloud container clusters upgrade [CLUSTER_NAME]\
                 --image-type cos \
                 --zone [COMPUTE_ZONE] --node-pool [POOL_NAME]
-        scored: true
+        scored: false
 
-      - id: 6.5.2
-        text: "Ensure Node Auto-Repair is enabled for GKE nodes (Scored)"
+      - id: 5.5.2
+        text: "Ensure Node Auto-Repair is enabled for GKE nodes (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -278,10 +278,10 @@ groups:
               gcloud container node-pools update [POOL_NAME] \
                 --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
                 --enable-autorepair
-        scored: true
+        scored: false
 
-      - id: 6.5.3
-        text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Scored)"
+      - id: 5.5.3
+        text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -291,10 +291,10 @@ groups:
               gcloud container node-pools update [NODE_POOL] \
                 --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
                 --enable-autoupgrade
-        scored: true
+        scored: false
 
-      - id: 6.5.4
-        text: "Automate GKE version management using Release Channels (Not Scored)"
+      - id: 5.5.4
+        text: "Automate GKE version management using Release Channels (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -307,8 +307,8 @@ groups:
             where [RELEASE_CHANNEL] is stable or regular according to your needs.
         scored: false
 
-      - id: 6.5.5
-        text: "Ensure Shielded GKE Nodes are Enabled (Not Scored)"
+      - id: 5.5.5
+        text: "Ensure Shielded GKE Nodes are Enabled (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -323,21 +323,24 @@ groups:
             newly created Node pool, then delete the non-conforming pools.
         scored: false
 
-      - id: 6.5.6
-        text: "Ensure Shielded GKE Nodes are Enabled (Not Scored)"
+      - id: 5.5.6
+        text: "Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
-            To migrate an existing cluster, you will need to specify the --enable-shielded-nodes flag
-            on a cluster update command:
+            To create a Node pool within the cluster with Integrity Monitoring enabled, run the
+            following command:
 
-              gcloud beta container clusters update [CLUSTER_NAME] \
-                --zone [CLUSTER_ZONE] \
-                --enable-shielded-nodes
+              gcloud beta container node-pools create [NODEPOOL_NAME] \
+                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --shielded-integrity-monitoring
+
+          You will also need to migrate workloads from existing non-conforming Node pools to the newly created Node pool,
+          then delete the non-conforming pools.
         scored: false
 
-      - id: 6.5.7
-        text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Not Scored)"
+      - id: 5.5.7
+        text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -352,11 +355,11 @@ groups:
             newly created Node pool, then delete the non-conforming pools.
         scored: false
 
-  - id: 6.6
+  - id: 5.6
     text: "Cluster Networking"
     checks:
-      - id: 6.6.1
-        text: "Enable VPC Flow Logs and Intranode Visibility (Not Scored)"
+      - id: 5.6.1
+        text: "Enable VPC Flow Logs and Intranode Visibility (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -366,8 +369,8 @@ groups:
                 --enable-intra-node-visibility
         scored: false
 
-      - id: 6.6.2
-        text: "Ensure use of VPC-native clusters (Scored)"
+      - id: 5.6.2
+        text: "Ensure use of VPC-native clusters (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -376,10 +379,10 @@ groups:
               gcloud container clusters create [CLUSTER_NAME] \
                 --zone [COMPUTE_ZONE] \
                 --enable-ip-alias
-        scored: true
+        scored: false
 
-      - id: 6.6.3
-        text: "Ensure Master Authorized Networks is Enabled (Scored)"
+      - id: 5.6.3
+        text: "Ensure Master Authorized Networks is Enabled (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -400,10 +403,10 @@ groups:
 
             If Master Authorized Networks is disabled, the
             above command will return null ( { } ).
-        scored: true
+        scored: false
 
-      - id: 6.6.4
-        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Scored)"
+      - id: 5.6.4
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -415,10 +418,10 @@ groups:
 
             Setting this flag also requires the setting of --enable-private-nodes , --enable-ip-alias
             and --master-ipv4-cidr=[MASTER_CIDR_RANGE] .
-        scored: true
+        scored: false
 
-      - id: 6.6.5
-        text: "Ensure clusters are created with Private Nodes (Scored)"
+      - id: 5.6.5
+        text: "Ensure clusters are created with Private Nodes (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -430,10 +433,10 @@ groups:
 
             Setting this flag also requires the setting of --enable-ip-alias and --master-ipv4-
             cidr=[MASTER_CIDR_RANGE] .
-        scored: true
+        scored: false
 
-      - id: 6.6.6
-        text: "Consider firewalling GKE worker nodes (Not Scored)"
+      - id: 5.6.6
+        text: "Consider firewalling GKE worker nodes (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -454,8 +457,8 @@ groups:
                 --rules [RULES]
         scored: false
 
-      - id: 6.6.7
-        text: "Ensure Network Policy is Enabled and set as appropriate (Not Scored)"
+      - id: 5.6.7
+        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -472,8 +475,8 @@ groups:
                 --enable-network-policy
         scored: false
 
-      - id: 6.6.8
-        text: "Ensure use of Google-managed SSL Certificates (Not Scored)"
+      - id: 5.6.8
+        text: "Ensure use of Google-managed SSL Certificates (Manual)"
         type: "manual"
         remediation: |
           If services of type:LoadBalancer are discovered, consider replacing the Service with an
@@ -483,11 +486,11 @@ groups:
           as listed at https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs.
         scored: false
 
-  - id: 6.7
+  - id: 5.7
     text: "Logging"
     checks:
-      - id: 6.7.1
-        text: "Ensure Stackdriver Kubernetes Logging and Monitoring is Enabled (Scored)"
+      - id: 5.7.1
+        text: "Ensure Stackdriver Kubernetes Logging and Monitoring is Enabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -512,10 +515,10 @@ groups:
 
               gcloud container clusters update [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
                 --monitoring-service monitoring.googleapis.com
-        scored: true
+        scored: false
 
-      - id: 6.7.2
-        text: "Enable Linux auditd logging (Not Scored)"
+      - id: 5.7.2
+        text: "Enable Linux auditd logging (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -534,11 +537,11 @@ groups:
               kubectl get pods --namespace=cos-auditd
         scored: false
 
-  - id: 6.8
+  - id: 5.8
     text: "Authentication and Authorization"
     checks:
-      - id: 6.8.1
-        text: "Ensure Basic Authentication using static passwords is Disabled (Scored)"
+      - id: 5.8.1
+        text: "Ensure Basic Authentication using static passwords is Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -547,10 +550,10 @@ groups:
 
               gcloud container clusters update [CLUSTER_NAME] \
                 --no-enable-basic-auth
-        scored: true
+        scored: false
 
-      - id: 6.8.2
-        text: "Ensure authentication using Client Certificates is Disabled (Scored)"
+      - id: 5.8.2
+        text: "Ensure authentication using Client Certificates is Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -558,10 +561,10 @@ groups:
 
               gcloud container clusters create [CLUSTER_NAME] \
                 --no-issue-client-certificate
-        scored: true
+        scored: false
 
-      - id: 6.8.3
-        text: "Manage Kubernetes RBAC users with Google Groups for GKE (Not Scored)"
+      - id: 5.8.3
+        text: "Manage Kubernetes RBAC users with Google Groups for GKE (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -577,8 +580,8 @@ groups:
             reference your G Suite Groups.
         scored: false
 
-      - id: 6.8.4
-        text: "Ensure Legacy Authorization (ABAC) is Disabled (Scored)"
+      - id: 5.8.4
+        text: "Ensure Legacy Authorization (ABAC) is Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -587,13 +590,13 @@ groups:
               gcloud container clusters update [CLUSTER_NAME] \
                 --zone [COMPUTE_ZONE] \
                 --no-enable-legacy-authorization
-        scored: true
+        scored: false
 
-  - id: 6.9
+  - id: 5.9
     text: "Storage"
     checks:
-      - id: 6.9.1
-        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Not Scored)"
+      - id: 5.9.1
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -619,11 +622,11 @@ groups:
             engine/docs/how-to/using-cmek.
         scored: false
 
-  - id: 6.10
+  - id: 5.10
     text: "Other Cluster Configurations"
     checks:
-      - id: 6.10.1
-        text: "Ensure Kubernetes Web UI is Disabled (Scored)"
+      - id: 5.10.1
+        text: "Ensure Kubernetes Web UI is Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -632,10 +635,10 @@ groups:
               gcloud container clusters update [CLUSTER_NAME] \
                 --zone [ZONE] \
                 --update-addons=KubernetesDashboard=DISABLED
-        scored: true
+        scored: false
 
-      - id: 6.10.2
-        text: "Ensure that Alpha clusters are not used for production workloads (Scored)"
+      - id: 5.10.2
+        text: "Ensure that Alpha clusters are not used for production workloads (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -645,10 +648,10 @@ groups:
                 --zone [COMPUTE_ZONE]
 
             Do not use the --enable-kubernetes-alpha argument.
-        scored: true
+        scored: false
 
-      - id: 6.10.3
-        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Not Scored)"
+      - id: 5.10.3
+        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -659,8 +662,8 @@ groups:
                 --enable-pod-security-policy
         scored: false
 
-      - id: 6.10.4
-        text: "Consider GKE Sandbox for running untrusted workloads (Not Scored)"
+      - id: 5.10.4
+        text: "Consider GKE Sandbox for running untrusted workloads (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -673,8 +676,8 @@ groups:
                 --sandbox type=gvisor
         scored: false
 
-      - id: 6.10.5
-        text: "Ensure use of Binary Authorization (Scored)"
+      - id: 5.10.5
+        text: "Ensure use of Binary Authorization (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -691,10 +694,10 @@ groups:
             Import the policy file into Binary Authorization:
 
               gcloud container binauthz policy import [YAML_POLICY]
-        scored: true
+        scored: false
 
-      - id: 6.10.6
-        text: "Enable Cloud Security Command Center (Cloud SCC) (Not Scored)"
+      - id: 5.10.6
+        text: "Enable Cloud Security Command Center (Cloud SCC) (Manual)"
         type: "manual"
         remediation: |
           Using Command Line:

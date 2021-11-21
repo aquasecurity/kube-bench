@@ -585,7 +585,7 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			args: args{
 				platform: "gke",
 			},
-			want: "gke-1.0",
+			want: "gke-1.2.0",
 		},
 		{
 			name: "aliyun",
