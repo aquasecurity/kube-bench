@@ -130,7 +130,7 @@ func TestGetBinaries(t *testing.T) {
 			expectErr: false,
 		},
 		{
-			// "anotherthing" in list of components but doesn't have a defintion
+			// "anotherthing" in list of components but doesn't have a definition
 			config:    map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
 			psOut:     "kube-apiserver thing",
 			exp:       map[string]string{"apiserver": "kube-apiserver"},
