@@ -8,7 +8,7 @@ You can configure kube-bench with the `--asff` to send findings to AWS Security 
 * In the Security Hub console, under Integrations, search for kube-bench
 
 <p align="center">
-  <img src="../images/kube-bench-security-hub.png">
+  <img src="./images/kube-bench-security-hub.png">
 </p>
 
 * Click on `Accept findings`. This gives information about the IAM permissions required to send findings to your Security Hub account. kube-bench runs within a pod on your EKS cluster, and will need to be associated with a Role that has these permissions.
@@ -48,7 +48,7 @@ You can now run kube-bench as a pod in your cluster: `kubectl apply -f job-eks-a
 Findings will be generated for any kube-bench test that generates a `[FAIL]` or `[WARN]` output. If all tests pass, no findings will be generated. However, it's recommended that you consult the pod log output to check whether any findings were generated but could not be written to Security Hub.
 
 <p align="center">
-  <img src="../images/asff-example-finding.png">
+  <img src="./images/asff-example-finding.png">
 </p>
 
 [eks-instructions]: ../README.md#running-in-an-EKS-cluster
