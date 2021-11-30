@@ -1,0 +1,703 @@
+---
+controls:
+version: "gke-1.0"
+id: 6
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 6.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 6.1.1
+        text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
+        or a third-party provider (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+
+            gcloud services enable containerscanning.googleapis.com
+        scored: true
+
+      - id: 6.1.2
+        text: "Minimize user access to GCR (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To change roles at the GCR bucket level:
+            Firstly, run the following if read permissions are required:
+
+              gsutil iam ch [TYPE]:[EMAIL-ADDRESS]:objectViewer
+              gs://artifacts.[PROJECT_ID].appspot.com
+
+            Then remove the excessively privileged role (Storage Admin / Storage Object Admin /
+            Storage Object Creator) using:
+
+              gsutil iam ch -d [TYPE]:[EMAIL-ADDRESS]:[ROLE]
+              gs://artifacts.[PROJECT_ID].appspot.com
+
+            where:
+              [TYPE] can be one of the following:
+                    o user, if the [EMAIL-ADDRESS] is a Google account
+                    o serviceAccount, if [EMAIL-ADDRESS] specifies a Service account
+              [EMAIL-ADDRESS] can be one of the following:
+                    o a Google account (for example, someone@example.com)
+                    o a Cloud IAM service account
+                    To modify roles defined at the project level and subsequently inherited within the GCR
+                    bucket, or the Service Account User role, extract the IAM policy file, modify it accordingly
+            and apply it using:
+
+              gcloud projects set-iam-policy [PROJECT_ID] [POLICY_FILE]
+        scored: true
+
+      - id: 6.1.3
+        text: "Minimize cluster access to read-only for GCR (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            For an account explicitly granted to the bucket. First, add read access to the Kubernetes
+            Service Account
+
+              gsutil iam ch [TYPE]:[EMAIL-ADDRESS]:objectViewer
+              gs://artifacts.[PROJECT_ID].appspot.com
+
+              where:
+              [TYPE] can be one of the following:
+                      o user, if the [EMAIL-ADDRESS] is a Google account
+                      o serviceAccount, if [EMAIL-ADDRESS] specifies a Service account
+              [EMAIL-ADDRESS] can be one of the following:
+                      o a Google account (for example, someone@example.com)
+                      o a Cloud IAM service account
+
+              Then remove the excessively privileged role (Storage Admin / Storage Object Admin /
+              Storage Object Creator) using:
+
+                gsutil iam ch -d [TYPE]:[EMAIL-ADDRESS]:[ROLE]
+                gs://artifacts.[PROJECT_ID].appspot.com
+
+              For an account that inherits access to the GCR Bucket through Project level permissions,
+              modify the Projects IAM policy file accordingly, then upload it using:
+
+                gcloud projects set-iam-policy [PROJECT_ID] [POLICY_FILE]
+        scored: true
+
+      - id: 6.1.4
+        text: "Minimize Container Registries to only those approved (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            First, update the cluster to enable Binary Authorization:
+
+              gcloud container cluster update [CLUSTER_NAME] \
+                --enable-binauthz
+
+            Create a Binary Authorization Policy using the Binary Authorization Policy Reference
+            (https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) for guidance.
+            Import the policy file into Binary Authorization:
+
+              gcloud container binauthz policy import [YAML_POLICY]
+        scored: false
+
+  - id: 6.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 6.2.1
+        text: "Ensure GKE clusters are not running using the Compute Engine
+        default service account (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Firstly, create a minimally privileged service account:
+
+              gcloud iam service-accounts create [SA_NAME] \
+                --display-name "GKE Node Service Account"
+              export NODE_SA_EMAIL=`gcloud iam service-accounts list \
+                --format='value(email)' \
+                --filter='displayName:GKE Node Service Account'`
+
+            Grant the following roles to the service account:
+
+              export PROJECT_ID=`gcloud config get-value project`
+              gcloud projects add-iam-policy-binding $PROJECT_ID \
+                --member serviceAccount:$NODE_SA_EMAIL \
+                --role roles/monitoring.metricWriter
+              gcloud projects add-iam-policy-binding $PROJECT_ID \
+                --member serviceAccount:$NODE_SA_EMAIL \
+                --role roles/monitoring.viewer
+              gcloud projects add-iam-policy-binding $PROJECT_ID \
+                --member serviceAccount:$NODE_SA_EMAIL \
+                --role roles/logging.logWriter
+
+            To create a new Node pool using the Service account, run the following command:
+
+              gcloud container node-pools create [NODE_POOL] \
+                --service-account=[SA_NAME]@[PROJECT_ID].iam.gserviceaccount.com \
+                --cluster=[CLUSTER_NAME] --zone [COMPUTE_ZONE]
+
+            You will need to migrate your workloads to the new Node pool, and delete Node pools that
+            use the default service account to complete the remediation.
+        scored: true
+
+      - id: 6.2.2
+        text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+
+              gcloud beta container clusters update [CLUSTER_NAME] --zone [CLUSTER_ZONE] \
+                --identity-namespace=[PROJECT_ID].svc.id.goog
+
+            Note that existing Node pools are unaffected. New Node pools default to --workload-
+            metadata-from-node=GKE_METADATA_SERVER .
+
+            Then, modify existing Node pools to enable GKE_METADATA_SERVER:
+
+              gcloud beta container node-pools update [NODEPOOL_NAME] \
+                --cluster=[CLUSTER_NAME] --zone [CLUSTER_ZONE] \
+                --workload-metadata-from-node=GKE_METADATA_SERVER
+
+            You may also need to modify workloads in order for them to use Workload Identity as
+            described within https://cloud.google.com/kubernetes-engine/docs/how-to/workload-
+            identity. Also consider the effects on the availability of your hosted workloads as Node
+            pools are updated, it may be more appropriate to create new Node Pools.
+        scored: false
+
+  - id: 6.3
+    text: "Cloud Key Management Service (Cloud KMS)"
+    checks:
+      - id: 6.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To create a key
+
+            Create a key ring:
+
+              gcloud kms keyrings create [RING_NAME] \
+                --location [LOCATION] \
+                --project [KEY_PROJECT_ID]
+
+            Create a key:
+
+              gcloud kms keys create [KEY_NAME] \
+                --location [LOCATION] \
+                --keyring [RING_NAME] \
+                --purpose encryption \
+                --project [KEY_PROJECT_ID]
+
+            Grant the Kubernetes Engine Service Agent service account the Cloud KMS CryptoKey
+            Encrypter/Decrypter role:
+
+              gcloud kms keys add-iam-policy-binding [KEY_NAME] \
+                --location [LOCATION] \
+                --keyring [RING_NAME] \
+                --member serviceAccount:[SERVICE_ACCOUNT_NAME] \
+                --role roles/cloudkms.cryptoKeyEncrypterDecrypter \
+                --project [KEY_PROJECT_ID]
+
+            To create a new cluster with Application-layer Secrets Encryption:
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --cluster-version=latest \
+                --zone [ZONE] \
+                --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME] \
+                --project [CLUSTER_PROJECT_ID]
+
+            To enable on an existing cluster:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [ZONE] \
+                --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME] \
+                --project [CLUSTER_PROJECT_ID]
+        scored: true
+
+  - id: 6.4
+    text: "Node Metadata"
+    checks:
+      - id: 6.4.1
+        text: "Ensure legacy Compute Engine instance metadata APIs are Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To update an existing cluster, create a new Node pool with the legacy GCE metadata
+            endpoint disabled:
+
+              gcloud container node-pools create [POOL_NAME] \
+                --metadata disable-legacy-endpoints=true \
+                --cluster [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE]
+
+            You will need to migrate workloads from any existing non-conforming Node pools, to the
+            new Node pool, then delete non-conforming Node pools to complete the remediation.
+        scored: true
+
+      - id: 6.4.2
+        text: "Ensure the GKE Metadata Server is Enabled (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+              gcloud beta container clusters update [CLUSTER_NAME] \
+                --identity-namespace=[PROJECT_ID].svc.id.goog
+            Note that existing Node pools are unaffected. New Node pools default to --workload-
+            metadata-from-node=GKE_METADATA_SERVER .
+
+            To modify an existing Node pool to enable GKE Metadata Server:
+
+              gcloud beta container node-pools update [NODEPOOL_NAME] \
+                --cluster=[CLUSTER_NAME] \
+                --workload-metadata-from-node=GKE_METADATA_SERVER
+
+            You may also need to modify workloads in order for them to use Workload Identity as
+            described within https://cloud.google.com/kubernetes-engine/docs/how-to/workload-
+            identity.
+        scored: false
+
+  - id: 6.5
+    text: "Node Configuration and Maintenance"
+    checks:
+      - id: 6.5.1
+        text: "Ensure Container-Optimized OS (COS) is used for GKE node images (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To set the node image to cos for an existing cluster's Node pool:
+
+              gcloud container clusters upgrade [CLUSTER_NAME]\
+                --image-type cos \
+                --zone [COMPUTE_ZONE] --node-pool [POOL_NAME]
+        scored: true
+
+      - id: 6.5.2
+        text: "Ensure Node Auto-Repair is enabled for GKE nodes (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable node auto-repair for an existing cluster with Node pool, run the following
+            command:
+
+              gcloud container node-pools update [POOL_NAME] \
+                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --enable-autorepair
+        scored: true
+
+      - id: 6.5.3
+        text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable node auto-upgrade for an existing cluster's Node pool, run the following
+            command:
+
+              gcloud container node-pools update [NODE_POOL] \
+                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --enable-autoupgrade
+        scored: true
+
+      - id: 6.5.4
+        text: "Automate GKE version management using Release Channels (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Create a new cluster by running the following command:
+
+              gcloud beta container clusters create [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --release-channel [RELEASE_CHANNEL]
+
+            where [RELEASE_CHANNEL] is stable or regular according to your needs.
+        scored: false
+
+      - id: 6.5.5
+        text: "Ensure Shielded GKE Nodes are Enabled (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To create a Node pool within the cluster with Integrity Monitoring enabled, run the
+            following command:
+
+              gcloud beta container node-pools create [NODEPOOL_NAME] \
+                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --shielded-integrity-monitoring
+
+            You will also need to migrate workloads from existing non-conforming Node pools to the
+            newly created Node pool, then delete the non-conforming pools.
+        scored: false
+
+      - id: 6.5.6
+        text: "Ensure Shielded GKE Nodes are Enabled (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To migrate an existing cluster, you will need to specify the --enable-shielded-nodes flag
+            on a cluster update command:
+
+              gcloud beta container clusters update [CLUSTER_NAME] \
+                --zone [CLUSTER_ZONE] \
+                --enable-shielded-nodes
+        scored: false
+
+      - id: 6.5.7
+        text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To create a Node pool within the cluster with Secure Boot enabled, run the following
+            command:
+
+              gcloud beta container node-pools create [NODEPOOL_NAME] \
+                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --shielded-secure-boot
+
+            You will also need to migrate workloads from existing non-conforming Node pools to the
+            newly created Node pool, then delete the non-conforming pools.
+        scored: false
+
+  - id: 6.6
+    text: "Cluster Networking"
+    checks:
+      - id: 6.6.1
+        text: "Enable VPC Flow Logs and Intranode Visibility (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable intranode visibility on an existing cluster, run the following command:
+
+              gcloud beta container clusters update [CLUSTER_NAME] \
+                --enable-intra-node-visibility
+        scored: false
+
+      - id: 6.6.2
+        text: "Ensure use of VPC-native clusters (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable Alias IP on a new cluster, run the following command:
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --enable-ip-alias
+        scored: true
+
+      - id: 6.6.3
+        text: "Ensure Master Authorized Networks is Enabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To check Master Authorized Networks status for an existing cluster, run the following
+            command;
+
+              gcloud container clusters describe [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --format json | jq '.masterAuthorizedNetworksConfig'
+
+            The output should return
+
+              {
+                "enabled": true
+              }
+
+            if Master Authorized Networks is enabled.
+
+            If Master Authorized Networks is disabled, the
+            above command will return null ( { } ).
+        scored: true
+
+      - id: 6.6.4
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Create a cluster with a Private Endpoint enabled and Public Access disabled by including
+            the --enable-private-endpoint flag within the cluster create command:
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --enable-private-endpoint
+
+            Setting this flag also requires the setting of --enable-private-nodes , --enable-ip-alias
+            and --master-ipv4-cidr=[MASTER_CIDR_RANGE] .
+        scored: true
+
+      - id: 6.6.5
+        text: "Ensure clusters are created with Private Nodes (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To create a cluster with Private Nodes enabled, include the --enable-private-nodes flag
+            within the cluster create command:
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --enable-private-nodes
+
+            Setting this flag also requires the setting of --enable-ip-alias and --master-ipv4-
+            cidr=[MASTER_CIDR_RANGE] .
+        scored: true
+
+      - id: 6.6.6
+        text: "Consider firewalling GKE worker nodes (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Use the following command to generate firewall rules, setting the variables as appropriate.
+            You may want to use the target [TAG] and [SERVICE_ACCOUNT] previously identified.
+
+              gcloud compute firewall-rules create FIREWALL_RULE_NAME \
+                --network [NETWORK] \
+                --priority [PRIORITY] \
+                --direction [DIRECTION] \
+                --action [ACTION] \
+                --target-tags [TAG] \
+                --target-service-accounts [SERVICE_ACCOUNT] \
+                --source-ranges [SOURCE_CIDR-RANGE] \
+                --source-tags [SOURCE_TAGS] \
+                --source-service-accounts=[SOURCE_SERVICE_ACCOUNT] \
+                --destination-ranges [DESTINATION_CIDR_RANGE] \
+                --rules [RULES]
+        scored: false
+
+      - id: 6.6.7
+        text: "Ensure Network Policy is Enabled and set as appropriate (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable Network Policy for an existing cluster, firstly enable the Network Policy add-on:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --update-addons NetworkPolicy=ENABLED
+
+            Then, enable Network Policy:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --enable-network-policy
+        scored: false
+
+      - id: 6.6.8
+        text: "Ensure use of Google-managed SSL Certificates (Not Scored)"
+        type: "manual"
+        remediation: |
+          If services of type:LoadBalancer are discovered, consider replacing the Service with an
+          Ingress.
+
+          To configure the Ingress and use Google-managed SSL certificates, follow the instructions
+          as listed at https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs.
+        scored: false
+
+  - id: 6.7
+    text: "Logging"
+    checks:
+      - id: 6.7.1
+        text: "Ensure Stackdriver Kubernetes Logging and Monitoring is Enabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+
+            STACKDRIVER KUBERNETES ENGINE MONITORING SUPPORT (PREFERRED):
+            To enable Stackdriver Kubernetes Engine Monitoring for an existing cluster, run the
+            following command:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --enable-stackdriver-kubernetes
+
+            LEGACY STACKDRIVER SUPPORT:
+            Both Logging and Monitoring support must be enabled.
+            To enable Legacy Stackdriver Logging for an existing cluster, run the following command:
+
+              gcloud container clusters update [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --logging-service logging.googleapis.com
+
+            To enable Legacy Stackdriver Monitoring for an existing cluster, run the following
+            command:
+
+              gcloud container clusters update [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
+                --monitoring-service monitoring.googleapis.com
+        scored: true
+
+      - id: 6.7.2
+        text: "Enable Linux auditd logging (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Download the example manifests:
+
+              curl https://raw.githubusercontent.com/GoogleCloudPlatform/k8s-node-tools/master/os-audit/cos-auditd-logging.yaml \
+                > cos-auditd-logging.yaml
+
+            Edit the example manifests if needed. Then, deploy them:
+
+              kubectl apply -f cos-auditd-logging.yaml
+
+            Verify that the logging Pods have started. If you defined a different Namespace in your
+            manifests, replace cos-auditd with the name of the namespace you're using:
+
+              kubectl get pods --namespace=cos-auditd
+        scored: false
+
+  - id: 6.8
+    text: "Authentication and Authorization"
+    checks:
+      - id: 6.8.1
+        text: "Ensure Basic Authentication using static passwords is Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To update an existing cluster and disable Basic Authentication by removing the static
+            password:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --no-enable-basic-auth
+        scored: true
+
+      - id: 6.8.2
+        text: "Ensure authentication using Client Certificates is Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Create a new cluster without a Client Certificate:
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --no-issue-client-certificate
+        scored: true
+
+      - id: 6.8.3
+        text: "Manage Kubernetes RBAC users with Google Groups for GKE (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Follow the G Suite Groups instructions at https://cloud.google.com/kubernetes-
+            engine/docs/how-to/role-based-access-control#google-groups-for-gke.
+
+            Then, create a cluster with
+
+              gcloud beta container clusters create my-cluster \
+                --security-group="gke-security-groups@[yourdomain.com]"
+
+            Finally create Roles, ClusterRoles, RoleBindings, and ClusterRoleBindings that
+            reference your G Suite Groups.
+        scored: false
+
+      - id: 6.8.4
+        text: "Ensure Legacy Authorization (ABAC) is Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To disable Legacy Authorization for an existing cluster, run the following command:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --no-enable-legacy-authorization
+        scored: true
+
+  - id: 6.9
+    text: "Storage"
+    checks:
+      - id: 6.9.1
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            FOR NODE BOOT DISKS:
+            Create a new node pool using customer-managed encryption keys for the node boot disk, of
+            [DISK_TYPE] either pd-standard or pd-ssd :
+
+              gcloud beta container node-pools create [CLUSTER_NAME] \
+                --disk-type [DISK_TYPE] \
+                --boot-disk-kms-key \
+                projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
+
+            Create a cluster using customer-managed encryption keys for the node boot disk, of
+            [DISK_TYPE] either pd-standard or pd-ssd :
+
+              gcloud beta container clusters create [CLUSTER_NAME] \
+                --disk-type [DISK_TYPE] \
+                --boot-disk-kms-key \
+                projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
+
+            FOR ATTACHED DISKS:
+            Follow the instructions detailed at https://cloud.google.com/kubernetes-
+            engine/docs/how-to/using-cmek.
+        scored: false
+
+  - id: 6.10
+    text: "Other Cluster Configurations"
+    checks:
+      - id: 6.10.1
+        text: "Ensure Kubernetes Web UI is Disabled (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To disable the Kubernetes Dashboard on an existing cluster, run the following command:
+
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [ZONE] \
+                --update-addons=KubernetesDashboard=DISABLED
+        scored: true
+
+      - id: 6.10.2
+        text: "Ensure that Alpha clusters are not used for production workloads (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Upon creating a new cluster
+
+              gcloud container clusters create [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE]
+
+            Do not use the --enable-kubernetes-alpha argument.
+        scored: true
+
+      - id: 6.10.3
+        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable Pod Security Policy for an existing cluster, run the following command:
+
+              gcloud beta container clusters update [CLUSTER_NAME] \
+                --zone [COMPUTE_ZONE] \
+                --enable-pod-security-policy
+        scored: false
+
+      - id: 6.10.4
+        text: "Consider GKE Sandbox for running untrusted workloads (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            To enable GKE Sandbox on an existing cluster, a new Node pool must be created.
+
+              gcloud container node-pools create [NODE_POOL_NAME] \
+                --zone=[COMPUTE-ZONE] \
+                --cluster=[CLUSTER_NAME] \
+                --image-type=cos_containerd \
+                --sandbox type=gvisor
+        scored: false
+
+      - id: 6.10.5
+        text: "Ensure use of Binary Authorization (Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Firstly, update the cluster to enable Binary Authorization:
+
+              gcloud container cluster update [CLUSTER_NAME] \
+                --zone [COMPUTE-ZONE] \
+                --enable-binauthz
+
+            Create a Binary Authorization Policy using the Binary Authorization Policy Reference
+            (https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) for
+            guidance.
+
+            Import the policy file into Binary Authorization:
+
+              gcloud container binauthz policy import [YAML_POLICY]
+        scored: true
+
+      - id: 6.10.6
+        text: "Enable Cloud Security Command Center (Cloud SCC) (Not Scored)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+            Follow the instructions at https://cloud.google.com/security-command-
+            center/docs/quickstart-scc-setup.
+        scored: false
