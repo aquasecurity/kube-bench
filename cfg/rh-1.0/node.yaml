@@ -60,7 +60,7 @@ groups:
                 value: "644"
         remediation: |
           None needed.
-        scored: true
+        scored: false
 
       - id: 4.1.4
         text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)"
@@ -76,7 +76,7 @@ groups:
             - flag: root:root
         remediation: |
           None required. The configuration is managed by OpenShift operators.
-        scored: true
+        scored: false
 
       - id: 4.1.5
         text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Manual)"
@@ -95,7 +95,7 @@ groups:
                 value: "644"
         remediation: |
           None required.
-        scored: true
+        scored: false
 
       - id: 4.1.6
         text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)"
@@ -110,7 +110,7 @@ groups:
             - flag: root:root
         remediation: |
           None required.
-        scored: true
+        scored: false
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
