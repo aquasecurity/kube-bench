@@ -240,7 +240,7 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "1.19", succeed: true, exp: "cis-1.20"},
 		{kubeVersion: "1.20", succeed: true, exp: "cis-1.20"},
 		{kubeVersion: "1.21", succeed: true, exp: "cis-1.20"},
-		{kubeVersion: "gke-1.0", succeed: true, exp: "gke-1.0"},
+		{kubeVersion: "gke-1.2.0", succeed: true, exp: "gke-1.2.0"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
@@ -366,7 +366,7 @@ func TestGetBenchmarkVersion(t *testing.T) {
 		{n: "kubeVersion", kubeVersion: "1.15", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "cis-1.5", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion310", kubeVersion: "ocp-3.10", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
 		{n: "ocpVersion311", kubeVersion: "ocp-3.11", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "rh-0.7", callFn: withNoPath, succeed: true},
-		{n: "gke10", kubeVersion: "gke-1.0", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "gke-1.0", callFn: withNoPath, succeed: true},
+		{n: "gke12", kubeVersion: "gke-1.2.0", benchmarkVersion: "", platformName: "", v: viperWithData, exp: "gke-1.2.0", callFn: withNoPath, succeed: true},
 	}
 	for _, c := range cases {
 		rv, err := c.callFn(c.kubeVersion, c.benchmarkVersion, c.platformName, c.v, getBenchmarkVersion)
@@ -426,9 +426,9 @@ func TestValidTargets(t *testing.T) {
 			expected:  true,
 		},
 		{
-			name:      "gke-1.0 valid",
-			benchmark: "gke-1.0",
-			targets:   []string{"master", "node", "controlplane", "etcd", "policies", "managedservices"},
+			name:      "gke-1.2.0 valid",
+			benchmark: "gke-1.2.0",
+			targets:   []string{"master", "node", "controlplane", "policies", "managedservices"},
 			expected:  true,
 		},
 		{

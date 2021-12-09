@@ -457,7 +457,8 @@ func getPlatformBenchmarkVersion(platform string) string {
 	case "eks":
 		return "eks-1.0.1"
 	case "gke":
-		return "gke-1.0"
+		// TODO: support check kubeVersion
+		return "gke-1.2.0"
 	case "aliyun":
 		return "ack-1.0"
 	case "ocp-3.10":

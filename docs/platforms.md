@@ -11,6 +11,7 @@ Some defined by other hardenening guides.
 | CIS | [1.6.0](https://workbench.cisecurity.org/benchmarks/4834) | cis-1.6 | 1.16-1.18 |
 | CIS | [1.20](https://workbench.cisecurity.org/benchmarks/6246) | cis-1.20 | 1.19-1.20 |
 | CIS | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536) | gke-1.0 | GKE |
+| CIS | [GKE 1.2.0](https://workbench.cisecurity.org/benchmarks/7534) | gke-1.2.0 | GKE |
 | CIS | [EKS 1.0.1](https://workbench.cisecurity.org/benchmarks/6041) | eks-1.0.1 | EKS |
 | CIS | [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467) | ack-1.0 | ACK |
 | CIS | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347) | aks-1.0 | AKS |
