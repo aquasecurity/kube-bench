@@ -246,6 +246,7 @@ version_mapping:
   "1.20": "cis-1.20"
   "eks-1.0.1": "eks-1.0.1"
   "gke-1.0": "gke-1.0"
+  "gke-1.2.0": "gke-1.2.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
@@ -276,6 +277,12 @@ target_mapping:
     - "node"
     - "controlplane"
     - "etcd"
+    - "policies"
+    - "managedservices"
+  "gke-1.2.0":
+    - "master"
+    - "node"
+    - "controlplane"
     - "policies"
     - "managedservices"
   "eks-1.0.1":
