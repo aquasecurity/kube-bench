@@ -1,0 +1,14 @@
+[Unit]
+Description=Kubernetes kubelet
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=10
+EnvironmentFile=/etc/default/kubelet
+EnvironmentFile=/etc/default/kubelet_secondary_env
+ExecStart=/home/kubernetes/bin/kubelet $KUBELET_OPTS $SECONDARY_KUBELET_OPTS
+
+[Install]
+WantedBy=kubernetes.target

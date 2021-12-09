@@ -1,0 +1,48 @@
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 0s
+    cacheUnauthorizedTTL: 0s
+cgroupRoot: /
+clusterDNS:
+- 10.96.128.2
+clusterDomain: cluster.local
+cpuManagerReconcilePeriod: 0s
+enableDebuggingHandlers: true
+evictionHard:
+  memory.available: 100Mi
+  nodefs.available: 10%
+  nodefs.inodesFree: 5%
+evictionPressureTransitionPeriod: 0s
+featureGates:
+  DynamicKubeletConfig: false
+  IPv6DualStack: true
+fileCheckFrequency: 0s
+hairpinMode: hairpin-veth
+httpCheckFrequency: 0s
+imageMinimumGCAge: 0s
+kind: KubeletConfiguration
+kubeReserved:
+  cpu: 70m
+  ephemeral-storage: 39Gi
+  memory: 1124Mi
+maxPods: 110
+nodeStatusReportFrequency: 0s
+nodeStatusUpdateFrequency: 0s
+registryBurst: 20
+registryPullQPS: 10
+rotateCertificates: true
+runtimeRequestTimeout: 0s
+staticPodPath: /etc/kubernetes/manifests
+streamingConnectionIdleTimeout: 0s
+syncFrequency: 0s
+volumeStatsAggPeriod: 0s
