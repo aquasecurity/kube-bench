@@ -35,6 +35,7 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: latest
+          args: --verbose
   unit:
     name: Unit tests
     runs-on: ubuntu-18.04
