@@ -254,7 +254,6 @@ version_mapping:
   "ocp-4.0": "rh-1.0"
   "aks-1.0": "aks-1.0"
   "ack-1.0": "ack-1.0"
-  "yc-1.0": "yc-1.0"
 
 target_mapping:
   "cis-1.5":
@@ -315,8 +314,4 @@ target_mapping:
     - "node"
     - "controlplane"
     - "policies"
-    - "etcd"
-  "yc-1.0":
-    - "master"
-    - "node"
     - "etcd"
