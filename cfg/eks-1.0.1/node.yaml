@@ -1,6 +1,6 @@
 ---
 controls:
-version: "aks-1.0"
+version: "eks-1.0.1"
 id: 3
 text: "Worker Node Security Configuration"
 type: "node"
@@ -64,13 +64,14 @@ groups:
     text: "Kubelet"
     checks:
       - id: 3.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: "--anonymous-auth"
               path: '{.authentication.anonymous.enabled}'
+              set: true
               compare:
                 op: eq
                 value: false
@@ -84,16 +85,17 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.2
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --authorization-mode
               path: '{.authorization.mode}'
+              set: true
               compare:
                 op: nothave
                 value: AlwaysAllow
@@ -106,7 +108,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
@@ -181,7 +183,7 @@ groups:
         scored: false
 
       - id: 3.2.6
-        text: "Ensure that the --protect-kernel-defaults argument is set to true (Manual)"
+        text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -201,10 +203,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.7
-        text: "Ensure that the --make-iptables-util-chains argument is set to true (Manual) "
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated) "
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -228,7 +230,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.8
         text: "Ensure that the --hostname-override argument is not set (Manual)"
@@ -250,7 +252,7 @@ groups:
         scored: false
 
       - id: 3.2.9
-        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Manual)"
+        text: "Ensure that the --eventRecordQPS argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
