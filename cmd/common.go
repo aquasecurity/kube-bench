@@ -313,13 +313,13 @@ func loadTargetMapping(v *viper.Viper) (map[string][]string, error) {
 	return benchmarkVersionToTargetsMap, nil
 }
 
-func getBenchmarkVersion(kubeVersion, benchmarkVersion, platformName string, v *viper.Viper) (bv string, err error) {
+func getBenchmarkVersion(kubeVersion, benchmarkVersion string, platform Platform, v *viper.Viper) (bv string, err error) {
 	detecetedKubeVersion = "none"
 	if !isEmpty(kubeVersion) && !isEmpty(benchmarkVersion) {
 		return "", fmt.Errorf("It is an error to specify both --version and --benchmark flags")
 	}
-	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) && !isEmpty(platformName) {
-		benchmarkVersion = getPlatformBenchmarkVersion(platformName)
+	if isEmpty(benchmarkVersion) && isEmpty(kubeVersion) && !isEmpty(platform.Name) {
+		benchmarkVersion = getPlatformBenchmarkVersion(platform)
 		if !isEmpty(benchmarkVersion) {
 			detecetedKubeVersion = benchmarkVersion
 		}

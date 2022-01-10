@@ -527,46 +527,45 @@ func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string
+		want Platform
 	}{
 		{
 			name: "eks",
 			args: args{s: "v1.17.9-eks-4c6976"},
-			want: "eks",
+			want: Platform{Name: "eks", Version: "1.17"},
 		},
 		{
 			name: "gke",
 			args: args{s: "v1.17.6-gke.1"},
-			want: "gke",
+			want: Platform{Name: "gke", Version: "1.17"},
 		},
 		{
 			name: "ack",
 			args: args{s: "v1.18.8-aliyun.1"},
-			want: "aliyun",
+			want: Platform{Name: "aliyun", Version: "1.18"},
 		},
 		{
 			name: "unknown",
 			args: args{s: "v1.17.6"},
-			want: "",
+			want: Platform{},
 		},
 		{
 			name: "empty string",
 			args: args{s: ""},
-			want: "",
+			want: Platform{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getPlatformNameFromVersion(tt.args.s); got != tt.want {
-				t.Errorf("getPlatformNameFromKubectlOutput() = %v, want %v", got, tt.want)
-			}
+			got := getPlatformInfoFromVersion(tt.args.s)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
 func Test_getPlatformBenchmarkVersion(t *testing.T) {
 	type args struct {
-		platform string
+		platform Platform
 	}
 	tests := []struct {
 		name string
@@ -576,49 +575,63 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		{
 			name: "eks",
 			args: args{
-				platform: "eks",
+				platform: Platform{Name: "eks"},
 			},
 			want: "eks-1.0.1",
 		},
 		{
-			name: "gke",
+			name: "gke 1.19",
 			args: args{
-				platform: "gke",
+				platform: Platform{Name: "gke", Version: "1.19"},
+			},
+			want: "gke-1.0",
+		},
+		{
+			name: "gke 1.20",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.20"},
+			},
+			want: "gke-1.2.0",
+		},
+		{
+			name: "gke 1.22",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.22"},
 			},
 			want: "gke-1.2.0",
 		},
 		{
 			name: "aliyun",
 			args: args{
-				platform: "aliyun",
+				platform: Platform{Name: "aliyun"},
 			},
 			want: "ack-1.0",
 		},
 		{
 			name: "unknown",
 			args: args{
-				platform: "rh",
+				platform: Platform{Name: "rh"},
 			},
 			want: "",
 		},
 		{
 			name: "empty",
 			args: args{
-				platform: "",
+				platform: Platform{},
 			},
 			want: "",
 		},
 		{
 			name: "openshift3",
 			args: args{
-				platform: "ocp-3.10",
+				platform: Platform{Name: "ocp", Version: "3.10"},
 			},
 			want: "rh-0.7",
 		},
 		{
 			name: "openshift4",
 			args: args{
-				platform: "ocp-4.1",
+				platform: Platform{Name: "ocp", Version: "4.1"},
 			},
 			want: "rh-1.0",
 		},
