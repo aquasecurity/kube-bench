@@ -69,7 +69,7 @@ var RootCmd = &cobra.Command{
 	Short: "Run CIS Benchmarks checks against a Kubernetes deployment",
 	Long:  `This tool runs the CIS Kubernetes Benchmark (https://www.cisecurity.org/benchmark/kubernetes/)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, getPlatformName(), viper.GetViper())
+		bv, err := getBenchmarkVersion(kubeVersion, benchmarkVersion, getPlatformInfo(), viper.GetViper())
 		if err != nil {
 			exitWithError(fmt.Errorf("unable to determine benchmark version: %v", err))
 		}
