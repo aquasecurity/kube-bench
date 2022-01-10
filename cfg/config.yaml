@@ -143,6 +143,7 @@ node:
       - "kubelet"
     kubeconfig:
       - "/etc/kubernetes/kubelet.conf"
+      - "/etc/kubernetes/kubelet-kubeconfig.conf"
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/etc/kubernetes/kubelet/kubeconfig"
@@ -193,6 +194,7 @@ node:
       - /var/snap/microk8s/current/args/kube-proxy
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/etc/kubernetes/kubelet-kubeconfig.conf"
       - "/etc/kubernetes/kubelet/config"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/proxy.config"
