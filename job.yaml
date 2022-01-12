@@ -12,7 +12,7 @@ spec:
       hostPID: true
       containers:
         - name: kube-bench
-          image: aquasec/kube-bench:latest
+          image: aquasec/kube-bench:0.6.3
           command: ["kube-bench"]
           volumeMounts:
             - name: var-lib-etcd

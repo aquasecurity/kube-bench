@@ -229,9 +229,22 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 			if check.State == FAIL || check.State == WARN {
 				// ASFF ProductFields['Actual result'] can't be longer than 1024 characters
 				actualValue := check.ActualValue
+				remediation := check.Remediation
+				reason := check.Reason
+
 				if len(check.ActualValue) > 1024 {
 					actualValue = check.ActualValue[0:1023]
 				}
+
+				// Fix issue https://github.com/aquasecurity/kube-bench/issues/903
+				if len(check.Remediation) > 512 {
+					remediation = check.Remediation[0:511]
+				}
+
+				if len(check.Reason) > 1024 {
+					reason = check.Reason[0:1023]
+				}
+
 				f := securityhub.AwsSecurityFinding{
 					AwsAccountId:  aws.String(a),
 					Confidence:    aws.Int64(100),
@@ -249,11 +262,11 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 					},
 					Remediation: &securityhub.Remediation{
 						Recommendation: &securityhub.Recommendation{
-							Text: aws.String(check.Remediation),
+							Text: aws.String(remediation),
 						},
 					},
 					ProductFields: map[string]*string{
-						"Reason":          aws.String(check.Reason),
+						"Reason":          aws.String(reason),
 						"Actual result":   aws.String(actualValue),
 						"Expected result": aws.String(check.ExpectedResult),
 						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),

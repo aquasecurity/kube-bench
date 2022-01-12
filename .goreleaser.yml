@@ -1,4 +1,5 @@
 ---
+project_name: kube-bench
 env:
   - GO111MODULE=on
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
@@ -28,13 +29,23 @@ archives:
 nfpms:
   -
     vendor: Aqua Security
-    maintainer: Yoav Rotem <yoav.rotem@aquasec.com>
     description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
+    maintainer: Yoav Rotem <yoav.rotem@aquasec.com>
     license: Apache-2.0
     homepage: https://github.com/aquasecurity/kube-bench
-    files:
-      "cfg/**/*": "/etc/kube-bench/cfg"
-      "cfg/config.yaml": "/etc/kube-bench/cfg"
+    file_name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
+    contents:
+      - src: "cfg/**/*"
+        dst: "/etc/kube-bench/cfg"
+      - src: "cfg/config.yaml"
+        dst: "/etc/kube-bench/cfg/config.yaml"
     formats:
       - deb
       - rpm
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs'
+      - '^test'
+      - '^release'

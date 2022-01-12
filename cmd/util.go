@@ -30,16 +30,25 @@ var psFunc func(string) string
 var statFunc func(string) (os.FileInfo, error)
 var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
 var TypeMap = map[string][]string{
-	"ca":         []string{"cafile", "defaultcafile"},
-	"kubeconfig": []string{"kubeconfig", "defaultkubeconfig"},
-	"service":    []string{"svc", "defaultsvc"},
-	"config":     []string{"confs", "defaultconf"},
+	"ca":         {"cafile", "defaultcafile"},
+	"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
+	"service":    {"svc", "defaultsvc"},
+	"config":     {"confs", "defaultconf"},
 }
 
 func init() {
 	psFunc = ps
 	statFunc = os.Stat
 	getBinariesFunc = getBinaries
+}
+
+type Platform struct {
+	Name    string
+	Version string
+}
+
+func (p Platform) String() string {
+	return fmt.Sprintf("Platform{ Name: %s Version: %s }", p.Name, p.Version)
 }
 
 func exitWithError(err error) {
@@ -427,48 +436,59 @@ These program names are provided in the config.yaml, section '%s.%s.bins'
 	return fmt.Sprintf(errMessageTemplate, component, componentRoleName, binList, componentType, component)
 }
 
-func getPlatformName() string {
+func getPlatformInfo() Platform {
 
-	openShiftVersion := getOpenShiftVersion()
-	if openShiftVersion != "" {
-		return openShiftVersion
+	openShiftInfo := getOpenShiftInfo()
+	if openShiftInfo.Name != "" && openShiftInfo.Version != "" {
+		return openShiftInfo
 	}
 
 	kv, err := getKubeVersion()
 	if err != nil {
 		glog.V(2).Info(err)
-		return ""
+		return Platform{}
 	}
-	return getPlatformNameFromVersion(kv.GitVersion)
+	return getPlatformInfoFromVersion(kv.GitVersion)
 }
 
-func getPlatformNameFromVersion(s string) string {
-	versionRe := regexp.MustCompile(`v\d+\.\d+\.\d+-(\w+)(?:[.\-])\w+`)
+func getPlatformInfoFromVersion(s string) Platform {
+	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+-(\w+)(?:[.\-])\w+`)
 	subs := versionRe.FindStringSubmatch(s)
-	if len(subs) < 2 {
-		return ""
+	if len(subs) < 3 {
+		return Platform{}
 	}
-	return subs[1]
+	return Platform{
+		Name:    subs[2],
+		Version: subs[1],
+	}
 }
 
-func getPlatformBenchmarkVersion(platform string) string {
+func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
-	switch platform {
+	switch platform.Name {
 	case "eks":
-		return "eks-1.0"
+		return "eks-1.0.1"
 	case "gke":
-		return "gke-1.0"
+		switch platform.Version {
+		case "1.15", "1.16", "1.17", "1.18", "1.19":
+			return "gke-1.0"
+		default:
+			return "gke-1.2.0"
+		}
 	case "aliyun":
 		return "ack-1.0"
-	case "ocp-3.10":
-		return "rh-0.7"
-	case "ocp-4.1":
-		return "rh-1.0"
+	case "ocp":
+		switch platform.Version {
+		case "3.10":
+			return "rh-0.7"
+		case "4.1":
+			return "rh-1.0"
+		}
 	}
 	return ""
 }
 
-func getOpenShiftVersion() string {
+func getOpenShiftInfo() Platform {
 	glog.V(1).Info("Checking for oc")
 	_, err := exec.LookPath("oc")
 
@@ -484,10 +504,10 @@ func getOpenShiftVersion() string {
 				subs = versionRe.FindStringSubmatch(string(out))
 			}
 			if len(subs) > 1 {
-				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformNameFromVersion(string(out)), subs[1])
+				glog.V(2).Infof("OCP output '%s' \nplatform is %s \nocp %v", string(out), getPlatformInfoFromVersion(string(out)), subs[1])
 				ocpBenchmarkVersion, err := getOcpValidVersion(subs[1])
 				if err == nil {
-					return fmt.Sprintf("ocp-%s", ocpBenchmarkVersion)
+					return Platform{Name: "ocp", Version: ocpBenchmarkVersion}
 				} else {
 					glog.V(1).Infof("Can't get getOcpValidVersion: %v", err)
 				}
@@ -500,7 +520,7 @@ func getOpenShiftVersion() string {
 	} else {
 		glog.V(1).Infof("Can't find oc command: %v", err)
 	}
-	return ""
+	return Platform{}
 }
 
 func getOcpValidVersion(ocpVer string) (string, error) {

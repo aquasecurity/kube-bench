@@ -35,6 +35,7 @@ master:
       - /var/snap/kube-apiserver/current/args
       - /var/snap/microk8s/current/args/kube-apiserver
       - /etc/origin/master/master-config.yaml
+      - /etc/kubernetes/manifests/talos-kube-apiserver.yaml
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -51,11 +52,13 @@ master:
       - /var/snap/kube-scheduler/current/args
       - /var/snap/microk8s/current/args/kube-scheduler
       - /etc/origin/master/scheduler.json
+      - /etc/kubernetes/manifests/talos-kube-scheduler.yaml
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
       - /var/lib/kube-scheduler/kubeconfig
       - /var/lib/kube-scheduler/config.yaml
+      - /system/secrets/kubernetes/kube-scheduler/kubeconfig
     defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
   controllermanager:
@@ -73,10 +76,12 @@ master:
       - /etc/kubernetes/manifests/kube-controller-manager.manifest
       - /var/snap/kube-controller-manager/current/args
       - /var/snap/microk8s/current/args/kube-controller-manager
+      - /etc/kubernetes/manifests/talos-kube-controller-manager.yaml
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
       - /var/lib/kube-controller-manager/kubeconfig
+      - /system/secrets/kubernetes/kube-controller-manager/kubeconfig
     defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
   etcd:
@@ -138,13 +143,18 @@ node:
       - "kubelet"
     kubeconfig:
       - "/etc/kubernetes/kubelet.conf"
+      - "/etc/kubernetes/kubelet-kubeconfig.conf"
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/etc/kubernetes/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
+      - "/etc/kubernetes/kubeconfig-kubelet"
     confs:
+      - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
       - "/etc/default/kubeletconfig.json"
@@ -162,6 +172,7 @@ node:
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
+      - "/etc/kubernetes/kubelet.yaml"
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
@@ -183,6 +194,8 @@ node:
       - /var/snap/microk8s/current/args/kube-proxy
     kubeconfig:
       - "/etc/kubernetes/kubelet-kubeconfig"
+      - "/etc/kubernetes/kubelet-kubeconfig.conf"
+      - "/etc/kubernetes/kubelet/config"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/proxy.config"
     svc:
@@ -231,9 +244,11 @@ version_mapping:
   "1.16": "cis-1.6"
   "1.17": "cis-1.6"
   "1.18": "cis-1.6"
-  "1.19": "cis-1.6"
-  "eks-1.0": "eks-1.0"
+  "1.19": "cis-1.20"
+  "1.20": "cis-1.20"
+  "eks-1.0.1": "eks-1.0.1"
   "gke-1.0": "gke-1.0"
+  "gke-1.2.0": "gke-1.2.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
@@ -253,6 +268,12 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "cis-1.20":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
   "gke-1.0":
     - "master"
     - "node"
@@ -260,7 +281,13 @@ target_mapping:
     - "etcd"
     - "policies"
     - "managedservices"
-  "eks-1.0":
+  "gke-1.2.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "eks-1.0.1":
     - "master"
     - "node"
     - "controlplane"
