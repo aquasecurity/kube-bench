@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/spf13/cobra"
@@ -36,6 +37,7 @@ var nodeCmd = &cobra.Command{
 		filename := loadConfig(check.NODE, bv)
 		runChecks(check.NODE, filename, detecetedKubeVersion)
 		writeOutput(controlsCollection)
+		os.Exit(exitCodeSelection(controlsCollection))
 	},
 	Deprecated: "this command will be retired soon. Please use the `run` command with `--targets=node` instead.",
 }
