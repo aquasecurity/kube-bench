@@ -54,13 +54,15 @@ var runCmd = &cobra.Command{
 		path := filepath.Join(cfgDir, bv)
 		err = mergeConfig(path)
 		if err != nil {
-			fmt.Printf("Error in mergeConfig: %v\n", err)
+			exitWithError(fmt.Errorf("Error in mergeConfig: %v\n", err))
 		}
 
 		err = run(targets, bv)
 		if err != nil {
-			fmt.Printf("Error in run: %v\n", err)
+			exitWithError(fmt.Errorf("Error in run: %v\n", err))
 		}
+
+		os.Exit(exitCodeSelection(controlsCollection))
 	},
 }
 
