@@ -1,17 +1,16 @@
 [![GitHub Release][release-img]][release]
-![Downloads][download]
-![Docker Pulls][docker-pull]
+[![Downloads][download]][release]
+[![Docker Pulls][docker-pull]][docker]
 [![Go Report Card][report-card-img]][report-card]
 [![Build Status](https://github.com/aquasecurity/kube-bench/workflows/Build/badge.svg?branch=main)](https://github.com/aquasecurity/kube-bench/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
-[![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
-[![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
 
 [download]: https://img.shields.io/github/downloads/aquasecurity/kube-bench/total?logo=github
 [release-img]: https://img.shields.io/github/release/aquasecurity/kube-bench.svg?logo=github
 [release]: https://github.com/aquasecurity/kube-bench/releases
 [docker-pull]: https://img.shields.io/docker/pulls/aquasec/kube-bench?logo=docker&label=docker%20pulls%20%2F%20kube-bench
+[docker]: https://hub.docker.com/r/aquasec/kube-bench
 [cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/main/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
 [report-card-img]: https://goreportcard.com/badge/github.com/aquasecurity/kube-bench
