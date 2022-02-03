@@ -157,8 +157,29 @@ func parseSkipIds(skipIds string) map[string]bool {
 	return skipIdMap
 }
 
+func parseStatus(statusList string) map[check.State]bool {
+	var statusMap = make(map[check.State]bool, 0)
+	if statusList != "" {
+		for _, status := range strings.Split(statusList, ",") {
+			statusMap[check.State(strings.ToUpper(strings.Trim(status, " ")))] = true
+		}
+	}
+	return statusMap
+}
+
+func printStatus(state check.State) bool {
+	if statusList == "" {
+		return true
+	}
+	statusMap := parseStatus(statusList)
+	return statusMap[state]
+}
+
 // colorPrint outputs the state in a specific colour, along with a message string
 func colorPrint(state check.State, s string) {
+	if !printStatus(state) {
+		return
+	}
 	colors[state].Printf("[%s] ", state)
 	fmt.Printf("%s", s)
 }
@@ -184,24 +205,29 @@ func prettyPrint(r *check.Controls, summary check.Summary) {
 
 	// Print remediations.
 	if !noRemediations {
+		var remediationOutput strings.Builder
 		if summary.Fail > 0 || summary.Warn > 0 {
-			colors[check.WARN].Printf("== Remediations %s ==\n", r.Type)
 			for _, g := range r.Groups {
 				for _, c := range g.Checks {
-					if c.State == check.FAIL {
-						fmt.Printf("%s %s\n", c.ID, c.Remediation)
+					if c.State == check.FAIL && printStatus(check.FAIL) {
+						remediationOutput.WriteString(fmt.Sprintf("%s %s\n", c.ID, c.Remediation))
 					}
-					if c.State == check.WARN {
+					if c.State == check.WARN && printStatus(check.WARN) {
 						// Print the error if test failed due to problem with the audit command
 						if c.Reason != "" && c.Type != "manual" {
-							fmt.Printf("%s audit test did not run: %s\n", c.ID, c.Reason)
+							remediationOutput.WriteString(fmt.Sprintf("%s audit test did not run: %s\n", c.ID, c.Reason))
 						} else {
-							fmt.Printf("%s %s\n", c.ID, c.Remediation)
+							remediationOutput.WriteString(fmt.Sprintf("%s %s\n", c.ID, c.Remediation))
 						}
 					}
 				}
 			}
-			fmt.Println()
+			output := remediationOutput.String()
+			if len(output) > 0 {
+				remediationOutput.WriteString("\n")
+				fmt.Printf(colors[check.WARN].Sprintf("== Remediations %s ==\n", r.Type))
+				fmt.Printf(remediationOutput.String())
+			}
 		}
 	}
 
@@ -222,9 +248,19 @@ func printSummary(summary check.Summary, sectionName string) {
 	}
 
 	colors[res].Printf("== Summary %s ==\n", sectionName)
-	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
-		summary.Pass, summary.Fail, summary.Warn, summary.Info,
-	)
+	if statusList == "" {
+		fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n", summary.Pass, summary.Fail, summary.Warn, summary.Info)
+		return
+	}
+	statusMap := parseStatus(statusList)
+	var summaryBuilder strings.Builder
+	for s, b := range statusMap {
+		if b {
+			summaryBuilder.WriteString(fmt.Sprintf("%d checks %v\n", summary.Results(s), s))
+		}
+	}
+	summaryBuilder.WriteString("\n")
+	fmt.Printf(summaryBuilder.String())
 }
 
 // loadConfig finds the correct config dir based on the kubernetes version,

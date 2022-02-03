@@ -76,6 +76,21 @@ type Summary struct {
 	Info int `json:"total_info"`
 }
 
+func (s Summary) Results(c State) int {
+	var r int
+	switch c {
+	case "PASS":
+		r = s.Pass
+	case "FAIL":
+		r = s.Fail
+	case "WARN":
+		r = s.Warn
+	case "INFO":
+		r = s.Info
+	}
+	return r
+}
+
 // Predicate a predicate on the given Group and Check arguments.
 type Predicate func(group *Group, check *Check) bool
 
