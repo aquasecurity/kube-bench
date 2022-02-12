@@ -23,7 +23,7 @@ Flag | Description
 --noremediations | Disable printing of remediations section to stdout.
 --noresults | Disable printing of results section to stdout.
 --nototals | Disable calculating and printing of totals for failed, passed, ... checks across all sections 
---outputfile | Writes the JSON results to output file
+--outputfile | Writes the results to output file when run with --json or --junit
 --pgsql | Save the results to PostgreSQL
 --scored | Run the scored CIS checks (default true)
 --skip string | List of comma separated values of checks to be skipped
