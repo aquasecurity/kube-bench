@@ -7,7 +7,7 @@ IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
 GOOS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
-BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le
+BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le,linux/s390x
 DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
 
