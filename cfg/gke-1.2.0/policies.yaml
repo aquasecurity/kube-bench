@@ -1,8 +1,8 @@
 ---
 controls:
-version: "aks-1.0"
+version: "gke-1.2.0"
 id: 4
-text: "Policies"
+text: "Kubernetes Policies"
 type: "policies"
 groups:
   - id: 4.1
@@ -49,7 +49,7 @@ groups:
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
-        scored: false
+        scored: true
 
       - id: 4.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
@@ -128,47 +128,44 @@ groups:
         scored: false
 
       - id: 4.2.9
-        text: "Minimize the admission of containers with capabilities assigned (Manual)"
+        text: "Minimize the admission of containers with capabilities assigned (Manual) "
         type: "manual"
         remediation: |
-          Review the use of capabilities in applications running on your cluster. Where a namespace
+          Review the use of capabilites in applications running on your cluster. Where a namespace
           contains applications which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
   - id: 4.3
-    text: "Azure Policy / OPA"
-    checks: []
-
-  - id: 4.4
-    text: "CNI Plugin"
+    text: "Network Policies and CNI"
     checks:
-      - id: 4.4.1
-        text: "Ensure that the latest CNI version is used (Manual)"
+      - id: 4.3.1
+        text: "Ensure that the CNI in use supports Network Policies (Manual)"
         type: "manual"
         remediation: |
-          Review the documentation of AWS CNI plugin, and ensure latest CNI version is used.
+          To use a CNI plugin with Network Policy, enable Network Policy in GKE, and the CNI plugin
+          will be updated. See Recommendation 6.6.7.
         scored: false
 
-      - id: 4.4.2
+      - id: 4.3.2
         text: "Ensure that all Namespaces have Network Policies defined (Manual)"
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
         scored: false
 
-  - id: 4.5
+  - id: 4.4
     text: "Secrets Management"
     checks:
-      - id: 4.5.1
+      - id: 4.4.1
         text: "Prefer using secrets as files over secrets as environment variables (Manual)"
         type: "manual"
         remediation: |
-          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          if possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false
 
-      - id: 4.5.2
+      - id: 4.4.2
         text: "Consider external secret storage (Manual)"
         type: "manual"
         remediation: |
@@ -176,19 +173,21 @@ groups:
           secrets management solution.
         scored: false
 
-  - id: 4.6
+  - id: 4.5
     text: "Extensible Admission Control"
     checks:
-      - id: 4.6.1
-        text: "Verify that admission controllers are working as expected (Manual)"
+      - id: 4.5.1
+        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
         type: "manual"
-        remediation: "No remediation"
+        remediation: |
+          Follow the Kubernetes documentation and setup image provenance.
+          See also Recommendation 6.10.5 for GKE specifically.
         scored: false
 
-  - id: 4.7
+  - id: 4.6
     text: "General Policies"
     checks:
-      - id: 4.7.1
+      - id: 4.6.1
         text: "Create administrative boundaries between resources using namespaces (Manual)"
         type: "manual"
         remediation: |
@@ -196,7 +195,33 @@ groups:
           them.
         scored: false
 
-      - id: 4.7.2
+      - id: 4.6.2
+        text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
+        type: "manual"
+        remediation: |
+          Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
+          would need to enable alpha features in the apiserver by passing "--feature-
+          gates=AllAlpha=true" argument.
+          Edit the /etc/kubernetes/apiserver file on the master node and set the KUBE_API_ARGS
+          parameter to "--feature-gates=AllAlpha=true"
+          KUBE_API_ARGS="--feature-gates=AllAlpha=true"
+          Based on your system, restart the kube-apiserver service. For example:
+          systemctl restart kube-apiserver.service
+          Use annotations to enable the docker/default seccomp profile in your pod definitions. An
+          example is as below:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: trustworthy-pod
+            annotations:
+              seccomp.security.alpha.kubernetes.io/pod: docker/default
+          spec:
+            containers:
+              - name: trustworthy-container
+                image: sotrustworthy:latest
+        scored: false
+
+      - id: 4.6.3
         text: "Apply Security Context to Your Pods and Containers (Manual)"
         type: "manual"
         remediation: |
@@ -205,7 +230,7 @@ groups:
           Containers.
         scored: false
 
-      - id: 4.7.3
+      - id: 4.6.4
         text: "The default namespace should not be used (Manual)"
         type: "manual"
         remediation: |

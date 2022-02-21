@@ -120,8 +120,9 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 | CIS Benchmark | Targets |
 |---|---|
 | gke-1.0| master, controlplane, node, etcd, policies, managedservices |
+| gke-1.2.0| master, controlplane, node, policies, managedservices |
 
-kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` when you run the `kube-bench` command.
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` or `--benchmark gke-1.2.0` when you run the `kube-bench` command.
 
 To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
 

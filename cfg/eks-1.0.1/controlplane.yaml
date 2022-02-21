@@ -1,6 +1,6 @@
 ---
 controls:
-version: "eks-1.0"
+version: "eks-1.0.1"
 id: 2
 text: "Control Plane Configuration"
 type: "controlplane"
@@ -9,6 +9,6 @@ groups:
     text: "Logging"
     checks:
       - id: 2.1.1
-        text: "Enable audit logs"
+        text: "Enable audit logs (Manual)"
         remediation: "Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler."
         scored: false
