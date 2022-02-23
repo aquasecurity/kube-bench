@@ -13,6 +13,7 @@ builds:
       - arm
       - arm64
       - ppc64le
+      - s390x
     goarm:
       - 6
       - 7
