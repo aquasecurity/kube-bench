@@ -28,7 +28,7 @@ jobs:
         with:
           go-version: 1.16
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
   unit:
@@ -40,7 +40,7 @@ jobs:
         with:
           go-version: 1.16
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
@@ -56,7 +56,7 @@ jobs:
         with:
           go-version: 1.16
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Kubernetes cluster (KIND)
         uses: engineerd/setup-kind@v0.5.0
         with:
@@ -86,7 +86,7 @@ jobs:
         with:
           go-version: 1.16
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
