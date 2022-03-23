@@ -11,9 +11,9 @@ groups:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
         audit: |
-          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
           do
-            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /etc/systemd/system/kubelet.service
+            oc debug node/${node} -- chroot /host stat -c "$node %n permissions=%a" /etc/systemd/system/kubelet.service;
           done 2> /dev/null
         use_multiple_values: true
         tests:
@@ -30,9 +30,9 @@ groups:
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
         audit: |
           # Should return root:root for each node
-          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
+          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
           do
-            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /etc/systemd/system/kubelet.service
+            oc debug node/${node} -- chroot /host stat -c "$node %n %U:%G" /etc/systemd/system/kubelet.service;
           done 2> /dev/null
         use_multiple_values: true
         tests:
