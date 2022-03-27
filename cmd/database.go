@@ -64,7 +64,7 @@ func getPsqlConnInfo() (PsqlConnInfo, error) {
 		schema = value
 	} else {
 		schema = ""
-		fmt.Printf("No schema set.")
+		glog.V(2).Info("No schema set.")
 	}
 
 	return PsqlConnInfo{
