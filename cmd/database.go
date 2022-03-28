@@ -20,9 +20,6 @@ type PsqlConnInfo struct {
 	Password string
 	Schema   string
 }
-
-var db *gorm.DB
-
 func getPsqlConnInfo() (PsqlConnInfo, error) {
 	var host string
 	if value := viper.GetString("PGSQL_HOST"); value != "" {
