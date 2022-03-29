@@ -653,6 +653,9 @@ func TestGetSummaryTotals(t *testing.T) {
 	assert.Equal(t, 14, resultTotals.Warn)
 	assert.Equal(t, 0, resultTotals.Info)
 	assert.Equal(t, 49, resultTotals.Pass)
+	assert.Equal(t, 0, resultTotals.Skip)
+	assert.Equal(t, 0, resultTotals.Manu)
+	assert.Equal(t, 0, resultTotals.Erro)
 }
 
 func TestPrintSummary(t *testing.T) {
@@ -670,7 +673,7 @@ func TestPrintSummary(t *testing.T) {
 	out, _ := ioutil.ReadAll(r)
 	os.Stdout = rescueStdout
 
-	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n\n")
+	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n0 checks SKIP\n0 checks MANU\n0 checks ERRO\n")
 }
 
 func TestPrettyPrintNoSummary(t *testing.T) {

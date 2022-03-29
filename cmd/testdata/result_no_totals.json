@@ -11,6 +11,9 @@
         "fail": 1,
         "warn": 5,
         "info": 0,
+        "skip": 0,
+        "manu": 0,
+        "erro": 0,
         "desc": "Master Node Configuration Files",
         "results": [
           {
@@ -34,7 +37,10 @@
     "total_pass": 42,
     "total_fail": 12,
     "total_warn": 11,
-    "total_info": 0
+    "total_info": 0,
+    "total_skip": 0,
+    "total_manu": 0,
+    "total_erro": 0
   },
   {
     "id": "2",
@@ -48,6 +54,9 @@
         "fail": 0,
         "warn": 0,
         "info": 0,
+        "skip": 0,
+        "manu": 0,
+        "erro": 0,
         "desc": "Etcd Node Configuration Files",
         "results": [
           {
@@ -71,7 +80,10 @@
     "total_pass": 7,
     "total_fail": 0,
     "total_warn": 0,
-    "total_info": 0
+    "total_info": 0,
+    "total_skip": 0,
+    "total_manu": 0,
+    "total_erro": 0
   },
   {
     "id": "3",
@@ -85,6 +97,9 @@
         "fail": 0,
         "warn": 1,
         "info": 0,
+        "skip": 0,
+        "manu": 0,
+        "erro": 0,
         "desc": "Authentication and Authorization",
         "results": [
           {
@@ -109,6 +124,9 @@
     "total_pass": 0,
     "total_fail": 0,
     "total_warn": 3,
-    "total_info": 0
+    "total_info": 0,
+    "total_skip": 0,
+    "total_manu": 0,
+    "total_erro": 0
   }
 ]
