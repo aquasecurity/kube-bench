@@ -13,3 +13,4 @@ coverage.txt
 thumbs.db
 /kubeconfig.kube-bench
 /test.data
+*.iml
