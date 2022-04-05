@@ -20,6 +20,8 @@ jobs:
           go-version: 1.16
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Run unit tests
         run: make tests
       - name: Setup Kubernetes cluster (KIND)
@@ -44,7 +46,8 @@ jobs:
       - name: Release
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.169.0
+          distribution: goreleaser
+          version: v1.7.0
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
