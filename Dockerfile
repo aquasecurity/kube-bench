@@ -1,4 +1,4 @@
-FROM golang:1.17.4 AS build
+FROM golang:1.18.0 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY makefile makefile
 COPY go.mod go.sum ./
@@ -9,7 +9,7 @@ COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 RUN make build && cp kube-bench /go/bin/kube-bench
 
-FROM alpine:3.15.0 AS run
+FROM alpine:3.15.2 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109

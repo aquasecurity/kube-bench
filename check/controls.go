@@ -249,7 +249,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 					AwsAccountId:  aws.String(a),
 					Confidence:    aws.Int64(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
-					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", arn, a, check.ID, tf)),
+					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s", arn, a, check.ID)),
 					CreatedAt:     aws.String(tf),
 					Description:   aws.String(check.Text),
 					ProductArn:    aws.String(arn),
