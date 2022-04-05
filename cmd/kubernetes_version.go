@@ -128,7 +128,6 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	}
 
 	authToken := fmt.Sprintf("Bearer %s", token)
-	glog.V(2).Info(fmt.Sprintf("getWebData AUTH TOKEN --[%q]--\n", authToken))
 	req.Header.Set("Authorization", authToken)
 
 	resp, err := client.Do(req)
