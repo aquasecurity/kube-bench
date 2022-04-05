@@ -68,9 +68,11 @@ type testItem struct {
 	auditUsed        AuditUsed
 }
 
-type envTestItem testItem
-type pathTestItem testItem
-type flagTestItem testItem
+type (
+	envTestItem  testItem
+	pathTestItem testItem
+	flagTestItem testItem
+)
 
 type compare struct {
 	Op    string
@@ -236,7 +238,7 @@ func (t testItem) evaluate(s string) *testOutput {
 	}
 
 	result.flagFound = match
-	var isExist = "exists"
+	isExist := "exists"
 	if !result.flagFound {
 		isExist = "does not exist"
 	}
@@ -255,7 +257,6 @@ func (t testItem) evaluate(s string) *testOutput {
 }
 
 func compareOp(tCompareOp string, flagVal string, tCompareValue string, flagName string) (string, bool) {
-
 	expectedResultPattern := ""
 	testResult := false
 

@@ -200,7 +200,6 @@ func init() {
 	goflag.CommandLine.VisitAll(func(goflag *goflag.Flag) {
 		RootCmd.PersistentFlags().AddGoFlag(goflag)
 	})
-
 }
 
 // initConfig reads in config file and ENV variables if set.
