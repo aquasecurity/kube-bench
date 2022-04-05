@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-//REGION ...
+// REGION ...
 const REGION = "AWS_REGION"
 
 func writeFinding(in []*securityhub.AwsSecurityFinding) error {
@@ -20,7 +20,8 @@ func writeFinding(in []*securityhub.AwsSecurityFinding) error {
 		return fmt.Errorf("%s not set", REGION)
 	}
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(r)},
+		Region: aws.String(r),
+	},
 	)
 	if err != nil {
 		return err

@@ -52,7 +52,6 @@ func TestParseSkipIds(t *testing.T) {
 }
 
 func TestNewRunFilter(t *testing.T) {
-
 	type TestCase struct {
 		Name       string
 		FilterOpts FilterOpts
@@ -139,7 +138,6 @@ func TestNewRunFilter(t *testing.T) {
 		// then
 		assert.EqualError(t, err, "group option and check option can't be used together")
 	})
-
 }
 
 func TestIsMaster(t *testing.T) {
@@ -212,7 +210,6 @@ func TestIsMaster(t *testing.T) {
 }
 
 func TestMapToCISVersion(t *testing.T) {
-
 	viperWithData, err := loadConfigForTest()
 	if err != nil {
 		t.Fatalf("Unable to load config file %v", err)

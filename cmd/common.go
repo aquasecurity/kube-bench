@@ -47,7 +47,7 @@ func NewRunFilter(opts FilterOpts) (check.Predicate, error) {
 	}
 
 	return func(g *check.Group, c *check.Check) bool {
-		var test = true
+		test := true
 		if len(groupIDs) > 0 {
 			_, ok := groupIDs[g.ID]
 			test = test && ok
@@ -87,7 +87,6 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 
 	// Get the set of executables we need for this section of the tests
 	binmap, err := getBinaries(typeConf, nodetype)
-
 	// Checks that the executables we need for the section are running.
 	if err != nil {
 		glog.V(1).Info(fmt.Sprintf("failed to get a set of executables needed for tests: %v", err))
@@ -148,7 +147,7 @@ func generateDefaultEnvAudit(controls *check.Controls, binSubs []string) {
 }
 
 func parseSkipIds(skipIds string) map[string]bool {
-	var skipIdMap = make(map[string]bool, 0)
+	skipIdMap := make(map[string]bool, 0)
 	if skipIds != "" {
 		for _, id := range strings.Split(skipIds, ",") {
 			skipIdMap[strings.Trim(id, " ")] = true

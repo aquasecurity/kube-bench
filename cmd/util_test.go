@@ -29,9 +29,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var g string
-var e []error
-var eIndex int
+var (
+	g      string
+	e      []error
+	eIndex int
+)
 
 func fakeps(proc string) string {
 	return g
@@ -132,7 +134,7 @@ func TestGetBinaries(t *testing.T) {
 			expectErr: false,
 		},
 		{
-			// "anotherthing" in list of components but doesn't have a defintion
+			// "anotherthing" in list of components but doesn't have a definition
 			config:    map[string]interface{}{"components": []string{"apiserver", "anotherthing"}, "apiserver": map[string]interface{}{"bins": []string{"apiserver", "kube-apiserver"}}, "thing": map[string]interface{}{"bins": []string{"something else", "thing"}}},
 			psOut:     "kube-apiserver thing",
 			exp:       map[string]string{"apiserver": "kube-apiserver"},
@@ -262,7 +264,8 @@ func TestGetConfigFiles(t *testing.T) {
 			config: map[string]interface{}{
 				"components": []string{"apiserver"},
 				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
-				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}},
+			},
 			statResults: []error{os.ErrNotExist, nil},
 			exp:         map[string]string{"apiserver": "kube-apiserver"},
 		},
@@ -271,7 +274,8 @@ func TestGetConfigFiles(t *testing.T) {
 			config: map[string]interface{}{
 				"components": []string{"apiserver", "thing"},
 				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
-				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}},
+			},
 			statResults: []error{os.ErrNotExist, nil, nil},
 			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "/my/file/thing"},
 		},
@@ -280,7 +284,8 @@ func TestGetConfigFiles(t *testing.T) {
 			config: map[string]interface{}{
 				"components": []string{"apiserver", "thing"},
 				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
-				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}, "defaultconf": "another/thing"}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}, "defaultconf": "another/thing"},
+			},
 			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
 			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "another/thing"},
 		},
@@ -289,7 +294,8 @@ func TestGetConfigFiles(t *testing.T) {
 			config: map[string]interface{}{
 				"components": []string{"apiserver", "thing"},
 				"apiserver":  map[string]interface{}{"confs": []string{"apiserver", "kube-apiserver"}},
-				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}}},
+				"thing":      map[string]interface{}{"confs": []string{"/my/file/thing"}},
+			},
 			statResults: []error{os.ErrNotExist, nil, os.ErrNotExist},
 			exp:         map[string]string{"apiserver": "kube-apiserver", "thing": "thing"},
 		},
@@ -459,7 +465,6 @@ func TestGetConfigFilePath(t *testing.T) {
 }
 
 func TestDecrementVersion(t *testing.T) {
-
 	cases := []struct {
 		kubeVersion string
 		succeed     bool
@@ -646,7 +651,6 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 }
 
 func Test_getOcpValidVersion(t *testing.T) {
-
 	cases := []struct {
 		openShiftVersion string
 		succeed          bool

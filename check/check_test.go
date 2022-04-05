@@ -115,7 +115,6 @@ func TestCheckAuditEnv(t *testing.T) {
 }
 
 func TestCheckAuditConfig(t *testing.T) {
-
 	passingCases := []*Check{
 		controls.Groups[1].Checks[0],
 		controls.Groups[1].Checks[3],

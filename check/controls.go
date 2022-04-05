@@ -285,6 +285,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	}
 	return fs, nil
 }
+
 func getConfig(name string) (string, error) {
 	r := viper.GetString(name)
 	if len(r) == 0 {
@@ -292,6 +293,7 @@ func getConfig(name string) (string, error) {
 	}
 	return r, nil
 }
+
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:

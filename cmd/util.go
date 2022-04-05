@@ -16,25 +16,25 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Print colors
+var colors = map[check.State]*color.Color{
+	check.PASS: color.New(color.FgGreen),
+	check.FAIL: color.New(color.FgRed),
+	check.WARN: color.New(color.FgYellow),
+	check.INFO: color.New(color.FgBlue),
+}
+
 var (
-	// Print colors
-	colors = map[check.State]*color.Color{
-		check.PASS: color.New(color.FgGreen),
-		check.FAIL: color.New(color.FgRed),
-		check.WARN: color.New(color.FgYellow),
-		check.INFO: color.New(color.FgBlue),
+	psFunc          func(string) string
+	statFunc        func(string) (os.FileInfo, error)
+	getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
+	TypeMap         = map[string][]string{
+		"ca":         {"cafile", "defaultcafile"},
+		"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
+		"service":    {"svc", "defaultsvc"},
+		"config":     {"confs", "defaultconf"},
 	}
 )
-
-var psFunc func(string) string
-var statFunc func(string) (os.FileInfo, error)
-var getBinariesFunc func(*viper.Viper, check.NodeType) (map[string]string, error)
-var TypeMap = map[string][]string{
-	"ca":         {"cafile", "defaultcafile"},
-	"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
-	"service":    {"svc", "defaultsvc"},
-	"config":     {"confs", "defaultconf"},
-}
 
 func init() {
 	psFunc = ps
@@ -208,7 +208,6 @@ func getFiles(v *viper.Viper, fileType string) map[string]string {
 
 // verifyBin checks that the binary specified is running
 func verifyBin(bin string) bool {
-
 	// Strip any quotes
 	bin = strings.Trim(bin, "'\"")
 
@@ -290,7 +289,6 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (*KubeVersion, error) {
-
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
 		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
 		return k8sVer, nil
@@ -298,7 +296,6 @@ func getKubeVersion() (*KubeVersion, error) {
 
 	// These executables might not be on the user's path.
 	_, err := exec.LookPath("kubectl")
-
 	if err != nil {
 		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
@@ -337,7 +334,6 @@ func getKubeVersionFromKubectl() *KubeVersion {
 func getKubeVersionFromKubelet() *KubeVersion {
 	cmd := exec.Command("kubelet", "--version")
 	out, err := cmd.CombinedOutput()
-
 	if err != nil {
 		glog.V(2).Infof("Failed to query kubelet: %s", err)
 		glog.V(2).Info(err)
@@ -401,11 +397,9 @@ func makeSubstitutions(s string, ext string, m map[string]string) (string, []str
 
 func isEmpty(str string) bool {
 	return strings.TrimSpace(str) == ""
-
 }
 
 func buildComponentMissingErrorMessage(nodetype check.NodeType, component string, bins []string) string {
-
 	errMessageTemplate := `
 Unable to detect running programs for component %q
 The following %q programs have been searched, but none of them have been found:
