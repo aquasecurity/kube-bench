@@ -92,8 +92,11 @@ jobs:
           go-version: 1.16
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.169.0
+          distribution: goreleaser
+          version: v1.7.0
           args: release --snapshot --skip-publish --rm-dist
