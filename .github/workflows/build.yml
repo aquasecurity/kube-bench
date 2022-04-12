@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.16
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.16
       - name: Checkout code
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.16
       - name: Checkout code
@@ -87,7 +87,7 @@ jobs:
     needs: [e2e, unit]
     steps:
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.16
       - name: Checkout code
