@@ -5,7 +5,7 @@ ARTIFACTORY := docker.internal.sysdig.com
 IMAGE_REPO := kube-bench-dependency
 IMAGE_TAG?= dev
 DEPENDENCY_IMAGE_NAME := $(ARTIFACTORY)/$(IMAGE_REPO):$(IMAGE_TAG)
-DEPENDENCY_IMAGE_NAME_ibm_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_s390x:$(IMAGE_TAG)
+DEPENDENCY_IMAGE_NAME_linux_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_s390x:$(IMAGE_TAG)
 
 build-dependency-image:
 	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
