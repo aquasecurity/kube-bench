@@ -32,7 +32,7 @@ jobs:
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
       - name: Setup golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           version: latest
           args: --verbose
