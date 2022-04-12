@@ -9,9 +9,9 @@ DEPENDENCY_IMAGE_NAME_linux_arm64 := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_arm64:$(
 DEPENDENCY_IMAGE_NAME_ibm_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_ibm_s390x:$(IMAGE_TAG)
 
 build-dependency-image:
-	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
-	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME_linux_arm64) -f Dependency-Dockerfile_linux_arm64 .
-	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME_ibm_s390x) -f Dependency-Dockerfile_ibm_s390x .
+	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
+	$(DOCKER) buildx create --node multiarch --use
+	$(DOCKER) buildx build --platform linux/s390x --load -t $(DEPENDENCY_IMAGE_NAME_ibm_s390x) -f Dependency-Dockerfile_ibm_s390x .
 
 push-dependency-image:
 	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME)
