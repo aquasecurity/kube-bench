@@ -5,20 +5,18 @@ ARTIFACTORY := docker.internal.sysdig.com
 IMAGE_REPO := kube-bench-dependency
 IMAGE_TAG?= dev
 DEPENDENCY_IMAGE_NAME := $(ARTIFACTORY)/$(IMAGE_REPO):$(IMAGE_TAG)
-DEPENDENCY_IMAGE_NAME_linux_arm64 := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_arm64:$(IMAGE_TAG)
-DEPENDENCY_IMAGE_NAME_ibm_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_ibm_s390x:$(IMAGE_TAG)
+DEPENDENCY_IMAGE_NAME_ibm_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_s390x:$(IMAGE_TAG)
 
 build-dependency-image:
+	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
 	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	$(DOCKER) buildx create --node multiarch --use
-	$(DOCKER) buildx build --platform linux/s390x --load -t $(DEPENDENCY_IMAGE_NAME_ibm_s390x) -f Dependency-Dockerfile_ibm_s390x .
+	$(DOCKER) buildx build --platform linux/s390x --load -t $(DEPENDENCY_IMAGE_NAME_linux_s390x) -f Dependency-Dockerfile_linux_s390x .
 
 push-dependency-image:
 	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME)
-	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME_linux_arm64)
-	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME_ibm_s390x)
+	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME_linux_s390x)
 
 delete-dependency-image:
 	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME)
-	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME_linux_arm64)
-	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME_ibm_s390x)
+	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME_linux_s390x)
