@@ -20,7 +20,7 @@ RUN microdnf install yum \
   && yum update -y glibc \
   && yum install procps \
   && yum update -y procps \
-  && yum install epel-release \
+  && yum install epel-release -y \
   && yum install jq -y \
   && yum clean all \
   && microdnf remove yum || rpm -e -v yum \
