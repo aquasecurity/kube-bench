@@ -13,15 +13,22 @@ RUN make build && cp kube-bench /go/bin/kube-bench
 # ubi8-minimal base image for build with ubi standards
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5 as run
 
-RUN RUN microdnf install yum \
+RUN microdnf install yum \
   && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
-  && yum clean all \
+  && yum update -y \
   && yum install glibc \
   && yum update -y glibc \
+  && yum install procps \
+  && yum update -y procps \
+  && yum install epel-release \
+  && yum install jq -y \
+  && yum clean all \
   && microdnf remove yum || rpm -e -v yum \
   && microdnf clean all
 
 WORKDIR /opt/kube-bench/
+
+ENV PATH=$PATH:/usr/local/mount-from-host/bin 
 
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
