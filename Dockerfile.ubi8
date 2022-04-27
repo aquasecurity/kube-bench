@@ -13,14 +13,13 @@ RUN make build && cp kube-bench /go/bin/kube-bench
 # ubi8-minimal base image for build with ubi standards
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5 as run
 
-RUN microdnf install yum \
+RUN microdnf install yum findutils openssl\
   && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
   && yum update -y \
-  && yum install glibc \
+  && yum install -y glibc \
   && yum update -y glibc \
-  && yum install procps \
+  && yum install -y procps \
   && yum update -y procps \
-  && yum install epel-release -y \
   && yum install jq -y \
   && yum clean all \
   && microdnf remove yum || rpm -e -v yum \
