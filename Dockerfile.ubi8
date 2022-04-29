@@ -1,0 +1,48 @@
+FROM golang:1.18.1 AS build
+WORKDIR /go/src/github.com/aquasecurity/kube-bench/
+COPY makefile makefile
+COPY go.mod go.sum ./
+COPY main.go .
+COPY check/ check/
+COPY cmd/ cmd/
+COPY internal/ internal/
+ARG KUBEBENCH_VERSION
+RUN make build && cp kube-bench /go/bin/kube-bench
+
+
+# ubi8-minimal base image for build with ubi standards
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5 as run
+
+RUN microdnf install yum findutils openssl\
+  && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
+  && yum update -y \
+  && yum install -y glibc \
+  && yum update -y glibc \
+  && yum install -y procps \
+  && yum update -y procps \
+  && yum install jq -y \
+  && yum clean all \
+  && microdnf remove yum || rpm -e -v yum \
+  && microdnf clean all
+
+WORKDIR /opt/kube-bench/
+
+ENV PATH=$PATH:/usr/local/mount-from-host/bin 
+
+COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
+COPY entrypoint.sh .
+COPY cfg/ cfg/
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["install"]
+
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.name="kube-bench" \
+    org.label-schema.description="Run the CIS Kubernetes Benchmark tests" \
+    org.label-schema.url="https://github.com/aquasecurity/kube-bench" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="https://github.com/aquasecurity/kube-bench" \
+    org.label-schema.schema-version="1.0"
