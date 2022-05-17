@@ -11,7 +11,7 @@ RUN make build && cp kube-bench /go/bin/kube-bench
 
 
 # ubi8-minimal base image for build with ubi standards
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5 as run
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.6 as run
 
 RUN microdnf install yum findutils openssl\
   && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
