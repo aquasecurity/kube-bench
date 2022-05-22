@@ -133,7 +133,7 @@ func generateDefaultEnvAudit(controls *check.Controls, binSubs []string) {
 						if len(binSubs) == 1 {
 							binPath = binSubs[0]
 						} else {
-							fmt.Printf("AuditEnv not explicit for check (%s), where bin path cannot be determined\n", checkItem.ID)
+							glog.V(1).Infof("AuditEnv not explicit for check (%s), where bin path cannot be determined", checkItem.ID)
 						}
 
 						if test.Env != "" && checkItem.AuditEnv == "" {
