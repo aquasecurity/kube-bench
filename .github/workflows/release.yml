@@ -44,7 +44,7 @@ jobs:
           second_file_path: integration/testdata/Expected_output.data
           expected_result: PASSED
       - name: Release
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: v1.7.0
