@@ -84,7 +84,7 @@ go build -o kube-bench .
 This command copies the kube-bench binary and configuration files to your host from the Docker container:
 **binaries compiled for linux-x86-64 only (so they won't run on macOS or Windows)**
 ```
-docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+docker run --rm -v `pwd`:/host docker.io/aquasec/kube-bench:latest install
 ```
 
 You can then run `./kube-bench`.
