@@ -15,19 +15,19 @@ It is impossible to inspect the master nodes of managed clusters, e.g. GKE, EKS,
 You can avoid installing kube-bench on the host by running it inside a container using the host PID namespace and mounting the `/etc` and `/var` directories where the configuration and other files are located on the host so that kube-bench can check their existence and permissions.
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t aquasec/kube-bench:latest --version 1.18
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t docker.io/aquasec/kube-bench:latest --version 1.18
 ```
 
 > Note: the tests require either the kubelet or kubectl binary in the path in order to auto-detect the Kubernetes version. You can pass `-v $(which kubectl):/usr/local/mount-from-host/bin/kubectl` to resolve this. You will also need to pass in kubeconfig credentials. For example:
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t aquasec/kube-bench:latest 
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config -t docker.io/aquasec/kube-bench:latest 
 ```
 
 You can use your own configs by mounting them over the default ones in `/opt/kube-bench/cfg/`
 
 ```
-docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config aquasec/kube-bench:latest
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.yaml:/opt/kube-bench/cfg/config.yaml -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl -v ~/.kube:/.kube -e KUBECONFIG=/.kube/config docker.io/aquasec/kube-bench:latest
 ```
 
 ### Running in a Kubernetes cluster
@@ -72,7 +72,7 @@ could open nsg 22 port and assign a public ip for one agent node (only for testi
 
 1. Run CIS benchmark to view results:
 ```
-docker run --rm -v `pwd`:/host aquasec/kube-bench:latest install
+docker run --rm -v `pwd`:/host docker.io/aquasec/kube-bench:latest install
 ./kube-bench 
 ```
 kube-bench cannot be run on AKS master nodes
@@ -107,9 +107,9 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 ### Running on OpenShift
 
 | OpenShift Hardening Guide | kube-bench config |
-|---|---|
-| ocp-3.10 +| rh-0.7 |
-| ocp-4.1 +| rh-1.0 |
+| ------------------------- | ----------------- |
+| ocp-3.10 +                | rh-0.7            |
+| ocp-4.1 +                 | rh-1.0            |
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 4.1. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or,`--version ocp-4.5` or `--benchmark rh-1.0` 
 
@@ -117,10 +117,10 @@ kube-bench includes a set of test files for Red Hat's OpenShift hardening guide 
 
 ### Running in a GKE cluster
 
-| CIS Benchmark | Targets |
-|---|---|
-| gke-1.0| master, controlplane, node, etcd, policies, managedservices |
-| gke-1.2.0| master, controlplane, node, policies, managedservices |
+| CIS Benchmark | Targets                                                     |
+| ------------- | ----------------------------------------------------------- |
+| gke-1.0       | master, controlplane, node, etcd, policies, managedservices |
+| gke-1.2.0     | master, controlplane, node, policies, managedservices       |
 
 kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` or `--benchmark gke-1.2.0` when you run the `kube-bench` command.
 
@@ -132,9 +132,9 @@ kubectl apply -f job-gke.yaml
 
 ### Running in a ACK cluster
 
-| CIS Benchmark | Targets |
-|---|---|
-| ack-1.0| master, controlplane, node, etcd, policies, managedservices |
+| CIS Benchmark | Targets                                                     |
+| ------------- | ----------------------------------------------------------- |
+| ack-1.0       | master, controlplane, node, etcd, policies, managedservices |
 
 kube-bench includes benchmarks for Alibaba Cloud Container Service For Kubernetes (ACK).
 To run this you will need to specify `--benchmark ack-1.0` when you run the `kube-bench` command.

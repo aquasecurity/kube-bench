@@ -15,7 +15,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: kube-bench
-          image: aquasec/kube-bench:latest
+          image: docker.io/aquasec/kube-bench:latest
           command: ["kube-bench", "run", "--targets", "master"]
           volumeMounts:
             - name: var-lib-etcd
