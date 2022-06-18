@@ -208,11 +208,11 @@ func (controls *Controls) JUnit() ([]byte, error) {
 // ASFF encodes the results of last run to AWS Security Finding Format(ASFF).
 func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	fs := []*securityhub.AwsSecurityFinding{}
-	a, err := getConfig("AWS_ACCOUNT")
+	account, err := getConfig("AWS_ACCOUNT")
 	if err != nil {
 		return nil, err
 	}
-	c, err := getConfig("CLUSTER_ARN")
+	cluster, err := getConfig("CLUSTER_ARN")
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +220,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	if err != nil {
 		return nil, err
 	}
+	nodeName, _ := getConfig("NODE_NAME")
 	arn := fmt.Sprintf(ARN, region)
 
 	ti := time.Now()
@@ -244,12 +245,16 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 				if len(check.Reason) > 1024 {
 					reason = check.Reason[0:1023]
 				}
+				id := aws.String(fmt.Sprintf("%s%sEKSnodeID+%s+%s", arn, account, check.ID, cluster))
+				if nodeName != "" {
+					id = aws.String(fmt.Sprintf("%s%sEKSnodeID+%s+%s+%s", arn, account, check.ID, cluster, nodeName))
+				}
 
 				f := securityhub.AwsSecurityFinding{
-					AwsAccountId:  aws.String(a),
+					AwsAccountId:  aws.String(account),
 					Confidence:    aws.Int64(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
-					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s+%s", arn, a, check.ID, c)),
+					Id:            id,
 					CreatedAt:     aws.String(tf),
 					Description:   aws.String(check.Text),
 					ProductArn:    aws.String(arn),
@@ -274,7 +279,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 					},
 					Resources: []*securityhub.Resource{
 						{
-							Id:   aws.String(c),
+							Id:   aws.String(cluster),
 							Type: aws.String(TYPE),
 						},
 					},
