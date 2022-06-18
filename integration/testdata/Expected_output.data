@@ -240,7 +240,7 @@ minimum.
 [PASS] 4.2.8 Ensure that the --hostname-override argument is not set (Manual)
 [WARN] 4.2.9 Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Manual)
 [WARN] 4.2.10 Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)
-[PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Manual)
+[PASS] 4.2.11 Ensure that the --rotate-certificates argument is not set to false (Automated)
 [PASS] 4.2.12 Verify that the RotateKubeletServerCertificate argument is set to true (Manual)
 [WARN] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)
 
