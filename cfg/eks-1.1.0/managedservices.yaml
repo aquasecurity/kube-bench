@@ -13,13 +13,13 @@ groups:
         type: "manual"
         remediation: |
           To utilize AWS ECR for Image scanning please follow the steps below:
-          
+
           To create a repository configured for scan on push (AWS CLI):
           aws ecr create-repository --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
-          
+
           To edit the settings of an existing repository (AWS CLI):
           aws ecr put-image-scanning-configuration --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
-          
+
           Use the following steps to start a manual image scan using the AWS Management Console.
               Open the Amazon ECR console at https://console.aws.amazon.com/ecr/repositories.
               From the navigation bar, choose the Region to create your repository in.
