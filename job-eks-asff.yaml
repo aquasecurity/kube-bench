@@ -40,7 +40,7 @@ spec:
               "--targets",
               "node",
               "--benchmark",
-              "eks-1.0.1",
+              "eks-1.1.0",
               "--asff",
             ]
           env:
@@ -59,7 +59,7 @@ spec:
               mountPath: /etc/kubernetes
               readOnly: true
             - name: kube-bench-eks-config
-              mountPath: "/opt/kube-bench/cfg/eks-1.0.1/config.yaml"
+              mountPath: "/opt/kube-bench/cfg/eks-1.1.0/config.yaml"
               subPath: config.yaml
               readOnly: true
       restartPolicy: Never

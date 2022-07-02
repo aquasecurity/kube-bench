@@ -1,0 +1,205 @@
+---
+controls:
+version: "eks-1.1.0"
+id: 4
+text: "Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
+        type: "manual"
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
+          if they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
+        scored: false
+
+      - id: 4.1.2
+        text: "Minimize access to secrets (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 4.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 4.1.4
+        text: "Minimize access to create pods (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that default service accounts are not actively used. (Manual)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific access
+          to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+        scored: false
+
+      - id: 4.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+  - id: 4.2
+    text: "Pod Security Policies"
+    checks:
+      - id: 4.2.1
+        text: "Minimize the admission of privileged containers (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that
+          the .spec.privileged field is omitted or set to false.
+        scored: false
+
+      - id: 4.2.2
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.hostPID field is omitted or set to false.
+        scored: false
+
+      - id: 4.2.3
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.hostIPC field is omitted or set to false.
+        scored: false
+
+      - id: 4.2.4
+        text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.hostNetwork field is omitted or set to false.
+        scored: false
+
+      - id: 4.2.5
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.allowPrivilegeEscalation field is omitted or set to false.
+        scored: false
+
+      - id: 4.2.6
+        text: "Minimize the admission of root containers (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
+          UIDs not including 0.
+        scored: false
+
+      - id: 4.2.7
+        text: "Minimize the admission of containers with the NET_RAW capability (Automated)"
+        type: "manual"
+        remediation: |
+          Create a PSP as described in the Kubernetes documentation, ensuring that the
+          .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
+        scored: false
+
+      - id: 4.2.8
+        text: "Minimize the admission of containers with added capabilities (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure that allowedCapabilities is not present in PSPs for the cluster unless
+          it is set to an empty array.
+        scored: false
+
+      - id: 4.2.9
+        text: "Minimize the admission of containers with capabilities assigned (Manual)"
+        type: "manual"
+        remediation: |
+          Review the use of capabilities in applications running on your cluster. Where a namespace
+          contains applications which do not require any Linux capabities to operate consider adding
+          a PSP which forbids the admission of containers which do not drop all capabilities.
+        scored: false
+
+  - id: 4.3
+    text: "CNI Plugin"
+    checks:
+      - id: 4.3.1
+        text: "Ensure that the latest CNI version is used (Manual)"
+        type: "manual"
+        remediation: |
+          Review the documentation of AWS CNI plugin, and ensure latest CNI version is used.
+        scored: false
+
+      - id: 4.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as you need them.
+        scored: false
+
+  - id: 4.4
+    text: "Secrets Management"
+    checks:
+      - id: 4.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Manual)"
+        type: "manual"
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 4.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 4.5
+    text: "Extensible Admission Control"
+    checks: []
+
+  - id: 4.6
+    text: "General Policies"
+    checks:
+      - id: 4.6.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 4.6.2
+        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and apply security contexts to your pods. For a
+          suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
+          Containers.
+        scored: false
+
+      - id: 4.6.3
+        text: "The default namespace should not be used (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false
