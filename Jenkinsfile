@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'builder-backend-j8 || new-builder-backend-j8'
+        label 'amazon-linux2'
     }
     parameters {
         gitParameter name: 'TAG',
