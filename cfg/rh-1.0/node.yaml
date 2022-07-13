@@ -364,12 +364,19 @@ groups:
       - id: 4.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.kubeletClientInfo // .apiServerArguments'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.kubeletClientInfo // .apiServerArguments | "kubelet-client-certificate: \(."kubelet-client-certificate"[] // ."certFile")"'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.kubeletClientInfo // .apiServerArguments | "kubelet-client-key: \(."kubelet-client-key"[] // ."keyFile")"'
         tests:
           bin_op: and
           test_items:
-            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
-            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
+            - flag: "kubelet-client-certificate"
+              compare:
+                op: eq
+                value: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.crt"
+            - flag: "kubelet-client-key"
+              compare:
+                op: eq
+                value: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.key"
         remediation: |
           OpenShift automatically manages TLS authentication for the API server communication with the node/kublet.
           This is not configurable.
