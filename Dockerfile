@@ -9,7 +9,7 @@ COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 RUN make build && cp kube-bench /go/bin/kube-bench
 
-FROM alpine:3.16.0 AS run
+FROM alpine:3.16.1 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
