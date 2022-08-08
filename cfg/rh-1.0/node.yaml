@@ -186,7 +186,7 @@ groups:
         audit: |
           for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
           do
-            oc debug node/${node} -- chroot /host grep -B4 -A1 anonymous: /etc/kubernetes/kubelet.conf
+            oc debug node/${node} -- chroot /host grep -B4 -A1 anonymous /etc/kubernetes/kubelet.conf
           done
         use_multiple_values: true
         tests:
@@ -222,7 +222,7 @@ groups:
         audit: |
           for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
           do
-            oc debug node/${node} -- chroot /host grep clientCAFile: /etc/kubernetes/kubelet.conf
+            oc debug node/${node} -- chroot /host grep clientCAFile /etc/kubernetes/kubelet.conf
           done 2> /dev/null
         use_multiple_values: true
         tests:
