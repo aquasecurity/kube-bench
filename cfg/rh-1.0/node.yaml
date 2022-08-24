@@ -199,7 +199,7 @@ groups:
         scored: true
 
       - id: 4.2.2
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
         type: manual
         # Takes a lot of time for connection to fail and
         audit: |
@@ -346,7 +346,7 @@ groups:
         scored: false
 
       - id: 4.2.9
-        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Automated)"
+        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Manual)"
         audit: |
           for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
           do

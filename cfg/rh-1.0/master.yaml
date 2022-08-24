@@ -129,7 +129,7 @@ groups:
         scored: false
 
       - id: 1.1.8
-        text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
+        text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
         audit: |
           for i in $( oc get pods -n openshift-etcd -l app=etcd -o name | grep etcd )
           do
@@ -316,7 +316,7 @@ groups:
         scored: false
 
       - id: 1.1.19
-        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
+        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Manual)"
         audit: |
           # Should return root:root for all files and directories
           for i in $(oc -n openshift-kube-apiserver get pod -l app=openshift-kube-apiserver -o jsonpath='{.items[*].metadata.name}')
@@ -334,7 +334,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: true
+        scored: false
 
       - id: 1.1.20
         text: "Ensure that the OpenShift PKI certificate file permissions are set to 644 or more restrictive (Manual)"
@@ -381,9 +381,9 @@ groups:
         text: "Ensure that anonymous requests are authorized (Manual)"
         audit: |
           # To verify that userGroups include system:unauthenticated
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
           # To verify that userGroups include system:unauthenticated
-          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[].userGroups'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?.userGroups'
           # To verify RBAC is enabled
           oc get clusterrolebinding
           oc get clusterrole
