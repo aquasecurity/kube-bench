@@ -26,6 +26,9 @@ metadata:
   name: kube-bench
 spec:
   template:
+    metadata:
+      labels:
+        app: kube-bench
     spec:
       hostPID: true
       containers:
