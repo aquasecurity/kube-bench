@@ -1,0 +1,42 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+master:
+  components:
+    - scheduler
+    - controllermanager
+    - node
+
+  scheduler:
+    kubeconfig:
+      - /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig
+    defaultkubeconfig: /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig
+
+  controllermanager:
+    kubeconfig:
+      - /var/lib/rancher/k3s/server/cred/cloud-controller.kubeconfig
+    defaultkubeconfig: /var/lib/rancher/k3s/server/cred/cloud-controller.kubeconfig
+
+etcd:
+  components:
+    - etcd
+  etcd:
+    confs:
+      - /var/lib/rancher/k3s/server/db/etcd/config
+    defaultconf: /var/lib/rancher/k3s/server/db/etcd/config
+
+node:
+  components:
+    - proxy
+    - kubelet
+  proxy:
+    kubeconfig:
+      - "/var/lib/rancher/k3s/agent/kubeproxy.kubeconfig"
+    defaultkubeconfig: "/var/lib/rancher/k3s/agent/kubeproxy.kubeconfig"
+  kubelet:
+    kubeconfig:
+      - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
+    defaultkubeconfig: "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
+    cafile:
+      - "/var/lib/rancher/k3s/server/tls/server-ca.crt"
+    defaultcafile: "/var/lib/rancher/k3s/server/tls/server-ca.crt"
