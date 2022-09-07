@@ -1,3 +1,4 @@
+---
 controls:
 version: "eks-stig-kubernetes-v1r6"
 id: 5
@@ -20,9 +21,9 @@ groups:
         type: "manual"
         remediation: |
          Amazon EKS version 1.18 and later automatically enable ValidatingAdmissionWebhook
-         Ref: https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html     
+         Ref: https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html
         scored: false
-        
+
       - id: V-245542
         text: "Kubernetes API Server must disable basic authentication to protect information in transit | Component of EKS Control Plane"
         type: "skip"

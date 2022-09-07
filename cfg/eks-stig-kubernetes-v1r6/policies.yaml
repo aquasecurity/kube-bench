@@ -17,18 +17,17 @@ groups:
          Modify the configuration of each default service account to include this value
          automountServiceAccountToken: false
         scored: false
-      
+
       - id: V-242383
         text: "User-managed resources must be created in dedicated namespaces. (Manual)"
         type: "manual"
         remediation: |
          Move any user-managed resources from the default, kube-public and kube-node-lease namespaces, to user namespaces.
         scored: false
-      
+
       - id: V-242417
         text: "Kubernetes must separate user functionality. (Manual)"
         type: "manual"
         remediation: |
          Move any user pods that are present in the Kubernetes system namespaces to user specific namespaces.
-        scored: false         
-         
+        scored: false

@@ -14,11 +14,11 @@ spec:
         - name: kube-bench
           image: docker.io/aquasec/kube-bench:${VERSION}
           command: [
-              "kube-bench",
-              "run",
-              "--benchmark",
-              "eks-stig-kubernetes-v1r6",
-            ]
+            "kube-bench",
+            "run",
+            "--benchmark",
+            "eks-stig-kubernetes-v1r6",
+          ]
           volumeMounts:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd

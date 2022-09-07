@@ -4,5 +4,3 @@ version: "eks-stig-kubernetes-v1r6"
 id: 1
 text: "Control Plane Components"
 type: "master"
-
-        
