@@ -19,7 +19,7 @@ groups:
             - flag: "--key-file"
               env: "ETCD_KEY_FILE"
         remediation: |
-          By default, K3s uses a config file for etcd that can be found at $etcdconf. 
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
           Server and peer cert and key files are specified. No manual remediation needed.
         scored: true
 
@@ -34,7 +34,7 @@ groups:
                 op: eq
                 value: true
         remediation: |
-          By default, K3s uses a config file for etcd that can be found at $etcdconf. 
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
           client-cert-auth is set to true. No manual remediation needed.
         scored: true
 
@@ -68,7 +68,7 @@ groups:
             - flag: "--peer-key-file"
               env: "ETCD_PEER_KEY_FILE"
         remediation: |
-          By default, K3s starts Etcd with a config file found here, $etcdconf. 
+          By default, K3s starts Etcd with a config file found here, $etcdconf.
           The config file contains peer-transport-security: which has fields that have the peer cert and peer key files.
         scored: true
 
@@ -83,7 +83,7 @@ groups:
                 op: eq
                 value: true
         remediation: |
-          By default, K3s uses a config file for etcd that can be found at $etcdconf. 
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
           Within the file, the client-cert-auth field is set. No manual remediation needed.
         scored: true
 
@@ -102,17 +102,17 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          By default, K3s uses a config file for etcd that can be found at $etcdconf. 
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
           Within the file, it does not contain the peer-auto-tls field. No manual remediation needed.
         scored: true
 
       - id: 2.7
         text: "Ensure that a unique Certificate Authority is used for etcd (Manual)"
         audit: |
-          if [ -f "$etcdconf" ];then 
+          if [ -f "$etcdconf" ];then
             etcd_ca=$(grep 'trusted-ca-file' $etcdconf | awk -F ":|: *" '{print $NF}');
             apiserver_ca=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "trusted-ca-file" | awk -F "=" '{print $NF}')
-            if [ "$etcd_ca" == "$apiserver_ca" ]; then 
+            if [ "$etcd_ca" == "$apiserver_ca" ]; then
               echo 'etcd_and_apiserver_have_same_ca'; 
             else 
               echo 'etcd_and_apiserver_ca_not_same1' ;
@@ -124,6 +124,6 @@ groups:
           test_items:
             - flag: "etcd_and_apiserver_ca_not_same"
         remediation: |
-          By default, K3s uses a config file for etcd that can be found at $etcdconf 
+          By default, K3s uses a config file for etcd that can be found at $etcdconf
           and the trusted-ca-file parameters in it are set to unique values specific to etcd. No manual remediation needed.
         scored: false

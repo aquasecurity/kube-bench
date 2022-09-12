@@ -27,7 +27,7 @@ groups:
             - flag: "--audit-policy-file"
               set: true
         remediation: |
-          Create an audit policy file for your cluster and pass it to k3s. 
+          Create an audit policy file for your cluster and pass it to k3s.
           e.g. --kube-apiserver-arg='audit-log-path=/var/lib/rancher/k3s/server/logs/audit-log'
         scored: true
 

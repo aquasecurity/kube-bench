@@ -79,10 +79,10 @@ groups:
         audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/admin.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/admin.kubeconfig; fi'"
         tests:
           test_items:
-          - flag: "permissions"
-            compare:
-              op: bitmask
-              value: "644"
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
         remediation: |
           Run the below command (based on the file location on your system) on the k3s node.
           For example,
@@ -345,8 +345,8 @@ groups:
                 op: has
                 value: "EventRateLimit"
         remediation: |
-          By default, K3s only sets NodeRestriction,PodSecurityPolicy as the parameter to the --enable-admission-plugins argument. 
-          To configure this, follow the Kubernetes documentation and set the desired limits in a configuration file. 
+          By default, K3s only sets NodeRestriction,PodSecurityPolicy as the parameter to the --enable-admission-plugins argument.
+          To configure this, follow the Kubernetes documentation and set the desired limits in a configuration file.
           Then refer to K3s's documentation to see how to supply additional api server configuration via the kube-apiserver-arg parameter.
         scored: false
 
@@ -381,8 +381,8 @@ groups:
                 op: has
                 value: "AlwaysPullImages"
         remediation: |
-          By default, K3s only sets NodeRestriction,PodSecurityPolicy as the parameter to the --enable-admission-plugins argument. 
-          To configure this, follow the Kubernetes documentation and set the desired limits in a configuration file. 
+          By default, K3s only sets NodeRestriction,PodSecurityPolicy as the parameter to the --enable-admission-plugins argument.
+          To configure this, follow the Kubernetes documentation and set the desired limits in a configuration file.
           Then refer to K3s's documentation to see how to supply additional api server configuration via the kube-apiserver-arg parameter.
         scored: false
 
@@ -403,7 +403,7 @@ groups:
                 op: has
                 value: "PodSecurityPolicy"
         remediation: |
-          K3s would need to have the SecurityContextDeny admission plugin enabled by passing it as an argument to K3s. 
+          K3s would need to have the SecurityContextDeny admission plugin enabled by passing it as an argument to K3s.
           --kube-apiserver-arg='enable-admission-plugins=SecurityContextDeny
         scored: false
 
@@ -422,8 +422,8 @@ groups:
             - flag: "--disable-admission-plugins"
               set: false
         remediation: |
-          By default, K3s does not use this argument. 
-          If there's a desire to use this argument, follow the documentation and create ServiceAccount objects as per your environment. 
+          By default, K3s does not use this argument.
+          If there's a desire to use this argument, follow the documentation and create ServiceAccount objects as per your environment.
           Then refer to K3s's documentation to see how to supply additional api server configuration via the kube-apiserver-arg parameter.
         scored: true
 
@@ -457,7 +457,7 @@ groups:
                 op: has
                 value: "PodSecurityPolicy"
         remediation: |
-          K3s would need to have the PodSecurityPolicy admission plugin enabled by passing it as an argument to K3s. 
+          K3s would need to have the PodSecurityPolicy admission plugin enabled by passing it as an argument to K3s.
           --kube-apiserver-arg='enable-admission-plugins=PodSecurityPolicy.
         scored: true
 
@@ -473,7 +473,7 @@ groups:
                 op: has
                 value: "NodeRestriction"
         remediation: |
-          K3s would need to have the NodeRestriction admission plugin enabled by passing it as an argument to K3s. 
+          K3s would need to have the NodeRestriction admission plugin enabled by passing it as an argument to K3s.
           --kube-apiserver-arg='enable-admission-plugins=NodeRestriction.
         scored: true
 
@@ -701,7 +701,7 @@ groups:
           test_items:
             - flag: "--encryption-provider-config"
         remediation: |
-          K3s server needs to be ran with the follow, --kube-apiserver-arg='encryption-provider-config=/path/to/encryption_config'. 
+          K3s server needs to be ran with the follow, --kube-apiserver-arg='encryption-provider-config=/path/to/encryption_config'.
           This can be done by running k3s with the --secrets-encryptiuon argument which will configure the encryption provider.
         scored: false
 

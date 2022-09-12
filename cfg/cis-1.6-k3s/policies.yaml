@@ -163,7 +163,7 @@ groups:
           for i in kube-system kube-public default; do
             kubectl get networkpolicies -n $i;
           done
-          Verify that there are network policies applied to each of the namespaces. 
+          Verify that there are network policies applied to each of the namespaces.
           An operator should apply NetworkPolcyies that prevent unneeded traffic from traversing networks unnecessarily. An example of applying a NetworkPolcy can be found in the Hardening Guide.
           https://docs.rancher.cn/docs/k3s/security/hardening-guide/_index
         scored: false
@@ -177,7 +177,7 @@ groups:
         remediation: |
           Run the following command to find references to objects which use environment variables defined from secrets.
           kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
-          
+ 
           if possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false
@@ -254,7 +254,7 @@ groups:
         remediation: |
           Run the below command on the master node.
           kubectl get all -n default
-          The only entries there should be system-managed resources such as the kubernetes service. 
+          The only entries there should be system-managed resources such as the kubernetes service.
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
         scored: false
