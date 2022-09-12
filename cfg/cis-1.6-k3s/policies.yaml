@@ -177,7 +177,7 @@ groups:
         remediation: |
           Run the following command to find references to objects which use environment variables defined from secrets.
           kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
- 
+
           if possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: false

@@ -113,12 +113,12 @@ groups:
             etcd_ca=$(grep 'trusted-ca-file' $etcdconf | awk -F ":|: *" '{print $NF}');
             apiserver_ca=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "trusted-ca-file" | awk -F "=" '{print $NF}')
             if [ "$etcd_ca" == "$apiserver_ca" ]; then
-              echo 'etcd_and_apiserver_have_same_ca'; 
-            else 
+              echo 'etcd_and_apiserver_have_same_ca';
+            else
               echo 'etcd_and_apiserver_ca_not_same1' ;
             fi
-          else 
-            echo 'etcd_and_apiserver_ca_not_same'; return ; 
+          else
+            echo 'etcd_and_apiserver_ca_not_same'; return ;
           fi
         tests:
           test_items:
