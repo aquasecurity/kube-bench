@@ -50,18 +50,13 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive if etcd is used (Automated)"
-        audit: if [ -d "/var/lib/rancher/k3s/server/db/etcd" ];then stat -c permissions=%a /var/lib/rancher/k3s/server/db/etcd; else echo 'NotEtcd'; fi
+        audit: stat -c permissions=%a /var/lib/rancher/k3s/server/db/etcd
         tests:
-          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "700"
-            - flag: "NotEtcd"
-              conpare:
-                op: eq
-                value: "NotEtcd"
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the below command:
@@ -186,7 +181,7 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Automated)"
-        audit: "find //var/lib/rancher/k3s/server/tls/ -name '*.key' | xargs stat -c permissions=%a"
+        audit: "find /var/lib/rancher/k3s/server/tls/ -name '*.key' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -205,9 +200,7 @@ groups:
     checks:
       - id: 1.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth");
-          if [ ! $res ];then echo "--anonymous-auth=false"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth"
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -220,9 +213,7 @@ groups:
 
       - id: 1.2.2
         text: "Ensure that the --basic-auth-file argument is not set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "basic-auth-file");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "basic-auth-file"
         tests:
           test_items:
             - flag: "--basic-auth-file"
@@ -233,9 +224,7 @@ groups:
 
       - id: 1.2.3
         text: "Ensure that the --token-auth-file parameter is not set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file"
         tests:
           test_items:
             - flag: "--token-auth-file"
@@ -246,9 +235,7 @@ groups:
 
       - id: 1.2.4
         text: "Ensure that the --kubelet-https argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file"
         tests:
           bin_op: or
           test_items:
@@ -264,9 +251,7 @@ groups:
 
       - id: 1.2.5
         text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'kubelet-client-certificate|kubelet-client-key');
-          if [ ! $res ];then echo "--kubelet-client-certificate= --kubelet-client-key="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'kubelet-client-certificate|kubelet-client-key'
         tests:
           bin_op: and
           test_items:
@@ -278,9 +263,7 @@ groups:
 
       - id: 1.2.6
         text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "kubelet-certificate-authority");
-          if [ ! $res ];then echo "--kubelet-certificate-authority="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "kubelet-certificate-authority"
         tests:
           test_items:
             - flag: "--kubelet-certificate-authority"
@@ -290,9 +273,7 @@ groups:
 
       - id: 1.2.7
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode");
-          if [ ! $res ];then echo "--authorization-mode="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -305,9 +286,7 @@ groups:
 
       - id: 1.2.8
         text: "Ensure that the --authorization-mode argument includes Node (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode");
-          if [ ! $res ];then echo "--authorization-mode=Node"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -320,9 +299,7 @@ groups:
 
       - id: 1.2.9
         text: "Ensure that the --authorization-mode argument includes RBAC (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode");
-          if [ ! $res ];then echo "--authorization-mode=RBAC"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -335,9 +312,7 @@ groups:
 
       - id: 1.2.10
         text: "Ensure that the admission control plugin EventRateLimit is set (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo "--enable-admission-plugins=EventRateLimit"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -352,9 +327,7 @@ groups:
 
       - id: 1.2.11
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo "--enable-admission-plugins="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           bin_op: or
           test_items:
@@ -371,9 +344,7 @@ groups:
 
       - id: 1.2.12
         text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo "--enable-admission-plugins=AlwaysPullImages"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -388,9 +359,7 @@ groups:
 
       - id: 1.2.13
         text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo "--enable-admission-plugins="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           bin_op: or
           test_items:
@@ -409,9 +378,7 @@ groups:
 
       - id: 1.2.14
         text: "Ensure that the admission control plugin ServiceAccount is set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "ServiceAccount");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "ServiceAccount"
         tests:
           bin_op: or
           test_items:
@@ -429,9 +396,7 @@ groups:
 
       - id: 1.2.15
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "disable-admission-plugins");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "disable-admission-plugins"
         tests:
           bin_op: or
           test_items:
@@ -447,9 +412,7 @@ groups:
 
       - id: 1.2.16
         text: "Ensure that the admission control plugin PodSecurityPolicy is set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -463,9 +426,7 @@ groups:
 
       - id: 1.2.17
         text: "Ensure that the admission control plugin NodeRestriction is set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -479,9 +440,7 @@ groups:
 
       - id: 1.2.18
         text: "Ensure that the --insecure-bind-address argument is not set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "enable-admission-plugins"
         tests:
           test_items:
             - flag: "--insecure-bind-address"
@@ -492,9 +451,7 @@ groups:
 
       - id: 1.2.19
         text: "Ensure that the --insecure-port argument is set to 0 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "insecure-port");
-          if [ ! $res ];then echo "--insecure-port=0"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "insecure-port"
         tests:
           test_items:
             - flag: "--insecure-port"
@@ -507,9 +464,7 @@ groups:
 
       - id: 1.2.20
         text: "Ensure that the --secure-port argument is not set to 0 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "secure-port");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "secure-port"
         tests:
           bin_op: or
           test_items:
@@ -525,9 +480,7 @@ groups:
 
       - id: 1.2.21
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "profiling");
-          if [ ! $res ];then echo "--profiling=false"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "profiling"
         tests:
           test_items:
             - flag: "--profiling"
@@ -540,9 +493,7 @@ groups:
 
       - id: 1.2.22
         text: "Ensure that the --audit-log-path argument is set (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-path");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-path"
         tests:
           test_items:
             - flag: "--audit-log-path"
@@ -552,9 +503,7 @@ groups:
 
       - id: 1.2.23
         text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxage");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxage"
         tests:
           test_items:
             - flag: "--audit-log-maxage"
@@ -567,9 +516,7 @@ groups:
 
       - id: 1.2.24
         text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxbackup");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxbackup"
         tests:
           test_items:
             - flag: "--audit-log-maxbackup"
@@ -582,9 +529,7 @@ groups:
 
       - id: 1.2.25
         text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxsize");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "audit-log-maxsize"
         tests:
           test_items:
             - flag: "--audit-log-maxsize"
@@ -597,9 +542,7 @@ groups:
 
       - id: 1.2.26
         text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "request-timeout");
-          if [ ! $res ];then echo "--request-timeout=60"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "request-timeout"
         tests:
           test_items:
             - flag: "--request-timeout"
@@ -612,9 +555,7 @@ groups:
 
       - id: 1.2.27
         text: "Ensure that the --service-account-lookup argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "service-account-lookup");
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "service-account-lookup"
         tests:
           bin_op: or
           test_items:
@@ -630,9 +571,7 @@ groups:
 
       - id: 1.2.28
         text: "Ensure that the --service-account-key-file argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "service-account-key-file");
-          if [ ! $res ];then echo "--service-account-key-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "service-account-key-file"
         tests:
           test_items:
             - flag: "--service-account-key-file"
@@ -642,9 +581,7 @@ groups:
 
       - id: 1.2.29
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'etcd-certfile|etcd-keyfile');
-          if [ ! $res ];then echo "--etcd-certfile= --etcd-keyfile"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'etcd-certfile|etcd-keyfile'
         tests:
           bin_op: and
           test_items:
@@ -656,9 +593,7 @@ groups:
 
       - id: 1.2.30
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'tls-cert-file|tls-private-key-file');
-          if [ ! $res ];then echo "--tls-cert-file= --tls-private-key-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'tls-cert-file|tls-private-key-file'
         tests:
           bin_op: and
           test_items:
@@ -670,9 +605,7 @@ groups:
 
       - id: 1.2.31
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file");
-          if [ ! $res ];then echo "--client-ca-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"
         tests:
           test_items:
             - flag: "--client-ca-file"
@@ -682,9 +615,7 @@ groups:
 
       - id: 1.2.32
         text: "Ensure that the --etcd-cafile argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'etcd-cafile');
-          if [ ! $res ];then echo "--etcd-cafile="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E 'etcd-cafile'
         tests:
           test_items:
             - flag: "--etcd-cafile"
@@ -694,9 +625,7 @@ groups:
 
       - id: 1.2.33
         text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E "encryption-provider-config");
-          if [ ! $res ];then echo "--etcd-certfile= --etcd-keyfile"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep -E "encryption-provider-config"
         tests:
           test_items:
             - flag: "--encryption-provider-config"
@@ -717,9 +646,7 @@ groups:
 
       - id: 1.2.35
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "tls-cipher-suites");
-          if [ ! $res ];then echo "--tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "tls-cipher-suites"
         tests:
           test_items:
             - flag: "--tls-cipher-suites"
@@ -746,9 +673,7 @@ groups:
 
       - id: 1.3.2
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "profiling")
-          if [ ! $res ];then echo "--profiling=false"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "profiling"
         tests:
           test_items:
             - flag: "--profiling"
@@ -761,9 +686,7 @@ groups:
 
       - id: 1.3.3
         text: "Ensure that the --use-service-account-credentials argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "use-service-account-credentials")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "use-service-account-credentials"
         tests:
           test_items:
             - flag: "--use-service-account-credentials"
@@ -776,9 +699,7 @@ groups:
 
       - id: 1.3.4
         text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "service-account-private-key-file")
-          if [ ! $res ];then echo "--service-account-private-key-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "service-account-private-key-file"
         tests:
           test_items:
             - flag: "--service-account-private-key-file"
@@ -788,9 +709,7 @@ groups:
 
       - id: 1.3.5
         text: "Ensure that the --root-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "root-ca-file")
-          if [ ! $res ];then echo "--root-ca-file"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "root-ca-file"
         tests:
           test_items:
             - flag: "--root-ca-file"
@@ -800,9 +719,7 @@ groups:
 
       - id: 1.3.6
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "RotateKubeletServerCertificate")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "RotateKubeletServerCertificate"
         tests:
           bin_op: or
           test_items:
@@ -819,9 +736,7 @@ groups:
 
       - id: 1.3.7
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "bind-address")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "bind-address"
         tests:
           bin_op: or
           test_items:
@@ -840,9 +755,7 @@ groups:
     checks:
       - id: 1.4.1
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-scheduler" | tail -n1 | grep "profiling")
-          if [ ! $res ];then echo "--profiling=false"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-scheduler" | tail -n1 | grep "profiling"
         tests:
           test_items:
             - flag: "--profiling"
@@ -855,9 +768,7 @@ groups:
 
       - id: 1.4.2
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "bind-address")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "bind-address"
         tests:
           bin_op: or
           test_items:

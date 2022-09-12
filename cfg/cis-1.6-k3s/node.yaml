@@ -111,9 +111,7 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the anonymous-auth argument is set to false (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth")
-          if [ ! $res ];then echo "--anonymous-auth=false"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth"
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -126,9 +124,7 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode")
-          if [ ! $res ];then echo "--authorization-mode=Webhook"; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"
         tests:
           test_items:
             - flag: --authorization-mode
@@ -141,9 +137,7 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file")
-          if [ ! $res ];then echo "--client-ca-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"
         tests:
           test_items:
             - flag: --client-ca-file
@@ -153,9 +147,7 @@ groups:
 
       - id: 4.2.4
         text: "Ensure that the --read-only-port argument is set to 0 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "read-only-port")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "read-only-port"
         tests:
           bin_op: or
           test_items:
@@ -171,9 +163,7 @@ groups:
 
       - id: 4.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "streaming-connection-idle-timeout")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "streaming-connection-idle-timeout"
         tests:
           test_items:
             - flag: --streaming-connection-idle-timeout
@@ -189,9 +179,7 @@ groups:
 
       - id: 4.2.6
         text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "protect-kernel-defaults")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "protect-kernel-defaults"
         tests:
           test_items:
             - flag: --protect-kernel-defaults
@@ -204,9 +192,7 @@ groups:
 
       - id: 4.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "make-iptables-util-chains")
-          if [ ! $res ];then echo ""; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "make-iptables-util-chains"
         tests:
           test_items:
             - flag: --make-iptables-util-chains
@@ -245,9 +231,7 @@ groups:
 
       - id: 4.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
-        audit: |
-          res=$(journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep -E 'tls-cert-file|tls-private-key-file')
-          if [ ! $res ];then echo "--tls-cert-file= --tls-private-key-file="; else echo $res; fi
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep -E 'tls-cert-file|tls-private-key-file'
         tests:
           test_items:
             - flag: --tls-cert-file

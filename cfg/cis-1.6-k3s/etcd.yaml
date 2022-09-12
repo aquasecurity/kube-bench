@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate if use etcd as database (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep -E 'cert-file|key-file' $etcdconf; else echo '--cert-file= --key-file='; fi
+        audit: grep -E 'cert-file|key-file' $etcdconf
         tests:
           bin_op: and
           test_items:
@@ -25,7 +25,7 @@ groups:
 
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep 'client-cert-auth' $etcdconf; else echo '--client-cert-auth=true'; fi
+        audit: grep 'client-cert-auth' $etcdconf
         tests:
           test_items:
             - flag: "--client-cert-auth"
@@ -40,7 +40,7 @@ groups:
 
       - id: 2.3
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep 'auto-tls' $etcdconf; else echo ''; fi
+        audit: grep 'auto-tls' $etcdconf
         tests:
           bin_op: or
           test_items:
@@ -59,7 +59,7 @@ groups:
       - id: 2.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
         set as appropriate (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep -A 5 'peer-transport-security' $etcdconf | grep -E 'cert-file|key-file'; else echo '--peer-cert-file= --peer-key-file'; fi
+        audit: grep -A 5 'peer-transport-security' $etcdconf | grep -E 'cert-file|key-file'
         tests:
           bin_op: and
           test_items:
@@ -74,7 +74,7 @@ groups:
 
       - id: 2.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep 'client-cert-auth' $etcdconf; else echo '--peer-client-cert-auth=true'; fi
+        audit: grep 'client-cert-auth' $etcdconf
         tests:
           test_items:
             - flag: "--peer-client-cert-auth"
@@ -89,7 +89,7 @@ groups:
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
-        audit: if [ -f "$etcdconf" ];then grep 'peer-auto-tls' $etcdconf; else echo ''; fi
+        audit: grep 'peer-auto-tls' $etcdconf
         tests:
           bin_op: or
           test_items:
