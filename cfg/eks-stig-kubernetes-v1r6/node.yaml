@@ -9,7 +9,7 @@ groups:
     text: "DISA Category Code I"
     checks:
       - id: V-242387   # CIS 3.2.4
-        text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
+        text: "The Kubernetes Kubelet must have the read-only port flag disabled (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -30,31 +30,8 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: false
-      - id: V-242390
-        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          test_items:
-            - flag: "--anonymous-auth"
-              path: '{.authentication.anonymous.enabled}'
-              set: true
-              compare:
-                op: eq
-                value: false
-        remediation: |
-          If using a Kubelet config file, edit $kubeletconf to set authentication: anonymous: enabled to
-          false.
-          If using executable arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          --anonymous-auth=false
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: true
       - id: V-242391  # CIS 3.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        text: "The Kubernetes Kubelet must have anonymous authentication disabled (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -77,7 +54,7 @@ groups:
           systemctl restart kubelet.service
         scored: true
       - id: V-242392  # CIS 3.2.2
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        text: "The Kubernetes kubelet must enable explicit authorization (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -123,7 +100,7 @@ groups:
          from environment variables.
         scored: false
       - id: V-242434  # CIS 3.2.6
-        text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
+        text: "Kubernetes Kubelet must enable kernel protection (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -145,7 +122,7 @@ groups:
           systemctl restart kubelet.service
         scored: true
       - id: V-242435
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        text: "Kubernetes must prevent non-privileged users from executing privileged functions (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -239,29 +216,8 @@ groups:
           completely. Restart the kubelet service if the kubelet config file
           if the kubelet config file is changed.
         scored: true
-      - id: V-242400
-        text: "The Kubernetes API server must have Alpha APIs disabled (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          bin_op: or
-          test_items:
-            - flag: "--feature-gates"
-              compare:
-                op: nothave
-                value: "AllAlpha=true"
-              set: true
-            - flag: "--feature-gates"
-              set: false
-        remediation: |
-          Edit any manifest files or $kubeletconf that contain the feature-gates
-          setting with AllAlpha set to "true".
-          Set the flag to "false" or remove the "AllAlpha" setting
-          completely. Restart the kubelet service if the kubelet config file
-          if the kubelet config file is changed.
-        scored: true
       - id: V-242404  # CIS 3.2.8
-        text: "Ensure that the --hostname-override argument is not set (Automated)"
+        text: "Kubernetes Kubelet must deny hostname override (Automated)"
         # This is one of those properties that can only be set as a command line argument.
         # To check if the property is set as expected, we need to parse the kubelet command
         # instead reading the Kubelet Configuration file.
@@ -279,7 +235,7 @@ groups:
           systemctl restart kubelet.service
         scored: true
       - id: V-242406
-        text: "Ensure that the kubelet kubeconfig file ownership is set to root:root (Automated)"
+        text: "The Kubernetes kubelet configuration file must be owned by root (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
         tests:
           test_items:
@@ -290,7 +246,7 @@ groups:
           chown root:root $kubeletkubeconfig
         scored: true
       - id: V-242407
-        text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Automated)"
+        text: "The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
