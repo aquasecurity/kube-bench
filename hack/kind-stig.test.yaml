@@ -12,7 +12,7 @@ spec:
       hostPID: true
       containers:
         - name: kube-bench
-          image: docker.io/aquasec/kube-bench:5c76890
+          image: docker.io/aquasec/kube-bench:latest
           command: [
             "kube-bench",
             "run",
