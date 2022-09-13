@@ -141,7 +141,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: true
+        scored: false
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
