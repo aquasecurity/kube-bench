@@ -3,10 +3,8 @@ module github.com/aquasecurity/kube-bench
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.44.97
-	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
+	github.com/aws/aws-sdk-go v1.44.86
 	github.com/fatih/color v1.13.0
-	github.com/form3tech-oss/jwt-go v3.2.3+incompatible // indirect
 	github.com/golang/glog v1.0.0
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
