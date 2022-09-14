@@ -1,4 +1,4 @@
-FROM golang:1.18.3 AS build
+FROM golang:1.19.0 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY makefile makefile
 COPY go.mod go.sum ./
@@ -9,7 +9,7 @@ COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 RUN make build && cp kube-bench /go/bin/kube-bench
 
-FROM alpine:3.16.0 AS run
+FROM alpine:3.16.2 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
@@ -26,8 +26,7 @@ RUN apk update && apk upgrade && apk --no-cache add openssl
 
 # Add glibc for running oc command 
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.33-r0/glibc-2.33-r0.apk
-RUN apk add glibc-2.33-r0.apk
+RUN apk add gcompat
 RUN apk add jq
 
 ENV PATH=$PATH:/usr/local/mount-from-host/bin

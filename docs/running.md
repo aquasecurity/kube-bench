@@ -77,7 +77,7 @@ docker run --rm -v `pwd`:/host docker.io/aquasec/kube-bench:latest install
 ```
 kube-bench cannot be run on AKS master nodes
 
-### Running in an EKS cluster
+### Running CIS benchmark in an EKS cluster
 
 There is a `job-eks.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
 
@@ -103,6 +103,31 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
   - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
+### Running DISA STIG in an EKS cluster
+
+There is a `job-eks-stig.yaml` file for running the kube-bench node checks on an EKS cluster. The significant difference on EKS is that it's not possible to schedule jobs onto the master node, so master checks can't be performed
+
+1. To create an EKS Cluster refer to [Getting Started with Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html) in the *Amazon EKS User Guide*
+  - Information on configuring `eksctl`, `kubectl` and the AWS CLI is within
+2. Create an [Amazon Elastic Container Registry (ECR)](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) repository to host the kube-bench container image
+```
+aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutability MUTABLE
+```
+3. Download, build and push the kube-bench container image to your ECR repo
+```
+git clone https://github.com/aquasecurity/kube-bench.git
+cd kube-bench
+aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
+docker build -t k8s/kube-bench .
+docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
+docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
+```
+4. Copy the URI of your pushed image, the URI format is like this: `<AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest`
+5. Replace the `image` value in `job-eks-stig.yaml` with the URI from Step 4
+6. Run the kube-bench job on a Pod in your Cluster: `kubectl apply -f job-eks-stig.yaml`
+7. Find the Pod that was created, it *should* be in the `default` namespace: `kubectl get pods --all-namespaces`
+8. Retrieve the value of this Pod and output the report, note the Pod name will vary: `kubectl logs kube-bench-<value>`
+  - You can save the report for later reference: `kubectl logs kube-bench-<value> > kube-bench-report.txt`
 
 ### Running on OpenShift
 
