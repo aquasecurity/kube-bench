@@ -1,0 +1,268 @@
+---
+controls:
+version: "eks-stig-kubernetes-v1r6"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "DISA Category Code I"
+    checks:
+      - id: V-242386
+        text: "The Kubernetes API server must have the insecure port flag disabled | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242388
+        text: "The Kubernetes API server must have the insecure bind address not set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242436
+        text: "The Kubernetes API server must have the ValidatingAdmissionWebhook enabled (manual)"
+        type: "manual"
+        remediation: |
+         Amazon EKS version 1.18 and later automatically enable ValidatingAdmissionWebhook
+         Ref: https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html
+        scored: false
+
+      - id: V-245542
+        text: "Kubernetes API Server must disable basic authentication to protect information in transit | Component of EKS Control Plane"
+        type: "skip"
+
+  - id: 5.2
+    text: "DISA Category Code II"
+    checks:
+      - id: V-242376
+        text: "The Kubernetes Controller Manager must use TLS 1.2, at a minimum | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242377
+        text: "The Kubernetes Scheduler must use TLS 1.2, at a minimum | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242378
+        text: "The Kubernetes API Server must use TLS 1.2, at a minimum | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242379
+        text: "The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242380
+        text: "The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242382
+        text: "The Kubernetes API Server must enable Node,RBAC as the authorization mode | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242384
+        text: "The Kubernetes Scheduler must have secure binding | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242385
+        text: "The Kubernetes Controller Manager must have secure binding | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242389
+        text: "The Kubernetes API server must have the secure port set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242401
+        text: "The Kubernetes API Server must have an audit policy set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242402
+        text: "The Kubernetes API Server must have an audit log path set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242403
+        text: "Kubernetes API Server must generate audit records | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242405
+        text: "The Kubernetes manifests must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242408
+        text: "The Kubernetes manifests must have least privileges | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242409
+        text: "Kubernetes Controller Manager must disable profiling | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242410
+        text: "The Kubernetes API Server must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242411
+        text: "The Kubernetes Scheduler must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242412
+        text: "The Kubernetes Controllers must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242413
+        text: "The Kubernetes etcd must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242418
+        text: "The Kubernetes API server must use approved cipher suites | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242419
+        text: "Kubernetes API Server must have the SSL Certificate Authority set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242420
+        text: "Kubernetes Kubelet must have the SSL Certificate Authority set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242421
+        text: "Kubernetes Controller Manager must have the SSL Certificate Authority set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242422
+        text: "Kubernetes API Server must have a certificate for communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242423
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242424
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242425
+        text: "Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242426
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242427
+        text: "Kubernetes etcd must have a key file for secure communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242428
+        text: "Kubernetes etcd must have a certificate for communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242429
+        text: "Kubernetes etcd must have the SSL Certificate Authority set | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242430
+        text: "Kubernetes etcd must have a certificate for communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242431
+        text: "Kubernetes etcd must have a key file for secure communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242432
+        text: "Kubernetes etcd must have peer-cert-file set for secure communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242433
+        text: "Kubernetes etcd must have a peer-key-file set for secure communication | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242438
+        text: "Kubernetes API Server must configure timeouts to limit attack surface | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242444
+        text: "The Kubernetes component manifests must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242445
+        text: "The Kubernetes component etcd must be owned by etcd | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242446
+        text: "The Kubernetes conf files must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242447
+        text: "The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242448
+        text: "The Kubernetes Kube Proxy must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242449
+        text: "The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242450
+        text: "The Kubernetes Kubelet certificate authority must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242451
+        text: "The Kubernetes component PKI must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242452
+        text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242453
+        text: "The Kubernetes kubelet config must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242454
+        text: "The Kubernetes kubeadm.conf must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242455
+        text: "The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242456
+        text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242457
+        text: "The Kubernetes kubelet config must be owned by root | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242458
+        text: "The Kubernetes API Server must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242459
+        text: "The Kubernetes etcd must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242460
+        text: "The Kubernetes admin.conf must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242466
+        text: "The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242467
+        text: "The Kubernetes PKI keys must have file permissions set to 600 or more restrictive | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-242468
+        text: "The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0 | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-245541
+        text: "Kubernetes Kubelet must not disable timeouts | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-245543
+        text: "Kubernetes API Server must disable token authentication to protect information in transit | Component of EKS Control Plane"
+        type: "skip"
+
+      - id: V-245544
+        text: "Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit | Component of EKS Control Plane"
+        type: "skip"

@@ -324,3 +324,8 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "etcd"
+  "eks-stig-kubernetes-v1r6":
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"

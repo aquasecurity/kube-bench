@@ -2,7 +2,10 @@
 ## CIS Kubernetes Benchmark support
 
 kube-bench supports running tests for Kubernetes.
-Most of our supported benchmarks are defined in the [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/).
+Most of our supported benchmarks are defined in one of the following:
+    [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/)
+    [STIG Document Library](https://public.cyber.mil/stigs/downloads)
+    
 Some defined by other hardenening guides.
 
 | Source | Kubernetes Benchmark | kube-bench config | Kubernetes versions |
@@ -18,3 +21,4 @@ Some defined by other hardenening guides.
 | CIS  | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347)  | aks-1.0   | AKS         |
 | RHEL | RedHat OpenShift hardening guide                               | rh-0.7    | OCP 3.10-3.11 |
 | CIS  | [OCP4 1.1.0](https://workbench.cisecurity.org/benchmarks/6778) | rh-1.0    | OCP 4.1-    |
+| DISA | [Kubernetes Ver 1, Rel 6](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R6_STIG.zip) | eks-stig-kubernetes-v1r6 | EKS |
