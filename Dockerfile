@@ -25,6 +25,7 @@ RUN apk --no-cache upgrade apk-tools
 RUN apk update && apk upgrade && apk --no-cache add openssl
 
 # Add glibc for running oc command 
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 RUN apk add gcompat
 RUN apk add jq
 
