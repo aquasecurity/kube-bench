@@ -582,7 +582,7 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			args: args{
 				platform: Platform{Name: "eks"},
 			},
-			want: "eks-1.0.1",
+			want: "eks-1.1.0",
 		},
 		{
 			name: "gke 1.19",

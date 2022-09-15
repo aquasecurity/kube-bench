@@ -20,7 +20,7 @@ spec:
               "--targets",
               "node",
               "--benchmark",
-              "eks-1.0.1",
+              "eks-1.1.0",
             ]
           volumeMounts:
             - name: var-lib-kubelet
