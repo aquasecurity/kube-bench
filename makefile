@@ -78,3 +78,15 @@ kind-run: kind-push
 		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
 		kubectl logs job/kube-bench > ./test.data && \
 		diff ./test.data integration/testdata/Expected_output.data
+
+kind-run-stig: KUBECONFIG = "./kubeconfig.kube-bench"
+kind-run-stig: kind-push
+	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind-stig.yaml > ./hack/kind-stig.test.yaml
+	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
+	-KUBECONFIG=$(KUBECONFIG) \
+		kubectl delete job kube-bench
+	KUBECONFIG=$(KUBECONFIG) \
+		kubectl apply -f ./hack/kind-stig.test.yaml && \
+		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
+		kubectl logs job/kube-bench > ./test.data && \
+		diff ./test.data integration/testdata/Expected_output_stig.data
