@@ -1,0 +1,6 @@
+---
+controls:
+version: "eks-1.1.0"
+id: 1
+text: "Control Plane Components"
+type: "master"

@@ -1,25 +1,4 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: kube-bench
-  # If using a dedicated IAM role for kube-bench, uncomment the annotations
-  # block below and replace the ROLE_ARN
-  # annotations:
-  #   eks.amazonaws.com/role-arn: "<ROLE_ARN>"
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kube-bench-eks-config
-data:
-  config.yaml: |
-    AWS_ACCOUNT: "<AWS_ACCT_NUMBER>"
-    AWS_REGION: "<AWS_REGION>"
-    CLUSTER_ARN: "<AWS_CLUSTER_ARN>"
-
----
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -33,21 +12,14 @@ spec:
           # Push the image to your ECR and then refer to it here
           # image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
           image: docker.io/aquasec/kube-bench:latest
+          # To send findings to AWS Security Hub, refer to `job-eks-asff.yaml` instead
           command:
             [
               "kube-bench",
               "run",
-              "--targets",
-              "node",
               "--benchmark",
-              "eks-1.1.0",
-              "--asff",
+              "eks-stig-kubernetes-v1r6",
             ]
-          env:
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
@@ -58,12 +30,7 @@ spec:
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
-            - name: kube-bench-eks-config
-              mountPath: "/opt/kube-bench/cfg/eks-1.1.0/config.yaml"
-              subPath: config.yaml
-              readOnly: true
       restartPolicy: Never
-      serviceAccountName: kube-bench
       volumes:
         - name: var-lib-kubelet
           hostPath:
@@ -74,9 +41,3 @@ spec:
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"
-        - name: kube-bench-eks-config
-          configMap:
-            name: kube-bench-eks-config
-            items:
-              - key: config.yaml
-                path: config.yaml

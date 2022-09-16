@@ -1,0 +1,124 @@
+---
+controls:
+version: "eks-stig-kubernetes-v1r6"
+id: 2
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 2.1
+    text: "DISA Category Code I"
+    checks:
+      - id: V-242390
+        text: "The Kubernetes API server must have anonymous authentication disabled (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              path: '{.authentication.anonymous.enabled}'
+              set: true
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          If using a Kubelet config file, edit $kubeletconf to set authentication: anonymous: enabled to
+          false.
+          If using executable arguments, edit the kubelet service file
+          $kubeletsvc on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --anonymous-auth=false
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+      - id: V-242400
+        text: "The Kubernetes API server must have Alpha APIs disabled (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--feature-gates"
+              compare:
+                op: nothave
+                value: "AllAlpha=true"
+              set: true
+            - flag: "--feature-gates"
+              set: false
+        remediation: |
+          Edit any manifest files or $kubeletconf that contain the feature-gates
+          setting with AllAlpha set to "true".
+          Set the flag to "false" or remove the "AllAlpha" setting
+          completely. Restart the kubelet service if the kubelet config file
+          if the kubelet config file is changed.
+        scored: true
+  - id: 2.2
+    text: "DISA Category Code II"
+    checks:
+      - id: V-242381
+        text: "The Kubernetes Controller Manager must create unique service accounts for each work payload. (Manual)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific access
+          to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+        scored: false
+      - id: V-242402
+        text: "The Kubernetes API Server must have an audit log path set (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242403
+        text: "Kubernetes API Server must generate audit records (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242461
+        text: "Kubernetes API Server audit logs must be enabled. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242462
+        text: "The Kubernetes API Server must be set to audit log max size. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242463
+        text: "The Kubernetes API Server must be set to audit log maximum backup. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242464
+        text: "The Kubernetes API Server audit log retention must be set. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+      - id: V-242465
+        text: "The Kubernetes API Server audit log path must be set. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+        scored: false
+  - id: 2.2
+    text: "DISA Category Code II"
+    checks:
+      - id: V-242443
+        text: " Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. (Manual)"
+        type: "manual"
+        remediation: |
+         Upgrade Kubernetes to a supported version.
+         Ref: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html
