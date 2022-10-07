@@ -76,6 +76,7 @@ groups:
         tests:
           test_items:
             - flag: "permissions"
+              set: true
               compare:
                 op: bitmask
                 value: "644"
