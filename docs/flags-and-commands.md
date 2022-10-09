@@ -112,7 +112,7 @@ There are four output states:
 - [INFO] is informational output that needs no further action.
 
 Note:
-- Some tests with `Automatic` in their description must still be run manually
+- Some tests with `Automated` in their description must still be run manually
 - If the user has to run a test manually, this always generates WARN
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
