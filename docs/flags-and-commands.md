@@ -29,6 +29,7 @@ Flag | Description
 --skip string | List of comma separated values of checks to be skipped
 --stderrthreshold severity | logs at or above this threshold go to stderr (default 2)
 -v, --v Level | log level for V logs (default 0)
+--unscored | Run the unscored CIS checks (default true)
 --version string | Manually specify Kubernetes version, automatically detected if unset
 --vmodule moduleSpec | comma-separated list of pattern=N settings for file-filtered logging
 
