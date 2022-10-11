@@ -419,7 +419,7 @@ First, you'll need to create the cluster using `make kind-test-cluster` this wil
 Next, you'll have to build the kube-bench docker image using `make build-docker`, then we will be able to push the docker image to the cluster using `make kind-push`.
 
 ### Updates
-we have a separate make file makefile-sysdig. To build the project, we need to run target from this make file.
+we have a separate make file `makefile-sysdig`. To build the project, we need to run target from this make file.
 `makefile` is from open source project and `make build-docker` builds the images slightly different. So correct way to build
 images is `make build-dependency-image` which uses `makefile-sysdig`
 
