@@ -78,7 +78,7 @@ groups:
             - flag: "permissions"
               set: true
               compare:
-                op: eq
+                op: bitmask
                 value: "644"
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
