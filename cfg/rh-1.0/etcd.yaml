@@ -57,7 +57,7 @@ groups:
           # Returns 0 if found, 1 if not found
           for i in $(oc get pods -oname -n openshift-etcd)
           do
-            oc exec -n openshift-etcd -c etcd $i -- ps -o command= -C etcd | grep -- --auto-tls=true 2>&1>/dev/null ; echo exit_code=$?
+            oc exec -n openshift-etcd -c etcd $i -- ps -o command= -C etcd | grep -- --auto-tls=true 2>/dev/null ; echo exit_code=$?
           done 2>/dev/null
         use_multiple_values: true
         tests:
@@ -118,7 +118,7 @@ groups:
           # Returns 0 if found, 1 if not found
           for i in $(oc get pods -oname -n openshift-etcd)
           do
-            oc exec -n openshift-etcd -c etcd $i -- ps -o command= -C etcd | grep -- --peer-auto-tls=true 2>&1>/dev/null ; echo exit_code=$?
+            oc exec -n openshift-etcd -c etcd $i -- ps -o command= -C etcd | grep -- --peer-auto-tls=true 2>/dev/null ; echo exit_code=$?
           done 2>/dev/null
         use_multiple_values: true
         tests:
