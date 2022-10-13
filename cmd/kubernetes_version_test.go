@@ -264,14 +264,8 @@ func TestGetKubernetesURL(t *testing.T) {
 			}
 			k8sURL := getKubernetesURL()
 
-			if !c.useDefault {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
-				}
-			} else {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
-				}
+			if k8sURL != c.expected {
+				t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
 			}
 		})
 	}
