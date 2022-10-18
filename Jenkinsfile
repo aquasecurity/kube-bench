@@ -19,9 +19,7 @@ pipeline {
                 ])
                 script {
                     docker.withRegistry("https://docker.internal.sysdig.com", 'jenkins-artifactory') {
-                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig build-dependency-image"
-                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig push-dependency-image"
-                        sh "IMAGE_TAG=${params.TAG} make -f makefile-sysdig delete-dependency-image"
+                        sh "IMAGE_TAG=${params.TAG} PUSH=yes make -f makefile-sysdig build-dependency-image"
                     }
                 }
             }

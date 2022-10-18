@@ -1,26 +1,18 @@
 # This repo is a fork of a public upstream, so Sysdig specific make commands have been added in a separate makefile
 
-DOCKER := docker
 ARTIFACTORY := docker.internal.sysdig.com
-IMAGE_REPO := kube-bench-dependency
+PROJECT := kube-bench
+IMAGE_REPO := $(PROJECT)-dependency
 IMAGE_TAG?= dev
 DEPENDENCY_IMAGE_NAME := $(ARTIFACTORY)/$(IMAGE_REPO):$(IMAGE_TAG)
-DEPENDENCY_IMAGE_NAME_linux_arm64 := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_arm64:$(IMAGE_TAG)
-DEPENDENCY_IMAGE_NAME_linux_s390x := $(ARTIFACTORY)/$(IMAGE_REPO)_linux_s390x:$(IMAGE_TAG)
+
+ifndef PUSH
+	PUSH_FLAG := ""
+else
+	PUSH_FLAG := "--push"
+endif
 
 build-dependency-image:
-	$(DOCKER) build -t $(DEPENDENCY_IMAGE_NAME) -f Dependency-Dockerfile .
-#	$(DOCKER) run --rm --privileged multiarch/qemu-user-static --reset -p yes
-#	$(DOCKER) buildx create --node multiarch --use
-#	$(DOCKER) buildx build --platform linux/arm64 --load -t $(DEPENDENCY_IMAGE_NAME_linux_arm64) -f Dependency-Dockerfile_linux_arm64 .
-#	$(DOCKER) buildx build --platform linux/s390x --load -t $(DEPENDENCY_IMAGE_NAME_linux_s390x) -f Dependency-Dockerfile_linux_s390x .
-
-push-dependency-image:
-	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME)
-#	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME_linux_arm64)
-#	$(DOCKER) push $(DEPENDENCY_IMAGE_NAME_linux_s390x)
-
-delete-dependency-image:
-	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME)
-#	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME_linux_arm64)
-#	$(DOCKER) rmi $(DEPENDENCY_IMAGE_NAME_linux_s390x)
+	docker buildx rm -f $(PROJECT)-builder || true
+	docker buildx create --name $(PROJECT)-builder --use
+	docker buildx build --platform linux/arm64,linux/amd64 $(PUSH_FLAG) --tag $(DEPENDENCY_IMAGE_NAME) --file Dependency-Dockerfile .
