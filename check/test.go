@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/jsonpath"
 )
 
@@ -243,11 +243,11 @@ func (t testItem) evaluate(s string) *testOutput {
 		isExist = "does not exist"
 	}
 	switch t.auditUsed {
-	case "auditCommand":
+	case AuditCommand:
 		glog.V(3).Infof("Flag '%s' %s", t.Flag, isExist)
-	case "auditConfig":
+	case AuditConfig:
 		glog.V(3).Infof("Path '%s' %s", t.Path, isExist)
-	case "auditEnv":
+	case AuditEnv:
 		glog.V(3).Infof("Env '%s' %s", t.Env, isExist)
 	default:
 		glog.V(3).Infof("Error with identify audit used %s", t.auditUsed)
