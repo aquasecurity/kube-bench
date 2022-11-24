@@ -1,0 +1,46 @@
+---
+controls:
+version: "cis-1.24"
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Client certificate authentication should not be used for users (Manual)"
+        type: "manual"
+        remediation: |
+          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+          implemented in place of client certificates.
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created (Manual)"
+        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        tests:
+          test_items:
+            - flag: "--audit-policy-file"
+              set: true
+        remediation: |
+          Create an audit policy file for your cluster.
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns (Manual)"
+        type: "manual"
+        remediation: |
+          Review the audit policy provided for the cluster and ensure that it covers
+          at least the following areas,
+          - Access to Secrets managed by the cluster. Care should be taken to only
+            log Metadata for requests to Secrets, ConfigMaps, and TokenReviews, in
+            order to avoid risk of logging sensitive data.
+          - Modification of Pod and Deployment objects.
+          - Use of `pods/exec`, `pods/portforward`, `pods/proxy` and `services/proxy`.
+          For most requests, minimally logging at the Metadata level is recommended
+          (the most basic level of logging).
+        scored: false

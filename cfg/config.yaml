@@ -249,6 +249,7 @@ version_mapping:
   "1.21": "cis-1.20"
   "1.22": "cis-1.23"
   "1.23": "cis-1.23"
+  "1.24": "cis-1.24"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
   "gke-1.0": "gke-1.0"
@@ -286,6 +287,12 @@ target_mapping:
     - "etcd"
     - "policies"
   "cis-1.23":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+  "cis-1.24":
     - "master"
     - "node"
     - "controlplane"
