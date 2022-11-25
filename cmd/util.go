@@ -33,6 +33,7 @@ var (
 		"kubeconfig": {"kubeconfig", "defaultkubeconfig"},
 		"service":    {"svc", "defaultsvc"},
 		"config":     {"confs", "defaultconf"},
+		"datadir":    {"datadirs", "defaultdatadir"},
 	}
 )
 

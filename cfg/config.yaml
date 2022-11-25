@@ -89,6 +89,9 @@ master:
     bins:
       - "etcd"
       - "openshift start etcd"
+    datadirs:
+      - /var/lib/etcd/default.etcd
+      - /var/lib/etcd/data.etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -99,6 +102,7 @@ master:
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
+    defaultdatadir: /var/lib/etcd/default.etcd
 
   flanneld:
     optional: true
@@ -211,6 +215,9 @@ etcd:
   etcd:
     bins:
       - "etcd"
+    datadirs:
+      - /var/lib/etcd/default.etcd
+      - /var/lib/etcd/data.etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -221,6 +228,7 @@ etcd:
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
+    defaultdatadir: /var/lib/etcd/default.etcd
 
 controlplane:
   components:
