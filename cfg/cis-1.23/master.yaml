@@ -169,7 +169,13 @@ groups:
 
       - id: 1.1.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
-        audit: ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%' | xargs stat -c %U:%G
+        audit: |
+          DATA_DIR=''
+          for d in $(ps -ef | grep $etcdbin | grep -- --data-dir | sed 's%.*data-dir[= ]\([^ ]*\).*%\1%'); do
+            if test -d "$d"; then DATA_DIR="$d"; fi
+          done
+          if ! test -d "$DATA_DIR"; then DATA_DIR=$etcddatadir; fi
+          stat -c %U:%G "$DATA_DIR"
         tests:
           test_items:
             - flag: "etcd:etcd"
