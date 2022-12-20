@@ -213,7 +213,7 @@ groups:
 
       - id: 1.2.2
         text: "Ensure that the --basic-auth-file argument is not set (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "basic-auth-file"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "basic-auth-file" | cat
         tests:
           test_items:
             - flag: "--basic-auth-file"
@@ -224,7 +224,7 @@ groups:
 
       - id: 1.2.3
         text: "Ensure that the --token-auth-file parameter is not set (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file" | cat
         tests:
           test_items:
             - flag: "--token-auth-file"
@@ -235,7 +235,7 @@ groups:
 
       - id: 1.2.4
         text: "Ensure that the --kubelet-https argument is set to true (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "token-auth-file"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "kubelet-https" | cat
         tests:
           bin_op: or
           test_items:
@@ -396,7 +396,7 @@ groups:
 
       - id: 1.2.15
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "disable-admission-plugins"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "disable-admission-plugins" | cat
         tests:
           bin_op: or
           test_items:
@@ -542,9 +542,12 @@ groups:
 
       - id: 1.2.26
         text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "request-timeout"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "request-timeout" | cat
         tests:
+          bin_op: or
           test_items:
+            - flag: "--request-timeout"
+              set: false
             - flag: "--request-timeout"
               compare:
                 op: lte
@@ -719,7 +722,7 @@ groups:
 
       - id: 1.3.6
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
-        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "RotateKubeletServerCertificate"
+        audit: journalctl -u k3s | grep "Running kube-controller-manager" | tail -n1 | grep "RotateKubeletServerCertificate" | cat
         tests:
           bin_op: or
           test_items:
