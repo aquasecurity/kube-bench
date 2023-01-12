@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate if use etcd as database (Automated)"
-        audit: grep -A 4 'client-transport-security' $etcdconf | grep -E 'cert-file|key-file' 
+        audit: grep -A 4 'client-transport-security' $etcdconf | grep -E 'cert-file|key-file'
         tests:
           bin_op: and
           test_items:
