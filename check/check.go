@@ -208,6 +208,14 @@ func (c *Check) runAuditCommands() (lastCommand string, err error) {
 	}
 
 	c.AuditConfigOutput, err = runAudit(c.AuditConfig)
+	// when file not found then error comes as exit status 127
+	if err != nil && strings.Contains(err.Error(), "exit status 127") &&
+		(c.AuditEnvOutput != "" || c.AuditOutput != "") {
+		// suppress file not found error when there is Audit OR auditEnv output present
+		glog.V(3).Info(err)
+		err = nil
+		c.AuditConfigOutput = ""
+	}
 	return c.AuditConfig, err
 }
 
@@ -227,8 +235,8 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 		t.auditUsed = AuditCommand
 		result := *(t.execute(c.AuditOutput))
 
-		// Check for AuditConfigOutput only if AuditConfig is set
-		if !result.flagFound && c.AuditConfig != "" {
+		// Check for AuditConfigOutput only if AuditConfig is set and auditConfigOutput is not empty
+		if !result.flagFound && c.AuditConfig != "" && c.AuditConfigOutput != "" {
 			// t.isConfigSetting = true
 			t.auditUsed = AuditConfig
 			result = *(t.execute(c.AuditConfigOutput))
