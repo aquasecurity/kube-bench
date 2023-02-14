@@ -209,7 +209,9 @@ func (c *Check) runAuditCommands() (lastCommand string, err error) {
 
 	c.AuditConfigOutput, err = runAudit(c.AuditConfig)
 	// when file not found then error comes as exit status 127
-	if err != nil && strings.Contains(err.Error(), "exit status 127") &&
+	// in some env same error comes as exit status 1
+	if err != nil && (strings.Contains(err.Error(), "exit status 127") ||
+		strings.Contains(err.Error(), "No such file or directory")) &&
 		(c.AuditEnvOutput != "" || c.AuditOutput != "") {
 		// suppress file not found error when there is Audit OR auditEnv output present
 		glog.V(3).Info(err)
