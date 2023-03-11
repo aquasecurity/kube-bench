@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.17.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.4
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.23.5
-	github.com/fatih/color v1.13.0
+	github.com/fatih/color v1.14.1
 	github.com/golang/glog v1.0.0
 	github.com/magiconair/properties v1.8.7
 	github.com/onsi/ginkgo v1.16.5
@@ -41,7 +41,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
