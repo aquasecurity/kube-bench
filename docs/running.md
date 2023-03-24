@@ -34,7 +34,7 @@ docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro -t -v path/to/my-config.ya
 
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.
 
-The supplied `job.yaml` file can be applied to run the tests as a job. For example:
+The `job.yaml` file (available in the root directory of the repository) can be applied to run the tests as a Kubernetes `Job`. For example:
 
 ```bash
 $ kubectl apply -f job.yaml
@@ -139,6 +139,14 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 4.1. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or,`--version ocp-4.5` or `--benchmark rh-1.0` 
 
 `kube-bench` supports auto-detection, when you run the `kube-bench` command it will autodetect if running in openshift environment.
+
+Since running `kube-bench` requires elevated privileges, the `privileged` SecurityContextConstraint needs to be applied to the ServiceAccount used for the `Job`:
+
+```
+oc create namespace kube-bench
+oc adm policy add-scc-to-user privileged --serviceaccount default
+oc apply -f job.yaml
+```
 
 ### Running in a GKE cluster
 
