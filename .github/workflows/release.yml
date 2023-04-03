@@ -12,7 +12,7 @@ env:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup Go
         uses: actions/setup-go@v3
