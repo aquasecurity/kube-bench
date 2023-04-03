@@ -12,7 +12,7 @@ env:
 jobs:
   publish:
     name: Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v3
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build and push - Docker/ECR
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
@@ -62,6 +62,23 @@ jobs:
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:latest
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache/release
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
+
+      - name: Build and push ubi image - Docker/ECR
+        id: docker_build_ubi
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          file: Dockerfile.ubi
+          build-args: |
+            KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+          tags: |
+            ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
+            public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
           cache-from: type=local,src=/tmp/.buildx-cache/release
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
       - name: Image digest
