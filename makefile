@@ -4,6 +4,7 @@ DOCKER_ORG ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
+IMAGE_NAME_UBI ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)-ubi
 GOOS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
@@ -44,6 +45,12 @@ build-docker:
              --build-arg VCS_REF=$(VERSION) \
 			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
              -t $(IMAGE_NAME) .
+
+build-docker-ubi:
+	docker build -f Dockerfile.ubi --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+             --build-arg VCS_REF=$(VERSION) \
+			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+             -t $(IMAGE_NAME_UBI) .
 
 # unit tests
 tests:
