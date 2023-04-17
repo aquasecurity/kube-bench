@@ -29,6 +29,7 @@ WORKDIR /opt/kube-bench/
 
 ENV PATH=$PATH:/usr/local/mount-from-host/bin 
 
+COPY LICENSE /licenses/LICENSE
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY entrypoint.sh .
 COPY cfg/ cfg/
