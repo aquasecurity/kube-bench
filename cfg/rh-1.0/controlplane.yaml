@@ -16,10 +16,17 @@ groups:
           # To verify that an identity provider is configured
           oc get identity
           # To verify that a custom cluster-admin user exists
-          oc get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind | grep cluster-admin | grep User
+          #oc get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind | grep cluster-admin | grep User
+          oc get clusterrolebindings --all-namespaces -o jsonpath='{range .items[*]}[{.metadata.name},{.roleRef.name},{range .subjects[*]}[{.kind}]{end}]{"\n"}{end}' | grep ,cluster-admin, | grep User
           # To verity that kbueadmin is removed, no results should be returned
           oc get secrets kubeadmin -n kube-system
-        type: manual
+        tests:
+          test_items:
+            - flag: "No resources found"
+              set: false
+            - flag: "cluster-admin"
+            - flag: "kubeadmin"
+              set: false
         remediation: |
           Configure an identity provider for the OpenShift cluster.
           Understanding identity provider configuration | Authentication | OpenShift
@@ -27,7 +34,7 @@ groups:
           you can use RBAC to define and apply permissions.
           After you define an identity provider and create a new cluster-admin user,
           remove the kubeadmin user to improve cluster security.
-        scored: false
+        scored: true
 
   - id: 3.2
     text: "Logging"

@@ -1052,7 +1052,7 @@ groups:
         remediation: |
           Follow the OpenShift documentation for Encrypting etcd data | Authentication | OpenShift Container Platform 4.5
           https://docs.openshift.com/container-platform/4.5/security/encrypting-etcd.html
-        scored: false
+        scored: true
 
       - id: 1.2.34
         text: "Ensure that encryption providers are appropriately configured (Manual)"
@@ -1069,7 +1069,21 @@ groups:
 
       - id: 1.2.35
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
-        type: manual
+        #type: manual
+        #oc get openshiftapiservers.operator.openshift.io cluster -o json | jq .spec.observedConfig.servingInfo
+        audit_config: |
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo}'
+        tests:
+          bin_op: and
+          test_items:
+            - path: "{.cipherSuites}"
+              compare:
+                op: valid_elements
+                value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+            - path: "{.minTLSVersion}"
+              compare:
+                op: valid_elements
+                value: "VersionTLS12,VersionTLS13"
         remediation: |
           Verify that the tlsSecurityProfile is set to the value you chose.
           Note: The HAProxy Ingress controller image does not support TLS 1.3
@@ -1077,7 +1091,7 @@ groups:
           The Ingress Operator converts the Modern profile to Intermediate.
           The Ingress Operator also converts the TLS 1.0 of an Old or Custom profile to 1.1,
           and TLS 1.3 of a Custom profile to 1.2.
-        scored: false
+        scored: true
 
   - id: 1.3
     text: "Controller Manager"
@@ -1232,7 +1246,7 @@ groups:
 
       - id: 1.4.2
         text: "Verify that the scheduler API service is protected by authentication and authorization (Manual)"
-        type: manual
+        #type: manual
         audit: |
           # To verify endpoints
           oc -n openshift-kube-scheduler describe endpoints
@@ -1255,6 +1269,21 @@ groups:
           # As cluster admin, should succeed
           CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
           oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
+        use_multiple_values: true
+        tests:
+          bin_op: and
+          tests_items:
+            - flag: "--bind-address"
+              set: false
+            - flag: "containerPort"
+              compare:
+                op: eq
+                value: "10251"
+            - flag: "port"
+              compare:
+                op: eq
+                value: "10251"
+            
         remediation: |
           By default, the --bind-address argument is not present,
           the readinessProbe and livenessProbe arguments are set to 10251 and the port argument is set to 0.
