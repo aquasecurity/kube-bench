@@ -241,7 +241,7 @@ func findConfigFile(candidates []string) string {
 		if err == nil {
 			return c
 		}
-		if !os.IsNotExist(err) {
+		if !os.IsNotExist(err) && !strings.HasSuffix(err.Error(), "not a directory") {
 			exitWithError(fmt.Errorf("error looking for file %s: %v", c, err))
 		}
 	}

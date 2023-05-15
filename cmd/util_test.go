@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -233,6 +234,7 @@ func TestFindConfigFile(t *testing.T) {
 		{input: []string{"myfile"}, statResults: []error{nil}, exp: "myfile"},
 		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, nil}, exp: "thatfile"},
 		{input: []string{"thisfile", "thatfile"}, statResults: []error{os.ErrNotExist, os.ErrNotExist}, exp: ""},
+		{input: []string{"thisfile", "/etc/dummy/thatfile"}, statResults: []error{os.ErrNotExist, errors.New("stat /etc/dummy/thatfile: not a directory")}, exp: ""},
 	}
 
 	statFunc = fakestat
