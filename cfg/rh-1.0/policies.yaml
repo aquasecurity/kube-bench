@@ -11,13 +11,13 @@ groups:
       - id: 5.1.1
         text: "Ensure that the cluster-admin role is only used where required (Manual)"
         audit: |
-          echo "Result=$(oc get rolebinding -o jsonpath='{.items[*].roleRef.name}' | sed -e 's/^cluster-admin$/FailComand/' -e 's/^cluster-admin .*/FailComand/' -e 's/.* cluster-admin$/FailComand/' -e 's/.* cluster-admin .*/FailComand/')"
+          oc get rolebinding -o jsonpath='{.items[*].roleRef.name}' | sed -e 's/^/roleBindings=/' -e 's/ /,/g'
         tests:
           test_items:
-            - flag: "Result"
+            - flag: "roleBindings"
               compare:
-                op: noteq
-                value: "FailCommand"
+                op: nothave
+                value: "cluster-admin"
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
