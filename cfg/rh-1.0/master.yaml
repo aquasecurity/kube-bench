@@ -1069,18 +1069,17 @@ groups:
 
       - id: 1.2.35
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
-        #type: manual
-        #oc get openshiftapiservers.operator.openshift.io cluster -o json | jq .spec.observedConfig.servingInfo
-        audit_config: |
-          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo}'
+        audit: |
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.cipherSuites}{"\n"}' | sed 's/^/cipherSuites=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.minTLSVersion}{"\n"}' | sed 's/^/minTLSVersion=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
         tests:
           bin_op: and
           test_items:
-            - path: "{.cipherSuites}"
+            - flag: "cipherSuites"
               compare:
                 op: valid_elements
                 value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
-            - path: "{.minTLSVersion}"
+            - flag: "minTLSVersion"
               compare:
                 op: valid_elements
                 value: "VersionTLS12,VersionTLS13"
@@ -1246,46 +1245,25 @@ groups:
 
       - id: 1.4.2
         text: "Verify that the scheduler API service is protected by authentication and authorization (Manual)"
-        #type: manual
         audit: |
-          # To verify endpoints
-          oc -n openshift-kube-scheduler describe endpoints
-          # To verify that bind-adress is not used in the configuration and that port is set to 0
-          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq -r '.data."pod.yaml"' | jq '.spec.containers'
-          # To test for RBAC:
-          oc project openshift-kube-scheduler
-          POD=$(oc get pods -l app=openshift-kube-scheduler -o jsonpath='{.items[0].metadata.name}')
-          POD_IP=$(oc get pods -l app=openshift-kube-scheduler -o jsonpath='{.items[0].status.podIP}')
-          PORT=$(oc get pod $POD -o jsonpath='{.spec.containers[0].livenessProbe.httpGet.port}')
-          # Should return a 403
-          oc rsh ${POD} curl http://${POD_IP}:${PORT}/metrics
-          # Create a service account to test RBAC
-          oc create sa permission-test-sa
-          # Should return 403 Forbidden
-          SA_TOKEN=$(oc sa get-token permission-test-sa)
-          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $SA_TOKEN" -k
-          # Cleanup
-          oc delete sa permission-test-sa
-          # As cluster admin, should succeed
-          CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
-          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
-        use_multiple_values: true
+          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq | grep 'bind-address'
+          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq -r '.data."pod.yaml"' | jq -r '.spec.containers[].livenessProbe.httpGet.port' | sed 's/^/livenessProbe-httpGet-Port=/' | grep -v null
+          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq -r '.data."pod.yaml"' | jq -r '.spec.containers[].readinessProbe.httpGet.port' | sed 's/^/readinessProbe-httpGet-Port=/' | grep -v null
         tests:
           bin_op: and
-          tests_items:
+          test_items:
             - flag: "--bind-address"
               set: false
-            - flag: "containerPort"
+            - flag: "livenessProbe-httpGet-Port"
               compare:
                 op: eq
                 value: "10251"
-            - flag: "port"
+            - flag: "readinessProbe-httpGet-Port"
               compare:
                 op: eq
                 value: "10251"
-            
         remediation: |
           By default, the --bind-address argument is not present,
           the readinessProbe and livenessProbe arguments are set to 10251 and the port argument is set to 0.
           Check the status of this issue: https://bugzilla.redhat.com/show_bug.cgi?id=1889488
-        scored: false
+        scored: true

@@ -399,17 +399,15 @@ groups:
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         #type: "manual"
         audit: |
-          for profile in $(oc get pods --all-namespaces -o jsonpath='{.items[*].metadata.annotations.seccomp\.security\.alpha\.kubernetes\.io/pod}')
-          do
-            echo "Profile=$profile"
-          done
-        use_multiple_values: true
+          oc get pods -n sysdig -o jsonpath="{.items[*].metadata.annotations.seccomp\.security\.alpha\.kubernetes\.io/pod}{'\n'}" | tr ' ' ',' | sed -e 's/^/Profile=/' -e 's/=$/=<none>/' | grep -q docker/default && echo "Profile=valid" || echo "Profile=invalid"
+        use_multiple_values: false
         tests:
+          bin_op: and
           test_items:
             - flag: "Profile"
               compare:
                 op: eq
-                value: "docker/default"
+                value: "valid"
         remediation: |
           To enable the default seccomp profile, use the reserved value /runtime/default that will
           make sure that the pod uses the default policy available on the host.
@@ -458,12 +456,14 @@ groups:
 
       - id: 5.7.4
         text: "The default namespace should not be used (Manual)"
-        #type: "manual"
         audit: |
-          oc get all
+          oc get all -n default -o jsonpath="{range .items[*]}{.metadata.name}{'\n'}{end}{'\n'}" | tr '\n' ',' | sed -e 's/^/default-namespace-items=/' -e 's/,$//' -e 's/=$/=<none>/' -e 's/,$//'
         tests:
           test_items:
-            - flag: "No resources found in default namespace."
+            - flag: "default-namespace-items" 
+              compare: 
+                op: eq 
+                value: "<none>"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.

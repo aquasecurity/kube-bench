@@ -449,16 +449,17 @@ groups:
 
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
-        audit_config: |
-          oc get openshiftapiservers.operator.openshift.io cluster -o json | jq .spec.observedConfig.servingInfo
+        audit: |
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.cipherSuites}{"\n"}' | sed 's/^/cipherSuites=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.minTLSVersion}{"\n"}' | sed 's/^/minTLSVersion=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
         tests:
           bin_op: and
           test_items:
-            - path: "{.cipherSuites}"
+            - flag: "cipherSuites"
               compare:
                 op: valid_elements
                 value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
-            - path: "{.minTLSVersion}"
+            - flag: "minTLSVersion"
               compare:
                 op: valid_elements
                 value: "VersionTLS12,VersionTLS13"
