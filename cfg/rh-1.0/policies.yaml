@@ -31,11 +31,8 @@ groups:
         type: "manual"
         remediation: |
           Where possible, remove get, list and watch access to secret objects in the cluster.
-        scored: true
-#oc get roles -A -o jsonpath='{"rolesResources="}{.items[*].rules[*].resources[?(@=="*")]}{"\n"}{"rolesVerbs="}{.items[*].rules[*].verbs[?(@=="*")]}{"\n"}' | sed -e 's/\s\+/,/g'
-#oc get clusterroles -A -o jsonpath='{"clusterrolesResources="}{.items[*].rules[*].resources[?(@=="*")]}{"\n"}{"clusterrolesVerbs="}{.items[*].rules[*].verbs[?(@=="*")]}{"\n"}' | sed -e 's/\s\+/,/g'
-#oc get roles -A -o jsonpath='{.items[*].rules[*]}'
-#oc get clusterroles -A -o jsonpath='{.items[*].rules[*]}'
+        scored: false
+
       - id: 5.1.3
         text: "Minimize wildcard  use in Roles and ClusterRoles (Manual)"
         audit: |
@@ -72,7 +69,6 @@ groups:
           IFS=$'\n'
           for line in $(oc get roles --all-namespaces -o jsonpath='{range .items[*].rules[*]}{"apiGroup="}{.apiGroups}{" "}{"Resources="}{.resources}{" "}{"Verbs="}{.verbs}{"\n"}{end}')
           do
-              #echo "$line"
               apiG=$(echo "$line" | cut -d' ' -f1)
               res=$(echo "$line" | cut -d' ' -f2)
               verb=$(echo "$line" | cut -d' ' -f3)
@@ -83,7 +79,6 @@ groups:
           done
           for line in $(oc get clusterroles --all-namespaces -o jsonpath='{range .items[*].rules[*]}{"apiGroup="}{.apiGroups}{" "}{"Resources="}{.resources}{" "}{"Verbs="}{.verbs}{"\n"}{end}')
           do
-              #echo "$line"
               apiG=$(echo "$line" | cut -d' ' -f1)
               res=$(echo "$line" | cut -d' ' -f2)
               verb=$(echo "$line" | cut -d' ' -f3)
@@ -229,7 +224,6 @@ groups:
       - id: 5.2.7
         text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
         audit: |
-          # needs verification
           for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
           do
             echo "$i";
@@ -247,16 +241,13 @@ groups:
 
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (Manual)"
-        #type: "manual"
         audit: |
           rest=""
           for i in `oc get scc --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
           do
                   if [ "$i" != "privileged" ]
                   then
-                        #echo "$i";
                         rest=$(oc describe scc $i | grep "Allowed Capabilities" | tr -d ' ' | tr -d '\t' | sed 's/AllowedCapabilities//g' | sed 's/:/cap=/g' | tr -d '\n' | tr -d '\r\t');
-                        #echo "$rest"
                         echo "$rest"
                   fi
           done
@@ -265,7 +256,6 @@ groups:
           do
                   if [ "$i" != "privileged" ]
                   then
-                          #echo "$i";
                           rest=$(oc describe scc $i | grep "Default Add Capabilities" | tr -d ' ' | tr -d '\t' | sed 's/DefaultAddCapabilities//g' | sed 's/:/cap=/g' |  tr -d '\n' | tr -d '\r\t');
                           echo "$rest"
                   fi
@@ -285,27 +275,16 @@ groups:
       - id: 5.2.9
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         audit: |
-          declare -a StringArray=("CHOWN" "DAC_OVERRIDE" "FOWNER" "FSETID" "KILL" "SETGID" "SETUID" "SETPCAP" "NET_BIND_SERVICE" "NET_RAW" "SYS_CHROOT" "MKNOD" "AUDIT_WRITE" "SETFCAP" "SYS_MODULE" "SYS_RAWIO" "SYS_PACCT" "SYS_ADMIN" "SYS_NICE" "SYS_RESOURCE" "SYS_TIME" "SYS_TTY_CONFIG" "AUDIT_CONTROL" "MAC_OVERRIDE" "MAC_ADMIN" "NET_ADMIN" "SYSLOG" "DAC_READ_SEARCH" "LINUX_IMMUTABLE" "NET_BROADCAST" "IPC_LOCK" "IPC_OWNER" "SYS_PTRACE" "SYS_BOOT" "LEASE" "WAKE_ALARM" "BLOCK_SUSPEND")
-          result="Pass"
-          for cap in ${StringArray[@]}; do 
-              for i in `oc get scc --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}'`; do 
-                  drop=$(oc describe scc $i | grep "Required Drop Capabilities" | sed 's/[[:blank:]]*Required[[:blank:]]*Drop[[:blank:]]*Capabilities:[[:blank:]]*//')
-                  if [[ "$drop" == *"$cap"* ]]
-                  then
-                      echo "es igual"
-                  else
-                      result="Fail"
-                      break 2
-                  fi
-              done
+          for i in `oc get scc --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}'`; do 
+              echo "Capabilities=$(oc describe scc $i | grep "Required Drop Capabilities" | sed 's/[[:blank:]]*Required[[:blank:]]*Drop[[:blank:]]*Capabilities:[[:blank:]]*//')"
           done
-          echo "Result=$result"
+        use_multiple_values: true
         tests:
           test_items:
-            - flag: "Result"
+            - flag: "Capabilitie"
               compare:
-                op: eq
-                value: "Pass"
+                op: has
+                value: "ALL"
         remediation: |
           Review the use of capabilites in applications running on your cluster. Where a namespace
           contains applicaions which do not require any Linux capabities to operate consider
@@ -397,7 +376,6 @@ groups:
 
       - id: 5.7.2
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
-        #type: "manual"
         audit: |
           oc get pods -n sysdig -o jsonpath="{.items[*].metadata.annotations.seccomp\.security\.alpha\.kubernetes\.io/pod}{'\n'}" | tr ' ' ',' | sed -e 's/^/Profile=/' -e 's/=$/=<none>/' | grep -q docker/default && echo "Profile=valid" || echo "Profile=invalid"
         use_multiple_values: false
@@ -415,7 +393,6 @@ groups:
 
       - id: 5.7.3
         text: "Apply Security Context to Your Pods and Containers (Manual)"
-        #type: "manual"
         audit: |
           oc get pods --all-namespaces -o jsonpath='{range .items[*]}{"podSec="}{.spec.securityContext}{"\n"}{end}'
           oc get pods --all-namespaces -o jsonpath='{range .items[*].spec.containers[*]}{"contSec="}{.securityContext}{"\n"}{end}'

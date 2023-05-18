@@ -11,21 +11,33 @@ groups:
       - id: 3.1.1
         text: "Client certificate authentication should not be used for users (Manual)"
         audit: |
-          # To verify user authentication is enabled
-          oc describe authentication
-          # To verify that an identity provider is configured
-          oc get identity
-          # To verify that a custom cluster-admin user exists
-          oc get clusterrolebindings --all-namespaces -o jsonpath='{range .items[*]}[{.metadata.name},{.roleRef.name},{range .subjects[*]}[{.kind}]{end}]{"\n"}{end}' | grep ,cluster-admin, | grep User
-          # To verity that kbueadmin is removed, no results should be returned
-          oc get secrets kubeadmin -n kube-system
+          AuthenticationResult=$(oc get authentication -o jsonpath='{.items[*].metadata.name}')
+          IdentityResult=$(oc get oauth -o jsonpath='{.items[*].metadata.name}')
+          RoleResult=$(oc get clusterrolebindings --all-namespaces -o jsonpath='{range .items[*]}[{.metadata.name},{.roleRef.name},{range .subjects[*]}[{.kind}]{end}]{"\n"}{end}' | grep ,cluster-admin, | grep User)
+          SecretsResult=$(oc get secrets kubeadmin -n kube-system -o jsonpath='{.metadata.name}')
+          echo "AuthenticationResult=$AuthenticationResult"
+          echo "IdentityResult=$IdentityResult"
+          echo "RoleResult=$RoleResult"
+          echo "SecretsResult=$SecretsResult"
         tests:
+          bin_op: and
           test_items:
-            - flag: "No resources found"
-              set: false
-            - flag: "cluster-admin"
-            - flag: "kubeadmin"
-              set: false
+            - flag: "AuthenticationResult"
+              compare:
+                op: noteq
+                value: ""
+            - flag: "IdentityResult"
+              compare:
+                op: noteq
+                value: ""
+            - flag: "RoleResult"
+              compare:
+                op: has
+                value: "cluster-admin"
+            - flag: "SecretsResult"
+              compare:
+                op: noteq
+                value: "kubeadmin"
         remediation: |
           Configure an identity provider for the OpenShift cluster.
           Understanding identity provider configuration | Authentication | OpenShift

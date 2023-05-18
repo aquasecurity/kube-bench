@@ -348,15 +348,14 @@ groups:
       - id: 4.2.9
         text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: |
-          echo "worker-"$(oc get machineconfig 01-worker-kubelet -o yaml | grep -oE "kubeAPIQPS%3A\S*?%0A" | sed "s/%3A/:/g" | sed "s/%20/ /g" | sed "s/%0A//g" | sed "s/kubeAPIBurst/ kubeAPIBurst/g" ) && echo "master-"$(oc get machineconfig 01-master-kubelet -o yaml | grep -oE "kubeAPIQPS%3A\S*?%0A" | sed "s/%3A/:/g" | sed "s/%20/ /g" | sed "s/%0A//g" | sed "s/kubeAPIBurst/ kubeAPIBurst/g")
+          for node in $(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'); do
+            value=$(oc get --raw /api/v1/nodes/$node/proxy/configz | jq '.kubeletconfig.kubeAPIQPS')
+            echo "QPS=$value"
+          done
+        use_multiple_values: true
         tests:
-          bin_op: and
           test_items:
-            - flag: "worker-kubeAPIQPS"
-              compare:
-                op: get
-                value: 0
-            - flag: "master-kubeAPIQPS"
+            - flag: "QPS"
               compare:
                 op: gt
                 value: 0
