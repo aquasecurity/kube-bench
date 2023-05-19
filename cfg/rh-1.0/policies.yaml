@@ -377,15 +377,14 @@ groups:
       - id: 5.7.2
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         audit: |
-          oc get pods -n sysdig -o jsonpath="{.items[*].metadata.annotations.seccomp\.security\.alpha\.kubernetes\.io/pod}{'\n'}" | tr ' ' ',' | sed -e 's/^/Profile=/' -e 's/=$/=<none>/' | grep -q docker/default && echo "Profile=valid" || echo "Profile=invalid"
+          oc get pods --all-namespaces -o jsonpath='{.items[*].metadata.annotations.openshift\.io/scc}' | sed -e 's/^/seccomp-profiles=/' -e 's/ /,/g'
         use_multiple_values: false
         tests:
-          bin_op: and
           test_items:
-            - flag: "Profile"
+            - flag: "seccomp-profiles"
               compare:
-                op: eq
-                value: "valid"
+                op: regex
+                value: "^((docker/default),?)+$"
         remediation: |
           To enable the default seccomp profile, use the reserved value /runtime/default that will
           make sure that the pod uses the default policy available on the host.
