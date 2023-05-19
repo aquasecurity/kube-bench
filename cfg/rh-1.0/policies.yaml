@@ -281,7 +281,7 @@ groups:
         use_multiple_values: true
         tests:
           test_items:
-            - flag: "Capabilitie"
+            - flag: "Capabilities"
               compare:
                 op: has
                 value: "ALL"
