@@ -127,7 +127,7 @@ func getConfigFilePath(benchmarkVersion string, filename string) (path string, e
 	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
 	path = filepath.Join(cfgDir, benchmarkVersion)
-	file := filepath.Join(path, string(filename))
+	file := filepath.Join(path, filename)
 	glog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
 
 	if _, err := os.Stat(file); err != nil {
@@ -241,7 +241,7 @@ func findConfigFile(candidates []string) string {
 		if err == nil {
 			return c
 		}
-		if !os.IsNotExist(err) {
+		if !os.IsNotExist(err) && !strings.HasSuffix(err.Error(), "not a directory") {
 			exitWithError(fmt.Errorf("error looking for file %s: %v", c, err))
 		}
 	}
