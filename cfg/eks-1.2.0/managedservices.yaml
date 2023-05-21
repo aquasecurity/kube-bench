@@ -1,0 +1,154 @@
+---
+controls:
+version: "eks-1.2.0"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Manual)"
+        type: "manual"
+        remediation: |
+          To utilize AWS ECR for Image scanning please follow the steps below:
+
+          To create a repository configured for scan on push (AWS CLI):
+          aws ecr create-repository --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
+
+          To edit the settings of an existing repository (AWS CLI):
+          aws ecr put-image-scanning-configuration --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
+
+          Use the following steps to start a manual image scan using the AWS Management Console.
+              Open the Amazon ECR console at https://console.aws.amazon.com/ecr/repositories.
+              From the navigation bar, choose the Region to create your repository in.
+              In the navigation pane, choose Repositories.
+              On the Repositories page, choose the repository that contains the image to scan.
+              On the Images page, select the image to scan and then choose Scan.
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access to Amazon ECR (Manual)"
+        type: "manual"
+        remediation: |
+          Before you use IAM to manage access to Amazon ECR, you should understand what IAM features
+          are available to use with Amazon ECR. To get a high-level view of how Amazon ECR and other
+          AWS services work with IAM, see AWS Services That Work with IAM in the IAM User Guide.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for Amazon ECR (Manual)"
+        type: "manual"
+        remediation: |
+          You can use your Amazon ECR images with Amazon EKS, but you need to satisfy the following prerequisites.
+
+          The Amazon EKS worker node IAM role (NodeInstanceRole) that you use with your worker nodes must possess
+          the following IAM policy permissions for Amazon ECR.
+
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "ecr:BatchCheckLayerAvailability",
+                          "ecr:BatchGetImage",
+                          "ecr:GetDownloadUrlForLayer",
+                          "ecr:GetAuthorizationToken"
+                      ],
+                      "Resource": "*"
+                  }
+              ]
+          }
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated Amazon EKS Service Accounts (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+  - id: 5.3
+    text: "AWS Key Management Service (KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS (Manual)"
+        type: "manual"
+        remediation: |
+          This process can only be performed during Cluster Creation.
+
+          Enable 'Secrets Encryption' during Amazon EKS cluster creation as described
+          in the links within the 'References' section.
+        scored: false
+
+  - id: 5.4
+    text: "Cluster Networking"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the 'Managing users or IAM roles for your cluster' in Amazon EKS documentation.
+        scored: false
+
+
+  - id: 5.6
+    text: "Other Cluster Configurations"
+    checks:
+      - id: 5.6.1
+        text: "Consider Fargate for running untrusted workloads (Manual)"
+        type: "manual"
+        remediation: |
+          Create a Fargate profile for your cluster Before you can schedule pods running on Fargate
+          in your cluster, you must define a Fargate profile that specifies which pods should use
+          Fargate when they are launched. For more information, see AWS Fargate profile.
+
+          Note: If you created your cluster with eksctl using the --fargate option, then a Fargate profile has
+          already been created for your cluster with selectors for all pods in the kube-system
+          and default namespaces. Use the following procedure to create Fargate profiles for
+          any other namespaces you would like to use with Fargate.
+        scored: false
