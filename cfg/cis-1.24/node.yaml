@@ -350,8 +350,12 @@ groups:
             - flag: --event-qps
               path: '{.eventRecordQPS}'
               compare:
-                op: eq
+                op: gte
                 value: 0
+            - flag: --event-qps
+              path: '{.eventRecordQPS}'
+              set: false
+          bin_op: or
         remediation: |
           If using a Kubelet config file, edit the file to set `eventRecordQPS` to an appropriate level.
           If using command line arguments, edit the kubelet service file
