@@ -113,7 +113,7 @@ groups:
         scored: false
 
       - id: 4.1.7
-        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
+        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive RH-1.0(Automated)"
         audit: |
           for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
           do
@@ -348,13 +348,17 @@ groups:
       - id: 4.2.9
         text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: |
-          for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}');
-          do
-            oc debug node/${node} -- chroot /host more /etc/kubernetes/kubelet.conf;
+          for node in $(oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'); do
+            value=$(oc get --raw /api/v1/nodes/$node/proxy/configz | jq '.kubeletconfig.kubeAPIQPS')
+            echo "QPS=$value"
           done
-          oc get machineconfig 01-worker-kubelet -o yaml | grep --color kubeAPIQPS%3A%2050
-          oc get machineconfig 01-master-kubelet -o yaml | grep --color kubeAPIQPS%3A%2050
-        type: "manual"
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "QPS"
+              compare:
+                op: gt
+                value: 0
         remediation: |
           Follow the documentation to edit kubelet parameters
           https://docs.openshift.com/container-platform/4.5/scalability_and_performance/recommended-host-practices.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters
@@ -445,16 +449,20 @@ groups:
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: |
-          # needs verification
-          # verify cipher suites
-          oc describe --namespace=openshift-ingress-operator ingresscontroller/default
-          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
-          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
-          oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
-          #check value for tlsSecurityProfile; null is returned if default is used
-          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.tlsSecurityProfile
-        type: manual
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.cipherSuites}{"\n"}' | sed 's/^/cipherSuites=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
+          oc get openshiftapiservers.operator.openshift.io cluster -o jsonpath='{.spec.observedConfig.servingInfo.minTLSVersion}{"\n"}' | sed 's/^/minTLSVersion=/' | sed 's/\[//g' | sed 's/\]//g' | sed 's/\"//g'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "cipherSuites"
+              compare:
+                op: valid_elements
+                value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+            - flag: "minTLSVersion"
+              compare:
+                op: valid_elements
+                value: "VersionTLS12,VersionTLS13"
         remediation: |
           Follow the directions above and in the OpenShift documentation to configure the tlsSecurityProfile.
           Configuring Ingress
-        scored: false
+        scored: true
