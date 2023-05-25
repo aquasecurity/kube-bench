@@ -447,7 +447,7 @@ func getPlatformInfo() Platform {
 }
 
 func getPlatformInfoFromVersion(s string) Platform {
-	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+-(\w+)(?:[.\-])\w+`)
+	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-])\w+`)
 	subs := versionRe.FindStringSubmatch(s)
 	if len(subs) < 3 {
 		return Platform{}
@@ -479,6 +479,8 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		case "4.1":
 			return "rh-1.0"
 		}
+	case "vmware":
+		return "tkgi-1.2.53"
 	}
 	return ""
 }

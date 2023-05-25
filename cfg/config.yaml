@@ -270,6 +270,7 @@ version_mapping:
   "aks-1.0": "aks-1.0"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
+  "tkgi-1.2.53": "tkgi-1.2.53"
 
 target_mapping:
   "cis-1.5":
@@ -372,3 +373,9 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "tkgi-1.2.53":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"

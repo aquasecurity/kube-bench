@@ -177,3 +177,18 @@ To run the benchmark as a job in your ACK cluster apply the included `job-ack.ya
 ```
 kubectl apply -f job-ack.yaml
 ```
+
+### Running in a VMware TKGI cluster
+
+| CIS Benchmark | Targets                                    |
+|---------------|--------------------------------------------|
+| tkgi-1.2.53   | master, etcd, controlplane, node, policies |
+
+kube-bench includes benchmarks for VMware tkgi platform.
+To run this you will need to specify `--benchmark tkgi-1.2.53` when you run the `kube-bench` command.
+
+To run the benchmark as a job in your VMware tkgi cluster apply the included `job-tkgi.yaml`.
+
+```
+kubectl apply -f job-tkgi.yaml
+```
