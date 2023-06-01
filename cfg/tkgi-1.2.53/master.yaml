@@ -50,32 +50,32 @@ groups:
           For example, chmod 644 /var/vcap/jobs/kube-apiserver/config/bpm.yml
         scored: true
 
-      - id: 1.1.4                                                                 
+      - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root"
-        audit: stat -c %U:%G /var/vcap/jobs/kube-controller-manager/config/bpm.yml                  
-        tests:                                                                                         
-          test_items:                                                                                  
-            - flag: "root:root"                                                                        
-        remediation: |                                                                                 
-          Run the below command (based on the file location on your system) on the                     
-          master node.                                                                                 
-          For example, chown root:root /etc/kubernetes/manifests/kube-controller-manager.yaml          
-        scored: true 
+        audit: stat -c %U:%G /var/vcap/jobs/kube-controller-manager/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chown root:root /etc/kubernetes/manifests/kube-controller-manager.yaml
+        scored: true
 
-      - id: 1.1.5                                                                 
+      - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive"
-        audit: stat -c permissions=%a /var/vcap/jobs/kube-scheduler/config/bpm.yml                   
-        tests:                                                                                         
-          test_items:                                                                                  
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        tests:
+          test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "644"                                                                       
-        remediation: |                                                                                 
-          Run the below command (based on the file location on your system) on the                     
-          master node.                                                                                 
-          For example, chown 644 /var/vcap/jobs/kube-scheduler/config/bpm.yml          
-        scored: true 
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chown 644 /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        scored: true
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root"
@@ -566,7 +566,7 @@ groups:
           not have access to a registry to pull in-use images. This setting is not appropriate for
           clusters which use this configuration."
           TKGi is packages with pre-loaded images.
-        scored: false 
+        scored: false
 
       - id: 1.2.13
         text: "Ensure that the admission control plugin SecurityContextDeny is set"
@@ -666,13 +666,13 @@ groups:
           value that includes NodeRestriction.
           --enable-admission-plugins=...,NodeRestriction,...
           Exception
-          PR opened to address the issue https://github.com/cloudfoundry-incubator/kubo-release/pull/179" 
+          PR opened to address the issue https://github.com/cloudfoundry-incubator/kubo-release/pull/179"
         scored: true
 
       - id: 1.2.18
         text: "Ensure that the --insecure-bind-address argument is not set"
         audit: |
-          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--insecure-bind-address"        
+          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--insecure-bind-address"
         tests:
           test_items:
             - flag: "--insecure-bind-address"

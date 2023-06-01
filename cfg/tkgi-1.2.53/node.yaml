@@ -55,7 +55,7 @@ groups:
       - id: 4.1.4
         text: "Ensure that the proxy kubeconfig file ownership is set to root:root"
         audit: stat -c %U:%G /var/vcap/jobs/kube-proxy/config/kubeconfig
-        type:  manual
+        type: manual
         tests:
           test_items:
             - flag: root:root
@@ -181,7 +181,7 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow"
-        audit:  |
+        audit: |
           grep "^authorization:\n\s{2}mode: AlwaysAllow$" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
         tests:
           test_items:
@@ -298,7 +298,7 @@ groups:
           ps -ef | grep [k]ubelet | grep -- --[c]onfig=/var/vcap/jobs/kubelet/config/kubeletconfig.yml | grep -v -- --hostname-override
         type: manual
         remediation: |
-          Edit the kubelet service file 
+          Edit the kubelet service file
           on each worker node and remove the --hostname-override argument from the
           KUBELET_SYSTEM_PODS_ARGS variable.
           Based on your system, restart the kubelet service. For example:
@@ -331,8 +331,8 @@ groups:
 
       - id: 4.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate"
-        audit:  |
-          grep  ^tlsCertFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet\.pem\"\ntlsPrivateKeyFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet-key\.pem\"$ 
+        audit: |
+          grep  ^tlsCertFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet\.pem\"\ntlsPrivateKeyFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet-key\.pem\"$
           /var/vcap/jobs/kubelet/config/kubeletconfig.yml
         tests:
           bin_op: and
@@ -383,7 +383,7 @@ groups:
           test_items:
             - flag: "RotateKubeletServerCertificate=true"
         remediation: |
-          Edit the kubelet service file 
+          Edit the kubelet service file
           on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
           --feature-gates=RotateKubeletServerCertificate=true
           Based on your system, restart the kubelet service. For example:
