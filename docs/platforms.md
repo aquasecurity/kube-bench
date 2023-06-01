@@ -27,3 +27,4 @@ Some defined by other hardenening guides.
 | CIS  | [OCP4 1.1.0](https://workbench.cisecurity.org/benchmarks/6778)                                              | rh-1.0                   | OCP 4.1-            |
 | CIS  | [1.6.0-k3s](https://docs.rancher.cn/docs/k3s/security/self-assessment/_index)                               | cis-1.6-k3s              | k3s v1.16-v1.24     |
 | DISA | [Kubernetes Ver 1, Rel 6](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Kubernetes_V1R6_STIG.zip) | eks-stig-kubernetes-v1r6 | EKS                 |
+| CIS  | [TKGI 1.2.53](https://network.pivotal.io/products/p-compliance-scanner#/releases/1248397)                   | tkgi-1.2.53              | vmware              |
