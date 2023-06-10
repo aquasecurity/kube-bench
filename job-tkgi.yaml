@@ -1,0 +1,54 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench
+spec:
+  template:
+    spec:
+      hostPID: true
+      containers:
+        - name: kube-bench
+          image: docker.io/aquasec/kube-bench:latest
+          command:
+            [
+              "kube-bench",
+              "run",
+              "--targets",
+              "node,policies",
+              "--benchmark",
+              "tkgi-1.2.53",
+            ]
+          volumeMounts:
+            - name: var-vcap-jobs
+              mountPath: /var/vcap/jobs
+              readOnly: true
+            - name: var-vcap-packages
+              mountPath: /var/vcap/packages
+              readOnly: true
+            - name: var-vcap-store-etcd
+              mountPath: /var/vcap/store/etcd
+              readOnly: true
+            - name: var-vcap-sys
+              mountPath: /var/vcap/sys
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /etc/kubernetes
+              readOnly: true
+      restartPolicy: Never
+      volumes:
+        - name: var-vcap-jobs
+          hostPath:
+            path: "/var/vcap/jobs"
+        - name: var-vcap-packages
+          hostPath:
+            path: "/var/vcap/packages"
+        - name: var-vcap-store-etcd
+          hostPath:
+            path: "/var/vcap/store/etcd"
+        - name: var-vcap-sys
+          hostPath:
+            path: "/var/vcap/sys"
+        - name: etc-kubernetes
+          hostPath:
+            path: "/etc/kubernetes"

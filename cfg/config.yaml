@@ -258,8 +258,10 @@ version_mapping:
   "1.22": "cis-1.23"
   "1.23": "cis-1.23"
   "1.24": "cis-1.24"
+  "1.25": "cis-1.7"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
+  "eks-1.2.0": "eks-1.2.0"
   "gke-1.0": "gke-1.0"
   "gke-1.2.0": "gke-1.2.0"
   "ocp-3.10": "rh-0.7"
@@ -268,6 +270,7 @@ version_mapping:
   "aks-1.0": "aks-1.0"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
+  "tkgi-1.2.53": "tkgi-1.2.53"
 
 target_mapping:
   "cis-1.5":
@@ -306,6 +309,12 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "cis-1.7":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
   "gke-1.0":
     - "master"
     - "node"
@@ -326,6 +335,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "eks-1.1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "eks-1.2.0":
     - "master"
     - "node"
     - "controlplane"
@@ -358,3 +373,9 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "tkgi-1.2.53":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"

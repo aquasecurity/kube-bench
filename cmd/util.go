@@ -127,7 +127,7 @@ func getConfigFilePath(benchmarkVersion string, filename string) (path string, e
 	glog.V(2).Info(fmt.Sprintf("Looking for config specific CIS version %q", benchmarkVersion))
 
 	path = filepath.Join(cfgDir, benchmarkVersion)
-	file := filepath.Join(path, string(filename))
+	file := filepath.Join(path, filename)
 	glog.V(2).Info(fmt.Sprintf("Looking for file: %s", file))
 
 	if _, err := os.Stat(file); err != nil {
@@ -241,7 +241,7 @@ func findConfigFile(candidates []string) string {
 		if err == nil {
 			return c
 		}
-		if !os.IsNotExist(err) {
+		if !os.IsNotExist(err) && !strings.HasSuffix(err.Error(), "not a directory") {
 			exitWithError(fmt.Errorf("error looking for file %s: %v", c, err))
 		}
 	}
@@ -447,7 +447,7 @@ func getPlatformInfo() Platform {
 }
 
 func getPlatformInfoFromVersion(s string) Platform {
-	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+-(\w+)(?:[.\-])\w+`)
+	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-])\w+`)
 	subs := versionRe.FindStringSubmatch(s)
 	if len(subs) < 3 {
 		return Platform{}
@@ -462,7 +462,7 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform.Name {
 	case "eks":
-		return "eks-1.1.0"
+		return "eks-1.2.0"
 	case "gke":
 		switch platform.Version {
 		case "1.15", "1.16", "1.17", "1.18", "1.19":
@@ -479,6 +479,8 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		case "4.1":
 			return "rh-1.0"
 		}
+	case "vmware":
+		return "tkgi-1.2.53"
 	}
 	return ""
 }

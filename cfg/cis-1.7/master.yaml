@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.24"
+version: "cis-1.7"
 id: 1
 text: "Control Plane Security Configuration"
 type: "master"
@@ -342,22 +342,20 @@ groups:
         scored: true
 
       - id: 1.2.3
-        text: "Ensure that the --DenyServiceExternalIPs is not set (Automated)"
+        text: "Ensure that the --DenyServiceExternalIPs is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
           test_items:
             - flag: "--enable-admission-plugins"
               compare:
-                op: nothave
+                op: have
                 value: "DenyServiceExternalIPs"
-            - flag: "--enable-admission-plugins"
-              set: false
         remediation: |
           Edit the API server pod specification file $apiserverconf
           on the control plane node and remove the `DenyServiceExternalIPs`
           from enabled admission plugins.
-        scored: true
+        scored: false
 
       - id: 1.2.4
         text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
@@ -563,7 +561,7 @@ groups:
         scored: true
 
       - id: 1.2.16
-        text: "Ensure that the --secure-port argument is not set to 0 (Automated)"
+        text: "Ensure that the --secure-port argument is not set to 0 - NoteThis recommendation is obsolete and will be deleted per the consensus process (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           bin_op: or
@@ -578,7 +576,7 @@ groups:
           Edit the API server pod specification file $apiserverconf
           on the control plane node and either remove the --secure-port parameter or
           set it to a different (non-zero) desired port.
-        scored: true
+        scored: false
 
       - id: 1.2.17
         text: "Ensure that the --profiling argument is set to false (Automated)"

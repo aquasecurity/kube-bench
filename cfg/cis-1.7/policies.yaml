@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.24"
+version: "cis-1.7"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -71,6 +71,41 @@ groups:
         type: "manual"
         remediation: |
           Where possible, remove the impersonate, bind and escalate rights from subjects.
+        scored: false
+
+      - id: 5.1.9
+        text: "Minimize access to create persistent volumes (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove create access to PersistentVolume objects in the cluster.
+        scored: false
+
+      - id: 5.1.10
+        text: "Minimize access to the proxy sub-resource of nodes (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove access to the proxy sub-resource of node objects.
+        scored: false
+
+      - id: 5.1.11
+        text: "Minimize access to the approval sub-resource of certificatesigningrequests objects (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove access to the approval sub-resource of certificatesigningrequest objects.
+        scored: false
+
+      - id: 5.1.12
+        text: "Minimize access to webhook configuration objects (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove access to the validatingwebhookconfigurations or mutatingwebhookconfigurations objects
+        scored: false
+
+      - id: 5.1.13
+        text: "Minimize access to the service account token creation (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove access to the token sub-resource of serviceaccount objects.
         scored: false
 
   - id: 5.2
