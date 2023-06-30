@@ -98,8 +98,8 @@ groups:
         text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Manual)"
         audit: |
           CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')
-          if test -z $CAFILE; then CAFILE=$kubeletcafile; fi
-          if test -e $CAFILE; then stat -c permissions=%a $CAFILE; fi
+          if test -n "$CAFILE"; then CAFILE=$kubeletcafile; fi
+          if test -e "$CAFILE"; then stat -c permissions=%a "$CAFILE"; fi
         tests:
           test_items:
             - flag: "permissions"
@@ -115,8 +115,8 @@ groups:
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Manual)"
         audit: |
           CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')
-          if test -z $CAFILE; then CAFILE=$kubeletcafile; fi
-          if test -e $CAFILE; then stat -c %U:%G $CAFILE; fi
+          if test -n "$CAFILE"; then CAFILE=$kubeletcafile; fi
+          if test -e "$CAFILE"; then stat -c %U:%G "$CAFILE"; fi
         tests:
           test_items:
             - flag: root:root
