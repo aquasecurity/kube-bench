@@ -39,6 +39,9 @@ build: $(BINARY)
 $(BINARY): $(SOURCES)
 	GOOS=$(GOOS) CGO_ENABLED=0 go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
+build-fips:
+	GOOS=$(GOOS) CGO_ENABLED=0 GOEXPERIMENT=boringcrypto go build -tags fipsonly -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
