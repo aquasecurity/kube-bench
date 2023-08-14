@@ -1,4 +1,4 @@
-FROM golang:1.20.6 AS build
+FROM golang:1.21.0 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY makefile makefile
 COPY go.mod go.sum ./
