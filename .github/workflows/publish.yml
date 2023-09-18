@@ -41,7 +41,7 @@ jobs:
           password: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
       - name: Get version
         id: get_version
-        uses: crazy-max/ghaction-docker-meta@v4
+        uses: crazy-max/ghaction-docker-meta@v5
         with:
           images: ${{ env.REP }}
           tag-semver: |
