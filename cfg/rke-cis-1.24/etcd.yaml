@@ -1,0 +1,232 @@
+---
+controls:
+version: "rke-cis-1.24"
+id: 2
+text: "Etcd Node Configuration"
+type: "etcd"
+groups:
+  - id: 1.1
+    text: "Control Plane Node Configuration Files"
+    checks:
+      - id: 1.1.11
+        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
+        audit: stat -c %a /node/var/lib/etcd
+        tests:
+          test_items:
+            - flag: "700"
+              compare:
+                op: eq
+                value: "700"
+              set: true
+        remediation: |
+          On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
+          from the command 'ps -ef | grep etcd'.
+          Run the below command (based on the etcd data directory found above). For example,
+          chmod 700 /var/lib/etcd
+        scored: true
+
+      - id: 1.1.12
+        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
+        type: "skip"
+        audit: "stat -c %U:%G /node/var/lib/etcd"
+        tests:
+          test_items:
+            - flag: "etcd:etcd"
+              set: true
+        remediation: |
+          On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
+          from the command 'ps -ef | grep etcd'.
+          Run the below command (based on the etcd data directory found above).
+          For example, chown etcd:etcd /var/lib/etcd
+        scored: true
+
+      - id: 1.1.19
+        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
+        audit: "check_files_owner_in_dir.sh /node/etc/kubernetes/ssl"
+        tests:
+          test_items:
+            - flag: "true"
+              compare:
+                op: eq
+                value: "true"
+              set: true
+        remediation: |
+          Run the below command (based on the file location on your system) on the control plane node.
+          For example,
+          chown -R root:root /etc/kubernetes/pki/
+        scored: true
+
+      - id: 1.1.20
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
+        audit: "find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a"
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "600"
+        remediation: |
+          Run the below command (based on the file location on your system) on the control plane node.
+          For example,
+          find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
+        scored: false
+
+      - id: 1.1.21
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
+        audit: "find /node/etc/kubernetes/ssl/ -name '*key.pem' | xargs stat -c permissions=%a"
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "600"
+        remediation: |
+          Run the below command (based on the file location on your system) on the control plane node.
+          For example,
+          find /node/etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
+        scored: false
+
+  - id: 2
+    text: "Etcd Node Configuration"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--cert-file"
+              env: "ETCD_CERT_FILE"
+              set: true
+            - flag: "--key-file"
+              env: "ETCD_KEY_FILE"
+              set: true
+        remediation: |
+          Follow the etcd service documentation and configure TLS encryption.
+          Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml
+          on the master node and set the below parameters.
+          --cert-file=</path/to/ca-file>
+          --key-file=</path/to/key-file>
+        scored: true
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--client-cert-auth"
+              set: true
+            - flag: "--client-cert-auth"
+              env: "ETCD_CLIENT_CERT_AUTH"
+              compare:
+                op: eq
+                value: true
+              set: true
+        remediation: |
+          Edit the etcd pod specification file $etcdconf on the master
+          node and set the below parameter.
+          --client-cert-auth="true"
+        scored: true
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
+              set: false
+            - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          Edit the etcd pod specification file $etcdconf on the master
+          node and either remove the --auto-tls parameter or set it to false.
+            --auto-tls=false
+        scored: true
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
+        set as appropriate (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--peer-cert-file"
+              env: "ETCD_PEER_CERT_FILE"
+              set: true
+            - flag: "--peer-key-file"
+              env: "ETCD_PEER_KEY_FILE"
+              set: true
+        remediation: |
+          Follow the etcd service documentation and configure peer TLS encryption as appropriate
+          for your etcd cluster.
+          Then, edit the etcd pod specification file $etcdconf on the
+          master node and set the below parameters.
+          --peer-client-file=</path/to/peer-cert-file>
+          --peer-key-file=</path/to/peer-key-file>
+        scored: true
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--peer-client-cert-auth"
+              set: true
+            - flag: "--peer-client-cert-auth"
+              env: "ETCD_PEER_CLIENT_CERT_AUTH"
+              compare:
+                op: eq
+                value: true
+              set: true
+        remediation: |
+          Edit the etcd pod specification file $etcdconf on the master
+          node and set the below parameter.
+          --peer-client-cert-auth=true
+        scored: true
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
+              set: false
+            - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
+              compare:
+                op: eq
+                value: false
+              set: false
+        remediation: |
+          Edit the etcd pod specification file $etcdconf on the master
+          node and either remove the --peer-auto-tls parameter or set it to false.
+          --peer-auto-tls=false
+        scored: true
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for etcd (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          test_items:
+            - flag: "--trusted-ca-file"
+              env: "ETCD_TRUSTED_CA_FILE"
+              set: true
+        remediation: |
+          [Manual test]
+          Follow the etcd documentation and create a dedicated certificate authority setup for the
+          etcd service.
+          Then, edit the etcd pod specification file $etcdconf on the
+          master node and set the below parameter.
+          --trusted-ca-file=</path/to/ca-file>
+        scored: true

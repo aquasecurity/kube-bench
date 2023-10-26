@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -13,7 +14,11 @@ import (
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
 	"github.com/golang/glog"
+	"github.com/rancher/kubernetes-provider-detector/providers"
 	"github.com/spf13/viper"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // Print colors
@@ -290,13 +295,23 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (*KubeVersion, error) {
+	kubeConfig, err := rest.InClusterConfig()
+	k8sClient, err := kubernetes.NewForConfig(kubeConfig)
+	isRKE, err := providers.IsRKE(context.Background(), k8sClient)
+	if err != nil {
+		glog.V(3).Infof("Error detecting RKE cluster: %s", err)
+	}
+
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
 		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
+		if isRKE {
+			k8sVer.GitVersion = k8sVer.GitVersion + "-rancher1"
+		}
 		return k8sVer, nil
 	}
 
 	// These executables might not be on the user's path.
-	_, err := exec.LookPath("kubectl")
+	_, err = exec.LookPath("kubectl")
 	if err != nil {
 		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
@@ -447,7 +462,7 @@ func getPlatformInfo() Platform {
 }
 
 func getPlatformInfoFromVersion(s string) Platform {
-	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-])\w+`)
+	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-+]*)\w+`)
 	subs := versionRe.FindStringSubmatch(s)
 	if len(subs) < 3 {
 		return Platform{}
@@ -481,6 +496,33 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		}
 	case "vmware":
 		return "tkgi-1.2.53"
+	case "k3s":
+		switch platform.Version {
+		case "1.23":
+			return "k3s-cis-1.23"
+		case "1.24":
+			return "k3s-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "k3s-cis-1.7"
+		}
+	case "rancher":
+		switch platform.Version {
+		case "1.23":
+			return "rke-cis-1.23"
+		case "1.24":
+			return "rke-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "rke-cis-1.7"
+		}
+	case "rke2r":
+		switch platform.Version {
+		case "1.23":
+			return "rke2-cis-1.23"
+		case "1.24":
+			return "rke2-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "rke2-cis-1.7"
+		}
 	}
 	return ""
 }

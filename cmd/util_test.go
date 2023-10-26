@@ -613,6 +613,21 @@ func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
 			args: args{s: ""},
 			want: Platform{},
 		},
+		{
+			name: "k3s",
+			args: args{s: "v1.27.6+k3s1"},
+			want: Platform{Name: "k3s", Version: "1.27"},
+		},
+		{
+			name: "rancher1",
+			args: args{s: " v1.25.13-rancher1-1"},
+			want: Platform{Name: "rancher1", Version: "1.25"},
+		},
+		{
+			name: "rke2",
+			args: args{s: "v1.27.6+rke2r1"},
+			want: Platform{Name: "rke2r", Version: "1.27"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -693,6 +708,27 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				platform: Platform{Name: "ocp", Version: "4.1"},
 			},
 			want: "rh-1.0",
+		},
+		{
+			name: "k3s",
+			args: args{
+				platform: Platform{Name: "k3s", Version: "1.27"},
+			},
+			want: "k3s-cis-1.7",
+		},
+		{
+			name: "rancher1",
+			args: args{
+				platform: Platform{Name: "rancher", Version: "1.27"},
+			},
+			want: "rke-cis-1.7",
+		},
+		{
+			name: "rke2",
+			args: args{
+				platform: Platform{Name: "rke2r", Version: "1.27"},
+			},
+			want: "rke2-cis-1.7",
 		},
 	}
 	for _, tt := range tests {
