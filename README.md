@@ -24,7 +24,12 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ![Kubernetes Bench for Security](/docs/images/output.png "Kubernetes Bench for Security")
 
-### Quick start
+## CIS Scanning as part of Trivy and the Trivy Operator
+
+[Trivy](https://github.com/aquasecurity/trivy), the all in one cloud native security scanner, can be deployed as a [Kubernetes Operator](https://github.com/aquasecurity/trivy-operator) inside a cluster.
+Both, the [Trivy CLI](https://github.com/aquasecurity/trivy), and the [Trivy Operator](https://github.com/aquasecurity/trivy-operator) support CIS Kubernetes Benchmark scanning among several other features.
+
+## Quick start
 
 There are multiple ways to run kube-bench.
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.

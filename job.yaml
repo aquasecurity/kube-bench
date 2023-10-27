@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - command: ["kube-bench"]
-          image: docker.io/aquasec/kube-bench:v0.6.17
+          image: docker.io/aquasec/kube-bench:v0.6.19
           name: kube-bench
           volumeMounts:
             - mountPath: /var/lib/etcd
