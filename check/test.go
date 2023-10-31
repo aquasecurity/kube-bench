@@ -143,7 +143,7 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 				if strings.HasPrefix(t.Flag, "--") {
 					value = "true"
 				} else {
-					value = vals[1]
+					value = ""
 				}
 			}
 		} else {
