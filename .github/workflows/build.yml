@@ -95,7 +95,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Dry-run release snapshot
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           version: v1.7.0

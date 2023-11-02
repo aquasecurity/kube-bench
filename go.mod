@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.4
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.29.1
 	github.com/fatih/color v1.14.1
-	github.com/golang/glog v1.0.0
+	github.com/golang/glog v1.1.2
 	github.com/magiconair/properties v1.8.7
 	github.com/onsi/ginkgo v1.16.5
 	github.com/pkg/errors v0.9.1
