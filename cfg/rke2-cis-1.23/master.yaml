@@ -96,6 +96,38 @@ groups:
           For example, chown root:root $schedulerconf
         scored: true
 
+      - id: 1.1.7
+        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the control plane node.
+          For example,
+          chmod 644 $etcdconf
+        scored: true
+
+      - id: 1.1.8
+        text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
+        tests:
+          test_items:
+            - flag: "root:root"
+              compare:
+                op: eq
+                value: "root:root"
+              set: true
+        remediation: |
+          Run the below command (based on the file location on your system) on the control plane node.
+          For example,
+          chown root:root $etcdconf
+        scored: true
+
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
         audit: |
@@ -127,6 +159,37 @@ groups:
           For example,
           chown root:root <path/to/cni/files>
         scored: false
+
+      - id: 1.1.11
+        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
+        audit: "stat -c permissions=%a /var/lib/rancher/rke2/server/db/etcd"
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "700"
+              set: true
+        remediation: |
+          On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
+          from the command 'ps -ef | grep etcd'.
+          Run the below command (based on the etcd data directory found above). For example,
+          chmod 700 /var/lib/etcd
+        scored: true
+
+      - id: 1.1.12
+        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
+        type: "skip"
+        audit: "stat -c %U:%G /var/lib/rancher/rke2/server/db/etcd"
+        tests:
+          test_items:
+            - flag: "etcd:etcd"
+        remediation: |
+          On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
+          from the command 'ps -ef | grep etcd'.
+          Run the below command (based on the etcd data directory found above).
+          For example, chown etcd:etcd /var/lib/etcd
+        scored: true
 
       - id: 1.1.13
         text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Automated)"
