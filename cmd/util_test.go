@@ -620,7 +620,7 @@ func Test_getPlatformNameFromKubectlOutput(t *testing.T) {
 		},
 		{
 			name: "rancher1",
-			args: args{s: " v1.25.13-rancher1-1"},
+			args: args{s: "v1.25.13-rancher1-1"},
 			want: Platform{Name: "rancher1", Version: "1.25"},
 		},
 		{

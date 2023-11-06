@@ -296,13 +296,20 @@ Alternatively, you can specify the version with --version
 
 func getKubeVersion() (*KubeVersion, error) {
 	kubeConfig, err := rest.InClusterConfig()
-
+	if err != nil {
+		glog.V(3).Infof("Error fetching cluster config: %s", err)
+	}
 	isRKE := false
-	if kubeConfig != nil {
+	if err == nil && kubeConfig != nil {
 		k8sClient, err := kubernetes.NewForConfig(kubeConfig)
-		isRKE, err = providers.IsRKE(context.Background(), k8sClient)
 		if err != nil {
-			glog.V(3).Infof("Error detecting RKE cluster: %s", err)
+			glog.V(3).Infof("Failed to fetch k8sClient object from kube config : %s", err)
+		}
+		if err == nil {
+			isRKE, err = providers.IsRKE(context.Background(), k8sClient)
+			if err != nil {
+				glog.V(3).Infof("Error detecting RKE cluster: %s", err)
+			}
 		}
 	}
 
