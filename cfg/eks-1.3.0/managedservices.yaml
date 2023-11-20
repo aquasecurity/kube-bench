@@ -9,7 +9,7 @@ groups:
     text: "Image Registry and Image Scanning"
     checks:
       - id: 5.1.1
-        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Manual)"
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third-party provider (Automated)"
         type: "manual"
         remediation: |
           To utilize AWS ECR for Image scanning please follow the steps below:
@@ -129,7 +129,7 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 5.5.1
-        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes (Manual)"
+        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes or Upgrade to AWS CLI v1.16.156 or greater (Manual)"
         type: "manual"
         remediation: |
           Refer to the 'Managing users or IAM roles for your cluster' in Amazon EKS documentation.

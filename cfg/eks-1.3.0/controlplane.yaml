@@ -9,6 +9,6 @@ groups:
     text: "Logging"
     checks:
       - id: 2.1.1
-        text: "Enable audit logs (Manual)"
+        text: "Enable audit logs (Automated)"
         remediation: "Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler."
         scored: false
