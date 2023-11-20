@@ -241,7 +241,7 @@ groups:
         scored: true
 
       - id: 3.2.9
-        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -262,10 +262,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.10
-        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
+        text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -289,7 +289,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.11
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"

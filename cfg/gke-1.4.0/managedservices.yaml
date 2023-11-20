@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
-        or a third-party provider (Manual)"
+        or a third-party provider (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -102,7 +102,7 @@ groups:
     checks:
       - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine
-        default service account (Manual)"
+        default service account (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -165,7 +165,7 @@ groups:
     text: "Cloud Key Management Service (Cloud KMS)"
     checks:
       - id: 5.3.1
-        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Manual)"
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -256,7 +256,7 @@ groups:
     text: "Node Configuration and Maintenance"
     checks:
       - id: 5.5.1
-        text: "Ensure Container-Optimized OS (COS) is used for GKE node images (Automated)"
+        text: "Ensure Container-Optimized OS (cos_containerd) is used for GKE node images (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -382,7 +382,7 @@ groups:
         scored: false
 
       - id: 5.6.3
-        text: "Ensure Master Authorized Networks is Enabled (Manual)"
+        text: "Ensure Master Authorized Networks is Enabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -406,7 +406,7 @@ groups:
         scored: false
 
       - id: 5.6.4
-        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:
@@ -421,7 +421,7 @@ groups:
         scored: false
 
       - id: 5.6.5
-        text: "Ensure clusters are created with Private Nodes (Manual)"
+        text: "Ensure clusters are created with Private Nodes (Automated)"
         type: "manual"
         remediation: |
           Using Command Line:

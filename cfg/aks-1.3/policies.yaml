@@ -60,74 +60,66 @@ groups:
         scored: false
 
   - id: 4.2
-    text: "Pod Security Policies"
+    text: "Pod Security Standards"
     checks:
       - id: 4.2.1
-        text: "Minimize the admission of privileged containers (Automated)"
+        text: "Minimize the admission of privileged containers (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that
-          the .spec.privileged field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads
+          to restrict the admission of privileged containers.
         scored: false
 
       - id: 4.2.2
-        text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostPID field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads
+          to restrict the admission of hostPID containers.
         scored: false
 
       - id: 4.2.3
-        text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostIPC field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads
+          to restrict the admission of hostIPC containers.
         scored: false
 
       - id: 4.2.4
-        text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
+        text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostNetwork field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads
+          to restrict the admission of hostNetwork containers.
         scored: false
 
       - id: 4.2.5
-        text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.allowPrivilegeEscalation field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads
+          to restrict the admission of containers with .spec.allowPrivilegeEscalation set to true.
         scored: false
 
       - id: 4.2.6
-        text: "Minimize the admission of root containers (Automated)"
+        text: "Minimize the admission of root containers (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of
-          UIDs not including 0.
+          Create a policy for each namespace in the cluster,
+          ensuring that either MustRunAsNonRoot or MustRunAs
+          with the range of UIDs not including 0, is set.
         scored: false
 
       - id: 4.2.7
-        text: "Minimize the admission of containers with the NET_RAW capability (Automated)"
+        text: "Minimize the admission of containers with added capabilities (Manual)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.
-        scored: false
-
-      - id: 4.2.8
-        text: "Minimize the admission of containers with added capabilities (Automated)"
-        type: "manual"
-        remediation: |
-          Ensure that allowedCapabilities is not present in PSPs for the cluster unless
+          Ensure that allowedCapabilities is not present in policies for the cluster unless
           it is set to an empty array.
         scored: false
 
-      - id: 4.2.9
+      - id: 4.2.8
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
         remediation: |

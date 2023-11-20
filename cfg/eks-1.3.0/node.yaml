@@ -111,7 +111,7 @@ groups:
         scored: true
 
       - id: 3.2.3
-        text: "Ensure that a Client CA File is Configured (Manual)"
+        text: "Ensure that a Client CA File is Configured (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -129,7 +129,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.4
         text: "Ensure that the --read-only-port is disabled (Manual)"
@@ -248,7 +248,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.9
         text: "Ensure that the --rotate-certificates argument is not present or is set to true (Manual)"
@@ -279,7 +279,7 @@ groups:
         scored: false
 
       - id: 3.2.10
-        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Manual)"
+        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -297,7 +297,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
   - id: 3.3
     text: "Container Optimized OS"
     checks:

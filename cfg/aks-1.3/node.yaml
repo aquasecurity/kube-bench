@@ -64,7 +64,7 @@ groups:
     text: "Kubelet"
     checks:
       - id: 3.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -84,10 +84,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.2
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -106,10 +106,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.3
-        text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -127,7 +127,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.4
         text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
@@ -153,7 +153,7 @@ groups:
         scored: false
 
       - id: 3.2.5
-        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -178,10 +178,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.6
-        text: "Ensure that the --make-iptables-util-chains argument is set to true (Manual) "
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated) "
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -205,7 +205,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.7
         text: "Ensure that the --hostname-override argument is not set (Manual)"
@@ -227,7 +227,7 @@ groups:
         scored: false
 
       - id: 3.2.8
-        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Manual)"
+        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -246,10 +246,10 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.9
-        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
+        text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -274,7 +274,7 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-        scored: false
+        scored: true
 
       - id: 3.2.10
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Manual)"
