@@ -14,9 +14,9 @@ import (
 	"github.com/aquasecurity/kube-bench/check"
 	"github.com/fatih/color"
 	"github.com/golang/glog"
-	"github.com/rancher/kubernetes-provider-detector/providers"
 	"github.com/spf13/viper"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -305,8 +305,9 @@ func getKubeVersion() (*KubeVersion, error) {
 		if err != nil {
 			glog.V(3).Infof("Failed to fetch k8sClient object from kube config : %s", err)
 		}
+
 		if err == nil {
-			isRKE, err = providers.IsRKE(context.Background(), k8sClient)
+			isRKE, err = IsRKE(context.Background(), k8sClient)
 			if err != nil {
 				glog.V(3).Infof("Error detecting RKE cluster: %s", err)
 			}
@@ -587,4 +588,38 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 
 	glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
 	return "", fmt.Errorf("unable to find a matching Benchmark Version match for ocp version: %s", ocpOriginal)
+}
+
+// IsRKE Identifies if the cluster belongs to Rancher Distribution RKE
+func IsRKE(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
+	// if there are windows nodes then this should not be counted as rke.linux
+	windowsNodes, err := k8sClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{
+		Limit:         1,
+		LabelSelector: "kubernetes.io/os=windows",
+	})
+	if err != nil {
+		return false, err
+	}
+	if len(windowsNodes.Items) != 0 {
+		return false, nil
+	}
+
+	// Any node created by RKE should have the annotation, so just grab 1
+	nodes, err := k8sClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{Limit: 1})
+	if err != nil {
+		return false, err
+	}
+
+	if len(nodes.Items) == 0 {
+		return false, nil
+	}
+
+	annos := nodes.Items[0].Annotations
+	if _, ok := annos["rke.cattle.io/external-ip"]; ok {
+		return true, nil
+	}
+	if _, ok := annos["rke.cattle.io/internal-ip"]; ok {
+		return true, nil
+	}
+	return false, nil
 }

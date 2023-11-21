@@ -686,7 +686,7 @@ groups:
           For example, to set it as 100 MB, --audit-log-maxsize=100
         scored: true
 
-      - id: 1.2.25
+      - id: 1.2.23
         text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
         audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
         type: "skip"
