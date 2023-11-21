@@ -2,11 +2,7 @@ pipeline {
     agent {
         label 'amazon-linux2'
     }
-    parameters {
-        gitParameter name: 'TAG',
-                     type: 'PT_TAG',
-                     defaultValue: 'master'
-    }
+
     stages {
         stage('Build and Push Dependency Image') {
             steps {
