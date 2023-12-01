@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,6 +15,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // Print colors
@@ -290,13 +295,35 @@ Alternatively, you can specify the version with --version
 `
 
 func getKubeVersion() (*KubeVersion, error) {
+	kubeConfig, err := rest.InClusterConfig()
+	if err != nil {
+		glog.V(3).Infof("Error fetching cluster config: %s", err)
+	}
+	isRKE := false
+	if err == nil && kubeConfig != nil {
+		k8sClient, err := kubernetes.NewForConfig(kubeConfig)
+		if err != nil {
+			glog.V(3).Infof("Failed to fetch k8sClient object from kube config : %s", err)
+		}
+
+		if err == nil {
+			isRKE, err = IsRKE(context.Background(), k8sClient)
+			if err != nil {
+				glog.V(3).Infof("Error detecting RKE cluster: %s", err)
+			}
+		}
+	}
+
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
 		glog.V(2).Info(fmt.Sprintf("Kubernetes REST API Reported version: %s", k8sVer))
+		if isRKE {
+			k8sVer.GitVersion = k8sVer.GitVersion + "-rancher1"
+		}
 		return k8sVer, nil
 	}
 
 	// These executables might not be on the user's path.
-	_, err := exec.LookPath("kubectl")
+	_, err = exec.LookPath("kubectl")
 	if err != nil {
 		glog.V(3).Infof("Error locating kubectl: %s", err)
 		_, err = exec.LookPath("kubelet")
@@ -447,7 +474,7 @@ func getPlatformInfo() Platform {
 }
 
 func getPlatformInfoFromVersion(s string) Platform {
-	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-])\w+`)
+	versionRe := regexp.MustCompile(`v(\d+\.\d+)\.\d+[-+](\w+)(?:[.\-+]*)\w+`)
 	subs := versionRe.FindStringSubmatch(s)
 	if len(subs) < 3 {
 		return Platform{}
@@ -481,6 +508,33 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		}
 	case "vmware":
 		return "tkgi-1.2.53"
+	case "k3s":
+		switch platform.Version {
+		case "1.23":
+			return "k3s-cis-1.23"
+		case "1.24":
+			return "k3s-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "k3s-cis-1.7"
+		}
+	case "rancher":
+		switch platform.Version {
+		case "1.23":
+			return "rke-cis-1.23"
+		case "1.24":
+			return "rke-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "rke-cis-1.7"
+		}
+	case "rke2r":
+		switch platform.Version {
+		case "1.23":
+			return "rke2-cis-1.23"
+		case "1.24":
+			return "rke2-cis-1.24"
+		case "1.25", "1.26", "1.27":
+			return "rke2-cis-1.7"
+		}
 	}
 	return ""
 }
@@ -534,4 +588,38 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 
 	glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion unable to find a match for: %q", ocpOriginal))
 	return "", fmt.Errorf("unable to find a matching Benchmark Version match for ocp version: %s", ocpOriginal)
+}
+
+// IsRKE Identifies if the cluster belongs to Rancher Distribution RKE
+func IsRKE(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
+	// if there are windows nodes then this should not be counted as rke.linux
+	windowsNodes, err := k8sClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{
+		Limit:         1,
+		LabelSelector: "kubernetes.io/os=windows",
+	})
+	if err != nil {
+		return false, err
+	}
+	if len(windowsNodes.Items) != 0 {
+		return false, nil
+	}
+
+	// Any node created by RKE should have the annotation, so just grab 1
+	nodes, err := k8sClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{Limit: 1})
+	if err != nil {
+		return false, err
+	}
+
+	if len(nodes.Items) == 0 {
+		return false, nil
+	}
+
+	annos := nodes.Items[0].Annotations
+	if _, ok := annos["rke.cattle.io/external-ip"]; ok {
+		return true, nil
+	}
+	if _, ok := annos["rke.cattle.io/internal-ip"]; ok {
+		return true, nil
+	}
+	return false, nil
 }
