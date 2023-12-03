@@ -45,8 +45,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-            - flag: "$proxykubeconfig"
-              set: false
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -60,8 +58,6 @@ groups:
           bin_op: or
           test_items:
             - flag: root:root
-            - flag: "$proxykubeconfig"
-              set: false
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chown root:root $proxykubeconfig
