@@ -294,9 +294,9 @@ systemctl restart kubelet.service
 
 
 == Summary node ==
-19 checks PASS
+17 checks PASS
 1 checks FAIL
-3 checks WARN
+5 checks WARN
 0 checks INFO
 
 [INFO] 5 Kubernetes Policies
@@ -426,8 +426,8 @@ resources and that all new resources are created in a specific namespace.
 0 checks INFO
 
 == Summary total ==
-69 checks PASS
+67 checks PASS
 11 checks FAIL
-43 checks WARN
+45 checks WARN
 0 checks INFO
 
