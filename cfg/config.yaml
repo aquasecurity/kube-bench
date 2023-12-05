@@ -36,6 +36,7 @@ master:
       - /var/snap/microk8s/current/args/kube-apiserver
       - /etc/origin/master/master-config.yaml
       - /etc/kubernetes/manifests/talos-kube-apiserver.yaml
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-apiserver.yaml
     defaultconf: /etc/kubernetes/manifests/kube-apiserver.yaml
 
   scheduler:
@@ -53,6 +54,7 @@ master:
       - /var/snap/microk8s/current/args/kube-scheduler
       - /etc/origin/master/scheduler.json
       - /etc/kubernetes/manifests/talos-kube-scheduler.yaml
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-scheduler.yaml
     defaultconf: /etc/kubernetes/manifests/kube-scheduler.yaml
     kubeconfig:
       - /etc/kubernetes/scheduler.conf
@@ -77,6 +79,7 @@ master:
       - /var/snap/kube-controller-manager/current/args
       - /var/snap/microk8s/current/args/kube-controller-manager
       - /etc/kubernetes/manifests/talos-kube-controller-manager.yaml
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-controller-manager.yaml
     defaultconf: /etc/kubernetes/manifests/kube-controller-manager.yaml
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
@@ -101,6 +104,7 @@ master:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
+      - /var/lib/rancher/rke2/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
@@ -132,6 +136,9 @@ node:
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
       - "/var/snap/microk8s/current/certs/ca.crt"
+      - "/var/lib/rancher/rke2/agent/server.crt"
+      - "/var/lib/rancher/rke2/agent/client-ca.crt"
+      - "/var/lib/rancher/k3s/agent/client-ca.crt"
     svc:
       # These paths must also be included
       #  in the 'confs' property below
@@ -151,8 +158,12 @@ node:
       - "/var/lib/kubelet/kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/etc/kubernetes/kubelet/kubeconfig"
+      - "/etc/kubernetes/ssl/kubecfg-kube-node.yaml"
       - "/var/snap/microk8s/current/credentials/kubelet.config"
       - "/etc/kubernetes/kubeconfig-kubelet"
+      - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
+      - "/var/lib/rancher/k3s/server/cred/admin.kubeconfig"
+      - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
@@ -177,6 +188,8 @@ node:
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
       - "/etc/kubernetes/kubelet.yaml"
+      - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
+
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
     defaultkubeconfig: "/etc/kubernetes/kubelet.conf"
@@ -200,8 +213,11 @@ node:
       - "/etc/kubernetes/kubelet-kubeconfig"
       - "/etc/kubernetes/kubelet-kubeconfig.conf"
       - "/etc/kubernetes/kubelet/config"
+      - "/etc/kubernetes/ssl/kubecfg-kube-proxy.yaml"
       - "/var/lib/kubelet/kubeconfig"
       - "/var/snap/microk8s/current/credentials/proxy.config"
+      - "/var/lib/rancher/rke2/agent/kubeproxy.kubeconfig"
+      - "/var/lib/rancher/k3s/agent/kubeproxy.kubeconfig"
     svc:
       - "/lib/systemd/system/kube-proxy.service"
       - "/etc/systemd/system/snap.microk8s.daemon-proxy.service"
@@ -227,6 +243,8 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
+      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
+      - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
@@ -259,6 +277,7 @@ version_mapping:
   "1.23": "cis-1.23"
   "1.24": "cis-1.24"
   "1.25": "cis-1.7"
+  "1.26": "cis-1.8"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
   "eks-1.2.0": "eks-1.2.0"
@@ -270,7 +289,17 @@ version_mapping:
   "aks-1.0": "aks-1.0"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
+  "cis-1.24-microk8s": "cis-1.24-microk8s"
   "tkgi-1.2.53": "tkgi-1.2.53"
+  "k3s-cis-1.7": "k3s-cis-1.7"
+  "k3s-cis-1.23": "k3s-cis-1.23"
+  "k3s-cis-1.24": "k3s-cis-1.24"
+  "rke-cis-1.7": "rke-cis-1.7"
+  "rke-cis-1.23": "rke-cis-1.23"
+  "rke-cis-1.24": "rke-cis-1.24"
+  "rke2-cis-1.7": "rke2-cis-1.7"
+  "rke2-cis-1.23": "rke2-cis-1.23"
+  "rke2-cis-1.24": "rke2-cis-1.24"
 
 target_mapping:
   "cis-1.5":
@@ -309,7 +338,19 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "cis-1.24-microk8s":
+    - "master"
+    - "etcd"
+    - "node"
+    - "controlplane"
+    - "policies"
   "cis-1.7":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+  "cis-1.8":
     - "master"
     - "node"
     - "controlplane"
@@ -374,6 +415,60 @@ target_mapping:
     - "policies"
     - "managedservices"
   "tkgi-1.2.53":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.23":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.24":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke-cis-1.23":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke-cis-1.24":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.23":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.24":
     - "master"
     - "etcd"
     - "controlplane"
