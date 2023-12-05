@@ -18,7 +18,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -71,7 +70,7 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 		os.Exit(1)
 	}
 
-	in, err := ioutil.ReadFile(testYamlFile)
+	in, err := os.ReadFile(testYamlFile)
 	if err != nil {
 		exitWithError(fmt.Errorf("error opening %s test file: %v", testYamlFile, err))
 	}

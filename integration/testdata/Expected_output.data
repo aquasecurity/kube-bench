@@ -221,8 +221,8 @@ minimum.
 [INFO] 4.1 Worker Node Configuration Files
 [PASS] 4.1.1 Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.2 Ensure that the kubelet service file ownership is set to root:root (Automated)
-[PASS] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)
-[PASS] 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
+[WARN] 4.1.3 If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)
+[WARN] 4.1.4 If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)
 [PASS] 4.1.5 Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)
 [PASS] 4.1.6 Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)
 [PASS] 4.1.7 Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Manual)
@@ -245,6 +245,13 @@ minimum.
 [WARN] 4.2.13 Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)
 
 == Remediations node ==
+4.1.3 Run the below command (based on the file location on your system) on the each worker node.
+For example,
+chmod 644 /etc/kubernetes/proxy.conf
+
+4.1.4 Run the below command (based on the file location on your system) on the each worker node.
+For example, chown root:root /etc/kubernetes/proxy.conf
+
 4.2.6 If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
 If using command line arguments, edit the kubelet service file
 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
@@ -287,9 +294,9 @@ systemctl restart kubelet.service
 
 
 == Summary node ==
-19 checks PASS
+17 checks PASS
 1 checks FAIL
-3 checks WARN
+5 checks WARN
 0 checks INFO
 
 [INFO] 5 Kubernetes Policies
@@ -419,8 +426,8 @@ resources and that all new resources are created in a specific namespace.
 0 checks INFO
 
 == Summary total ==
-69 checks PASS
+67 checks PASS
 11 checks FAIL
-43 checks WARN
+45 checks WARN
 0 checks INFO
 
