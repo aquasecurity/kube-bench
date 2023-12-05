@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -45,7 +44,7 @@ func TestGetTestYamlFiles(t *testing.T) {
 
 	// Set up temp config directory
 	var err error
-	cfgDir, err = ioutil.TempDir("", "kube-bench-test")
+	cfgDir, err = os.MkdirTemp("", "kube-bench-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory")
 	}
@@ -59,7 +58,7 @@ func TestGetTestYamlFiles(t *testing.T) {
 
 	// We never expect config.yaml to be returned
 	for _, filename := range []string{"one.yaml", "two.yaml", "three.yaml", "config.yaml"} {
-		err = ioutil.WriteFile(filepath.Join(d, filename), []byte("hello world"), 0666)
+		err = os.WriteFile(filepath.Join(d, filename), []byte("hello world"), 0666)
 		if err != nil {
 			t.Fatalf("error writing temp file %s: %v", filename, err)
 		}
