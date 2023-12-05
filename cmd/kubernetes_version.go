@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -45,7 +45,7 @@ func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 		return nil, err
 	}
 
-	tb, err := ioutil.ReadFile(tokenfile)
+	tb, err := os.ReadFile(tokenfile)
 	if err != nil {
 		glog.V(2).Infof("Failed reading token file Error: %s", err)
 		return nil, err
@@ -143,11 +143,11 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func loadCertificate(certFile string) (*tls.Certificate, error) {
-	cacert, err := ioutil.ReadFile(certFile)
+	cacert, err := os.ReadFile(certFile)
 	if err != nil {
 		return nil, err
 	}

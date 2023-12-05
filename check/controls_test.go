@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -53,7 +52,7 @@ func TestYamlFiles(t *testing.T) {
 		}
 		if !info.IsDir() {
 			t.Logf("reading file: %s", path)
-			in, err := ioutil.ReadFile(path)
+			in, err := os.ReadFile(path)
 			if err != nil {
 				t.Fatalf("error opening file %s: %v", path, err)
 			}
