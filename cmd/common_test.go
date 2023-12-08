@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -681,7 +681,7 @@ func TestPrintSummary(t *testing.T) {
 	os.Stdout = w
 	printSummary(resultTotals, "totals")
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n\n")
@@ -700,7 +700,7 @@ func TestPrettyPrintNoSummary(t *testing.T) {
 	noSummary = true
 	prettyPrint(controlsCollection[0], resultTotals)
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	assert.NotContains(t, string(out), "49 checks PASS")
@@ -719,7 +719,7 @@ func TestPrettyPrintSummary(t *testing.T) {
 	noSummary = false
 	prettyPrint(controlsCollection[0], resultTotals)
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	assert.Contains(t, string(out), "49 checks PASS")
@@ -737,7 +737,7 @@ func TestWriteStdoutOutputNoTotal(t *testing.T) {
 	noTotals = true
 	writeStdoutOutput(controlsCollection)
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
 	assert.NotContains(t, string(out), "49 checks PASS")
@@ -757,7 +757,7 @@ func TestWriteStdoutOutputTotal(t *testing.T) {
 	noTotals = false
 	writeStdoutOutput(controlsCollection)
 	w.Close()
-	out, _ := ioutil.ReadAll(r)
+	out, _ := io.ReadAll(r)
 
 	os.Stdout = rescueStdout
 
@@ -767,7 +767,7 @@ func TestWriteStdoutOutputTotal(t *testing.T) {
 func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 
-	d, err := ioutil.ReadFile(filepath)
+	d, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
@@ -782,7 +782,7 @@ func parseControlsJsonFile(filepath string) ([]*check.Controls, error) {
 func parseResultJsonFile(filepath string) (JsonOutputFormat, error) {
 	var result JsonOutputFormat
 
-	d, err := ioutil.ReadFile(filepath)
+	d, err := os.ReadFile(filepath)
 	if err != nil {
 		return result, err
 	}
@@ -797,7 +797,7 @@ func parseResultJsonFile(filepath string) (JsonOutputFormat, error) {
 func parseResultNoTotalsJsonFile(filepath string) ([]*check.Controls, error) {
 	var result []*check.Controls
 
-	d, err := ioutil.ReadFile(filepath)
+	d, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
@@ -822,7 +822,7 @@ type restoreFn func()
 
 func fakeExecutableInPath(execFile, execCode string) (restoreFn, error) {
 	pathenv := os.Getenv("PATH")
-	tmp, err := ioutil.TempDir("", "TestfakeExecutableInPath")
+	tmp, err := os.MkdirTemp("", "TestfakeExecutableInPath")
 	if err != nil {
 		return nil, err
 	}
@@ -833,7 +833,7 @@ func fakeExecutableInPath(execFile, execCode string) (restoreFn, error) {
 	}
 
 	if len(execCode) > 0 {
-		ioutil.WriteFile(filepath.Join(tmp, execFile), []byte(execCode), 0700)
+		os.WriteFile(filepath.Join(tmp, execFile), []byte(execCode), 0700)
 	} else {
 		f, err := os.OpenFile(execFile, os.O_CREATE|os.O_EXCL, 0700)
 		if err != nil {

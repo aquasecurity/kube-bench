@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -399,7 +398,7 @@ func TestGetServiceFiles(t *testing.T) {
 
 func TestGetDatadirFiles(t *testing.T) {
 	var err error
-	datadir, err := ioutil.TempDir("", "kube-bench-test-etcd-data-dir")
+	datadir, err := os.MkdirTemp("", "kube-bench-test-etcd-data-dir")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory")
 	}
@@ -474,7 +473,7 @@ func TestMakeSubsitutions(t *testing.T) {
 
 func TestGetConfigFilePath(t *testing.T) {
 	var err error
-	cfgDir, err = ioutil.TempDir("", "kube-bench-test")
+	cfgDir, err = os.MkdirTemp("", "kube-bench-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory")
 	}
@@ -484,7 +483,7 @@ func TestGetConfigFilePath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir")
 	}
-	err = ioutil.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
+	err = os.WriteFile(filepath.Join(d, "master.yaml"), []byte("hello world"), 0666)
 	if err != nil {
 		t.Logf("Failed to create temp file")
 	}
@@ -545,7 +544,7 @@ func TestDecrementVersion(t *testing.T) {
 }
 
 func TestGetYamlFilesFromDir(t *testing.T) {
-	cfgDir, err := ioutil.TempDir("", "kube-bench-test")
+	cfgDir, err := os.MkdirTemp("", "kube-bench-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory")
 	}
@@ -557,11 +556,11 @@ func TestGetYamlFilesFromDir(t *testing.T) {
 		t.Fatalf("Failed to create temp dir")
 	}
 
-	err = ioutil.WriteFile(filepath.Join(d, "something.yaml"), []byte("hello world"), 0666)
+	err = os.WriteFile(filepath.Join(d, "something.yaml"), []byte("hello world"), 0666)
 	if err != nil {
 		t.Fatalf("error writing file %v", err)
 	}
-	err = ioutil.WriteFile(filepath.Join(d, "config.yaml"), []byte("hello world"), 0666)
+	err = os.WriteFile(filepath.Join(d, "config.yaml"), []byte("hello world"), 0666)
 	if err != nil {
 		t.Fatalf("error writing file %v", err)
 	}

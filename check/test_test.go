@@ -16,7 +16,6 @@ package check
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -29,7 +28,7 @@ var (
 
 func init() {
 	var err error
-	in, err = ioutil.ReadFile("data")
+	in, err = os.ReadFile("data")
 	if err != nil {
 		panic("Failed reading test data: " + err.Error())
 	}
