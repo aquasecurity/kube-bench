@@ -25,10 +25,12 @@ groups:
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
+        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
