@@ -67,7 +67,7 @@ groups:
                 op: eq
                 value: "1"
         remediation: |
-          This setting is managed by the cluster etcd operator. No remediation required.e
+          This setting is managed by the cluster etcd operator. No remediation required.
         scored: false
 
       - id: 2.4
