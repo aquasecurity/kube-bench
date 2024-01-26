@@ -11,6 +11,12 @@ groups:
       - id: 5.1.1
         text: "Ensure that the cluster-admin role is only used where required (Manual)"
         type: "manual"
+        audit: |
+          #To get a list of users and service accounts with the cluster-admin role
+          oc get clusterrolebindings -o=customcolumns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind |
+          grep cluster-admin
+          #To verity that kbueadmin is removed, no results should be returned
+          oc get secrets kubeadmin -n kube-system
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
@@ -29,6 +35,15 @@ groups:
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
         type: "manual"
+        audit: |
+          #needs verification
+          oc get roles --all-namespaces -o yaml
+          for i in $(oc get roles -A -o jsonpath='{.items[*].metadata.name}'); do oc
+          describe clusterrole ${i}; done
+          #Retrieve the cluster	roles defined in the cluster and review	for	wildcards
+          oc get clusterroles -o yaml
+          for i in $(oc get clusterroles -o jsonpath='{.items[*].metadata.name}'); do
+          oc describe clusterrole ${i}; done
         remediation: |
           Where possible replace any use of wildcards in clusterroles and roles with specific
           objects or actions.
@@ -213,6 +228,9 @@ groups:
       - id: 5.3.2
         text: "Ensure that all Namespaces have Network Policies defined (Manual)"
         type: "manual"
+        audit: |
+          #Run the following command and review the NetworkPolicy objects created in the cluster.
+          oc -n all get networkpolicy
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
         scored: false
@@ -223,6 +241,10 @@ groups:
       - id: 5.4.1
         text: "Prefer using secrets as files over secrets as environment variables (Manual)"
         type: "manual"
+        audit: |
+          #Run the following command to find references to objects which use environment variables defined from secrets.
+          oc get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind}
+          {.metadata.name} {"\n"}{end}' -A
         remediation: |
           If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
@@ -252,6 +274,10 @@ groups:
       - id: 5.7.1
         text: "Create administrative boundaries between resources using namespaces (Manual)"
         type: "manual"
+        audit: |
+          #Run the following command and review the namespaces created in the cluster.
+          oc get namespaces
+          #Ensure that these namespaces are the ones you need and are adequately administered as per your requirements.
         remediation: |
           Follow the documentation and create namespaces for objects in your deployment as you need
           them.
@@ -277,6 +303,11 @@ groups:
       - id: 5.7.4
         text: "The default namespace should not be used (Manual)"
         type: "manual"
+        audit: |
+          #Run this command to list objects in default namespace
+          oc project default
+          oc get all
+          #The only entries there should be system managed resources such as the kubernetes and openshift service
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
