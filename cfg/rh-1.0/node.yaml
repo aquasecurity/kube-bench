@@ -222,15 +222,12 @@ groups:
         audit: |
           for node in $(oc get nodes -o jsonpath='{.items[*].metadata.name}')
           do
-            oc debug node/${node} -- chroot /host grep clientCAFile /etc/kubernetes/kubelet.conf
+            oc debug node/${node} -- chroot /host grep clientCAFile /etc/kubernetes/kubelet.conf | awk -F': ' '{ print "clientCAFile=" $2 }'
           done 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
-            - flag: "clientCAFile"
-              compare:
-                op: eq
-                value: "/etc/kubernetes/kubelet-ca.crt"
+            - flag: clientCAFile="/etc/kubernetes/kubelet-ca.crt"
         remediation: |
           None required. Changing the clientCAFile value is unsupported.
         scored: true
@@ -278,6 +275,10 @@ groups:
               compare:
                 op: noteq
                 value: 0
+            - flag: streamingConnectionIdleTimeout
+              compare:
+                op: noteq
+                value: 0s
             - flag: "exit_code"
               compare:
                 op: eq
