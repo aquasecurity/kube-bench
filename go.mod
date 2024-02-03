@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/aws/aws-sdk-go-v2 v1.24.1
 	github.com/aws/aws-sdk-go-v2/config v1.26.6
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.29.1
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.44.3
 	github.com/fatih/color v1.16.0
 	github.com/golang/glog v1.2.0
 	github.com/magiconair/properties v1.8.7
