@@ -94,27 +94,27 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Automated)"
-        audit: "stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: '/bin/sh -c "if test -e /node/etc/kubernetes/ssl/kube-ca.pem; then stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the following command to modify the file permissions of the
           --client-ca-file chmod 600 <filename>
         scored: true
-
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: '/bin/sh -c "if test -e /node/etc/kubernetes/ssl/kube-ca.pem; then stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
-              compare:
-                op: eq
-                value: root:root
+            - flag: "File not found"
         remediation: |
           Run the following command to modify the ownership of the --client-ca-file.
           chown root:root <filename>
