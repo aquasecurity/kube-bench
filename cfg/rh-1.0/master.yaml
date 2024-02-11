@@ -864,7 +864,6 @@ groups:
         remediation: |
           Follow the documentation for log forwarding. Forwarding logs to third party systems
           https://docs.openshift.com/container-platform/4.5/logging/cluster-logging-external.html
-
         scored: false
 
       - id: 1.2.24
@@ -1070,6 +1069,12 @@ groups:
       - id: 1.2.35
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
         type: manual
+        audit: |
+          # verify cipher suites
+          oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
+          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
+          oc describe --namespace=openshift-ingress-operator ingresscontroller/default
         remediation: |
           Verify that the tlsSecurityProfile is set to the value you chose.
           Note: The HAProxy Ingress controller image does not support TLS 1.3
