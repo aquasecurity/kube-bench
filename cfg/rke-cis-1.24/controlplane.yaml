@@ -20,7 +20,7 @@ groups:
     text: "Logging"
     checks:
       - id: 3.2.1
-        text: "Ensure that a minimal audit policy is created (Manual)"
+        text: "Ensure that a minimal audit policy is created (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
