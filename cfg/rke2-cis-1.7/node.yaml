@@ -120,9 +120,6 @@ groups:
         tests:
           test_items:
             - flag: root:root
-              compare:
-                op: eq
-                value: root:root
         remediation: |
           Run the following command to modify the ownership of the --client-ca-file.
           chown root:root <filename>
