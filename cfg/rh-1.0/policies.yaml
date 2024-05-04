@@ -78,10 +78,7 @@ groups:
         text: "Minimize the admission of privileged containers (Manual)"
         audit: |
           # needs verification
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i"; oc describe scc $i | grep "Allow Privileged";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowPrivilegedContainer:.allowPrivilegedContainer
         tests:
           test_items:
             - flag: "false"
@@ -93,10 +90,7 @@ groups:
       - id: 5.2.2
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i"; oc describe scc $i | grep "Allow Host PID";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostPID:.allowHostPID
         tests:
           test_items:
             - flag: "false"
@@ -108,10 +102,7 @@ groups:
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i"; oc describe scc $i | grep "Allow Host IPC";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostIPC:.allowHostIPC
         tests:
           test_items:
             - flag: "false"
@@ -123,10 +114,7 @@ groups:
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i"; oc describe scc $i | grep "Allow Host Network";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostNetwork:.allowHostNetwork
         tests:
           test_items:
             - flag: "false"
@@ -138,10 +126,7 @@ groups:
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i"; oc describe scc $i | grep "Allow Privilege Escalation";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowPrivilegeEscalation:.allowPrivilegeEscalation
         tests:
           test_items:
             - flag: "false"
@@ -153,18 +138,10 @@ groups:
       - id: 5.2.6
         text: "Minimize the admission of root containers (Manual)"
         audit: |
-          # needs verification
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i";
-            oc describe scc $i | grep "Run As User Strategy";
-          done
+          # needs verification # | awk 'NR>1 {gsub("map\\[type:", "", $2); gsub("\\]$", "", $2); print $1 ":" $2}'
+          oc get scc -o=custom-columns=NAME:.metadata.name,runAsUser:.runAsUser.type
           #For SCCs with MustRunAs verify that the range of UIDs does not include 0
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i";
-            oc describe scc $i | grep "\sUID";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,uidRangeMin:.runAsUser.uidRangeMin,uidRangeMax:.runAsUser.uidRangeMax
         tests:
           bin_op: or
           test_items:
@@ -183,11 +160,7 @@ groups:
         text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
         audit: |
           # needs verification
-          for i in `oc get scc --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'`;
-          do
-            echo "$i";
-            oc describe scc $i | grep "Required Drop Capabilities";
-          done
+          oc get scc -o=custom-columns=NAME:.metadata.name,requiredDropCapabilities:.requiredDropCapabilities
         tests:
           bin_op: or
           test_items:
