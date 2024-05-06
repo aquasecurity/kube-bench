@@ -24,6 +24,8 @@ master:
   etcd:
     bins:
       - containerd
+    datadirs:
+      - /var/lib/rancher/k3s/server/db/etcd
 
   node:
     components:
