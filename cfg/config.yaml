@@ -278,6 +278,7 @@ version_mapping:
   "1.24": "cis-1.24"
   "1.25": "cis-1.7"
   "1.26": "cis-1.8"
+  "oke-1.26": "oke-1.26"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
   "eks-1.2.0": "eks-1.2.0"
@@ -474,3 +475,5 @@ target_mapping:
     - "controlplane"
     - "node"
     - "policies"
+  "oke-1.26":
+    - "node"
