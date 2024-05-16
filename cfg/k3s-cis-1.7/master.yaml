@@ -167,7 +167,7 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: "stat -c %a /var/lib/rancher/k3s/server/db/etcd"
+        audit: "stat -c %a $etcddatadir"
         tests:
           test_items:
             - flag: "700"
