@@ -95,6 +95,7 @@ master:
     datadirs:
       - /var/lib/etcd/default.etcd
       - /var/lib/etcd/data.etcd
+      - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -105,6 +106,7 @@ master:
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
       - /var/lib/rancher/rke2/server/db/etcd/config
+      - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
@@ -234,6 +236,7 @@ etcd:
     datadirs:
       - /var/lib/etcd/default.etcd
       - /var/lib/etcd/data.etcd
+      - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
