@@ -453,3 +453,26 @@ groups:
           Decide on an appropriate level for this parameter and set it,
           either via the --pod-max-pids command line parameter or the PodPidsLimit configuration file setting.
         scored: false
+
+  - id: 4.3
+    text: "kube-proxy"
+    checks:
+      - id: 4.3.1
+        text: "Ensure that the kube-proxy metrics service is bound to localhost (Automated)"
+        audit: "/bin/ps -fC $proxybin"
+        audit_config: "/bin/sh -c 'if test -e $proxykubeconfig; then cat $proxykubeconfig; fi'"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--metrics-bind-address"
+              path: '{.metricsBindAddress}'
+              compare:
+                op: has
+                value: "127.0.0.1"
+            - flag: "--metrics-bind-address"
+              path: '{.metricsBindAddress}'
+              set: false
+        remediation: |
+           Modify or remove any values which bind the metrics service to a non-localhost address.
+           The default value is 127.0.0.1:10249.
+        scored: true
