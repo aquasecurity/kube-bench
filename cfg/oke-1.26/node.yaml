@@ -1,8 +1,8 @@
 ---
 controls:
 version: "oke-1.26"
-id: 3.1
-text: "Worker Nodes"
+id: 3
+text: "Worker Node Security Configuration"
 type: "node"
 groups:
   - id: 3.1
