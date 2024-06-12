@@ -1,0 +1,64 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+master:
+  apiserver:
+    confs:
+      - /var/snap/k8s/common/args/kube-apiserver
+    bins:
+      - kube-apiserver
+  scheduler:
+    confs:
+      - /var/snap/k8s/common/args/kube-scheduler
+    kubeconfig:
+      - /etc/kubernetes/scheduler.conf
+    bins:
+      - kube-scheduler
+  controllermanager:
+    confs:
+      - /var/snap/k8s/common/args/kube-controller-manager
+    bins:
+      - kube-controller-manager
+    kubeconfig:
+      - /etc/kubernetes/controller.conf
+  etcd:
+    confs:
+      - /var/snap/k8s/common/args/k8s-dqlite
+    bins:
+      - k8s-dqlite
+
+etcd:
+  components:
+    - etcd
+
+  etcd:
+    bins:
+      - "k8s-dqlite"
+    confs:
+      - /var/snap/microk8s/common/args/k8s-dqlite
+    defaultconf: /var/snap/microk8s/common/args/k8s-dqlite
+    defaultdatadir: /var/snap/k8s/common/var/lib/k8s-dqlite
+
+node:
+  kubelet:
+    cafile:
+      - "/etc/kubernetes/pki/client-ca.crt"
+    svc:
+      - "/etc/systemd/system/snap.k8s.kubelet.service"
+    bins:
+      - "bin/kubelet"
+    confs:
+      - "/var/snap/k8s/common/args/kubelet"
+    kubeconfig:
+      - "/etc/kubernetes/kubelet.conf"
+  proxy:
+    confs:
+      - /var/snap/k8s/common/args/kube-proxy
+    kubeconfig:
+      - /etc/kubernetes/proxy.conf
+    svc:
+      - "/etc/systemd/system/snap.k8s.kube-proxy.service"
+
+controlplane:
+  apiserver:
+    confs:
+      - /var/snap/k8s/common/args/kube-apiserver
