@@ -165,6 +165,7 @@ node:
       - "/var/lib/rancher/k3s/server/cred/admin.kubeconfig"
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
+      - "/etc/kubernetes/kubelet-config.json"
       - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"

@@ -1,8 +1,8 @@
 ---
 controls:
 version: "oke-1.26"
-id: 3.1
-text: "Worker Nodes"
+id: 3
+text: "Worker Node Security Configuration"
 type: "node"
 groups:
   - id: 3.1
@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 3.1.1
         text: "Ensure that the kubeconfig file permissions are set to 644 or more restrictive (Manual)"
-        audit: "stat -c %a /etc/kubernetes/kubelet.conf; stat -c %a /etc/kubernetes/bootstrap-kubelet.conf"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -22,9 +22,10 @@ groups:
           For example,
           chmod 644 $kubeletkubeconfig
         scored: false
+
       - id: 3.1.2
         text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)"
-        audit: "stat -c %U:%G etc/kubernetes/kubelet.conf; stat -c %U:%G etc/kubernetes/bootstrap-kubelet.conf"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
         tests:
           bin_op: or
           test_items:
@@ -37,7 +38,7 @@ groups:
         scored: false
       - id: 3.1.3
         text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Manual)"
-        audit: "stat -c %a etc/kubernetes/kubelet.conf; stat -c %a etc/kubernetes/bootstrap-kubelet.conf"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -51,7 +52,7 @@ groups:
         scored: true
       - id: 3.1.4
         text: "Ensure that the kubelet configuration file ownership is set to root:root (Manual)"
-        audit: "stat -c %U:%G etc/kubernetes/kubelet.conf; stat -c %U:%G etc/kubernetes/bootstrap-kubelet.conf"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
         tests:
           test_items:
             - flag: root:root
@@ -64,8 +65,8 @@ groups:
     checks:
       - id: 3.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -75,7 +76,7 @@ groups:
                 value: false
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --anonymous-auth=false
           Based on your system, restart the kubelet service and check status
           systemctl daemon-reload
@@ -84,8 +85,8 @@ groups:
         scored: true
       - id: 3.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --authorization-mode
@@ -95,7 +96,7 @@ groups:
                 value: AlwaysAllow
         remediation: |
           iff modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --authorization-mode=Webhook
           Based on your system, restart the kubelet service. For example,
           systemctl daemon-reload
@@ -104,15 +105,15 @@ groups:
         scored: true
       - id: 3.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --client-ca-file
               path: '{.authentication.x509.clientCAFile}'
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --client-ca-file=/etc/kubernetes/ca.crt \
           Based on your system, restart the kubelet service. For example,
           systemctl daemon-reload
@@ -121,8 +122,8 @@ groups:
         scored: false
       - id: 3.2.4
         text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           bin_op: or
           test_items:
@@ -145,8 +146,8 @@ groups:
         scored: false
       - id: 3.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --streaming-connection-idle-timeout
@@ -160,7 +161,7 @@ groups:
           bin_op: or
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --streaming-connection-idle-timeout
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
@@ -169,8 +170,8 @@ groups:
         scored: false
       - id: 3.2.6
         text: "Ensure that the --protect-kernel-defaults argument is set to true (Manual)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "cat /etc/systemd/system/kubelet.service"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --protect-kernel-defaults
@@ -181,7 +182,7 @@ groups:
                 value: true
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --protect-kernel-defaults=true
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
@@ -190,8 +191,8 @@ groups:
         scored: false
       - id: 3.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --make-iptables-util-chains
@@ -205,7 +206,7 @@ groups:
           bin_op: or
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --make-iptables-util-chains:true
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
@@ -217,7 +218,7 @@ groups:
         # This is one of those properties that can only be set as a command line argument.
         # To check if the property is set as expected, we need to parse the kubelet command
         # instead reading the Kubelet Configuration file.
-        audit: "cat /etc/systemd/system/kubelet.service"
+        audit: "/bin/ps -fC $kubeletbin "
         tests:
           test_items:
             - flag: --hostname-override
@@ -225,6 +226,8 @@ groups:
         remediation: |
           If modifying the Kubelet config file, edit the kubelet.service file
           /etc/systemd/system/kubelet-.service and set the below parameter
+          --hostname-override=NODE NAME (where NODE NAME is the internal IP ex.
+          10.0.10.4, as assigned my OKE on build)
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
@@ -232,8 +235,8 @@ groups:
         scored: false
       - id: 3.2.9
         text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --event-qps
@@ -244,9 +247,9 @@ groups:
                 value: 0
         remediation: |
           If modifying the Kubelet service config file, edit the kubelet.service file
-          /etc/systemd/system/kubelet.service and set the below parameter
+          /etc/kubernetes/kubelet-config.json and set the below parameter
           --event-qps=0
-          If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+          If using command line arguments, edit the kubelet service file /etc/kubernetes/kubelet-config.json.d/10-kubeadm.conf
           on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
@@ -255,15 +258,18 @@ groups:
         scored: true
       - id: 3.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           bin_op: and
           test_items:
-            - flag: "--tls-cert-file"
-            - flag: "--tls-private-key-file"
+            - flag: --tls-cert-file
+              path: '{.tlsCertFile}'
+            - flag: --tls-private-key-file
+              path: '{.tlsPrivateKeyFile}'
         remediation: |
-          If	modifying	the	Kubelet	service	config	file,	edit	the	kubelet.service	file	
-          /etc/systemd/system/kubelet.service and	set	the	below	parameter
+          If	modifying	the	Kubelet	service	config file, edit the	kubelet.service	file	
+          /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
           Verify that the `tls-cert-file=/var/lib/kubelet/pki/tls.pem`.
           Verify that the `tls-private-key-file=/var/lib/kubelet/pki/tls.key`.
           Based	on	your	system,	restart	the	kubelet service	and	check	status
@@ -273,8 +279,8 @@ groups:
         scored: true
       - id: 3.2.11
         text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --rotate-certificates
@@ -288,7 +294,7 @@ groups:
           bin_op: or
         remediation: |
           If	modifying	the	Kubelet	service	config	file,	edit	the	kubelet.service	file	
-          /etc/systemd/system/kubelet.service and	set	the	below	parameter
+          /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
           Verify that the `--rotate-certificates` is present.
           Based on your system, restart the kubelet service. For example,
           systemctl daemon-reload
@@ -297,8 +303,8 @@ groups:
         scored: true
       - id: 3.2.12
         text: "Ensure that the --rotate-server-certificates argument is set to true (Manual)"
-        audit: "cat /etc/systemd/system/kubelet.service"
-        # audit_config: "/bin/cat $kubeletconf"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
             - flag: --rotate-certificates
@@ -312,7 +318,7 @@ groups:
           bin_op: or
         remediation: |
           If	modifying	the	Kubelet	service	config	file,	edit	the	kubelet.service	file	
-          /etc/systemd/system/kubelet.service and	set	the	below	parameter
+          /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
           --rotate-server-certificates=true
           Based	on	your	system,	restart	the	kubelet service	and	check	status
           systemctl daemon-reload
