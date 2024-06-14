@@ -46,59 +46,51 @@ groups:
         remediation: |
           Where possible, remove get, list and watch access to Secret objects in the cluster.
         scored: true
-      - id: 5.1.3.1
-        text: "Minimize wildcard use in Roles (Automated)"
+      - id: 5.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
         audit: |
+          # Check Roles
           kubectl get roles --all-namespaces -o custom-columns=ROLE_NAMESPACE:.metadata.namespace,ROLE_NAME:.metadata.name --no-headers | while read -r role_namespace role_name
           do
             role_rules=$(kubectl get role -n "${role_namespace}" "${role_name}" -o=json | jq -c '.rules')
             if echo "${role_rules}" | grep -q "\[\"\*\"\]"; then
-              is_compliant="false"
+              role_is_compliant="false"
             else
-              is_compliant="true"
+              role_is_compliant="true"
             fi;
-            echo "**role_name: ${role_name} role_namespace: ${role_namespace} role_rules: ${role_rules} is_compliant: ${is_compliant}"
+            echo "**role_name: ${role_name} role_namespace: ${role_namespace} role_rules: ${role_rules} role_is_compliant: ${role_is_compliant}"
           done
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "is_compliant"
-              compare:
-                op: eq
-                value: true
-              set: true
-        remediation: |
-          Where possible replace any use of wildcards ["*"] in roles with specific
-          objects or actions.
-          Condition: is_compliant is false if ["*"] is found in rules.
-          Parent: 5.1.3.
-        scored: true
-      - id: 5.1.3.2
-        text: "Minimize wildcard use in ClusterRoles (Automated)"
-        audit: |
+
+          # Check ClusterRoles
           kubectl get clusterroles -o custom-columns=CLUSTERROLE_NAME:.metadata.name --no-headers | while read -r clusterrole_name
           do
             clusterrole_rules=$(kubectl get clusterrole "${clusterrole_name}" -o=json | jq -c '.rules')
             if echo "${clusterrole_rules}" | grep -q "\[\"\*\"\]"; then
-              is_compliant="false"
+              clusterrole_is_compliant="false"
             else
-              is_compliant="true"
+              clusterrole_is_compliant="true"
             fi;
-          echo "**clusterrole_name: ${clusterrole_name} clusterrole_rules: ${clusterrole_rules} is_compliant: ${is_compliant}"
+          echo "**clusterrole_name: ${clusterrole_name} clusterrole_rules: ${clusterrole_rules} clusterrole_is_compliant: ${clusterrole_is_compliant}"
           done
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
-            - flag: "is_compliant"
+            - flag: "role_is_compliant"
+              compare:
+                op: eq
+                value: true
+              set: true
+            - flag: "clusterrole_is_compliant"
               compare:
                 op: eq
                 value: true
               set: true
         remediation: |
-          Where possible replace any use of wildcards ["*"] in clusterroles with specific
+          Where possible replace any use of wildcards ["*"] in roles and clusterroles with specific
           objects or actions.
-          Condition: is_compliant is false if ["*"] is found in rules.
-          Parent: 5.1.3.
+          Condition: role_is_compliant is false if ["*"] is found in rules.
+          Condition: clusterrole_is_compliant is false if ["*"] is found in rules.
         scored: true
       - id: 5.1.4
         text: "Minimize access to create pods (Automated)"
@@ -131,32 +123,15 @@ groups:
           Modify the configuration of each default service account to include this value
           `automountServiceAccountToken: false`.
         scored: true
-      - id: 5.1.6.1
-        text: "Ensure that Service Account Tokens are only mounted where necessary - ServiceAccount (Automated)"
-        audit: |
-          kubectl get serviceaccount --all-namespaces -o=json | jq -r '.items[] | " namespace: \(.metadata.namespace), svacc_name: \(.metadata.name), kind: \(.kind), automountServiceAccountToken: \(.automountServiceAccountToken | if . == null then "notset" else . end )"' | xargs -L 1
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "automountServiceAccountToken"
-              compare:
-                op: eq
-                value: false
-              set: true
-        remediation: |
-          Modify the definition of service accounts which do not need to mount service
-          account tokens to disable it, with `automountServiceAccountToken: false`.
-          Parent: 5.1.6.
-        scored: true
-      - id: 5.1.6.2
-        text: "Ensure that Service Account Tokens are only mounted where necessary - Pods (Automated)"
+      - id: 5.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
         audit: |
           kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
           do
             # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
             svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n ${pod_namespace} ${pod_service_account} -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
             pod_is_automountserviceaccounttoken=$(echo ${pod_is_automountserviceaccounttoken} | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            if [[ "${svacc_is_automountserviceaccounttoken}" == "false"  && ( "${pod_is_automountserviceaccounttoken}" == "false" || "${pod_is_automountserviceaccounttoken}" == "notset" ) ]]; then
+            if [[ "${svacc_is_automountserviceaccounttoken}" == "false" && ( "${pod_is_automountserviceaccounttoken}" == "false" || "${pod_is_automountserviceaccounttoken}" == "notset" ) ]]; then
               is_compliant="true"
             elif [[ "${svacc_is_automountserviceaccounttoken}" == "true" && "${pod_is_automountserviceaccounttoken}" == "false" ]]; then
               is_compliant="true"
@@ -173,13 +148,12 @@ groups:
                 op: eq
                 value: true
         remediation: |
-          Modify the definition of pods which do not need to mount service
+          Modify the definition of ServiceAccounts and Pods which do not need to mount service
           account tokens to disable it, with `automountServiceAccountToken: false`.
           If both the ServiceAccount and the Pod's .spec specify a value for automountServiceAccountToken, the Pod spec takes precedence.
           Condition: Pod is_compliant to true when
             - ServiceAccount is automountServiceAccountToken: false and Pod is automountServiceAccountToken: false or notset
             - ServiceAccount is automountServiceAccountToken: true notset and Pod is automountServiceAccountToken: false
-          Parent: 5.1.6.
         scored: true
       - id: 5.1.7
         text: "Avoid use of system:masters group (Manual)"
