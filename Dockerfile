@@ -9,6 +9,14 @@ COPY internal/ internal/
 ARG KUBEBENCH_VERSION
 RUN make build && cp kube-bench /go/bin/kube-bench
 
+# Add kubectl to run policies checks
+ARG KUBECTL_VERSION TARGETARCH
+RUN wget -O /usr/local/bin/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl"
+RUN wget -O kubectl.sha256 "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl.sha256"
+# Verify kubectl sha256sum
+RUN /bin/bash -c 'echo "$(<kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum -c -'
+RUN chmod +x /usr/local/bin/kubectl
+
 FROM alpine:3.20.0 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
@@ -32,6 +40,7 @@ RUN apk add jq
 ENV PATH=$PATH:/usr/local/mount-from-host/bin
 
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
+COPY --from=build /usr/local/bin/kubectl /usr/local/bin/kubectl
 COPY entrypoint.sh .
 COPY cfg/ cfg/
 ENTRYPOINT ["./entrypoint.sh"]
