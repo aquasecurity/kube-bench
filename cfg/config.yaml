@@ -171,6 +171,7 @@ node:
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/etc/kubernetes/kubelet/config.json"
       - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
