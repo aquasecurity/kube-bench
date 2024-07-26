@@ -11,6 +11,8 @@ uname := $(shell uname -s)
 BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le,linux/s390x
 DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
+KUBECTL_VERSION ?= 1.28.7
+ARCH ?= $(shell go env GOARCH)
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
 	BUILD_OS := windows
@@ -45,15 +47,19 @@ build-fips:
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-             --build-arg VCS_REF=$(VERSION) \
-			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-             -t $(IMAGE_NAME) .
+                     	--build-arg VCS_REF=$(VERSION) \
+		     	--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+	             	--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg TARGETARCH=$(ARCH) \
+                       	-t $(IMAGE_NAME) .
 
 build-docker-ubi:
 	docker build -f Dockerfile.ubi --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-             --build-arg VCS_REF=$(VERSION) \
-			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-             -t $(IMAGE_NAME_UBI) .
+            		--build-arg VCS_REF=$(VERSION) \
+			--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+			--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg TARGETARCH=$(ARCH) \
+            		-t $(IMAGE_NAME_UBI) .
 
 # unit tests
 tests:

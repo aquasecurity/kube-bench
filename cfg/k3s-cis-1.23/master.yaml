@@ -155,7 +155,7 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: "check_for_k3s_etcd.sh 1.1.11"
+        audit: "stat -c %a $etcddatadir"
         tests:
           test_items:
             - flag: "700"
@@ -736,7 +736,7 @@ groups:
 
       - id: 1.2.26
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)"
-        audit: "check_for_k3s_etcd.sh 1.2.29"
+        audit: "journalctl -D /var/log/journal -u k3s | grep -m1 'Running kube-apiserver'"
         tests:
           bin_op: and
           test_items:

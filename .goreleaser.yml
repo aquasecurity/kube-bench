@@ -2,10 +2,15 @@
 project_name: kube-bench
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=0
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
 builds:
   - main: main.go
     binary: kube-bench
+    tags:
+      - osusergo
+      - netgo
+      - static_build
     goos:
       - linux
       - darwin
@@ -19,6 +24,9 @@ builds:
       - 6
       - 7
     ldflags:
+      - "-s"
+      - "-w"
+      - "-extldflags '-static'"
       - "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion={{.Version}}"
       - "-X github.com/aquasecurity/kube-bench/cmd.cfgDir={{.Env.KUBEBENCH_CFG}}"
 # Archive customization
