@@ -17,7 +17,7 @@ RUN wget -O kubectl.sha256 "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/li
 RUN /bin/bash -c 'echo "$(<kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum -c -'
 RUN chmod +x /usr/local/bin/kubectl
 
-FROM alpine:3.20.0 AS run
+FROM alpine:3.20.2 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, and --no-headers support
 # https://github.com/aquasecurity/kube-bench/issues/109
