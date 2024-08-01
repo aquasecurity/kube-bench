@@ -1,0 +1,227 @@
+---
+controls:
+version: "eks-1.5.0"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third party provider (Automated)"
+        type: "manual"
+        remediation: |
+          To utilize AWS ECR for Image scanning please follow the steps below:
+
+          To create a repository configured for scan on push (AWS CLI):
+          aws ecr create-repository --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
+
+          To edit the settings of an existing repository (AWS CLI):
+          aws ecr put-image-scanning-configuration --repository-name $REPO_NAME --image-scanning-configuration scanOnPush=true --region $REGION_CODE
+
+          Use the following steps to start a manual image scan using the AWS Management Console.
+
+          1.  Open the Amazon ECR console at https://console.aws.amazon.com/ecr/repositories.
+          2.  From the navigation bar, choose the Region to create your repository in.
+          3.  In the navigation pane, choose Repositories.
+          4.  On the Repositories page, choose the repository that contains the image to scan.
+          5.  On the Images page, select the image to scan and then choose Scan.
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access to Amazon ECR (Manual)"
+        type: "manual"
+        remediation: |
+          Before you use IAM to manage access to Amazon ECR, you should understand what IAM features
+          are available to use with Amazon ECR. To get a high-level view of how Amazon ECR and other
+          AWS services work with IAM, see AWS Services That Work with IAM in the IAM User Guide.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for Amazon ECR (Manual)"
+        type: "manual"
+        remediation: |
+          You can use your Amazon ECR images with Amazon EKS, but you need to satisfy the following prerequisites.
+
+          The Amazon EKS worker node IAM role (NodeInstanceRole) that you use with your worker nodes must possess
+          the following IAM policy permissions for Amazon ECR.
+
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "ecr:BatchCheckLayerAvailability",
+                          "ecr:BatchGetImage",
+                          "ecr:GetDownloadUrlForLayer",
+                          "ecr:GetAuthorizationToken"
+                      ],
+                      "Resource": "*"
+                  }
+              ]
+          }
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        type: "manual"
+        remediation: |
+          To minimize AWS ECR container registries to only those approved, you can follow these steps:
+
+          1.  Define your approval criteria: Determine the criteria that containers must meet to
+              be considered approved. This can include factors such as security, compliance,
+              compatibility, and other requirements.
+          2.  Identify all existing ECR registries: Identify all ECR registries that are currently
+              being used in your organization.
+          3.  Evaluate ECR registries against approval criteria: Evaluate each ECR registry
+              against your approval criteria to determine whether it should be approved or not.
+              This can be done by reviewing the registry settings and configuration, as well as
+              conducting security assessments and vulnerability scans.
+          4.  Establish policies and procedures: Establish policies and procedures that outline
+              how ECR registries will be approved, maintained, and monitored. This should
+              include guidelines for developers to follow when selecting a registry for their
+              container images.
+          5.  Implement access controls: Implement access controls to ensure that only
+              approved ECR registries are used to store and distribute container images. This
+              can be done by setting up IAM policies and roles that restrict access to
+              unapproved registries or create a whitelist of approved registries.
+          6.  Monitor and review: Continuously monitor and review the use of ECR registries
+              to ensure that they continue to meet your approval criteria. This can include
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated Amazon EKS Service Accounts (Automated)"
+        type: "manual"
+        remediation: |
+          With IAM roles for service accounts on Amazon EKS clusters, you can associate an
+          IAM role with a Kubernetes service account. This service account can then provide
+          AWS permissions to the containers in any pod that uses that service account. With this
+          feature, you no longer need to provide extended permissions to the worker node IAM
+          role so that pods on that node can call AWS APIs.
+          Applications must sign their AWS API requests with AWS credentials. This feature
+          provides a strategy for managing credentials for your applications, similar to the way
+          that Amazon EC2 instance profiles provide credentials to Amazon EC2 instances.
+          Instead of creating and distributing your AWS credentials to the containers or using the
+          Amazon EC2 instance’s role, you can associate an IAM role with a Kubernetes service
+          account. The applications in the pod’s containers can then use an AWS SDK or the
+          AWS CLI to make API requests to authorized AWS services.
+
+          The IAM roles for service accounts feature provides the following benefits:
+
+          - Least privilege - By using the IAM roles for service accounts feature, you no
+            longer need to provide extended permissions to the worker node IAM role so that
+            pods on that node can call AWS APIs. You can scope IAM permissions to a
+            service account, and only pods that use that service account have access to
+            those permissions. This feature also eliminates the need for third-party solutions
+            such as kiam or kube2iam.
+          - Credential isolation - A container can only retrieve credentials for the IAM role
+            that is associated with the service account to which it belongs. A container never
+            has access to credentials that are intended for another container that belongs to
+            another pod.
+          - Audit-ability - Access and event logging is available through CloudTrail to help
+            ensure retrospective auditing.
+        scored: false
+
+  - id: 5.3
+    text: "AWS EKS Key Management Service"
+    checks:
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS (Manual)"
+        type: "manual"
+        remediation: |
+          This process can only be performed during Cluster Creation.
+
+          Enable 'Secrets Encryption' during Amazon EKS cluster creation as described
+          in the links within the 'References' section.
+        scored: false
+
+  - id: 5.4
+    text: "Cluster Networking"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Automated)"
+        type: "manual"
+        remediation: |
+          By enabling private endpoint access to the Kubernetes API server, all communication
+          between your nodes and the API server stays within your VPC. You can also limit the IP
+          addresses that can access your API server from the internet, or completely disable
+          internet access to the API server.
+          With this in mind, you can update your cluster accordingly using the AWS CLI to ensure
+          that Private Endpoint Access is enabled.
+          If you choose to also enable Public Endpoint Access then you should also configure a
+          list of allowable CIDR blocks, resulting in restricted access from the internet. If you
+          specify no CIDR blocks, then the public API server endpoint is able to receive and
+          process requests from all IP addresses by defaulting to ['0.0.0.0/0'].
+          For example, the following command would enable private access to the Kubernetes
+          API as well as limited public access over the internet from a single IP address (noting
+          the /32 CIDR suffix):
+          aws eks update-cluster-config --region $AWS_REGION --name $CLUSTER_NAME --resources-vpc-config endpointPrivateAccess=true,endpointPrivateAccess=true,publicAccessCidrs="203.0.113.5/32"
+
+          Note: The CIDR blocks specified cannot include reserved addresses.
+          There is a maximum number of CIDR blocks that you can specify. For more information,
+          see the EKS Service Quotas link in the references section.
+          For more detailed information, see the EKS Cluster Endpoint documentation link in the
+          references section.
+        scored: false
+
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
+        type: "manual"
+        remediation: |
+          By enabling private endpoint access to the Kubernetes API server, all communication
+          between your nodes and the API server stays within your VPC.
+          With this in mind, you can update your cluster accordingly using the AWS CLI to ensure
+          that Private Endpoint Access is enabled.
+          For example, the following command would enable private access to the Kubernetes
+          API and ensure that no public access is permitted:
+          aws eks update-cluster-config --region $AWS_REGION --name $CLUSTER_NAME --resources-vpc-config endpointPrivateAccess=true,endpointPublicAccess=false
+
+          Note: For more detailed information, see the EKS Cluster Endpoint documentation link
+          in the references section.
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Automated)"
+        type: "manual"
+        remediation: |
+          aws eks update-cluster-config \
+            --region region-code \
+            --name my-cluster \
+            --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs="203.0.113.5/32",endpointPrivateAccess=true
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Automated)"
+        type: "manual"
+        remediation: |
+          Utilize Calico or other network policy engine to segment and isolate your traffic.
+        scored: false
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        type: "manual"
+        remediation: |
+          Your load balancer vendor can provide details on configuring HTTPS with TLS.
+        scored: false
+
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes or Upgrade to AWS CLI v1.16.156 or greater (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the 'Managing users or IAM roles for your cluster' in Amazon EKS documentation.
+
+          Note: If using AWS CLI version 1.16.156 or later there is no need to install the AWS
+          IAM Authenticator anymore.
+          The relevant AWS CLI commands, depending on the use case, are:
+          aws eks update-kubeconfig
+          aws eks get-token
+        scored: false

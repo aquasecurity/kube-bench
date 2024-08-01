@@ -1,0 +1,32 @@
+---
+controls:
+version: "eks-1.5.0"
+id: 2
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 2.1
+    text: "Logging"
+    checks:
+      - id: 2.1.1
+        text: "Enable audit Logs (Automated)"
+        remediation: |
+          From Console:
+          1.  For each EKS Cluster in each region;
+          2.  Go to 'Amazon EKS' > 'Clusters' > '' > 'Configuration' > 'Logging'.
+          3.  Click 'Manage logging'.
+          4.  Ensure that all options are toggled to 'Enabled'.
+                API server: Enabled
+                Audit: Enabled
+                Authenticator: Enabled
+                Controller manager: Enabled
+                Scheduler: Enabled
+          5.  Click 'Save Changes'.
+
+          From CLI:
+          # For each EKS Cluster in each region;
+          aws eks update-cluster-config \
+            --region '${REGION_CODE}' \
+            --name '${CLUSTER_NAME}' \
+            --logging '{"clusterLogging":[{"types":["api","audit","authenticator","controllerManager","scheduler"],"enabled":true}]}'
+        scored: false
