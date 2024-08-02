@@ -400,6 +400,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "eks-1.5.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "rh-0.7":
     - "master"
     - "node"
