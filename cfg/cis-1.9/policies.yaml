@@ -129,11 +129,11 @@ groups:
           kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
           do
             # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
-            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n ${pod_namespace} ${pod_service_account} -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            pod_is_automountserviceaccounttoken=$(echo ${pod_is_automountserviceaccounttoken} | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            if [[ "${svacc_is_automountserviceaccounttoken}" == "false" && ( "${pod_is_automountserviceaccounttoken}" == "false" || "${pod_is_automountserviceaccounttoken}" == "notset" ) ]]; then
+            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n "${pod_namespace}" "${pod_service_account}" -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
+            pod_is_automountserviceaccounttoken=$(echo "${pod_is_automountserviceaccounttoken}" | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
+            if [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && ( [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ] ); then
               is_compliant="true"
-            elif [[ "${svacc_is_automountserviceaccounttoken}" == "true" && "${pod_is_automountserviceaccounttoken}" == "false" ]]; then
+            elif [ "${svacc_is_automountserviceaccounttoken}" = "true" ] && [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
               is_compliant="true"
             else
               is_compliant="false"
