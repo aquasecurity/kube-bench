@@ -460,6 +460,12 @@ func TestValidTargets(t *testing.T) {
 			targets:   []string{"node", "policies", "controlplane", "managedservices"},
 			expected:  true,
 		},
+		{
+			name:      "eks-1.5.0 valid",
+			benchmark: "eks-1.5.0",
+			targets:   []string{"node", "policies", "controlplane", "managedservices"},
+			expected:  true,
+		},
 	}
 
 	for _, c := range cases {

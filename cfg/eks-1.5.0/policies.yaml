@@ -114,8 +114,8 @@ groups:
         text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
         type: "manual"
         remediation: |
-          Create a PSP as described in the Kubernetes documentation, ensuring that the
-          .spec.hostNetwork field is omitted or set to false.
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostNetwork containers.
         scored: false
 
       - id: 4.2.5
