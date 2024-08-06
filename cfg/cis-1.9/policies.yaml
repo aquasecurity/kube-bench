@@ -18,7 +18,7 @@ groups:
             else
               is_compliant="true"
             fi;
-            echo "**role_name: ${role_name} role_binding: ${rolebinding} subject: ${subject} is_compliant: ${is_compliant}"
+            echo "**role_name: ${role_name} role_binding: ${role_binding} subject: ${subject} is_compliant: ${is_compliant}"
           done
         use_multiple_values: true
         tests:
