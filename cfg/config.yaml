@@ -436,6 +436,12 @@ target_mapping:
     - "controlplane"
     - "node"
     - "policies"
+  "k3s-cis-1.8":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
   "k3s-cis-1.23":
     - "master"
     - "etcd"
