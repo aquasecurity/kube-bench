@@ -133,11 +133,9 @@ groups:
         scored: false
 
       - id: 1.1.10
-        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Automated)"
+        audit: find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G\
         type: "skip"
-        audit: |
-          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
-          find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
         use_multiple_values: true
         tests:
           test_items:
@@ -145,7 +143,7 @@ groups:
         remediation: |
           Not Applicable.
           The default K3s CNI, flannel, does not create any files in /var/lib/cni/networks.
-        scored: false
+        scored: true
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
