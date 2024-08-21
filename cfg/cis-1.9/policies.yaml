@@ -106,7 +106,7 @@ groups:
           Where possible, remove create access to pod objects in the cluster.
         scored: true
       - id: 5.1.5
-        text: "Ensure that default service accounts are not actively used. (Automated)"
+        text: "Ensure that default service accounts are not actively used (Automated)"
         audit: |
           kubectl get serviceaccount --all-namespaces --field-selector metadata.name=default -o=json | jq -r '.items[] | " namespace: \(.metadata.namespace), kind: \(.kind), name: \(.metadata.name), automountServiceAccountToken: \(.automountServiceAccountToken | if . == null then "notset" else . end )"' | xargs -L 1
         use_multiple_values: true
