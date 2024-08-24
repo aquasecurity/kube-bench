@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.2.0"
+version: "gke-1.6.0"
 id: 4
 text: "Kubernetes Policies"
 type: "policies"
