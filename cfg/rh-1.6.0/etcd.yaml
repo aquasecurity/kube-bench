@@ -1,0 +1,183 @@
+---
+controls:
+version: rh-1.0
+id: 2
+text: "Etcd Node Configuration"
+type: "etcd"
+groups:
+  - id: 2
+    text: "Etcd Node Configuration Files"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--cert-file=[^ ]*\).*/\1/'
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--key-file=[^ ]*\).*/\1/'
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "file"
+              compare:
+                op: regex
+                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-serving\/etcd-serving-.*\.(?:crt|key)'
+        remediation: |
+          OpenShift does not use the etcd-certfile or etcd-keyfile flags.
+          Certificates for etcd are managed by the etcd cluster operator.
+        scored: false
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--client-cert-auth=[^ ]*\).*/\1/'
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "--client-cert-auth"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          This setting is managed by the cluster etcd operator. No remediation required."
+        scored: false
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Manual)"
+        audit: |
+          # Returns 0 if found, 1 if not found
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --auto-tls=true 2>/dev/null ; echo exit_code=$?
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "exit_code"
+              compare:
+                op: eq
+                value: "1"
+        remediation: |
+          This setting is managed by the cluster etcd operator. No remediation required.
+        scored: false
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-cert-file=[^ ]*\).*/\1/'
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-key-file=[^ ]*\).*/\1/'
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "file"
+              compare:
+                op: regex
+                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-peer\/etcd-peer-.*\.(?:crt|key)'
+        remediation: |
+          None. This configuration is managed by the etcd operator.
+        scored: false
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-client-cert-auth=[^ ]*\).*/\1/'
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "--peer-client-cert-auth"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          This setting is managed by the cluster etcd operator. No remediation required.
+        scored: false
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Manual)"
+        audit: |
+          # Returns 0 if found, 1 if not found
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --peer-auto-tls=true 2>/dev/null ; echo exit_code=$?
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "exit_code"
+              compare:
+                op: eq
+                value: "1"
+        remediation: |
+          This setting is managed by the cluster etcd operator. No remediation required.
+        scored: false
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for etcd (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching file found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--trusted-ca-file=[^ ]*\).*/\1/'
+          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-trusted-ca-file=[^ ]*\).*/\1/'
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "file"
+              compare:
+                op: regex
+                value: '\/etc\/kubernetes\/static-pod-certs\/configmaps\/etcd-(?:serving|peer-client)-ca\/ca-bundle\.(?:crt|key)'
+        remediation: |
+          None required. Certificates for etcd are managed by the OpenShift cluster etcd operator.
+        scored: false

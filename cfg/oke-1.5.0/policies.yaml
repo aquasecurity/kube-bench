@@ -1,0 +1,287 @@
+---
+controls:
+version: rh-1.0
+id: 5
+text: "Kubernetes Policies"
+type: "policies"
+groups:
+  - id: 5.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 5.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
+        type: "manual"
+        audit: |
+          #To get a list of users and service accounts with the cluster-admin role
+          oc get clusterrolebindings -o=customcolumns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind |
+          grep cluster-admin
+          #To verity that kbueadmin is removed, no results should be returned
+          oc get secrets kubeadmin -n kube-system
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
+          if they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize access to secrets (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
+        type: "manual"
+        audit: |
+          #needs verification
+          oc get roles --all-namespaces -o yaml
+          for i in $(oc get roles -A -o jsonpath='{.items[*].metadata.name}'); do oc
+          describe clusterrole ${i}; done
+          #Retrieve the cluster	roles defined in the cluster and review	for	wildcards
+          oc get clusterroles -o yaml
+          for i in $(oc get clusterroles -o jsonpath='{.items[*].metadata.name}'); do
+          oc describe clusterrole ${i}; done
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize access to create pods (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: false
+
+      - id: 5.1.5
+        text: "Ensure that default service accounts are not actively used. (Manual)"
+        type: "manual"
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 5.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+  - id: 5.2
+    text: "Pod Security Policies"
+    checks:
+      - id: 5.2.1
+        text: "Minimize the admission of privileged containers (Manual)"
+        audit: |
+          # needs verification
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowPrivilegedContainer:.allowPrivilegedContainer
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
+          Privileged field is set to false.
+        scored: false
+
+      - id: 5.2.2
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
+        audit: |
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostPID:.allowHostPID
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          PID field is set to false.
+        scored: false
+
+      - id: 5.2.3
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
+        audit: |
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostIPC:.allowHostIPC
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          IPC field is set to false.
+        scored: false
+
+      - id: 5.2.4
+        text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
+        audit: |
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowHostNetwork:.allowHostNetwork
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
+          Network field is omitted or set to false.
+        scored: false
+
+      - id: 5.2.5
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
+        audit: |
+          oc get scc -o=custom-columns=NAME:.metadata.name,allowPrivilegeEscalation:.allowPrivilegeEscalation
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
+          Privilege Escalation field is omitted or set to false.
+        scored: false
+
+      - id: 5.2.6
+        text: "Minimize the admission of root containers (Manual)"
+        audit: |
+          # needs verification # | awk 'NR>1 {gsub("map\\[type:", "", $2); gsub("\\]$", "", $2); print $1 ":" $2}'
+          oc get scc -o=custom-columns=NAME:.metadata.name,runAsUser:.runAsUser.type
+          #For SCCs with MustRunAs verify that the range of UIDs does not include 0
+          oc get scc -o=custom-columns=NAME:.metadata.name,uidRangeMin:.runAsUser.uidRangeMin,uidRangeMax:.runAsUser.uidRangeMax
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "MustRunAsNonRoot"
+            - flag: "MustRunAs"
+              compare:
+                op: nothave
+                value: 0
+        remediation: |
+          None required. By default, OpenShift includes the non-root SCC with the the Run As User
+          Strategy is set to either MustRunAsNonRoot. If additional SCCs are appropriate, follow the
+          OpenShift documentation to create custom SCCs.
+        scored: false
+
+      - id: 5.2.7
+        text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
+        audit: |
+          # needs verification
+          oc get scc -o=custom-columns=NAME:.metadata.name,requiredDropCapabilities:.requiredDropCapabilities
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "ALL"
+            - flag: "NET_RAW"
+        remediation: |
+          Create a SCC as described in the OpenShift documentation, ensuring that the Required
+          Drop Capabilities is set to include either NET_RAW or ALL.
+        scored: false
+
+      - id: 5.2.8
+        text: "Minimize the admission of containers with added capabilities (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure that Allowed Capabilities is set to an empty array for every SCC in the cluster
+          except for the privileged SCC.
+        scored: false
+
+      - id: 5.2.9
+        text: "Minimize the admission of containers with capabilities assigned (Manual)"
+        type: "manual"
+        remediation: |
+          Review the use of capabilites in applications running on your cluster. Where a namespace
+          contains applicaions which do not require any Linux capabities to operate consider
+          adding a SCC which forbids the admission of containers which do not drop all capabilities.
+        scored: false
+
+  - id: 5.3
+    text: "Network Policies and CNI"
+    checks:
+      - id: 5.3.1
+        text: "Ensure that the CNI in use supports Network Policies (Manual)"
+        type: "manual"
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 5.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command and review the NetworkPolicy objects created in the cluster.
+          oc -n all get networkpolicy
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as you need them.
+        scored: false
+
+  - id: 5.4
+    text: "Secrets Management"
+    checks:
+      - id: 5.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command to find references to objects which use environment variables defined from secrets.
+          oc get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind}
+          {.metadata.name} {"\n"}{end}' -A
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 5.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 5.5
+    text: "Extensible Admission Control"
+    checks:
+      - id: 5.5.1
+        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
+        scored: false
+
+  - id: 5.7
+    text: "General Policies"
+    checks:
+      - id: 5.7.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command and review the namespaces created in the cluster.
+          oc get namespaces
+          #Ensure that these namespaces are the ones you need and are adequately administered as per your requirements.
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 5.7.2
+        text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
+        type: "manual"
+        remediation: |
+          To enable the default seccomp profile, use the reserved value /runtime/default that will
+          make sure that the pod uses the default policy available on the host.
+        scored: false
+
+      - id: 5.7.3
+        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and apply security contexts to your pods. For a
+          suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
+          Containers.
+        scored: false
+
+      - id: 5.7.4
+        text: "The default namespace should not be used (Manual)"
+        type: "manual"
+        audit: |
+          #Run this command to list objects in default namespace
+          oc project default
+          oc get all
+          #The only entries there should be system managed resources such as the kubernetes and openshift service
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false

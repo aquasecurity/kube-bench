@@ -1,0 +1,1445 @@
+---
+controls:
+version: rh-1.0
+id: 1
+text: "Master Node Security Configuration"
+type: "master"
+groups:
+  - id: 1.1
+    text: "Master Node Configuration Files"
+    checks:
+      - id: 1.1.1
+        text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-apiserver namespace
+          POD_NAME=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+              echo "No matching pods found on the current node."
+          else
+             # Execute the stat command
+             oc exec -n openshift-kube-apiserver "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/static-pod-resources/kube-apiserver-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.2
+        text: "Ensure that the API server pod specification file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-apiserver namespace
+          POD_NAME=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+              echo "No matching pods found on the current node."
+          else
+             # Execute the stat command
+             oc exec -n openshift-kube-apiserver "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/static-pod-resources/kube-apiserver-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.3
+        text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-controller-manager namespace
+          POD_NAME=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+             echo "No matching pods found on the current node."
+          else
+            # Execute the stat command
+            oc exec -n openshift-kube-controller-manager "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/static-pod-resources/kube-controller-manager-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.4
+        text: "Ensure that the controller manager pod specification file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-controller-manager namespace
+          POD_NAME=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
+           # Execute the stat command
+           oc exec -n openshift-kube-controller-manager "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/static-pod-resources/kube-controller-manager-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.5
+        text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-scheduler namespace
+          POD_NAME=$(oc get pods -n openshift-kube-scheduler -l app=openshift-kube-scheduler --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-scheduler "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/static-pod-resources/kube-scheduler-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.6
+        text: "Ensure that the scheduler pod specification file ownership is set to root:root (Manual))"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-scheduler namespace
+          POD_NAME=$(oc get pods -n openshift-kube-scheduler -l app=openshift-kube-scheduler --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-scheduler "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/static-pod-resources/kube-scheduler-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.7
+        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Manual))"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc rsh -n openshift-etcd "$POD_NAME" stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/manifests/etcd-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.8
+        text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc rsh -n openshift-etcd "$POD_NAME" stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/manifests/etcd-pod.yaml
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.9
+        text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # For CNI multus
+          # Get the pod name in the openshift-multus namespace
+          POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf";  2>/dev/null
+          oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf";  2>/dev/null
+          fi
+          # For SDN pods
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+          fi
+
+          # For OVS pods
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /run/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.10
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # For CNI multus
+          # Get the pod name in the openshift-multus namespace
+          POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c '$i %n %U:%G' /host/etc/cni/net.d/*.conf" 2>/dev/null
+          oc exec -n openshift-multus $i -- /bin/bash -c "stat -c '$i %n %U:%G' /host/var/run/multus/cni/net.d/*.conf"  2>/dev/null
+          fi
+          # For SDN pods
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
+          fi
+          # For OVS pods in 4.5
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+           echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- find /run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.11
+        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /var/lib/etcd/member
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "700"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.12
+        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-etcd namespace
+          POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-etcd "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /var/lib/etcd/member
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.13
+        text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive (Manual))"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubeconfig 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.14
+        text: "Ensure that the admin.conf file ownership is set to root:root (Manual)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/kubeconfig 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.15
+        text: "Ensure that the scheduler.conf file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-scheduler namespace
+          POD_NAME=$(oc get pods -n openshift-kube-scheduler -l app=openshift-kube-scheduler --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-scheduler "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/static-pod-resources/configmaps/scheduler-kubeconfig/kubeconfig
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.16
+        text: "Ensure that the scheduler.conf file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-scheduler namespace
+          POD_NAME=$(oc get pods -n openshift-kube-scheduler -l app=openshift-kube-scheduler --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-scheduler "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/static-pod-resources/configmaps/scheduler-kubeconfig/kubeconfig
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.17
+        text: "Ensure that the controller-manager.conf file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-controller-manager namespace
+          POD_NAME=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-controller-manager "$POD_NAME" -- stat -c "$POD_NAME %n permissions=%a" /etc/kubernetes/static-pod-resources/configmaps/controller-manager-kubeconfig/kubeconfig
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.18
+        text: "Ensure that the controller-manager.conf file ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-controller-manager namespace
+          POD_NAME=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-controller-manager "$POD_NAME" -- stat -c "$POD_NAME %n %U:%G" /etc/kubernetes/static-pod-resources/configmaps/controller-manager-kubeconfig/kubeconfig
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.19
+        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Manual)"
+        audit: |
+          # Should return root:root for all files and directories
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-controller-manager namespace
+          POD_NAME=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # echo $i static-pod-certs
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-certs -type d -wholename '*/secrets*' -exec stat -c "$i %n %U:%G" {} \;
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-certs -type f -wholename '*/secrets*' -exec stat -c "$i %n %U:%G" {} \;
+          # echo $i static-pod-resources
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-resources -type d -wholename '*/secrets*' -exec stat -c "$i %n %U:%G" {} \;
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-resources -type f -wholename '*/secrets*' -exec stat -c "$i %n %U:%G" {} \;
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.20
+        text: "Ensure that the OpenShift PKI certificate file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-apiserver namespace
+          POD_NAME=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-certs -type f -wholename '*/secrets/*.crt' -exec stat -c "$POD_NAME %n permissions=%a" {} \;
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+      - id: 1.1.21
+        text: "Ensure that the OpenShift PKI key file permissions are set to 600 (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
+          # Get the pod name in the openshift-kube-apiserver namespace
+          POD_NAME=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-kube-apiserver "$POD_NAME" -c kube-apiserver -- find /etc/kubernetes/static-pod-certs -type f -wholename '*/secrets/*.key' -exec stat -c "$POD_NAME %n permissions=%a" {} \;
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "600"
+        remediation: |
+          No remediation required; file permissions are managed by the operator.
+        scored: false
+
+  - id: 1.2
+    text: "API Server"
+    checks:
+      - id: 1.2.1
+        text: "Ensure that anonymous requests are authorized (Manual)"
+        audit: |
+          # To verify that userGroups include system:unauthenticated
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
+          # To verify that userGroups include system:unauthenticated
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?.userGroups'
+          # To verify RBAC is enabled
+          oc get clusterrolebinding
+          oc get clusterrole
+          oc get rolebinding
+          oc get role
+        tests:
+          test_items:
+            - flag: "system:unauthenticated"
+        remediation: |
+          None required. The default configuration should not be modified.
+        scored: false
+
+      - id: 1.2.2
+        text: "Ensure that the --basic-auth-file argument is not set (Manual)"
+        audit: |
+          oc -n openshift-kube-apiserver get cm config -o yaml | grep --color "basic-auth"
+          oc -n openshift-apiserver get cm config -o yaml | grep --color "basic-auth"
+          # Add | awk '$3 != "AVAILABLE" { if ($3){print "available=true"}else{print "available=false"} }; to create AVAILABLE = true/false form
+          oc get clusteroperator authentication | awk '$3 != "AVAILABLE" { if ($3){print "available=true"}else{print "available=false"} }'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "basic-auth-file"
+              set: false
+            - flag: "available"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          None required. --basic-auth-file cannot be configured on OpenShift.
+        scored: false
+
+      - id: 1.2.3
+        text: "Ensure that the --token-auth-file parameter is not set (Manual)"
+        audit: |
+          # Verify that the token-auth-file flag is not present
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments'
+          #Verify that the authentication operator is running
+          oc get clusteroperator authentication | awk '$3 != "AVAILABLE" { if ($3){print "available=true"}else{print "available=false"} }'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "token-auth-file"
+              set: false
+            - flag: "available"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          None is required.
+        scored: false
+
+      - id: 1.2.4
+        text: "Use https for kubelet connections (Manual)"
+        audit: |
+          #for 4.5
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.kubeletClientInfo'
+          #for 4.6
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          #for both 4.5 and 4.6
+          oc -n openshift-apiserver describe secret serving-cert
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.key"
+        remediation: |
+          No remediation is required.
+          OpenShift platform components use X.509 certificates for authentication.
+          OpenShift manages the CAs and certificates for platform components. This is not configurable.
+        scored: false
+
+      - id: 1.2.5
+        text: "Ensure that the kubelet uses certificates to authenticate (Manual)"
+        audit: |
+          #for 4.5
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.kubeletClientInfo'
+          #for 4.6
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          #for both 4.5 and 4.6
+          oc -n openshift-apiserver describe secret serving-cert
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.key"
+        remediation: |
+          No remediation is required.
+          OpenShift platform components use X.509 certificates for authentication.
+          OpenShift manages the CAs and certificates for platform components.
+          This is not configurable.
+        scored: false
+
+      - id: 1.2.6
+        text: "Verify that the kubelet certificate authority is set as appropriate (Manual)"
+        audit: |
+          # for 4.5
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.kubeletClientInfo'
+          # for 4.6
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/configmaps/kubelet-serving-ca/ca-bundle.crt"
+        remediation: |
+          No remediation is required.
+          OpenShift platform components use X.509 certificates for authentication.
+          OpenShift manages the CAs and certificates for platform components.
+          This is not configurable.
+        scored: false
+
+      - id: 1.2.7
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
+        audit: |
+          # To verify that the authorization-mode argument is not used
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+          # To verify RBAC is configured:
+          oc get clusterrolebinding
+          oc get clusterrole
+          oc get rolebinding
+          oc get role
+        audit_config: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+        tests:
+          bin_op: or
+          test_items:
+            - path: "{.authorization-mode}"
+              compare:
+                op: nothave
+                value: "AlwaysAllow"
+            - path: "{.authorization-mode}"
+              flag: "authorization-mode"
+              set: false
+        remediation: |
+          None. RBAC is always on and the OpenShift API server does not use the values assigned to the flag authorization-mode.
+        scored: false
+
+      - id: 1.2.8
+        text: "Verify that the Node authorizer is enabled (Manual)"
+        audit: |
+          # For OCP 4.5 and earlier verify that authorization-mode is not used
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments'
+          # For OCP 4.5 and earlier verify that authorization-mode is not used
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host cat /etc/kubernetes/kubelet.conf | grep authorization-mode 2> /dev/null
+          oc debug node/$NODE_NAME -- chroot /host ps -aux | grep kubelet | grep authorization-mode 2> /dev/null
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        audit_config: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+        tests:
+          bin_op: or
+          test_items:
+            - path: "{.authorization-mode}"
+              compare:
+                op: has
+                value: "Node"
+            - path: "{.authorization-mode}"
+              flag: "authorization-mode"
+              set: false
+        remediation: |
+          No remediation is required.
+        scored: false
+
+      - id: 1.2.9
+        text: "Verify that RBAC is enabled (Manual)"
+        audit: |
+          # For 4.5 To verify that the authorization-mode argument is not used
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+          # To verify RBAC is used
+          oc get clusterrolebinding
+          oc get clusterrole
+          oc get rolebinding
+          oc get role
+          # For 4.6, verify that the authorization-mode argument includes RBAC
+        audit_config: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+        tests:
+          bin_op: or
+          test_items:
+            - path: "{.authorization-mode}"
+              compare:
+                op: has
+                value: "RBAC"
+            - path: "{.authorization-mode}"
+              flag: "authorization-mode"
+              set: false
+        remediation: |
+          None. It is not possible to disable RBAC.
+        scored: false
+
+      - id: 1.2.10
+        text: "Ensure that the APIPriorityAndFairness feature gate is enabled (Manual)"
+        audit: |
+          #Verify the APIPriorityAndFairness feature-gate
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments'
+          #Verify the set of admission-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "APIPriorityAndFairness=true"
+            - flag: "EventRateLimit"
+              set: false
+        remediation: |
+          No remediation is required
+        scored: false
+
+      - id: 1.2.11
+        text: "Ensure that the admission control plugin AlwaysAdmit is not set (Manual)"
+        audit: |
+          #Verify the set of admission-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        tests:
+          test_items:
+            - flag: "AlwaysAdmit"
+              set: false
+        remediation: |
+          No remediation is required. The AlwaysAdmit admission controller cannot be enabled in OpenShift.
+        scored: false
+
+      - id: 1.2.12
+        text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
+        audit: |
+          #Verify the set of admissi    on-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        tests:
+          test_items:
+            - flag: "AlwaysPullImages"
+              set: false
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 1.2.13
+        text: "Ensure that the admission control plugin SecurityContextDeny is not set (Manual)"
+        audit: |
+          #Verify the set of admission-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          output=$(oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"')
+          [ "$output" == "null" ] && echo "ocp 4.5 has SecurityContextDeny and SecurityContextConstraint compiled" || echo $output
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+          #Verify that SecurityContextConstraints are deployed
+          oc get scc
+          oc describe scc restricted
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "SecurityContextConstraint"
+              set: true
+            - flag: "anyuid"
+            - flag: "hostaccess"
+            - flag: "hostmount-anyuid"
+            - flag: "hostnetwork"
+            - flag: "node-exporter"
+            - flag: "nonroot"
+            - flag: "privileged"
+            - flag: "restricted"
+        remediation: |
+          None required. The Security Context Constraint admission controller cannot be disabled in OpenShift 4.
+        scored: false
+
+      - id: 1.2.14
+        text: "Ensure that the admission control plugin ServiceAccount is set (Manual)"
+        audit: |
+          #Verify the list of admission controllers for 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          output=$(oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"')
+          [ "$output" == "null" ] && echo "ocp 4.5 has ServiceAccount compiled" || echo $output
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+          #Verify that Service Accounts are present
+          oc get sa -A
+        tests:
+          test_items:
+            - flag: "ServiceAccount"
+              set: true
+        remediation: |
+          None required. OpenShift is configured to use service accounts by default.
+        scored: false
+
+      - id: 1.2.15
+        text: "Ensure that the admission control plugin NamespaceLifecycle is set (Manual)"
+        audit: |
+          #Verify the list of admission controllers for 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          output=$(oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"')
+          [ "$output" == "null" ] && echo "ocp 4.5 has NamespaceLifecycle compiled" || echo $output
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        tests:
+          test_items:
+            - flag: "NamespaceLifecycle"
+        remediation: |
+          Ensure that the --disable-admission-plugins parameter does not include NamespaceLifecycle.
+        scored: false
+
+      - id: 1.2.16
+        text: "Ensure that the admission control plugin SecurityContextConstraint is set (Manual)"
+        audit: |
+          #Verify the set of admission-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          output=$(oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"')
+          [ "$output" == "null" ] && echo "ocp 4.5 has SecurityContextConstraint compiled" || echo $output
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+          #Verify that SecurityContextConstraints are deployed
+          oc get scc
+          oc describe scc restricted
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "SecurityContextConstraint"
+            - flag: "anyuid"
+            - flag: "hostaccess"
+            - flag: "hostmount-anyuid"
+            - flag: "hostnetwork"
+            - flag: "node-exporter"
+            - flag: "nonroot"
+            - flag: "privileged"
+            - flag: "restricted"
+        remediation: |
+          None required. Security Context Constraints are enabled by default in OpenShift and cannot be disabled.
+        scored: false
+
+      - id: 1.2.17
+        text: "Ensure that the admission control plugin NodeRestriction is set (Manual)"
+        audit: |
+          # For 4.5, review the control plane manifest https://github.com/openshift/origin/blob/release-4.5/vendor/k8s.io/kubernetes/cmd/kubeadm/app/phases/controlplane/manifests.go#L132
+          #Verify the set of admission-plugins for OCP 4.6 and higher
+          oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
+          output=$(oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"')
+          [ "$output" == "null" ] && echo "ocp 4.5 has NodeRestriction compiled" || echo $output
+          #Check that no overrides are configured
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
+        tests:
+          test_items:
+            - flag: "NodeRestriction"
+        remediation: |
+          The NodeRestriction plugin cannot be disabled.
+        scored: false
+
+      - id: 1.2.18
+        text: "Ensure that the --insecure-bind-address argument is not set (Manual)"
+        audit: |
+          # InsecureBindAddress=true should not be in the results
+          oc get kubeapiservers.operator.openshift.io cluster -o jsonpath='{range .spec.observedConfig.apiServerArguments.feature-gates[*]}{@}{"\n"}{end}'
+          # Result should be only 6443
+          oc -n openshift-kube-apiserver get endpoints -o jsonpath='{.items[*].subsets[*].ports[*].port}'
+          # Result should be only 8443
+          oc -n openshift-apiserver get endpoints -o jsonpath='{.items[*].subsets[*].ports[*].port}'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "insecure-bind-address"
+              set: false
+            - flag: 6443
+            - flag: 8443
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 1.2.19
+        text: "Ensure that the --insecure-port argument is set to 0 (Manual)"
+        audit: |
+          # Should return 6443
+          oc -n openshift-kube-apiserver get endpoints -o jsonpath='{.items[*].subsets[*].ports[*].port}'
+          # For OCP 4.6 and above
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments["insecure-port"]'
+          output=$(oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments["insecure-port"]')
+          [ "$output" == "null" ] && echo "ocp 4.5 has insecure-port set to \"0\" compiled" || echo $output
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "\"0\""
+            - flag: "6443"
+        remediation: |
+          None required. The configuration is managed by the API server operator.
+        scored: false
+
+      - id: 1.2.20
+        text: "Ensure that the --secure-port argument is not set to 0 (Manual)"
+        audit: |
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig'
+          # Should return only 6443
+          echo ports=`oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[*].spec.containers[?(@.name=="kube-apiserver")].ports[*].containerPort}'`
+        tests:
+          bin_op: and
+          test_items:
+            - flag: '"bindAddress": "0.0.0.0:6443"'
+            - flag: "ports"
+              compare:
+                op: regex
+                value: '\s*(?:6443\s*){1,}$'
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 1.2.21
+        text: "Ensure that the healthz endpoint is protected by RBAC (Manual)"
+        type: manual
+        audit: |
+          # Verify endpoints
+          oc -n openshift-kube-apiserver describe endpoints
+          # Check config for ports, livenessProbe, readinessProbe, healthz
+          oc -n openshift-kube-apiserver get cm kube-apiserver-pod -o json | jq -r '.data."pod.yaml"' | jq '.spec.containers'
+          # Test to validate RBAC enabled on the apiserver endpoint; check with non-admin role
+          oc project openshift-kube-apiserver POD=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[0].metadata.name}') PORT=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[0].spec.containers[0].ports[0].hostPort}')
+          # Following should return 403 Forbidden
+          oc rsh -n openshift-kube-apiserver ${POD} curl https://localhost:${PORT}/metrics -k
+          # Create a service account to test RBAC
+          oc create -n openshift-kube-apiserver sa permission-test-sa
+          # Should return 403 Forbidden
+          SA_TOKEN=$(oc sa -n openshift-kube-apiserver get-token permission-test-sa)
+          oc rsh -n openshift-kube-apiserver ${POD} curl https://localhost:${PORT}/metrics -H "Authorization: Bearer $SA_TOKEN" -k
+          # Cleanup
+          oc delete -n openshift-kube-apiserver sa permission-test-sa
+          # As cluster admin, should succeed
+          CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
+          oc rsh -n openshift-kube-apiserver ${POD} curl https://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
+        remediation: |
+          None required as profiling data is protected by RBAC.
+        scored: false
+
+      - id: 1.2.22
+        text: "Ensure that the --audit-log-path argument is set (Manual)"
+        audit: |
+          # Should return “/var/log/kube-apiserver/audit.log"
+          output=$(oc get configmap config -n openshift-kube-apiserver -o jsonpath="{['.data.config\.yaml']}" | jq '.auditConfig.auditFilePath')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "$output" || true
+          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-path"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "$output" || true
+          POD=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[0].metadata.name}')
+          oc rsh -n openshift-kube-apiserver -c kube-apiserver $POD ls /var/log/kube-apiserver/audit.log 2>/dev/null
+          # Should return 0
+          echo exit_code=$?
+          # Should return "/var/log/openshift-apiserver/audit.log"
+          output=$(oc get configmap config -n openshift-apiserver -o jsonpath="{['.data.config\.yaml']}" | jq '.auditConfig.auditFilePath')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "$output" || true
+          output=$(oc get configmap config -n openshift-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-path"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "$output" || true
+          POD=$(oc get pods -n openshift-apiserver -l apiserver=true -o jsonpath='{.items[0].metadata.name}')
+          oc rsh -n openshift-apiserver $POD ls /var/log/openshift-apiserver/audit.log 2>/dev/null
+          # Should return 0
+          echo exit_code=$?
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "/var/log/kube-apiserver/audit.log"
+            - flag: "/var/log/openshift-apiserver/audit.log"
+            - flag: "exit_code=0"
+            - flag: "null"
+        remediation: |
+          None required. This is managed by the cluster apiserver operator.
+        scored: false
+
+      - id: 1.2.23
+        text: "Ensure that the audit logs are forwarded off the cluster for retention (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation for log forwarding. Forwarding logs to third party systems
+          https://docs.openshift.com/container-platform/4.5/logging/cluster-logging-external.html
+        scored: false
+
+      - id: 1.2.24
+        text: "Ensure that the maximumRetainedFiles argument is set to 10 or as appropriate (Manual)"
+        audit: |
+          #NOTICE
+          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r .auditConfig.maximumRetainedFiles)
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "maximumRetainedFiles=$output" || true
+          output=$(oc get configmap config -n openshift-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r .auditConfig.maximumRetainedFiles)
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "maximumRetainedFiles=$output" || true
+          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-maxbackup"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "audit-log-maxbackup=$output" || true
+          output=$(oc get configmap config -n openshift-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-maxbackup"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "audit-log-maxbackup=$output" || true
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "maximumRetainedFiles"
+              compare:
+                op: gte
+                value: 10
+            - flag: "audit-log-maxbackup"
+              compare:
+                op: gte
+                value: 10
+        remediation: |
+          Set the maximumRetainedFiles parameter to 10 or as an appropriate number of files. maximumRetainedFiles: 10
+        scored: false
+
+      - id: 1.2.25
+        text: "Ensure that the maximumFileSizeMegabytes argument is set to 100 or as appropriate (Manual)"
+        audit: |
+          #NOTICE
+          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r .auditConfig.maximumFileSizeMegabytes)
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "maximumFileSizeMegabytes=$output" || true
+          output=$(oc get configmap config -n openshift-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r .auditConfig.maximumFileSizeMegabytes)
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "maximumFileSizeMegabytes=$output" || true
+          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-maxsize"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "audit-log-maxsize=$output" || true
+          output=$(oc get configmap config -n openshift-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-maxsize"][]?')
+          [ "$output" != "" ] && [ "$output" != "null" ] && echo "audit-log-maxsize=$output" || true
+        use_multiple_values: true
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "maximumFileSizeMegabytes"
+              compare:
+                op: gte
+                value: 100
+            - flag: "audit-log-maxsize"
+              compare:
+                op: gte
+                value: 100
+        remediation: |
+          Set the audit-log-maxsize parameter to 100 or as an appropriate number.
+          maximumFileSizeMegabytes: 100
+        scored: false
+
+      - id: 1.2.26
+        text: "Ensure that the --request-timeout argument is set as appropriate (Manual)"
+        audit: |
+          echo requestTimeoutSeconds=`oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .servingInfo.requestTimeoutSeconds`
+        tests:
+          test_items:
+            - flag: "requestTimeoutSeconds"
+        remediation: |
+          TBD
+        scored: false
+
+      - id: 1.2.27
+        text: "Ensure that the --service-account-lookup argument is set to true (Manual)"
+        audit: |
+          # For OCP 4.5
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments' | grep service-account-lookup
+          # For OCP 4.6 and above
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["service-account-lookup"]'
+          output=$(oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["service-account-lookup"][0]')
+          [ "$output" == "null" ] && echo "ocp 4.5 has service-account-lookup=true compiled" || echo service-account-lookup=$output
+        tests:
+          test_items:
+            - flag: "service-account-lookup=true"
+        remediation: |
+          TBD
+        scored: false
+
+      - id: 1.2.28
+        text: "Ensure that the --service-account-key-file argument is set as appropriate (Manual)"
+        audit: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .serviceAccountPublicKeyFiles[]
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/configmaps/sa-token-signing-certs"
+            - flag: "/etc/kubernetes/static-pod-resources/configmaps/bound-sa-token-signing-certs"
+        remediation: |
+          The OpenShift API server does not use the service-account-key-file argument.
+          The ServiceAccount token authenticator is configured with serviceAccountConfig.publicKeyFiles.
+          OpenShift does not reuse the apiserver TLS key. This is not configurable.
+        scored: false
+
+      - id: 1.2.29
+        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Manual)"
+        audit: |
+          # etcd Certificate File
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .storageConfig.certFile
+          # etcd Key File
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .storageConfig.keyFile
+          # NOTICE 4.6 extention
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["etcd-certfile"]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["etcd-keyfile"]'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/etcd-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/etcd-client/tls.key"
+        remediation: |
+          OpenShift automatically manages TLS and client certificate authentication for etcd.
+          This is not configurable.
+        scored: false
+
+      - id: 1.2.30
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
+        audit: |
+          # TLS Cert File - openshift-kube-apiserver
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .servingInfo.certFile
+          # TLS Key File
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.servingInfo.keyFile'
+          # NOTECI 4.6 extention
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["tls-cert-file"]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["tls-private-key-file"]'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/service-network-serving-certkey/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/service-network-serving-certkey/tls.key"
+        remediation: |
+          OpenShift automatically manages TLS authentication for the API server communication with the node/kublet.
+          This is not configurable. You may optionally set a custom default certificate to be used by the API server
+          when serving content in order to enable clients to access the API server at a different host name or without
+          the need to distribute the cluster-managed certificate authority (CA) certificates to the clients.
+          Follow the directions in the OpenShift documentation User-provided certificates for the API server
+        scored: false
+
+      - id: 1.2.31
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
+        audit: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .servingInfo.clientCA
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["client-ca-file"]'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-certs/configmaps/client-ca/ca-bundle.crt"
+        remediation: |
+          OpenShift automatically manages TLS authentication for the API server communication with the node/kublet.
+          This is not configurable. You may optionally set a custom default certificate to be used by the API
+          server when serving content in order to enable clients to access the API server at a different host name
+          or without the need to distribute the cluster-managed certificate authority (CA) certificates to the clients.
+
+          User-provided certificates must be provided in a kubernetes.io/tls type Secret in the openshift-config namespace.
+          Update the API server cluster configuration,
+          the apiserver/cluster resource, to enable the use of the user-provided certificate.
+        scored: false
+
+      - id: 1.2.32
+        text: "Ensure that the --etcd-cafile argument is set as appropriate (Manual)"
+        audit: |
+          #etcd CA File
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .storageConfig.ca
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["etcd-cafile"]'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/configmaps/etcd-serving-ca/ca-bundle.crt"
+        remediation: |
+          None required. OpenShift generates the etcd-cafile and sets the arguments appropriately in the API server. Communication with etcd is secured by the etcd serving CA.
+        scored: false
+
+      - id: 1.2.33
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
+        audit: |
+          # encrypt the etcd datastore
+          oc get openshiftapiserver -o=jsonpath='{range.items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+        tests:
+          test_items:
+            - flag: "EncryptionCompleted"
+        remediation: |
+          Follow the OpenShift documentation for Encrypting etcd data | Authentication | OpenShift Container Platform 4.5
+          https://docs.openshift.com/container-platform/4.5/security/encrypting-etcd.html
+        scored: false
+
+      - id: 1.2.34
+        text: "Ensure that encryption providers are appropriately configured (Manual)"
+        audit: |
+          # encrypt the etcd datastore
+          oc get openshiftapiserver -o=jsonpath='{range.items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+        tests:
+          test_items:
+            - flag: "EncryptionCompleted"
+        remediation: |
+          Follow the Kubernetes documentation and configure a EncryptionConfig file.
+          In this file, choose aescbc, kms or secretbox as the encryption provider.
+        scored: false
+
+      - id: 1.2.35
+        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
+        type: manual
+        audit: |
+          # verify cipher suites
+          oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
+          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
+          oc describe --namespace=openshift-ingress-operator ingresscontroller/default
+        remediation: |
+          Verify that the tlsSecurityProfile is set to the value you chose.
+          Note: The HAProxy Ingress controller image does not support TLS 1.3
+          and because the Modern profile requires TLS 1.3, it is not supported.
+          The Ingress Operator converts the Modern profile to Intermediate.
+          The Ingress Operator also converts the TLS 1.0 of an Old or Custom profile to 1.1,
+          and TLS 1.3 of a Custom profile to 1.2.
+        scored: false
+
+  - id: 1.3
+    text: "Controller Manager"
+    checks:
+      - id: 1.3.1
+        text: "Ensure that garbage collection is configured as appropriate (Manual)"
+        type: manual
+        remediation: |
+          To configure, follow the directions in Configuring garbage collection for containers and images
+          https://docs.openshift.com/container-platform/4.5/nodes/nodes/nodes-nodes-garbage-collection.html#nodes-nodes-garbage-collection-configuring_nodes-nodes-configuring
+        scored: false
+
+      - id: 1.3.2
+        text: "Ensure that controller manager healthz endpoints are protected by RBAC (Manual)"
+        type: manual
+        audit: |
+          # Verify configuration for ports, livenessProbe, readinessProbe, healthz
+          oc -n openshift-kube-controller-manager get cm kube-controller-manager-pod -o json | jq -r '.data."pod.yaml"' | jq '.spec.containers'
+          # Verify endpoints
+          oc -n openshift-kube-controller-manager describe endpoints
+          # Test to validate RBAC enabled on the controller endpoint; check with non-admin role
+          oc project openshift-kube-controller-manage
+          POD=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager -o jsonpath='{.items[0].metadata.name}')
+          PORT=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager -o jsonpath='{.items[0].spec.containers[0].ports[0].hostPort}')
+          # Following should return 403 Forbidden
+          oc rsh -n openshift-kube-controller-manager ${POD} curl https://localhost:${PORT}/metrics -k
+          # Create a service account to test RBAC
+          oc create -n openshift-kube-controller-manager sa permission-test-sa
+          # Should return 403 Forbidden
+          SA_TOKEN=$(oc sa -n openshift-kube-controller-manager get-token permission-test-sa)
+          oc rsh -n openshift-kube-controller-manager ${POD} curl https://localhost:${PORT}/metrics -H "Authorization: Bearer $SA_TOKEN" -k
+          # Cleanup
+          oc delete -n openshift-kube-controller-manager sa permission-test-sa
+          # As cluster admin, should succeed
+          CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
+          oc rsh -n openshift-kube-controller-manager ${POD} curl https://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
+        remediation: |
+          None required; profiling is protected by RBAC.
+        scored: false
+
+      - id: 1.3.3
+        text: "Ensure that the --use-service-account-credentials argument is set to true (Manual)"
+        audit: |
+          echo use-service-account-credentials=`oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["use-service-account-credentials"][]'`
+        tests:
+          test_items:
+            - flag: "use-service-account-credentials"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          The OpenShift Controller Manager operator manages and updates the OpenShift Controller Manager.
+          The Kubernetes Controller Manager operator manages and updates the Kubernetes Controller Manager deployed on top of OpenShift.
+          This operator is configured via KubeControllerManager custom resource.
+        scored: false
+
+      - id: 1.3.4
+        text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Manual)"
+        audit: |
+          oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["service-account-private-key-file"][]'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/secrets/service-account-private-key/service-account.key"
+        remediation: |
+          None required.
+          OpenShift manages the service account credentials for the scheduler automatically.
+        scored: false
+
+      - id: 1.3.5
+        text: "Ensure that the --root-ca-file argument is set as appropriate (Manual)"
+        audit: |
+          oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["root-ca-file"][]'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-resources/configmaps/serviceaccount-ca/ca-bundle.crt"
+        remediation: |
+          None required.
+          Certificates for OpenShift platform components are automatically created and rotated by the OpenShift Container Platform.
+        scored: false
+
+      - id: 1.3.6
+        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Manual)"
+        audit: |
+          oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["feature-gates"][]'
+        tests:
+          test_items:
+            - flag: "RotateKubeletServerCertificate"
+              compare:
+                op: eq
+                value: "true"
+        remediation: |
+          None required.
+          Certificates for OpenShift platform components are automatically created and rotated by the OpenShift Container Platform.
+        scored: false
+
+      - id: 1.3.7
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Manual)"
+        audit: |
+          echo port=`oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq '.extendedArguments["port"][]'`
+          echo secure-port=`oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq '.extendedArguments["secure-port"][]'`
+          #Following should fail with a http code 403
+          POD=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager -o jsonpath='{.items[0].metadata.name}')
+          oc rsh -n openshift-kube-controller-manager -c kube-controller-manager $POD curl https://localhost:10257/metrics -k
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "secure-port"
+              compare:
+                op: eq
+                value: "\"10257\""
+            - flag: "port"
+              compare:
+                op: eq
+                value: "\"0\""
+            - flag: "\"code\": 403"
+        remediation: |
+          Edit the Controller Manager pod specification file $controllermanagerconf
+          on the master node and ensure the correct value for the --bind-address parameter
+        scored: false
+
+  - id: 1.4
+    text: "Scheduler"
+    checks:
+      - id: 1.4.1
+        text: "Ensure that the healthz endpoints for the scheduler are protected by RBAC (Manual)"
+        type: manual
+        audit: |
+          # check configuration for ports, livenessProbe, readinessProbe, healthz
+          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq -r '.data."pod.yaml"' | jq '.spec.containers'
+          # Test to verify endpoints
+          oc -n openshift-kube-scheduler describe endpoints
+          # Test to validate RBAC enabled on the scheduler endpoint; check with non-admin role
+          oc project openshift-kube-scheduler
+          POD=$(oc get pods -l app=openshift-kube-scheduler -o jsonpath='{.items[0].metadata.name}')
+          PORT=$(oc get pod $POD -o jsonpath='{.spec.containers[0].livenessProbe.httpGet.port}')
+          # Should return 403 Forbidden
+          oc rsh ${POD} curl http://localhost:${PORT}/metrics -k
+          # Create a service account to test RBAC
+          oc create sa permission-test-sa
+          # Should return 403 Forbidden
+          SA_TOKEN=$(oc sa get-token permission-test-sa)
+          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $SA_TOKEN" -k
+          # Cleanup
+          oc delete sa permission-test-sa
+          # As cluster admin, should succeed
+          CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
+          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
+        remediation: |
+          A fix to this issue: https://bugzilla.redhat.com/show_bug.cgi?id=1889488 None required.
+          Profiling is protected by RBAC and cannot be disabled.
+        scored: false
+
+      - id: 1.4.2
+        text: "Verify that the scheduler API service is protected by authentication and authorization (Manual)"
+        type: manual
+        audit: |
+          # To verify endpoints
+          oc -n openshift-kube-scheduler describe endpoints
+          # To verify that bind-adress is not used in the configuration and that port is set to 0
+          oc -n openshift-kube-scheduler get cm kube-scheduler-pod -o json | jq -r '.data."pod.yaml"' | jq '.spec.containers'
+          # To test for RBAC:
+          oc project openshift-kube-scheduler
+          POD=$(oc get pods -l app=openshift-kube-scheduler -o jsonpath='{.items[0].metadata.name}')
+          POD_IP=$(oc get pods -l app=openshift-kube-scheduler -o jsonpath='{.items[0].status.podIP}')
+          PORT=$(oc get pod $POD -o jsonpath='{.spec.containers[0].livenessProbe.httpGet.port}')
+          # Should return a 403
+          oc rsh ${POD} curl http://${POD_IP}:${PORT}/metrics
+          # Create a service account to test RBAC
+          oc create sa permission-test-sa
+          # Should return 403 Forbidden
+          SA_TOKEN=$(oc sa get-token permission-test-sa)
+          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $SA_TOKEN" -k
+          # Cleanup
+          oc delete sa permission-test-sa
+          # As cluster admin, should succeed
+          CLUSTER_ADMIN_TOKEN=$(oc whoami -t)
+          oc rsh ${POD} curl http://localhost:${PORT}/metrics -H "Authorization: Bearer $CLUSTER_ADMIN_TOKEN" -k
+        remediation: |
+          By default, the --bind-address argument is not present,
+          the readinessProbe and livenessProbe arguments are set to 10251 and the port argument is set to 0.
+          Check the status of this issue: https://bugzilla.redhat.com/show_bug.cgi?id=1889488
+        scored: false
