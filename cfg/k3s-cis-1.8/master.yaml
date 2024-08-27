@@ -312,7 +312,7 @@ groups:
           Run the below command (based on the file location on your system) on the master node.
           For example,
           chmod -R 600 /var/lib/rancher/k3s/server/tls/*.key
-        scored: false
+        scored: true
 
   - id: 1.2
     text: "API Server"
@@ -331,7 +331,7 @@ groups:
           If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove anything similar to below.
           kube-apiserver-arg:
             - "anonymous-auth=true"
-        scored: false
+        scored: true
 
       - id: 1.2.2
         text: "Ensure that the --token-auth-file parameter is not set (Automated)"
@@ -603,7 +603,7 @@ groups:
           file where you would like audit logs to be written, for example,
           kube-apiserver-arg:
             - "audit-log-path=/var/lib/rancher/k3s/server/logs/audit.log"
-        scored: true
+        scored: false
 
       - id: 1.2.18
         text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Manual)"
@@ -619,7 +619,7 @@ groups:
           set the audit-log-maxage parameter to 30 or as an appropriate number of days, for example,
           kube-apiserver-arg:
             - "audit-log-maxage=30"
-        scored: true
+        scored: false
 
       - id: 1.2.19
         text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Manual)"
@@ -635,7 +635,7 @@ groups:
           set the audit-log-maxbackup parameter to 10 or to an appropriate value. For example,
           kube-apiserver-arg:
             - "audit-log-maxbackup=10"
-        scored: true
+        scored: false
 
       - id: 1.2.20
         text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Manual)"
@@ -651,7 +651,7 @@ groups:
           set the audit-log-maxsize parameter to an appropriate size in MB. For example,
           kube-apiserver-arg:
             - "audit-log-maxsize=100"
-        scored: true
+        scored: false
 
       - id: 1.2.21
         text: "Ensure that the --request-timeout argument is set as appropriate (Manual)"

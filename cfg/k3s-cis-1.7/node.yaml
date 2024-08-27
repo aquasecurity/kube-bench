@@ -292,7 +292,7 @@ groups:
           Not Applicable.
           By default, K3s does set the --hostname-override argument. Per CIS guidelines, this is to comply
           with cloud providers that require this flag to ensure that hostname matches node names.
-        scored: false
+        scored: true
 
       - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
