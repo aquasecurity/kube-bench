@@ -17,4 +17,9 @@ endif
 build-dependency-image:
 	docker buildx rm -f $(PROJECT)-builder || true
 	docker buildx create --name $(PROJECT)-builder --use
-	docker buildx build --platform linux/arm64,linux/amd64 $(PUSH_FLAG) --tag $(DEPENDENCY_IMAGE_NAME) --tag $(DEPENDENCY_IMAGE_NAME_GAR) --file Dependency-Dockerfile .
+	docker buildx build --platform linux/arm64,linux/amd64 $(PUSH_FLAG) --tag $(DEPENDENCY_IMAGE_NAME) --file Dependency-Dockerfile .
+
+build-dependency-image-gar:
+	docker buildx rm -f $(PROJECT)-builder || true
+	docker buildx create --name $(PROJECT)-builder --use
+	docker buildx build --platform linux/arm64,linux/amd64 $(PUSH_FLAG) --tag $(DEPENDENCY_IMAGE_NAME_GAR) --file Dependency-Dockerfile .
