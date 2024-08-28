@@ -35,6 +35,7 @@ pipeline {
                 ])
                 script {
                     sh "IMAGE_TAG=${params.TAG} PUSH=yes make -f makefile-sysdig build-dependency-image"
+                    sh "IMAGE_TAG=${params.TAG} PUSH=yes make -f makefile-sysdig build-dependency-image-gar"
                 }
             }
         }
