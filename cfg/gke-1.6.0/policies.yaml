@@ -14,8 +14,10 @@ groups:
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
+
           Where possible, first bind users to a lower privileged role and then remove the
           clusterrolebinding to the cluster-admin role :
+
             kubectl delete clusterrolebinding [name]
         scored: false
 
@@ -40,7 +42,9 @@ groups:
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific
           access to the Kubernetes API server.
+
           Modify the configuration of each default service account to include this value
+
             automountServiceAccountToken: false
         scored: false
 
@@ -72,19 +76,17 @@ groups:
         remediation: |
           Identify all clusterrolebindings and rolebindings to the user system:anonymous.
           Check if they are used and review the permissions associated with the binding using the
-          commands in the Audit section above or refer to GKE documentation.
+          commands in the Audit section above or refer to GKE documentation
+          (https://cloud.google.com/kubernetes-engine/docs/best-practices/rbac#detect-prevent-default).
 
           Strongly consider replacing unsafe bindings with an authenticated, user-defined group.
           Where possible, bind to non-default, user-defined groups with least-privilege roles.
 
           If there are any unsafe bindings to the user system:anonymous, proceed to delete them
           after consideration for cluster operations with only necessary, safer bindings.
-            kubectl delete clusterrolebinding
-            [CLUSTER_ROLE_BINDING_NAME]
-            kubectl delete rolebinding
-            [ROLE_BINDING_NAME]
-            --namespace
-            [ROLE_BINDING_NAMESPACE]
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
         scored: false
 
       - id: 4.1.9
@@ -94,7 +96,7 @@ groups:
           Identify all non-default clusterrolebindings and rolebindings to the group
           system:unauthenticated. Check if they are used and review the permissions
           associated with the binding using the commands in the Audit section above or refer to
-          GKE documentation.
+          GKE documentation (https://cloud.google.com/kubernetes-engine/docs/best-practices/rbac#detect-prevent-default).
 
           Strongly consider replacing non-default, unsafe bindings with an authenticated, user-
           defined group. Where possible, bind to non-default, user-defined groups with least-
@@ -103,13 +105,9 @@ groups:
           If there are any non-default, unsafe bindings to the group system:unauthenticated,
           proceed to delete them after consideration for cluster operations with only necessary,
           safer bindings.
-            kubectl delete clusterrolebinding
-            [CLUSTER_ROLE_BINDING_NAME]
-            kubectl delete rolebinding
-            [ROLE_BINDING_NAME]
-            --
-            namespace
-            [ROLE_BINDING_NAMESPACE]
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
         scored: false
 
       - id: 4.1.10
@@ -128,12 +126,9 @@ groups:
           If there are any non-default, unsafe bindings to the group system:authenticated,
           proceed to delete them after consideration for cluster operations with only necessary,
           safer bindings.
-            kubectl delete clusterrolebinding
-            [CLUSTER_ROLE_BINDING_NAME]
-            kubectl delete rolebinding
-            [ROLE_BINDING_NAME]
-            --namespace
-            [ROLE_BINDING_NAMESPACE]
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
         scored: false
 
   - id: 4.2
@@ -146,6 +141,7 @@ groups:
           Ensure that Pod Security Admission is in place for every namespace which contains
           user workloads.
           Run the following command to enforce the Baseline profile in a namespace:
+
             kubectl label namespace pod-security.kubernetes.io/enforce=baseline
         scored: false
 
@@ -196,7 +192,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
-          See also Recommendation 5.10.5 for GKE specifically.
+          Also see recommendation 5.10.4.
         scored: false
 
   - id: 4.6
@@ -216,10 +212,11 @@ groups:
         remediation: |
           Use security context to enable the RuntimeDefault seccomp profile in your pod
           definitions. An example is as below:
+
             {
-            "namespace": "kube-system",
-            "name": "metrics-server-v0.7.0-dbcc8ddf6-gz7d4",
-            "seccompProfile": "RuntimeDefault"
+              "namespace": "kube-system",
+              "name": "metrics-server-v0.7.0-dbcc8ddf6-gz7d4",
+              "seccompProfile": "RuntimeDefault"
             }
         scored: false
 

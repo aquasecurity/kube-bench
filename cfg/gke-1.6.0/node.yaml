@@ -20,6 +20,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on each worker node.
           For example,
+
             chmod 644 $proxykubeconfig
         scored: false
 
@@ -32,6 +33,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on each worker node.
           For example:
+
             chown root:root $proxykubeconfig
         scored: false
 
@@ -46,6 +48,7 @@ groups:
                 value: "644"
         remediation: |
           Run the following command (using the kubelet config file location)
+
             chmod 644 $kubeletconf
         scored: false
 
@@ -57,6 +60,7 @@ groups:
             - flag: root:root
         remediation: |
           Run the following command (using the config file location identied in the Audit step)
+
             chown root:root $kubeletconf
         scored: false
 
@@ -75,29 +79,42 @@ groups:
                 op: eq
                 value: false
         remediation: |
+          Remediation Method 1:
           If configuring via the Kubelet config file, you first need to locate the file.
           To do this, SSH to each node and execute the following command to find the kubelet
           process:
+
             ps -ef | grep kubelet
+
           The output of the above command provides details of the active kubelet process, from
           which we can see the location of the configuration file provided to the kubelet service
           with the --config argument. The file can be viewed with a command such as more or
           less, like so:
+
             sudo less $kubeletconf
+
           Disable Anonymous Authentication by setting the following parameter:
+
             "authentication": { "anonymous": { "enabled": false } }
 
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file on each worker node and
           ensure the below parameters are part of the KUBELET_ARGS variable string.
+
           For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
           Bottlerocket AMIs, then this file can be found at
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf. Otherwise,
           you may need to look up documentation for your chosen operating system to determine
           which service manager is configured:
+
             --anonymous-auth=false
 
-          Based on your system, restart the kubelet service and check the service status. 
-          For example:
+          For Both Remediation Steps:
+          Based on your system, restart the kubelet service and check the service status.
+          The following example is for operating systems using systemd, such as the Amazon
+          EKS Optimised Amazon Linux or Bottlerocket AMIs, and invokes the systemctl
+          command. If systemctl is not available then you will need to look up documentation for
+          your chosen operating system to determine which service manager is configured:
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
@@ -115,20 +132,32 @@ groups:
                 op: nothave
                 value: AlwaysAllow
         remediation: |
+          Remediation Method 1:
           If configuring via the Kubelet config file, you first need to locate the file.
           To do this, SSH to each node and execute the following command to find the kubelet
           process:
+
             ps -ef | grep kubelet
+
           The output of the above command provides details of the active kubelet process, from
           which we can see the location of the configuration file provided to the kubelet service
           with the --config argument. The file can be viewed with a command such as more or
           less, like so:
+
             sudo less /path/to/kubelet-config.json
+
           Enable Webhook Authentication by setting the following parameter:
+
             "authentication": { "webhook": { "enabled": true } }
+
           Next, set the Authorization Mode to Webhook by setting the following parameter:
+
             "authorization": { "mode": "Webhook }
 
+          Finer detail of the authentication and authorization fields can be found in the
+          Kubelet Configuration documentation (https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/).
+
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file on each worker node and
           ensure the below parameters are part of the KUBELET_ARGS variable string.
           For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
@@ -136,14 +165,17 @@ groups:
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf. Otherwise,
           you may need to look up documentation for your chosen operating system to determine
           which service manager is configured:
-            --authentication-token-webhook
-            --authorization-mode=Webhook
 
+              --authentication-token-webhook
+              --authorization-mode=Webhook
+
+          For Both Remediation Steps:
           Based on your system, restart the kubelet service and check the service status.
           The following example is for operating systems using systemd, such as the Amazon
           EKS Optimised Amazon Linux or Bottlerocket AMIs, and invokes the systemctl
           command. If systemctl is not available then you will need to look up documentation for
           your chosen operating system to determine which service manager is configured:
+
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
@@ -159,19 +191,26 @@ groups:
               path: '{.authentication.x509.clientCAFile}'
               set: true
         remediation: |
+          Remediation Method 1:
           If configuring via the Kubelet config file, you first need to locate the file.
           To do this, SSH to each node and execute the following command to find the kubelet
           process:
-          ps -ef | grep kubelet
+
+            ps -ef | grep kubelet
+
           The output of the above command provides details of the active kubelet process, from
           which we can see the location of the configuration file provided to the kubelet service
           with the --config argument. The file can be viewed with a command such as more or
           less, like so:
+
             sudo less /path/to/kubelet-config.json
+
           Configure the client certificate authority file by setting the following parameter
           appropriately:
+
             "authentication": { "x509": {"clientCAFile": <path/to/client-ca-file> } }"
 
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file on each worker node and
           ensure the below parameters are part of the KUBELET_ARGS variable string.
           For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
@@ -179,13 +218,16 @@ groups:
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf. Otherwise,
           you may need to look up documentation for your chosen operating system to determine
           which service manager is configured:
+
             --client-ca-file=<path/to/client-ca-file>
-          
+
+          For Both Remediation Steps:
           Based on your system, restart the kubelet service and check the service status.
           The following example is for operating systems using systemd, such as the Amazon
           EKS Optimised Amazon Linux or Bottlerocket AMIs, and invokes the systemctl
           command. If systemctl is not available then you will need to look up documentation for
           your chosen operating system to determine which service manager is configured:
+
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
@@ -206,16 +248,19 @@ groups:
         remediation: |
           If modifying the Kubelet config file, edit the kubelet-config.json file
           /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to 0
+
             "readOnlyPort": 0
 
           If using executable arguments, edit the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
           worker node and add the below parameter at the end of the KUBELET_ARGS variable
           string.
+
             --read-only-port=0
 
           For each remediation:
           Based on your system, restart the kubelet service and check status
+
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
@@ -237,34 +282,44 @@ groups:
               set: false
           bin_op: or
         remediation: |
+          Remediation Method 1:
           If modifying the Kubelet config file, edit the kubelet-config.json file
           /etc/kubernetes/kubelet-config.yaml and set the below parameter to a non-zero
           value in the format of #h#m#s
+
             "streamingConnectionIdleTimeout": "4h0m0s"
+
           You should ensure that the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf does not
           specify a --streaming-connection-idle-timeout argument because it would
           override the Kubelet config file.
 
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
           worker node and add the below parameter at the end of the KUBELET_ARGS variable
           string.
+
             --streaming-connection-idle-timeout=4h0m0s
 
+          Remediation Method 3:
           If using the api configz endpoint consider searching for the status of
           "streamingConnectionIdleTimeout": by extracting the live configuration from the
           nodes running kubelet.
           **See detailed step-by-step configmap procedures in Reconfigure a Node's Kubelet in a
-          Live Cluster (https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/), and then rerun the curl statement from audit process to check for kubelet
+          Live Cluster (https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/),
+          and then rerun the curl statement from audit process to check for kubelet
           configuration changes
+
             kubectl proxy --port=8001 &
             export HOSTNAME_PORT=localhost:8001 (example host and port number)
             export NODE_NAME=gke-cluster-1-pool1-5e572947-r2hg (example node name from
             "kubectl get nodes")
             curl -sSL "http://${HOSTNAME_PORT}/api/v1/nodes/${NODE_NAME}/proxy/configz"
 
+          For all three remediations:
           Based on your system, restart the kubelet service and check status
+
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
@@ -283,41 +338,51 @@ groups:
                 op: eq
                 value: true
         remediation: |
+          Remediation Method 1:
           If modifying the Kubelet config file, edit the kubelet-config.json file
           /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to
           true
+
             "makeIPTablesUtilChains": true
+
           Ensure that /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf
           does not set the --make-iptables-util-chains argument because that would
           override your Kubelet config file.
 
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
           worker node and add the below parameter at the end of the KUBELET_ARGS variable
           string.
+
             --make-iptables-util-chains:true
 
+          Remediation Method 3:
           If using the api configz endpoint consider searching for the status of
           "makeIPTablesUtilChains.: true by extracting the live configuration from the nodes
           running kubelet.
 
           **See detailed step-by-step configmap procedures in Reconfigure a Node's Kubelet in a
-          Live Cluster, and then rerun the curl statement from audit process to check for kubelet
+          Live Cluster (https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/),
+          and then rerun the curl statement from audit process to check for kubelet
           configuration changes
+
             kubectl proxy --port=8001 &
             export HOSTNAME_PORT=localhost:8001 (example host and port number)
             export NODE_NAME=gke-cluster-1-pool1-5e572947-r2hg (example node name from
             "kubectl get nodes")
             curl -sSL "http://${HOSTNAME_PORT}/api/v1/nodes/${NODE_NAME}/proxy/configz"
-          
+
+          For all three remediations:
           Based on your system, restart the kubelet service and check status
+
             systemctl daemon-reload
             systemctl restart kubelet.service
             systemctl status kubelet -l
         scored: true
 
       - id: 3.2.7
-        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
+        text: "Ensure that the --eventRecordQPS argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
         tests:
@@ -333,10 +398,11 @@ groups:
 
           If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
           on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-  
+
           Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
         scored: true
 
       - id: 3.2.8
@@ -355,20 +421,25 @@ groups:
               set: false
           bin_op: or
         remediation: |
-        If modifying the Kubelet config file, edit the kubelet-config.yaml file
-        /etc/kubernetes/kubelet/kubelet-config.yaml and set the below parameter to
-        true
-          "RotateCertificate":true
-        Additionally, ensure that the kubelet service file
-        /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf does not set the --
-        RotateCertificate executable argument to false because this would override the Kubelet
-        config file.
+          Remediation Method 1:
+          If modifying the Kubelet config file, edit the kubelet-config.yaml file
+          /etc/kubernetes/kubelet/kubelet-config.yaml and set the below parameter to
+          true
 
-        If using executable arguments, edit the kubelet service file
-        /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
-        worker node and add the below parameter at the end of the KUBELET_ARGS variable
-        string.
-          --RotateCertificate=true
+            "RotateCertificate":true
+
+          Additionally, ensure that the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf does not set the --RotateCertificate
+          executable argument to false because this would override the Kubelet
+          config file.
+
+          Remediation Method 2:
+          If using executable arguments, edit the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
+          worker node and add the below parameter at the end of the KUBELET_ARGS variable
+          string.
+
+            --RotateCertificate=true
         scored: false
 
       - id: 3.2.9
@@ -383,37 +454,47 @@ groups:
                 op: eq
                 value: true
         remediation: |
+          Remediation Method 1:
           If modifying the Kubelet config file, edit the kubelet-config.json file
           /etc/kubernetes/kubelet-config.yaml and set the below parameter to true
+
             "featureGates": {
             "RotateKubeletServerCertificate":true
             },
+
           Additionally, ensure that the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf does not set
           the --rotate-kubelet-server-certificate executable argument to false because
           this would override the Kubelet config file.
 
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
           worker node and add the below parameter at the end of the KUBELET_ARGS variable
           string.
+
             --rotate-kubelet-server-certificate=true
 
+          Remediation Method 3:
           If using the api configz endpoint consider searching for the status of
           "RotateKubeletServerCertificate": by extracting the live configuration from the
           nodes running kubelet.
           **See detailed step-by-step configmap procedures in Reconfigure a Node's Kubelet in a
-          Live Cluster, and then rerun the curl statement from audit process to check for kubelet
+          Live Cluster (https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/),
+          and then rerun the curl statement from audit process to check for kubelet
           configuration changes
+
             kubectl proxy --port=8001 &
             export HOSTNAME_PORT=localhost:8001 (example host and port number)
             export NODE_NAME=gke-cluster-1-pool1-5e572947-r2hg (example node name from
             "kubectl get nodes")
             curl -sSL "http://${HOSTNAME_PORT}/api/v1/nodes/${NODE_NAME}/proxy/configz"
 
+          For all three remediation methods:
           Restart the kubelet service and check status. The example below is for when using
           systemctl to manage services:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-          systemctl status kubelet -l
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
         scored: true

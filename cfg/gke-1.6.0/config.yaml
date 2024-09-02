@@ -4,6 +4,6 @@
 node:
   proxy:
     defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
-  
+
   kubelet:
     defaultconf: "/etc/kubernetes/kubelet/kubelet-config.yaml"

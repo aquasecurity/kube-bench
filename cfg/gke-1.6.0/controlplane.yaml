@@ -14,6 +14,7 @@ groups:
         remediation: |
           Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
           implemented in place of client certificates.
+
           You can remediate the availability of client certificates in your GKE cluster. See
           Recommendation 5.8.1.
         scored: false
