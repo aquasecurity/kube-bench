@@ -34,29 +34,19 @@ groups:
       - id: 4.1.4
         text: "Ensure that default service accounts are not actively used. (Automated)"
         type: "automated"
-        audit: |
-          For each namespace in the cluster, review the rights assigned to the default service
-          account and ensure that it has no roles or cluster roles bound to it apart from the
-          defaults.
-          Additionally ensure that the automountServiceAccountToken: false setting is in
-          place for each default service account.
+        audit: "/bin/cat $apiserverconf $controller_managerconf $schedulerconf $etcdconf"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           test_items:
-            - key: "metadata.name"
-              value: "default"
-              set: true
-            - key: "metadata.namespace"
-              set: true
-            - key: "automountServiceAccountToken"
-              set: true
+            - flag: "automountServiceAccountToken"
+              path: '{.automountServiceAccountToken}'
               compare:
                 op: eq
                 value: false
-            - key: "metadata.name"
-              path: '{.metadata.name}'
-              exclude: "default"
-              related_command: |
-                kubectl get rolebindings,clusterrolebindings -n <namespace> -o json
+            - flag: "roleRef.name"
+              path: '{.roleRef.name}'
+              set: false
+          bin_op: and
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
