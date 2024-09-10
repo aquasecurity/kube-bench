@@ -64,6 +64,7 @@ groups:
     checks:
       - id: 3.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -88,6 +89,7 @@ groups:
 
       - id: 3.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -110,6 +112,7 @@ groups:
 
       - id: 3.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -153,6 +156,7 @@ groups:
 
       - id: 3.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -179,7 +183,8 @@ groups:
         scored: true
 
       - id: 3.2.6
-        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated) "
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -206,6 +211,7 @@ groups:
 
       - id: 3.2.7
         text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -254,6 +260,7 @@ groups:
 
       - id: 3.2.9
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
+        type: "automated"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
