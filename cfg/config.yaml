@@ -290,6 +290,7 @@ version_mapping:
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
   "aks-1.0": "aks-1.0"
+  "aks-1.5.0": "aks-1.5.0"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
@@ -400,6 +401,12 @@ target_mapping:
     - "master"
     - "node"
   "aks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "aks-1.5.0":
     - "master"
     - "node"
     - "controlplane"
