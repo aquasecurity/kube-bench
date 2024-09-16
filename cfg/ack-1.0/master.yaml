@@ -896,25 +896,7 @@ groups:
           --root-ca-file=<path/to/file>
         scored: true
 
-      - id: 1.3.6
-        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
-        audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
-        tests:
-          bin_op: or
-          test_items:
-            - flag: "--feature-gates"
-              compare:
-                op: nothave
-                value: "RotateKubeletServerCertificate=false"
-              set: true
-            - flag: "--feature-gates"
-              set: false
-        remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
-          --feature-gates=RotateKubeletServerCertificate=true
-        scored: true
-
+      -
       - id: 1.3.7
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"

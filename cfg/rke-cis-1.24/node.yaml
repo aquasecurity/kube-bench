@@ -410,7 +410,7 @@ groups:
 
       - id: 4.2.12
         text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
-        type: "manual"
+        type: skip
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
@@ -432,7 +432,6 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
           Clusters provisioned by RKE handles certificate rotation directly through RKE.
-        scored: false
 
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Automated)"

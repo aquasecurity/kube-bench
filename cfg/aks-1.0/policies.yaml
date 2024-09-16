@@ -121,7 +121,7 @@ groups:
 
       - id: 4.2.8
         text: "Minimize the admission of containers with added capabilities (Automated)"
-        type: "manual"
+        type: manual
         remediation: |
           Ensure that allowedCapabilities is not present in PSPs for the cluster unless
           it is set to an empty array.

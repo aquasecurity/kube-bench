@@ -433,32 +433,6 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
-
-      - id: 4.2.12
-        text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
-        tests:
-          bin_op: or
-          test_items:
-            - flag: RotateKubeletServerCertificate
-              path: '{.featureGates.RotateKubeletServerCertificate}'
-              set: true
-              compare:
-                op: nothave
-                value: false
-            - flag: RotateKubeletServerCertificate
-              path: '{.featureGates.RotateKubeletServerCertificate}'
-              set: false
-        remediation: |
-          Edit the kubelet service file $kubeletsvc
-          on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
-          --feature-gates=RotateKubeletServerCertificate=true
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: true
-
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)"
         audit: "/bin/ps -fC $kubeletbin"

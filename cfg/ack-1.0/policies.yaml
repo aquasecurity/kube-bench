@@ -150,7 +150,7 @@ groups:
 
       - id: 5.3.2
         text: "Ensure that all Namespaces have Network Policies defined (Manual)"
-        type: "manual"
+        type: manual
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
         scored: false
