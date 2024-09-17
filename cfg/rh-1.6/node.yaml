@@ -148,8 +148,13 @@ groups:
         text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          # default setups have the file present at /var/lib/kubelet only.
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/lib/kubelet/config.json /var/data/kubelet/config.json 2> /dev/null
+          # default setups have the file present at /var/lib/kubelet only. Custom setup is present at /var/data/kubelet/config.json.
+          oc debug node/$NODE_NAME -- /bin/sh -c '
+          if [ -f /var/data/kubelet/config.json ]; then
+            chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/data/kubelet/config.json;
+          else
+            chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/lib/kubelet/config.json;
+          fi' 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -165,8 +170,13 @@ groups:
         text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          # default setups have the file present at /var/lib/kubelet only.
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /var/lib/kubelet/config.json /var/data/kubelet/config.json 2> /dev/null
+          # default setups have the file present at /var/lib/kubelet only. Custom setup is present at /var/data/kubelet/config.json.
+          oc debug node/$NODE_NAME -- /bin/sh -c '
+          if [ -f /var/data/kubelet/config.json ]; then
+            chroot /host stat -c "$NODE_NAME %n %U:%G" /var/data/kubelet/config.json;
+          else
+            chroot /host stat -c "$NODE_NAME %n %U:%G" /var/lib/kubelet/config.json;
+          fi' 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -229,11 +239,11 @@ groups:
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authentication.x509' 2> /dev/null
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.authentication.x509.clientCAFile' 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
-            - flag: '"clientCAFile": "/etc/kubernetes/kubelet-ca.crt"'
+            - flag: '/etc/kubernetes/kubelet-ca.crt'
         remediation: |
           None required. Changing the clientCAFile value is unsupported.
         scored: true
@@ -244,7 +254,7 @@ groups:
           oc -n openshift-kube-apiserver get cm config -o json | jq -r '.data."config.yaml"' | jq -r '.apiServerArguments."kubelet-read-only-port"[]'  2> /dev/null
         tests:
           test_items:
-            - flag: '"0"'
+            - flag: '0'
         remediation: |
           In earlier versions of OpenShift 4, the read-only-port argument is not used.
           Follow the instructions in the documentation https://docs.openshift.com/container-platform/latest/post_installation_configuration/machine-configuration-tasks.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-machine-configuration-tasks
@@ -319,7 +329,7 @@ groups:
         text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig' 2> /dev/null
+          echo rotateCertificates=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.rotateCertificates' 2> /dev/null)
         use_multiple_values: true
         tests:
           test_items:
@@ -336,9 +346,9 @@ groups:
         audit: |
           #Verify the rotateKubeletServerCertificate feature gate is on
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.featureGates' 2> /dev/null
+          echo RotateKubeletServerCertificate=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.featureGates.RotateKubeletServerCertificate' 2> /dev/null)
           # Verify the rotateCertificates argument is set to true
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig' 2> /dev/null
+          echo rotateCertificates=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.rotateCertificates' 2> /dev/null)
         use_multiple_values: true
         tests:
           bin_op: or
