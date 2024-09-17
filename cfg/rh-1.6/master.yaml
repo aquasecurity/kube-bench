@@ -220,20 +220,15 @@ groups:
           # For CNI multus
           # Get the pod name in the openshift-multus namespace
           POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf";  2>/dev/null
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf";  2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf" 2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf" 2>/dev/null
           fi
+
           # For SDN pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
@@ -241,10 +236,7 @@ groups:
 
           # For OVS pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
@@ -266,33 +258,27 @@ groups:
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+
           # For CNI multus
           # Get the pod name in the openshift-multus namespace
           POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
             oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c '$i %n %U:%G' /host/etc/cni/net.d/*.conf" 2>/dev/null
             oc exec -n openshift-multus $i -- /bin/bash -c "stat -c '$i %n %U:%G' /host/var/run/multus/cni/net.d/*.conf"  2>/dev/null
           fi
+
           # For SDN pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
           fi
+
           # For OVS pods in 4.5
           POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
+          if [ -n "$POD_NAME" ]; then
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
@@ -613,9 +599,9 @@ groups:
         text: "Ensure that the --token-auth-file parameter is not set (Manual)"
         audit: |
           # Verify that the token-auth-file flag is not present
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
-          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
-          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments' | grep --color "token-auth-file"
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments' | grep --color "token-auth-file"
+          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments' | grep --color "token-auth-file"
           #Verify that the authentication operator is running
           oc get clusteroperator authentication | awk '$3 != "AVAILABLE" { if ($3){print "available=true"}else{print "available=false"} }'
         tests:
@@ -639,8 +625,8 @@ groups:
         tests:
           bin_op: and
           test_items:
-            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.crt"
-            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.key"
+            - flag: "/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/kubelet-client/tls.key"
         remediation: |
           No remediation is required.
           OpenShift platform components use X.509 certificates for authentication.
@@ -655,8 +641,8 @@ groups:
         tests:
           bin_op: and
           test_items:
-            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.crt"
-            - flag: "/etc/kubernetes/static-pod-resources/secrets/kubelet-client/tls.key"
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
         remediation: |
           No remediation is required.
           OpenShift platform components use X.509 certificates for authentication.
@@ -681,13 +667,11 @@ groups:
       - id: 1.2.7
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments."authorization-mode"[]'
         tests:
           test_items:
-            - path: "{.authorization-mode}"
-              compare:
-                op: nothave
-                value: "AlwaysAllow"
+            - flag: "AlwaysAllow"
+              set: false
         remediation: |
           None. RBAC is always on and the OpenShift API server does not use the values assigned to the flag authorization-mode.
         scored: false
@@ -695,13 +679,10 @@ groups:
       - id: 1.2.8
         text: "Verify that RBAC is enabled (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments."authorization-mode"[]'
         tests:
           test_items:
-            - path: "{.authorization-mode}"
-              compare:
-                op: has
-                value: "RBAC"
+            - flag: "RBAC"
         remediation: |
           None. It is not possible to disable RBAC.
         scored: false
@@ -824,17 +805,20 @@ groups:
       - id: 1.2.18
         text: "Ensure that the --secure-port argument is not set to 0 (Manual)"
         audit: |
-          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.servingInfo.bindAddress'
+          echo bindAddress=$(oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.servingInfo.bindAddress')
           # Should return only 6443
-          echo ports=`oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[*].spec.containers[?(@.name=="kube-apiserver")].ports[*].containerPort}'`
+          echo ports=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver -o jsonpath='{.items[*].spec.containers[?(@.name=="kube-apiserver")].ports[*].containerPort}')
         tests:
           bin_op: and
           test_items:
-            - flag: '"bindAddress": "0.0.0.0:6443"'
+            - flag: 'bindAddress'
+              compare:
+                op: eq
+                value: '"0.0.0.0:6443"'
             - flag: "ports"
               compare:
-                op: regex
-                value: '\s*(?:6443\s*){1,}$'
+                op: eq
+                value: '6443'
         remediation: |
           None required. By default, the openshift-kube-apiserver is served over HTTPS with authentication and authorization;
           the secure API endpoint is bound to 0.0.0.0:6443.
@@ -884,15 +868,15 @@ groups:
           oc rsh -n openshift-apiserver $POD ls /var/log/openshift-apiserver/audit.log 2>/dev/null
           # Should return 0
           echo apiserver_exit_code=$?
-        use_multiple_values: true
         tests:
-          bin_op: or
+          bin_op: and
           test_items:
             - flag: "/var/log/kube-apiserver/audit.log"
-            - flag: "/var/log/openshift-apiserver/audit.log"
+            - flag: "/var/log/kube-apiserver/audit.log"  # This is needed for second printing in ls command.
             - flag: "kube_apiserver_exit_code=0"
+            - flag: "/var/log/openshift-apiserver/audit.log"
+            - flag: "/var/log/openshift-apiserver/audit.log"  # This is needed for second printing in ls command.
             - flag: "apiserver_exit_code=0"
-            - flag: "null"
         remediation: |
           None required. This is managed by the cluster apiserver operator. By default, auditing is enabled.
         scored: false
