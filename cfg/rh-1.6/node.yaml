@@ -119,7 +119,7 @@ groups:
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/cert/ca.pem 2> /dev/null
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -135,7 +135,7 @@ groups:
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/cert/ca.pem 2> /dev/null
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -148,7 +148,8 @@ groups:
         text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/data/kubelet/config.json 2> /dev/null
+          # default setups have the file present at /var/lib/kubelet only.
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/lib/kubelet/config.json /var/data/kubelet/config.json 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -164,7 +165,8 @@ groups:
         text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /var/data/kubelet/config.json 2> /dev/null
+          # default setups have the file present at /var/lib/kubelet only.
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /var/lib/kubelet/config.json /var/data/kubelet/config.json 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
@@ -231,10 +233,7 @@ groups:
         use_multiple_values: true
         tests:
           test_items:
-            - flag: clientCAFile
-              compare:
-                op: eq
-                value: /etc/kubernetes/kubelet-ca.crt
+            - flag: '"clientCAFile": "/etc/kubernetes/kubelet-ca.crt"'
         remediation: |
           None required. Changing the clientCAFile value is unsupported.
         scored: true
@@ -242,15 +241,10 @@ groups:
       - id: 4.2.5
         text: "Verify that the read only port is not used or is set to 0 (Automated)"
         audit: |
-          oc -n openshift-kube-apiserver get cm config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments'  2> /dev/null
-          echo `oc -n openshift-kube-apiserver get cm kube-apiserver-pod -o yaml | grep --color read-only-port` 2> /dev/null
-          echo `oc -n openshift-kube-apiserver get cm config -o yaml | grep --color "read-only-port"` 2> /dev/null
+          oc -n openshift-kube-apiserver get cm config -o json | jq -r '.data."config.yaml"' | jq -r '.apiServerArguments."kubelet-read-only-port"[]'  2> /dev/null
         tests:
           test_items:
-            - flag: kubelet-read-only-port
-              compare:
-                op: has
-                value: "[\"0\"]"
+            - flag: '"0"'
         remediation: |
           In earlier versions of OpenShift 4, the read-only-port argument is not used.
           Follow the instructions in the documentation https://docs.openshift.com/container-platform/latest/post_installation_configuration/machine-configuration-tasks.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-machine-configuration-tasks
@@ -262,7 +256,7 @@ groups:
         audit: |
           # Should return 1 for node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig' 2> /dev/null
+          echo streamingConnectionIdleTimeout=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null)
         use_multiple_values: true
         tests:
           test_items:
@@ -280,14 +274,11 @@ groups:
         audit: |
           # Should return 1 for node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig' 2> /dev/null
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.makeIPTablesUtilChains' 2> /dev/null
         use_multiple_values: true
         tests:
           test_items:
-            - flag: makeIPTablesUtilChains
-              compare:
-                op: eq
-                value: true
+            - flag: "true"
         remediation: |
           None required. The makeIPTablesUtilChains argument is set to true by default.
         scored: false
@@ -296,7 +287,7 @@ groups:
         text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Manual)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig' 2> /dev/null
+          echo kubeAPIQPS=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.kubeAPIQPS' 2> /dev/null)
         tests:
           test_items:
             - flag: kubeAPIQPS
