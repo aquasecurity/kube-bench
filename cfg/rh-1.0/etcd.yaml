@@ -16,11 +16,11 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--cert-file=[^ ]*\).*/\1/'
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--key-file=[^ ]*\).*/\1/'
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--cert-file=[^ ]*\).*/\1/'
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--key-file=[^ ]*\).*/\1/'
           fi
         use_multiple_values: true
         tests:
@@ -28,7 +28,7 @@ groups:
             - flag: "file"
               compare:
                 op: regex
-                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-serving\/etcd-serving-.*\.(?:crt|key)'
+                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-certs\/etcd-serving-.*\.(?:crt|key)'
         remediation: |
           OpenShift does not use the etcd-certfile or etcd-keyfile flags.
           Certificates for etcd are managed by the etcd cluster operator.
@@ -42,10 +42,10 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--client-cert-auth=[^ ]*\).*/\1/'
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--client-cert-auth=[^ ]*\).*/\1/'
           fi
         use_multiple_values: true
         tests:
@@ -67,10 +67,10 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --auto-tls=true 2>/dev/null ; echo exit_code=$?
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --auto-tls=true 2>/dev/null ; echo exit_code=$?
           fi
         use_multiple_values: true
         tests:
@@ -91,11 +91,11 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-cert-file=[^ ]*\).*/\1/'
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-key-file=[^ ]*\).*/\1/'
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-cert-file=[^ ]*\).*/\1/'
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-key-file=[^ ]*\).*/\1/'
           fi
         use_multiple_values: true
         tests:
@@ -103,7 +103,7 @@ groups:
             - flag: "file"
               compare:
                 op: regex
-                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-peer\/etcd-peer-.*\.(?:crt|key)'
+                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-certs\/etcd-peer-.*\.(?:crt|key)'
         remediation: |
           None. This configuration is managed by the etcd operator.
         scored: false
@@ -116,10 +116,10 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-client-cert-auth=[^ ]*\).*/\1/'
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-client-cert-auth=[^ ]*\).*/\1/'
           fi
         use_multiple_values: true
         tests:
@@ -141,10 +141,10 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --peer-auto-tls=true 2>/dev/null ; echo exit_code=$?
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | grep -- --peer-auto-tls=true 2>/dev/null ; echo exit_code=$?
           fi
         use_multiple_values: true
         tests:
@@ -165,11 +165,11 @@ groups:
           # Get the pod name in the openshift-etcd namespace
           POD_NAME=$(oc get pods -n openshift-etcd -l app=etcd --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
           if [ -z "$POD_NAME" ]; then
-          echo "No matching file found on the current node."
+            echo "No matching file found on the current node."
           else
-          # Execute the stat command
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--trusted-ca-file=[^ ]*\).*/\1/'
-          oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-trusted-ca-file=[^ ]*\).*/\1/'
+            # Execute the stat command
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--trusted-ca-file=[^ ]*\).*/\1/'
+            oc exec -n openshift-etcd -c etcd "$POD_NAME" -- ps -o command= -C etcd | sed 's/.*\(--peer-trusted-ca-file=[^ ]*\).*/\1/'
           fi
         use_multiple_values: true
         tests:
