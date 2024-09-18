@@ -758,7 +758,7 @@ func Test_getOcpValidVersion(t *testing.T) {
 		{openShiftVersion: "4.1", succeed: true, exp: "4.1"},
 		{openShiftVersion: "4.5", succeed: true, exp: "4.1"},
 		{openShiftVersion: "4.6", succeed: true, exp: "4.1"},
-		{openShiftVersion: "4.16", succeed: true, exp: "4.16"},
+		{openShiftVersion: "4.16", succeed: true, exp: "4.15"},
 		{openShiftVersion: "invalid", succeed: false, exp: ""},
 	}
 	for _, c := range cases {
