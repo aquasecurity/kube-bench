@@ -349,15 +349,14 @@ groups:
           echo RotateKubeletServerCertificate=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.featureGates.RotateKubeletServerCertificate' 2> /dev/null)
           # Verify the rotateCertificates argument is set to true
           echo rotateCertificates=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.rotateCertificates' 2> /dev/null)
-        use_multiple_values: true
         tests:
-          bin_op: or
+          bin_op: and
           test_items:
-            - flag: rotateCertificates
+            - flag: RotateKubeletServerCertificate
               compare:
                 op: eq
                 value: true
-            - flag: RotateKubeletServerCertificate
+            - flag: rotateCertificates
               compare:
                 op: eq
                 value: true
