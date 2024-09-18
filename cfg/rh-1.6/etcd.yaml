@@ -28,7 +28,8 @@ groups:
             - flag: "file"
               compare:
                 op: regex
-                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-serving\/etcd-serving-.*\.(?:crt|key)'
+                # some systems have certs in directory '/etc/kubernetes/static-pod-certs/secrets/etcd-all-certs'
+                value: \/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-(?:serving|certs)\/etcd-serving-.*\.(?:crt|key)
         remediation: |
           OpenShift does not use the etcd-certfile or etcd-keyfile flags.
           Certificates for etcd are managed by the etcd cluster operator.
@@ -103,7 +104,8 @@ groups:
             - flag: "file"
               compare:
                 op: regex
-                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-peer\/etcd-peer-.*\.(?:crt|key)'
+                # some systems have certs in directory '/etc/kubernetes/static-pod-certs/secrets/etcd-all-certs'
+                value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-(?:peer|certs)\/etcd-peer-.*\.(?:crt|key)'
         remediation: |
           None. This configuration is managed by the etcd operator.
         scored: false
