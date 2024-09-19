@@ -154,6 +154,7 @@ groups:
         tests:
           test_items:
             - flag: "root:root"
+        type: manual
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -313,6 +314,7 @@ groups:
                 op: bitmask
                 value: "600"
               set: true
+        type: manual
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -979,7 +981,7 @@ groups:
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the control plane node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
           --feature-gates=RotateKubeletServerCertificate=true
-        scored: true
+        scored: false
         type: skip
 
       - id: 1.3.7
