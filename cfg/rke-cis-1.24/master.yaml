@@ -139,14 +139,16 @@ groups:
         scored: false
 
       - id: 1.1.10
-        text: "Ensure that the Container Network Interface file ownership is set to root:root (Automated)"
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
         audit: |
           ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
           find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
+
         use_multiple_values: true
         tests:
           test_items:
             - flag: "root:root"
+              type: manual
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -163,6 +165,7 @@ groups:
                 op: eq
                 value: "700"
               set: true
+        type: manual
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.
@@ -287,7 +290,7 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Automated)"
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
         audit: |
           if test -n "$(find /node/etc/kubernetes/ssl/ -name '*.pem' ! -name '*key.pem')"; then find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a;else echo "File not found"; fi
         tests:
@@ -298,6 +301,7 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
+        type: manual
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -951,12 +955,13 @@ groups:
               set: true
             - flag: "--feature-gates"
               set: false
+        type: skip
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the control plane node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
           --feature-gates=RotateKubeletServerCertificate=true
           Cluster provisioned by RKE handles certificate rotation directly through RKE.
-        scored: true
+        
 
       - id: 1.3.7
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
