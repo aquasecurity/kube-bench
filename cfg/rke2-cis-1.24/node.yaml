@@ -432,6 +432,7 @@ groups:
             - flag: RotateKubeletServerCertificate
               path: '{.featureGates.RotateKubeletServerCertificate}'
               set: false
+        type: manual
         remediation: |
           Edit the kubelet service file $kubeletsvc
           on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
