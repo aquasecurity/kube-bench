@@ -34,7 +34,7 @@ jobs:
       - name: Setup golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
-          version: latest
+          version: v1.57.2
           args: --verbose
   unit:
     name: Unit tests
@@ -95,7 +95,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Dry-run release snapshot
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: v1.7.0
