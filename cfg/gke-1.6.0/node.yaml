@@ -333,10 +333,13 @@ groups:
           test_items:
             - flag: --make-iptables-util-chains
               path: '{.makeIPTablesUtilChains}'
-              set: true
               compare:
                 op: eq
                 value: true
+            - flag: --make-iptables-utils-chains
+              path: '{.makeIPTablesUtilChains}'
+              set: false
+          bin_op: or
         remediation: |
           Remediation Method 1:
           If modifying the Kubelet config file, edit the kubelet-config.json file
