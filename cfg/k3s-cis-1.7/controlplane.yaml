@@ -35,7 +35,7 @@ groups:
     checks:
       - id: 3.2.1
         text: "Ensure that a minimal audit policy is created (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'audit-policy-file'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'audit-policy-file'"
         tests:
           test_items:
             - flag: "--audit-policy-file"
