@@ -1,6 +1,6 @@
 ---
 controls:
-version: "rke-cis-1.7"
+version: "k3s-cis-1.8"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -50,6 +50,7 @@ groups:
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
         scored: false
+
 
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
@@ -129,41 +130,35 @@ groups:
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostPID` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostIPC` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostNetwork` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.6
-        text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
         type: "manual"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers with `.spec.allowPrivilegeEscalation` set to `true`.
-        scored: false
+        scored: true
 
       - id: 5.2.7
-        text: "Minimize the admission of root containers (Manual)"
+        text: "Minimize the admission of root containers (Automated)"
         type: "manual"
         remediation: |
           Create a policy for each namespace in the cluster, ensuring that either `MustRunAsNonRoot`
@@ -171,7 +166,7 @@ groups:
         scored: false
 
       - id: 5.2.8
-        text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
+        text: "Minimize the admission of containers with the NET_RAW capability (Automated)"
         type: "manual"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
@@ -179,7 +174,7 @@ groups:
         scored: false
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with added capabilities (Manual)"
+        text: "Minimize the admission of containers with added capabilities (Automated)"
         type: "manual"
         remediation: |
           Ensure that `allowedCapabilities` is not present in policies for the cluster unless
@@ -190,8 +185,8 @@ groups:
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
         remediation: |
-          Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider adding
+          Review the use of capabilities in applications running on your cluster. Where a namespace
+          contains applications which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
@@ -233,10 +228,8 @@ groups:
 
       - id: 5.3.2
         text: "Ensure that all Namespaces have NetworkPolicies defined (Manual)"
-        type: "skip"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
-          Permissive - Enabling Network Policies can prevent certain applications from communicating with each other.
         scored: false
 
   - id: 5.4
@@ -301,9 +294,7 @@ groups:
 
       - id: 5.7.4
         text: "The default namespace should not be used (Manual)"
-        type: "skip"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
-          Permissive - Kubernetes provides a default namespace.
         scored: false
