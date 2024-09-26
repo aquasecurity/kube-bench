@@ -1,6 +1,6 @@
 ---
 controls:
-version: "k3s-cis-1.7"
+version: "k3s-cis-1.8"
 id: 2
 text: "Etcd Node Configuration"
 type: "etcd"

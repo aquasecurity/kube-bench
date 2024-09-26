@@ -19,10 +19,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the
-          control plane node.
-          For example, chmod 600 $apiserverconf
           Not Applicable.
+          By default, K3s embeds the api server within the k3s process. There is no API server pod specification file.
         scored: true
 
       - id: 1.1.2
@@ -33,9 +31,8 @@ groups:
           test_items:
             - flag: "root:root"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chown root:root $apiserverconf
           Not Applicable.
+          By default, K3s embeds the api server within the k3s process. There is no API server pod specification file.
         scored: true
 
       - id: 1.1.3
@@ -49,9 +46,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chmod 600 $controllermanagerconf
           Not Applicable.
+          By default, K3s embeds the controller manager within the k3s process. There is no controller manager pod specification file.
         scored: true
 
       - id: 1.1.4
@@ -62,9 +58,8 @@ groups:
           test_items:
             - flag: "root:root"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chown root:root $controllermanagerconf
           Not Applicable.
+          By default, K3s embeds the controller manager within the k3s process. There is no controller manager pod specification file.
         scored: true
 
       - id: 1.1.5
@@ -78,9 +73,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chmod 600 $schedulerconf
           Not Applicable.
+          By default, K3s embeds the scheduler within the k3s process. There is no scheduler pod specification file.
         scored: true
 
       - id: 1.1.6
@@ -91,9 +85,8 @@ groups:
           test_items:
             - flag: "root:root"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chown root:root $schedulerconf
           Not Applicable.
+          By default, K3s embeds the scheduler within the k3s process. There is no scheduler pod specification file.
         scored: true
 
       - id: 1.1.7
@@ -108,10 +101,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example,
-          chmod 600 $etcdconf
           Not Applicable.
+          By default, K3s embeds etcd within the k3s process. There is no etcd pod specification file.
         scored: true
 
       - id: 1.1.8
@@ -123,18 +114,13 @@ groups:
           test_items:
             - flag: "root:root"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example,
-          chown root:root $etcdconf
           Not Applicable.
+          By default, K3s embeds etcd within the k3s process. There is no etcd pod specification file.
         scored: true
 
       - id: 1.1.9
-        text: "Ensure that the Container Network Interface file permissions are set to 600 or more restrictive (Automated)"
-        type: "skip"
-        audit: |
-          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c permissions=%a
-          find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c permissions=%a
+        text: "Ensure that the Container Network Interface file permissions are set to 600 or more restrictive (Manual)"
+        audit: find /var/lib/cni/networks -type f ! -name lock 2> /dev/null | xargs --no-run-if-empty stat -c permissions=%a
         use_multiple_values: true
         tests:
           test_items:
@@ -143,17 +129,15 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
-          For example, chmod 600 <path/to/cni/files>
-          Not Applicable.
+          By default, K3s sets the CNI file permissions to 644.
+          Note that for many CNIs, a lock file is created with permissions 750. This is expected and can be ignored.
+          If you modify your CNI configuration, ensure that the permissions are set to 600.
+          For example, chmod 600 /var/lib/cni/networks/<filename>
         scored: false
 
       - id: 1.1.10
-        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
-        type: skip
-        audit: |
-          ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
-          find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Automated)"
+        audit: find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
         use_multiple_values: true
         tests:
           test_items:
@@ -161,25 +145,28 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          chown root:root <path/to/cni/files>
-          Not Applicable.
-        scored: false
+          chown root:root /var/lib/cni/networks/<filename>
+        scored: true
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: "stat -c %a $etcddatadir"
+        audit: |
+          if [ "$(journalctl -m -u k3s | grep -m1 'Managed etcd cluster' | wc -l)" -gt 0 ]; then
+            stat -c permissions=%a /var/lib/rancher/k3s/server/db/etcd
+          else
+            echo "permissions=700"
+          fi
         tests:
           test_items:
-            - flag: "700"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "700"
-              set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.
           Run the below command (based on the etcd data directory found above). For example,
-          chmod 700 /var/lib/etcd
+          chmod 700 $etcddatadir
         scored: true
 
       - id: 1.1.12
@@ -190,17 +177,14 @@ groups:
           test_items:
             - flag: "etcd:etcd"
         remediation: |
-          On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
-          from the command 'ps -ef | grep etcd'.
-          Run the below command (based on the etcd data directory found above).
-          For example, chown etcd:etcd /var/lib/etcd
           Not Applicable.
+          For K3s, etcd is embedded within the k3s process. There is no separate etcd process.
+          Therefore the etcd data directory ownership is managed by the k3s process and should be root:root.
         scored: true
 
       - id: 1.1.13
         text: "Ensure that the admin.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/admin.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/admin.kubeconfig'"
-        type: "skip"
+        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/admin.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/admin.kubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -224,12 +208,12 @@ groups:
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
-          For example, chown root:root /etc/kubernetes/admin.conf
+          For example, chown root:root /var/lib/rancher/k3s/server/cred/admin.kubeconfig
         scored: true
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -244,7 +228,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig; then stat -c %U:%G /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "root:root"
@@ -256,7 +240,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/controller.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/controller.kubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
         tests:
           test_items:
             - flag: "permissions"
@@ -271,7 +255,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /var/lib/rancher/k3s/server/cred/controller.kubeconfig"
+        audit: "stat -c %U:%G $controllermanagerkubeconfig"
         tests:
           test_items:
             - flag: "root:root"
@@ -300,7 +284,7 @@ groups:
 
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
-        audit: "stat -c %n\ %a /var/lib/rancher/k3s/server/tls/*.crt"
+        audit: "/bin/sh -c 'stat -c permissions=%a /var/lib/rancher/k3s/server/tls/*.crt'"
         use_multiple_values: true
         tests:
           test_items:
@@ -309,14 +293,14 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
+          Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod -R 600 /etc/kubernetes/pki/*.crt
+          chmod -R 600 /var/lib/rancher/k3s/server/tls/*.crt
         scored: false
 
       - id: 1.1.21
-        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
-        audit: "stat -c %n\ %a /var/lib/rancher/k3s/server/tls/*.key"
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Automated)"
+        audit: "/bin/sh -c 'stat -c permissions=%a /var/lib/rancher/k3s/server/tls/*.key'"
         use_multiple_values: true
         tests:
           test_items:
@@ -325,17 +309,17 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the control plane node.
+          Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod -R 600 /etc/kubernetes/pki/*.key
-        scored: false
+          chmod -R 600 /var/lib/rancher/k3s/server/tls/*.key
+        scored: true
 
   - id: 1.2
     text: "API Server"
     checks:
       - id: 1.2.1
-        text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'anonymous-auth'"
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'anonymous-auth'"
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -343,27 +327,29 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the below parameter.
-          --anonymous-auth=false
-        scored: false
+          By default, K3s sets the --anonymous-auth argument to false. If it is set to true,
+          edit the K3s config file /etc/rancher/k3s/config.yaml and remove anything similar to below.
+          kube-apiserver-arg:
+            - "anonymous-auth=true"
+        scored: true
 
       - id: 1.2.2
         text: "Ensure that the --token-auth-file parameter is not set (Automated)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--token-auth-file"
               set: false
         remediation: |
-          Follow the documentation and configure alternate mechanisms for authentication. Then,
-          edit the API server pod specification file $apiserverconf
-          on the control plane node and remove the --token-auth-file=<filename> parameter.
+          Follow the documentation and configure alternate mechanisms for authentication.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove anything similar to below.
+          kube-apiserver-arg:
+            - "token-auth-file=<path>"
         scored: true
 
       - id: 1.2.3
         text: "Ensure that the --DenyServiceExternalIPs is not set (Automated)"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           bin_op: or
           test_items:
@@ -375,47 +361,46 @@ groups:
             - flag: "--enable-admission-plugins"
               set: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and remove the `DenyServiceExternalIPs`
-          from enabled admission plugins.
+          By default, K3s does not set DenyServiceExternalIPs.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml, remove any lines like below.
+          kube-apiserver-arg:
+            - "enable-admission-plugins=DenyServiceExternalIPs"
         scored: true
 
       - id: 1.2.4
         text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'kubelet-certificate-authority'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'kubelet-certificate-authority'"
         tests:
           bin_op: and
           test_items:
             - flag: "--kubelet-client-certificate"
             - flag: "--kubelet-client-key"
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection between the
-          apiserver and kubelets. Then, edit API server pod specification file
-          $apiserverconf on the control plane node and set the
-          kubelet client certificate and key parameters as below.
-          --kubelet-client-certificate=<path/to/client-certificate-file>
-          --kubelet-client-key=<path/to/client-key-file>
+          By default, K3s automatically provides the kubelet client certificate and key.
+          They are generated and located at /var/lib/rancher/k3s/server/tls/client-kube-apiserver.crt and /var/lib/rancher/k3s/server/tls/client-kube-apiserver.key
+          If for some reason you need to provide your own certificate and key, you can set the
+          below parameters in the K3s config file /etc/rancher/k3s/config.yaml.
+          kube-apiserver-arg:
+            - "kubelet-client-certificate=<path/to/client-cert-file>"
+            - "kubelet-client-key=<path/to/client-key-file>"
         scored: true
 
       - id: 1.2.5
         text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)"
-        type: "skip"
-        audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'kubelet-certificate-authority'"
         tests:
           test_items:
             - flag: "--kubelet-certificate-authority"
         remediation: |
-          Follow the Kubernetes documentation and setup the TLS connection between
-          the apiserver and kubelets. Then, edit the API server pod specification file
-          $apiserverconf on the control plane node and set the
-          --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.
-          --kubelet-certificate-authority=<ca-string>
-          Permissive - When generating serving certificates, functionality could break in conjunction with hostname overrides which are required for certain cloud providers.
+          By default, K3s automatically provides the kubelet CA cert file, at /var/lib/rancher/k3s/server/tls/server-ca.crt.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "kubelet-certificate-authority=<path/to/ca-cert-file>"
         scored: true
 
       - id: 1.2.6
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -423,15 +408,15 @@ groups:
                 op: nothave
                 value: "AlwaysAllow"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --authorization-mode parameter to values other than AlwaysAllow.
-          One such example could be as below.
-          --authorization-mode=RBAC
+          By default, K3s does not set the --authorization-mode to AlwaysAllow.
+          If this check fails, edit K3s config file /etc/rancher/k3s/config.yaml, remove any lines like below.
+          kube-apiserver-arg:
+            - "authorization-mode=AlwaysAllow"
         scored: true
 
       - id: 1.2.7
         text: "Ensure that the --authorization-mode argument includes Node (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -439,14 +424,14 @@ groups:
                 op: has
                 value: "Node"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --authorization-mode parameter to a value that includes Node.
-          --authorization-mode=Node,RBAC
+          By default, K3s sets the --authorization-mode to Node and RBAC.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml,
+          ensure that you are not overriding authorization-mode.
         scored: true
 
       - id: 1.2.8
         text: "Ensure that the --authorization-mode argument includes RBAC (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'authorization-mode'"
         tests:
           test_items:
             - flag: "--authorization-mode"
@@ -454,14 +439,14 @@ groups:
                 op: has
                 value: "RBAC"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --authorization-mode parameter to a value that includes RBAC,
-          for example `--authorization-mode=Node,RBAC`.
+          By default, K3s sets the --authorization-mode to Node and RBAC.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml,
+          ensure that you are not overriding authorization-mode.
         scored: true
 
       - id: 1.2.9
         text: "Ensure that the admission control plugin EventRateLimit is set (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -470,15 +455,15 @@ groups:
                 value: "EventRateLimit"
         remediation: |
           Follow the Kubernetes documentation and set the desired limits in a configuration file.
-          Then, edit the API server pod specification file $apiserverconf
-          and set the below parameters.
-          --enable-admission-plugins=...,EventRateLimit,...
-          --admission-control-config-file=<path/to/configuration/file>
+          Then, edit the K3s config file /etc/rancher/k3s/config.yaml and set the below parameters.
+          kube-apiserver-arg:
+            - "enable-admission-plugins=...,EventRateLimit,..."
+            - "admission-control-config-file=<path/to/configuration/file>"
         scored: false
 
       - id: 1.2.10
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
         tests:
           bin_op: or
           test_items:
@@ -489,9 +474,10 @@ groups:
             - flag: "--enable-admission-plugins"
               set: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and either remove the --enable-admission-plugins parameter, or set it to a
-          value that does not include AlwaysAdmit.
+          By default, K3s does not set the --enable-admission-plugins to AlwaysAdmit.
+          If this check fails, edit K3s config file /etc/rancher/k3s/config.yaml, remove any lines like below.
+          kube-apiserver-arg:
+            - "enable-admission-plugins=AlwaysAdmit"
         scored: true
 
       - id: 1.2.11
@@ -504,10 +490,13 @@ groups:
                 op: has
                 value: "AlwaysPullImages"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --enable-admission-plugins parameter to include
-          AlwaysPullImages.
-          --enable-admission-plugins=...,AlwaysPullImages,...
+          Permissive, per CIS guidelines,
+          "This setting could impact offline or isolated clusters, which have images pre-loaded and
+          do not have access to a registry to pull in-use images. This setting is not appropriate for
+          clusters which use this configuration."
+          Edit the K3s config file /etc/rancher/k3s/config.yaml and set the below parameter.
+          kube-apiserver-arg:
+            - "enable-admission-plugins=...,AlwaysPullImages,..."
         scored: false
 
       - id: 1.2.12
@@ -526,16 +515,13 @@ groups:
                 op: has
                 value: "PodSecurityPolicy"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --enable-admission-plugins parameter to include
-          SecurityContextDeny, unless PodSecurityPolicy is already in place.
-          --enable-admission-plugins=...,SecurityContextDeny,...
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
+          Not Applicable.
+          Enabling Pod Security Policy is no longer supported on K3s v1.25+ and will cause applications to unexpectedly fail.
         scored: false
 
       - id: 1.2.13
         text: "Ensure that the admission control plugin ServiceAccount is set (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           bin_op: or
           test_items:
@@ -546,15 +532,16 @@ groups:
             - flag: "--disable-admission-plugins"
               set: false
         remediation: |
+          By default, K3s does not set the --disable-admission-plugins to anything.
           Follow the documentation and create ServiceAccount objects as per your environment.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and ensure that the --disable-admission-plugins parameter is set to a
-          value that does not include ServiceAccount.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "disable-admission-plugins=ServiceAccount"
         scored: true
 
       - id: 1.2.14
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           bin_op: or
           test_items:
@@ -565,14 +552,15 @@ groups:
             - flag: "--disable-admission-plugins"
               set: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --disable-admission-plugins parameter to
-          ensure it does not include NamespaceLifecycle.
+          By default, K3s does not set the --disable-admission-plugins to anything.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "disable-admission-plugins=...,NamespaceLifecycle,..."
         scored: true
 
       - id: 1.2.15
         text: "Ensure that the admission control plugin NodeRestriction is set (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'enable-admission-plugins'"
         tests:
           test_items:
             - flag: "--enable-admission-plugins"
@@ -580,16 +568,16 @@ groups:
                 op: has
                 value: "NodeRestriction"
         remediation: |
-          Follow the Kubernetes documentation and configure NodeRestriction plug-in on kubelets.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --enable-admission-plugins parameter to a
-          value that includes NodeRestriction.
-          --enable-admission-plugins=...,NodeRestriction,...
+          By default, K3s sets the --enable-admission-plugins to NodeRestriction.
+          If using the K3s config file /etc/rancher/k3s/config.yaml, check that you are not overriding the admission plugins.
+          If you are, include NodeRestriction in the list.
+          kube-apiserver-arg:
+            - "enable-admission-plugins=...,NodeRestriction,..."
         scored: true
 
       - id: 1.2.16
         text: "Ensure that the --secure-port argument is not set to 0 - NoteThis recommendation is obsolete and will be deleted per the consensus process (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'secure-port'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'secure-port'"
         tests:
           bin_op: or
           test_items:
@@ -600,14 +588,15 @@ groups:
             - flag: "--secure-port"
               set: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and either remove the --secure-port parameter or
-          set it to a different (non-zero) desired port.
+          By default, K3s sets the secure port to 6444.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "secure-port=<PORT>"
         scored: true
 
       - id: 1.2.17
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'profiling'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'profiling'"
         tests:
           test_items:
             - flag: "--profiling"
@@ -615,30 +604,28 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the below parameter.
-          --profiling=false
+          By default, K3s sets the --profiling argument to false.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "profiling=true"
         scored: true
 
       - id: 1.2.18
-        text: "Ensure that the --audit-log-path argument is set (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        text: "Ensure that the --audit-log-path argument is set (Manual)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--audit-log-path"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --audit-log-path parameter to a suitable path and
+          Edit the K3s config file /etc/rancher/k3s/config.yaml and set the audit-log-path parameter to a suitable path and
           file where you would like audit logs to be written, for example,
-          --audit-log-path=/var/log/apiserver/audit.log
-          Permissive.
-        scored: true
+          kube-apiserver-arg:
+            - "audit-log-path=/var/lib/rancher/k3s/server/logs/audit.log"
+        scored: false
 
       - id: 1.2.19
-        text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate (Manual)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--audit-log-maxage"
@@ -646,17 +633,15 @@ groups:
                 op: gte
                 value: 30
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --audit-log-maxage parameter to 30
-          or as an appropriate number of days, for example,
-          --audit-log-maxage=30
-          Permissive.
-        scored: true
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node and
+          set the audit-log-maxage parameter to 30 or as an appropriate number of days, for example,
+          kube-apiserver-arg:
+            - "audit-log-maxage=30"
+        scored: false
 
       - id: 1.2.20
-        text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Manual)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--audit-log-maxbackup"
@@ -664,17 +649,15 @@ groups:
                 op: gte
                 value: 10
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --audit-log-maxbackup parameter to 10 or to an appropriate
-          value. For example,
-          --audit-log-maxbackup=10
-          Permissive.
-        scored: true
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node and
+          set the audit-log-maxbackup parameter to 10 or to an appropriate value. For example,
+          kube-apiserver-arg:
+            - "audit-log-maxbackup=10"
+        scored: false
 
       - id: 1.2.21
-        text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Manual)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--audit-log-maxsize"
@@ -682,29 +665,30 @@ groups:
                 op: gte
                 value: 100
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --audit-log-maxsize parameter to an appropriate size in MB.
-          For example, to set it as 100 MB, --audit-log-maxsize=100
-          Permissive.
-        scored: true
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node and
+          set the audit-log-maxsize parameter to an appropriate size in MB. For example,
+          kube-apiserver-arg:
+            - "audit-log-maxsize=100"
+        scored: false
 
       - id: 1.2.22
         text: "Ensure that the --request-timeout argument is set as appropriate (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--request-timeout"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          and set the below parameter as appropriate and if needed.
-          For example, --request-timeout=300s
-          Permissive.
+          Permissive, per CIS guidelines,
+          "it is recommended to set this limit as appropriate and change the default limit of 60 seconds only if needed".
+          Edit the K3s config file /etc/rancher/k3s/config.yaml
+          and set the below parameter if needed. For example,
+          kube-apiserver-arg:
+            - "request-timeout=300s"
         scored: false
 
       - id: 1.2.23
         text: "Ensure that the --service-account-lookup argument is set to true (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           bin_op: or
           test_items:
@@ -715,30 +699,36 @@ groups:
                 op: eq
                 value: true
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the below parameter.
-          --service-account-lookup=true
-          Alternatively, you can delete the --service-account-lookup parameter from this file so
+          By default, K3s does not set the --service-account-lookup argument.
+          Edit the K3s config file /etc/rancher/k3s/config.yaml and set the service-account-lookup. For example,
+          kube-apiserver-arg:
+            - "service-account-lookup=true"
+          Alternatively, you can delete the service-account-lookup parameter from this file so
           that the default takes effect.
         scored: true
 
       - id: 1.2.24
         text: "Ensure that the --service-account-key-file argument is set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -v grep"
-        type: "skip"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1"
         tests:
           test_items:
             - flag: "--service-account-key-file"
         remediation: |
-          Edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --service-account-key-file parameter
-          to the public key file for service accounts. For example,
-          --service-account-key-file=<filename>
+          K3s automatically generates and sets the service account key file.
+          It is located at /var/lib/rancher/k3s/server/tls/service.key.
+          If this check fails, edit K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "service-account-key-file=<path>"
         scored: true
 
       - id: 1.2.25
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kube-apiserver' | tail -n1"
+        audit: |
+          if [ "$(journalctl -m -u k3s | grep -m1 'Managed etcd cluster' | wc -l)" -gt 0 ]; then
+            journalctl -m -u k3s | grep -m1 'Running kube-apiserver' | tail -n1
+          else
+            echo "--etcd-certfile AND --etcd-keyfile"
+          fi
         tests:
           bin_op: and
           test_items:
@@ -747,16 +737,17 @@ groups:
             - flag: "--etcd-keyfile"
               set: true
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the etcd certificate and key file parameters.
-          --etcd-certfile=<path/to/client-certificate-file>
-          --etcd-keyfile=<path/to/client-key-file>
+          K3s automatically generates and sets the etcd certificate and key files.
+          They are located at /var/lib/rancher/k3s/server/tls/etcd/client.crt and /var/lib/rancher/k3s/server/tls/etcd/client.key.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "etcd-certfile=<path>"
+            - "etcd-keyfile=<path>"
         scored: true
 
       - id: 1.2.26
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep -A1 'Running kube-apiserver' | tail -n2"
+        audit: "journalctl -m -u k3s | grep -A1 'Running kube-apiserver' | tail -n2"
         tests:
           bin_op: and
           test_items:
@@ -765,60 +756,61 @@ groups:
             - flag: "--tls-private-key-file"
               set: true
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the TLS certificate and private key file parameters.
-          --tls-cert-file=<path/to/tls-certificate-file>
-          --tls-private-key-file=<path/to/tls-key-file>
+          By default, K3s automatically generates and provides the TLS certificate and private key for the apiserver.
+          They are generated and located at /var/lib/rancher/k3s/server/tls/serving-kube-apiserver.crt and /var/lib/rancher/k3s/server/tls/serving-kube-apiserver.key
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "tls-cert-file=<path>"
+            - "tls-private-key-file=<path>"
         scored: true
 
       - id: 1.2.27
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'client-ca-file'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'client-ca-file'"
         tests:
           test_items:
             - flag: "--client-ca-file"
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the client certificate authority file.
-          --client-ca-file=<path/to/client-ca-file>
+          By default, K3s automatically provides the client certificate authority file.
+          It is generated and located at /var/lib/rancher/k3s/server/tls/client-ca.crt.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "client-ca-file=<path>"
         scored: true
 
       - id: 1.2.28
         text: "Ensure that the --etcd-cafile argument is set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'etcd-cafile'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'etcd-cafile'"
         tests:
           test_items:
             - flag: "--etcd-cafile"
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the etcd certificate authority file parameter.
-          --etcd-cafile=<path/to/ca-file>
+          By default, K3s automatically provides the etcd certificate authority file.
+          It is generated and located at /var/lib/rancher/k3s/server/tls/client-ca.crt.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-apiserver-arg:
+            - "etcd-cafile=<path>"
         scored: true
 
       - id: 1.2.29
         text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
-        type: "skip"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'encryption-provider-config'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'encryption-provider-config'"
         tests:
           test_items:
             - flag: "--encryption-provider-config"
         remediation: |
-          Follow the Kubernetes documentation and configure a EncryptionConfig file.
-          Then, edit the API server pod specification file $apiserverconf
-          on the control plane node and set the --encryption-provider-config parameter to the path of that file.
-          For example, --encryption-provider-config=</path/to/EncryptionConfig/File>
-          Permissive - Enabling encryption changes how data can be recovered as data is encrypted.
+          K3s can be configured to use encryption providers to encrypt secrets at rest.
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node and set the below parameter.
+          secrets-encryption: true
+          Secrets encryption can then be managed with the k3s secrets-encrypt command line tool.
+          If needed, you can find the generated encryption config at /var/lib/rancher/k3s/server/cred/encryption-config.json.
         scored: false
 
       - id: 1.2.30
         text: "Ensure that encryption providers are appropriately configured (Manual)"
-        type: "skip"
         audit: |
-          ENCRYPTION_PROVIDER_CONFIG=$(ps -ef | grep $apiserverbin | grep -- --encryption-provider-config | sed 's%.*encryption-provider-config[= ]\([^ ]*\).*%\1%')
-          if test -e $ENCRYPTION_PROVIDER_CONFIG; then grep -A1 'providers:' $ENCRYPTION_PROVIDER_CONFIG | tail -n1 | grep -o "[A-Za-z]*" | sed 's/^/provider=/'; fi
+          ENCRYPTION_PROVIDER_CONFIG=$(journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep -- --encryption-provider-config | sed 's%.*encryption-provider-config[= ]\([^ ]*\).*%\1%')
+          if test -e $ENCRYPTION_PROVIDER_CONFIG; then grep -o 'providers\"\:\[.*\]' $ENCRYPTION_PROVIDER_CONFIG | grep -o "[A-Za-z]*" | head -2 | tail -1  | sed 's/^/provider=/'; fi
         tests:
           test_items:
             - flag: "provider"
@@ -826,14 +818,16 @@ groups:
                 op: valid_elements
                 value: "aescbc,kms,secretbox"
         remediation: |
-          Follow the Kubernetes documentation and configure a EncryptionConfig file.
-          In this file, choose aescbc, kms or secretbox as the encryption provider.
-          Permissive - Enabling encryption changes how data can be recovered as data is encrypted.
+          K3s can be configured to use encryption providers to encrypt secrets at rest. K3s will utilize the aescbc provider.
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node and set the below parameter.
+          secrets-encryption: true
+          Secrets encryption can then be managed with the k3s secrets-encrypt command line tool.
+          If needed, you can find the generated encryption config at /var/lib/rancher/k3s/server/cred/encryption-config.json
         scored: false
 
-      - id: 1.2.32
-        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'tls-cipher-suites'"
+      - id: 1.2.31
+        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Automated)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'tls-cipher-suites'"
         tests:
           test_items:
             - flag: "--tls-cipher-suites"
@@ -841,36 +835,32 @@ groups:
                 op: valid_elements
                 value: "TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_GCM_SHA384"
         remediation: |
-          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-          on the control plane node and set the below parameter.
-          --tls-cipher-suites=TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,
-          TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-          TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-          TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-          TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-          TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-          TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,
-          TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_GCM_SHA384
-        scored: false
+          By default, the K3s kube-apiserver complies with this test. Changes to these values may cause regression, therefore ensure that all apiserver clients support the new TLS configuration before applying it in production deployments.
+          If a custom TLS configuration is required, consider also creating a custom version of this rule that aligns with your requirements.
+          If this check fails, remove any custom configuration around `tls-cipher-suites` or update the /etc/rancher/k3s/config.yaml file to match the default by adding the following:
+          kube-apiserver-arg:
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        scored: true
 
   - id: 1.3
     text: "Controller Manager"
     checks:
       - id: 1.3.1
         text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'terminated-pod-gc-threshold'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'terminated-pod-gc-threshold'"
         tests:
           test_items:
             - flag: "--terminated-pod-gc-threshold"
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and set the --terminated-pod-gc-threshold to an appropriate threshold,
-          for example, --terminated-pod-gc-threshold=10
+          Edit the K3s config file /etc/rancher/k3s/config.yaml on the control plane node
+          and set the --terminated-pod-gc-threshold to an appropriate threshold,
+          kube-controller-manager-arg:
+            - "terminated-pod-gc-threshold=10"
         scored: false
 
       - id: 1.3.2
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'profiling'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'profiling'"
         tests:
           test_items:
             - flag: "--profiling"
@@ -878,14 +868,15 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and set the below parameter.
-          --profiling=false
+          By default, K3s sets the --profiling argument to false.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-controller-manager-arg:
+            - "profiling=true"
         scored: true
 
       - id: 1.3.3
         text: "Ensure that the --use-service-account-credentials argument is set to true (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'use-service-account-credentials'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'use-service-account-credentials'"
         tests:
           test_items:
             - flag: "--use-service-account-credentials"
@@ -893,40 +884,43 @@ groups:
                 op: noteq
                 value: false
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node to set the below parameter.
-          --use-service-account-credentials=true
+          By default, K3s sets the --use-service-account-credentials argument to true.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-controller-manager-arg:
+            - "use-service-account-credentials=false"
         scored: true
 
       - id: 1.3.4
         text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'service-account-private-key-file'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'service-account-private-key-file'"
         tests:
           test_items:
             - flag: "--service-account-private-key-file"
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and set the --service-account-private-key-file parameter
-          to the private key file for service accounts.
-          --service-account-private-key-file=<filename>
+          By default, K3s automatically provides the service account private key file.
+          It is generated and located at /var/lib/rancher/k3s/server/tls/service.current.key.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-controller-manager-arg:
+            - "service-account-private-key-file=<path>"
         scored: true
 
       - id: 1.3.5
         text: "Ensure that the --root-ca-file argument is set as appropriate (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'root-ca-file'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'root-ca-file'"
         tests:
           test_items:
             - flag: "--root-ca-file"
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and set the --root-ca-file parameter to the certificate bundle file`.
-          --root-ca-file=<path/to/file>
+          By default, K3s automatically provides the root CA file.
+          It is generated and located at /var/lib/rancher/k3s/server/tls/server-ca.crt.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-controller-manager-arg:
+            - "root-ca-file=<path>"
         scored: true
 
       - id: 1.3.6
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
-        type: "skip"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-controller-manager' | tail -n1 | grep 'RotateKubeletServerCertificate'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-controller-manager' | tail -n1"
         tests:
           bin_op: or
           test_items:
@@ -938,10 +932,11 @@ groups:
             - flag: "--feature-gates"
               set: false
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
-          --feature-gates=RotateKubeletServerCertificate=true
-          Not Applicable.
+          By default, K3s does not set the RotateKubeletServerCertificate feature gate.
+          If you have enabled this feature gate, you should remove it.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml, remove any lines like below.
+          kube-controller-manager-arg:
+            - "feature-gate=RotateKubeletServerCertificate"
         scored: true
 
       - id: 1.3.7
@@ -958,8 +953,10 @@ groups:
             - flag: "--bind-address"
               set: false
         remediation: |
-          Edit the Controller Manager pod specification file $controllermanagerconf
-          on the control plane node and ensure the correct value for the --bind-address parameter
+          By default, K3s sets the --bind-address argument to 127.0.0.1
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-controller-manager-arg:
+            - "bind-address=<IP>"
         scored: true
 
   - id: 1.4
@@ -967,7 +964,7 @@ groups:
     checks:
       - id: 1.4.1
         text: "Ensure that the --profiling argument is set to false (Automated)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kube-scheduler' | tail -n1"
+        audit: "journalctl -m -u k3s | grep 'Running kube-scheduler' | tail -n1"
         tests:
           test_items:
             - flag: "--profiling"
@@ -976,14 +973,15 @@ groups:
                 value: false
               set: true
         remediation: |
-          Edit the Scheduler pod specification file $schedulerconf file
-          on the control plane node and set the below parameter.
-          --profiling=false
+          By default, K3s sets the --profiling argument to false.
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-scheduler-arg:
+            - "profiling=true"
         scored: true
 
       - id: 1.4.2
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
-        audit: "journalctl -D /var/log/journal  -u k3s | grep 'Running kube-scheduler' | tail -n1 | grep 'bind-address'"
+        audit: "journalctl -m -u k3s | grep 'Running kube-scheduler' | tail -n1 | grep 'bind-address'"
         tests:
           bin_op: or
           test_items:
@@ -995,6 +993,8 @@ groups:
             - flag: "--bind-address"
               set: false
         remediation: |
-          Edit the Scheduler pod specification file $schedulerconf
-          on the control plane node and ensure the correct value for the --bind-address parameter
+          By default, K3s sets the --bind-address argument to 127.0.0.1
+          If this check fails, edit the K3s config file /etc/rancher/k3s/config.yaml and remove any lines like below.
+          kube-scheduler-arg:
+            - "bind-address=<IP>"
         scored: true
