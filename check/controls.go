@@ -252,7 +252,7 @@ func (controls *Controls) ASFF() ([]types.AwsSecurityFinding, error) {
 
 				f := types.AwsSecurityFinding{
 					AwsAccountId:  aws.String(account),
-					Confidence:    *aws.Int32(100),
+					Confidence:    aws.Int32(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
 					Id:            id,
 					CreatedAt:     aws.String(tf),
