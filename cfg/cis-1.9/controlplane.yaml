@@ -15,6 +15,7 @@ groups:
           Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
           implemented in place of client certificates.
         scored: false
+
       - id: 3.1.2
         text: "Service account token authentication should not be used for users (Manual)"
         type: "manual"
@@ -22,6 +23,7 @@ groups:
           Alternative mechanisms provided by Kubernetes such as the use of OIDC should be implemented
           in place of service account tokens.
         scored: false
+
       - id: 3.1.3
         text: "Bootstrap token authentication should not be used for users (Manual)"
         type: "manual"
