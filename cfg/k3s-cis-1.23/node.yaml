@@ -186,7 +186,7 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -209,7 +209,7 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode" | grep -v grep; else echo "--authorization-mode=Webhook"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode" | grep -v grep; else echo "--authorization-mode=Webhook"; fi'' '
         tests:
           test_items:
             - flag: --authorization-mode
@@ -231,7 +231,7 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file" | grep -v grep; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file" | grep -v grep; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
         tests:
           test_items:
             - flag: --client-ca-file
@@ -251,7 +251,7 @@ groups:
 
       - id: 4.2.4
         text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'read-only-port' "
+        audit: "journalctl -m -u k3s | grep 'Running kubelet' | tail -n1 | grep 'read-only-port' "
         tests:
           bin_op: or
           test_items:
@@ -276,7 +276,7 @@ groups:
 
       - id: 4.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'streaming-connection-idle-timeout'"
+        audit: "journalctl -m -u k3s | grep 'Running kubelet' | tail -n1 | grep 'streaming-connection-idle-timeout'"
         tests:
           test_items:
             - flag: --streaming-connection-idle-timeout
@@ -302,7 +302,7 @@ groups:
 
       - id: 4.2.6
         text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'protect-kernel-defaults'"
+        audit: "journalctl -m -u k3s | grep 'Running kubelet' | tail -n1 | grep 'protect-kernel-defaults'"
         type: "skip"
         tests:
           test_items:
@@ -325,7 +325,7 @@ groups:
 
       - id: 4.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'make-iptables-util-chains'"
+        audit: "journalctl -m -u k3s | grep 'Running kubelet' | tail -n1 | grep 'make-iptables-util-chains'"
         type: "skip"
         tests:
           test_items:
@@ -393,7 +393,7 @@ groups:
 
       - id: 4.2.10
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1"
+        audit: "journalctl -m -u k3s | grep 'Running kubelet' | tail -n1"
         tests:
           test_items:
             - flag: --tls-cert-file
