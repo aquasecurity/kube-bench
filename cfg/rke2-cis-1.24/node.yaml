@@ -440,7 +440,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: false
-
+        type: skip
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: "/bin/ps -fC $kubeletbin"

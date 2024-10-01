@@ -19,9 +19,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the below command (based on the file location on your system) on the each worker node.
-          For example, chmod 600 $kubeletsvc
-          Not Applicable - All configuration is passed in as arguments at container run time.
+          Not Applicable.
+          The kubelet is embedded in the k3s process. There is no kubelet service file, all configuration is passed in as arguments at runtime.
         scored: true
 
       - id: 4.1.2
@@ -32,16 +31,15 @@ groups:
           test_items:
             - flag: root:root
         remediation: |
-          Run the below command (based on the file location on your system) on the each worker node.
-          For example,
-          chown root:root $kubeletsvc
+          Not Applicable.
+          The kubelet is embedded in the k3s process. There is no kubelet service file, all configuration is passed in as arguments at runtime.
           Not Applicable.
            All configuration is passed in as arguments at container run time.
         scored: true
 
       - id: 4.1.3
-        text: "If proxy kubeconfig file exists ensure permissions are set to 600 or more restrictive (Manual)"
-        audit: 'stat -c %a /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig'
+        text: "If proxy kubeconfig file exists ensure permissions are set to 600 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           bin_op: or
           test_items:
@@ -53,11 +51,11 @@ groups:
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
           chmod 600 $proxykubeconfig
-        scored: false
+        scored: true
 
       - id: 4.1.4
-        text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)"
-        audit: '/bin/sh -c ''if test -e /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig; then stat -c %U:%G /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig; fi'' '
+        text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
         tests:
           bin_op: or
           test_items:
@@ -65,7 +63,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chown root:root $proxykubeconfig
-        scored: false
+        scored: true
 
       - id: 4.1.5
         text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 600 or more restrictive (Automated)"
@@ -84,7 +82,7 @@ groups:
 
       - id: 4.1.6
         text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
-        audit: 'stat -c %U:%G /var/lib/rancher/k3s/agent/kubelet.kubeconfig'
+        audit: 'stat -c %U:%G $kubeletkubeconfig'
         tests:
           test_items:
             - flag: root:root
@@ -95,8 +93,8 @@ groups:
         scored: true
 
       - id: 4.1.7
-        text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Manual)"
-        audit: "stat -c %a /var/lib/rancher/k3s/server/tls/server-ca.crt"
+        text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Automated)"
+        audit: "stat -c permissions=%a $kubeletcafile"
         tests:
           test_items:
             - flag: "permissions"
@@ -105,19 +103,22 @@ groups:
                 value: "600"
         remediation: |
           Run the following command to modify the file permissions of the
-          --client-ca-file chmod 600 <filename>
-        scored: false
+          --client-ca-file chmod 600 $kubeletcafile
+        scored: true
 
       - id: 4.1.8
-        text: "Ensure that the client certificate authorities file ownership is set to root:root (Manual)"
-        audit: "stat -c %U:%G /var/lib/rancher/k3s/server/tls/client-ca.crt"
+        text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
+        audit: "stat -c %U:%G $kubeletcafile"
         tests:
           test_items:
             - flag: root:root
+              compare:
+                op: eq
+                value: root:root
         remediation: |
           Run the following command to modify the ownership of the --client-ca-file.
-          chown root:root <filename>
-        scored: false
+          chown root:root $kubeletcafile
+        scored: true
 
       - id: 4.1.9
         text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
@@ -130,8 +131,8 @@ groups:
                 op: bitmask
                 value: "600"
         remediation: |
-          Run the following command (using the config file location identified in the Audit step)
-          chmod 600 $kubeletconf
+          Not Applicable.
+          The kubelet is embedded in the k3s process. There is no kubelet config file, all configuration is passed in as arguments at runtime.
         scored: true
 
       - id: 4.1.10
@@ -142,10 +143,8 @@ groups:
           test_items:
             - flag: root:root
         remediation: |
-          Run the following command (using the config file location identified in the Audit step)
-          chown root:root $kubeletconf
           Not Applicable.
-          All configuration is passed in as arguments at container run time.
+          The kubelet is embedded in the k3s process. There is no kubelet config file, all configuration is passed in as arguments at runtime.
         scored: true
 
   - id: 4.2
@@ -153,7 +152,7 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -162,20 +161,20 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          If using a Kubelet config file, edit the file to set `authentication: anonymous: enabled` to
-          `false`.
-          If using executable arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          `--anonymous-auth=false`
-          Based on your system, restart the kubelet service. For example,
+          By default, K3s sets the --anonymous-auth to false. If you have set this to a different value, you
+          should set it back to false. If using the K3s config file /etc/rancher/k3s/config.yaml, remove any lines similar to below.
+          kubelet-arg:
+            - "anonymous-auth=true"
+          If using the command line, edit the K3s service file and remove the below argument.
+          --kubelet-arg="anonymous-auth=true"
+          Based on your system, restart the k3s service. For example,
           systemctl daemon-reload
-          systemctl restart kubelet.service
+          systemctl restart k3s.service
         scored: true
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode" | grep -v grep; else echo "--authorization-mode=Webhook"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"; else echo "--authorization-mode=Webhook"; fi'' '
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -185,38 +184,32 @@ groups:
                 op: nothave
                 value: AlwaysAllow
         remediation: |
-          If using a Kubelet config file, edit the file to set `authorization.mode` to Webhook. If
-          using executable arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_AUTHZ_ARGS variable.
-          --authorization-mode=Webhook
-          Based on your system, restart the kubelet service. For example,
+          By default, K3s does not set the --authorization-mode to AlwaysAllow.
+          If using the K3s config file /etc/rancher/k3s/config.yaml, remove any lines similar to below.
+          kubelet-arg:
+            - "authorization-mode=AlwaysAllow"
+          If using the command line, edit the K3s service file and remove the below argument.
+          --kubelet-arg="authorization-mode=AlwaysAllow"
+          Based on your system, restart the k3s service. For example,
           systemctl daemon-reload
-          systemctl restart kubelet.service
+          systemctl restart k3s.service
         scored: true
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -D /var/log/journal -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file" | grep -v grep; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
         tests:
           test_items:
             - flag: --client-ca-file
               path: '{.authentication.x509.clientCAFile}'
         remediation: |
-          If using a Kubelet config file, edit the file to set `authentication.x509.clientCAFile` to
-          the location of the client CA file.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_AUTHZ_ARGS variable.
-          --client-ca-file=<path/to/client-ca-file>
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+          By default, K3s automatically provides the client ca certificate for the Kubelet.
+          It is generated and located at /var/lib/rancher/k3s/agent/client-ca.crt
         scored: true
 
       - id: 4.2.4
-        text: "Verify that the --read-only-port argument is set to 0 (Manual)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'read-only-port' "
+        text: "Verify that the --read-only-port argument is set to 0 (Automated)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           bin_op: or
@@ -230,19 +223,20 @@ groups:
               path: '{.readOnlyPort}'
               set: false
         remediation: |
-          If using a Kubelet config file, edit the file to set `readOnlyPort` to 0.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          --read-only-port=0
-          Based on your system, restart the kubelet service. For example,
+          By default, K3s sets the --read-only-port to 0. If you have set this to a different value, you
+          should set it back to 0. If using the K3s config file /etc/rancher/k3s/config.yaml, remove any lines similar to below.
+          kubelet-arg:
+            - "read-only-port=XXXX"
+          If using the command line, edit the K3s service file and remove the below argument.
+          --kubelet-arg="read-only-port=XXXX"
+          Based on your system, restart the k3s service. For example,
           systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: false
+          systemctl restart k3s.service
+        scored: true
 
       - id: 4.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'streaming-connection-idle-timeout'"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         tests:
           test_items:
             - flag: --streaming-connection-idle-timeout
@@ -255,21 +249,17 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If using a Kubelet config file, edit the file to set `streamingConnectionIdleTimeout` to a
-          value other than 0.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          --streaming-connection-idle-timeout=5m
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+          If using the K3s config file /etc/rancher/k3s/config.yaml, set the following parameter to an appropriate value.
+          kubelet-arg:
+            - "streaming-connection-idle-timeout=5m"
+          If using the command line, run K3s with --kubelet-arg="streaming-connection-idle-timeout=5m".
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
         scored: false
 
       - id: 4.2.6
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
-        type: "skip"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1 | grep 'make-iptables-util-chains'"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         tests:
           test_items:
             - flag: --make-iptables-util-chains
@@ -282,41 +272,31 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If using a Kubelet config file, edit the file to set `makeIPTablesUtilChains` to `true`.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          remove the --make-iptables-util-chains argument from the
-          KUBELET_SYSTEM_PODS_ARGS variable.
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-          Permissive.
+          If using the K3s config file /etc/rancher/k3s/config.yaml, set the following parameter.
+          kubelet-arg:
+            - "make-iptables-util-chains=true"
+          If using the command line, run K3s with --kubelet-arg="make-iptables-util-chains=true".
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
         scored: true
 
       - id: 4.2.7
-        text: "Ensure that the --hostname-override argument is not set (Manual)"
-        # This is one of those properties that can only be set as a command line argument.
-        # To check if the property is set as expected, we need to parse the kubelet command
-        # instead reading the Kubelet Configuration file.
+        text: "Ensure that the --hostname-override argument is not set (Automated)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         type: "skip"
-        audit: "/bin/ps -fC $kubeletbin "
         tests:
           test_items:
             - flag: --hostname-override
               set: false
         remediation: |
-          Edit the kubelet service file $kubeletsvc
-          on each worker node and remove the --hostname-override argument from the
-          KUBELET_SYSTEM_PODS_ARGS variable.
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
           Not Applicable.
-        scored: false
+          By default, K3s does set the --hostname-override argument. Per CIS guidelines, this is to comply
+          with cloud providers that require this flag to ensure that hostname matches node names.
+        scored: true
 
       - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
-        audit: "/bin/ps -fC $kubeletbin"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -330,19 +310,18 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If using a Kubelet config file, edit the file to set `eventRecordQPS` to an appropriate level.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+          By default, K3s sets the event-qps to 0. Should you wish to change this,
+          If using the K3s config file /etc/rancher/k3s/config.yaml, set the following parameter to an appropriate value.
+          kubelet-arg:
+            - "event-qps=<value>"
+          If using the command line, run K3s with --kubelet-arg="event-qps=<value>".
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
         scored: false
 
       - id: 4.2.9
-        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
-        type: "skip"
-        audit: "journalctl -D /var/log/journal -u k3s | grep 'Running kubelet' | tail -n1"
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         tests:
           test_items:
             - flag: --tls-cert-file
@@ -350,23 +329,18 @@ groups:
             - flag: --tls-private-key-file
               path: '/var/lib/rancher/k3s/agent/serving-kubelet.key'
         remediation: |
-          If using a Kubelet config file, edit the file to set `tlsCertFile` to the location
-          of the certificate file to use to identify this Kubelet, and `tlsPrivateKeyFile`
-          to the location of the corresponding private key file.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
-          --tls-cert-file=<path/to/tls-certificate-file>
-          --tls-private-key-file=<path/to/tls-key-file>
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-          Permissive - When generating serving certificates, functionality could break in conjunction with hostname overrides which are required for certain cloud providers.
-        scored: false
+         By default, K3s automatically provides the TLS certificate and private key for the Kubelet.
+         They are generated and located at /var/lib/rancher/k3s/agent/serving-kubelet.crt and /var/lib/rancher/k3s/agent/serving-kubelet.key
+         If for some reason you need to provide your own certificate and key, you can set the
+         the below parameters in the K3s config file /etc/rancher/k3s/config.yaml.
+         kubelet-arg:
+         - "tls-cert-file=<path/to/tls-cert-file>"
+         - "tls-private-key-file=<path/to/tls-private-key-file>"
+        scored: true
 
       - id: 4.2.10
-        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
-        audit: "/bin/ps -fC $kubeletbin"
+        text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -380,20 +354,16 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If using a Kubelet config file, edit the file to add the line `rotateCertificates` to `true` or
-          remove it altogether to use the default value.
-          If using command line arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          remove --rotate-certificates=false argument from the KUBELET_CERTIFICATE_ARGS
-          variable.
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-        scored: false
+          By default, K3s does not set the --rotate-certificates argument. If you have set this flag with a value of `false`, you should either set it to `true` or completely remove the flag.
+          If using the K3s config file /etc/rancher/k3s/config.yaml, remove any rotate-certificates parameter.
+          If using the command line, remove the K3s flag --kubelet-arg="rotate-certificates".
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
+        scored: true
 
       - id: 4.2.11
-        text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
-        audit: "/bin/ps -fC $kubeletbin"
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true (Automated)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/cat $kubeletconf"
         tests:
           bin_op: or
@@ -407,18 +377,17 @@ groups:
               path: '{.featureGates.RotateKubeletServerCertificate}'
               set: false
         remediation: |
-          Edit the kubelet service file $kubeletsvc
-          on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
-          --feature-gates=RotateKubeletServerCertificate=true
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
-          Not Applicable.
-        scored: false
+          By default, K3s does not set the RotateKubeletServerCertificate feature gate.
+          If you have enabled this feature gate, you should remove it.
+          If using the K3s config file /etc/rancher/k3s/config.yaml, remove any feature-gate=RotateKubeletServerCertificate parameter.
+          If using the command line, remove the K3s flag --kubelet-arg="feature-gate=RotateKubeletServerCertificate".
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
+        scored: true
 
       - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
-        audit: "/bin/ps -fC $kubeletbin"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -428,21 +397,18 @@ groups:
                 op: valid_elements
                 value: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         remediation: |
-          If using a Kubelet config file, edit the file to set `TLSCipherSuites` to
-          TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `TLSCipherSuites` to
+          kubelet-arg:
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
           or to a subset of these values.
-          If using executable arguments, edit the kubelet service file
-          $kubeletsvc on each worker node and
-          set the --tls-cipher-suites parameter as follows, or to a subset of these values.
-          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
-          Based on your system, restart the kubelet service. For example:
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+          If using the command line, add the K3s flag --kubelet-arg="tls-cipher-suites=<same values as above>"
+          Based on your system, restart the k3s service. For example,
+          systemctl restart k3s.service
         scored: false
 
       - id: 4.2.13
         text: "Ensure that a limit is set on pod PIDs (Manual)"
-        audit: "/bin/ps -fC $kubeletbin"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -450,5 +416,7 @@ groups:
               path: '{.podPidsLimit}'
         remediation: |
           Decide on an appropriate level for this parameter and set it,
-          either via the --pod-max-pids command line parameter or the PodPidsLimit configuration file setting.
+          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `podPidsLimit` to
+          kubelet-arg:
+            - "pod-max-pids=<value>"
         scored: false

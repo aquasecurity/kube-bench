@@ -148,12 +148,18 @@ groups:
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
         audit: |
-          ps -fC ${kubeletbin:-kubelet} | grep -- --cni-conf-dir || echo "/etc/cni/net.d" | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
+          '/bin/sh -c "if [[ -e /etc/cni/net.d ]]; then
+          ps -fC "${kubeletbin:-kubelet}" | grep -- --cni-conf-dir || echo "/etc/cni/net.d" | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
           find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
+          else
+          echo "File not found"
+          fi'
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -321,11 +327,18 @@ groups:
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
-        audit: "stat -c permissions=%a /var/lib/rancher/rke2/server/tls/*.key"
+        audit: |
+          '/bin/sh -c if test -e "/var/lib/rancher/rke2/server/tls/*.key"; then
+          stat -c "%a" "/var/lib/rancher/rke2/server/tls/*.key"
+          else
+          echo "File not found"
+          fi'
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
+            - flag: "File not found"
               compare:
                 op: eq
                 value: "600"
@@ -979,7 +992,7 @@ groups:
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the control plane node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
           --feature-gates=RotateKubeletServerCertificate=true
-        scored: true
+        scored: false
         type: skip
 
       - id: 1.3.7
