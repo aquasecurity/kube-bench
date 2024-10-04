@@ -164,7 +164,6 @@ node:
       - "/var/snap/microk8s/current/credentials/kubelet.config"
       - "/etc/kubernetes/kubeconfig-kubelet"
       - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
-      - "/var/lib/rancher/k3s/server/cred/admin.kubeconfig"
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
@@ -191,7 +190,6 @@ node:
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
       - "/etc/kubernetes/kubelet.yaml"
-      - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
 
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
@@ -434,6 +432,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.8":
     - "master"
     - "etcd"
     - "controlplane"
