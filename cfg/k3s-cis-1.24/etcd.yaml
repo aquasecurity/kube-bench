@@ -10,128 +10,135 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
-        audit: "grep -A 4 'client-transport-security' $etcdconf | grep -E 'cert-file|key-file'"
+        audit_config: "cat $etcdconf"
         tests:
           bin_op: and
           test_items:
-            - flag: "cert-file"
-              set: true
-            - flag: "key-file"
-              set: true
+            - path: "{.client-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/k3s/server/tls/etcd/server-client.crt"
+            - path: "{.client-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/k3s/server/tls/etcd/server-client.key"
         remediation: |
-          Follow the etcd service documentation and configure TLS encryption.
-          Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml
-          on the master node and set the below parameters.
-          --cert-file=</path/to/ca-file>
-          --key-file=</path/to/key-file>
-        scored: true
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s generates cert and key files for etcd.
+          These are located in /var/lib/rancher/k3s/server/tls/etcd/.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use custom cert and key files.
+        scored: false
 
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
-        audit: "grep -A 4 'client-transport-security' $etcdconf | grep 'client-cert-auth'"
+        audit_config: "cat $etcdconf"
         tests:
-          bin_op: or
           test_items:
-            - flag: "--client-cert-auth"
-              set: true
-            - flag: "client-cert-auth"
+            - path: "{.client-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
-              set: true
         remediation: |
-          Edit the etcd pod specification file $etcdconf on the master
-          node and set the below parameter.
-          --client-cert-auth="true"
-        scored: true
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s sets the --client-cert-auth parameter to true.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to disable client certificate authentication.
+        scored: false
 
       - id: 2.3
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
-        audit: "if grep -q '^auto-tls' $etcdconf;then grep '^auto-tls' $etcdconf;else echo 'notset';fi"
+        audit_config: "cat $etcdconf"
         tests:
           bin_op: or
           test_items:
-            - flag: "--auto-tls"
-              set: false
-            - flag: "--auto-tls"
+            - path: "{.client-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
+            - path: "{.client-transport-security.auto-tls}"
+              set: false
         remediation: |
-          Edit the etcd pod specification file $etcdconf on the master
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s does not set the --auto-tls parameter.
+          If this check fails, edit the etcd pod specification file $etcdconf on the master
           node and either remove the --auto-tls parameter or set it to false.
-            --auto-tls=false
-        scored: true
+          client-transport-security:
+            auto-tls: false
+        scored: false
 
       - id: 2.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)"
-        audit: "grep -A 4 'peer-transport-security' $etcdconf | grep -E 'cert-file|key-file'"
+        audit_config: "cat $etcdconf"
         tests:
           bin_op: and
           test_items:
-            - flag: "cert-file"
-              set: true
-            - flag: "key-file"
-              set: true
+            - path: "{.peer-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/k3s/server/tls/etcd/peer-server-client.crt"
+            - path: "{.peer-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/k3s/server/tls/etcd/peer-server-client.key"
         remediation: |
-          Follow the etcd service documentation and configure peer TLS encryption as appropriate
-          for your etcd cluster.
-          Then, edit the etcd pod specification file $etcdconf on the
-          master node and set the below parameters.
-          --peer-client-file=</path/to/peer-cert-file>
-          --peer-key-file=</path/to/peer-key-file>
-        scored: true
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s generates peer cert and key files for etcd.
+          These are located in /var/lib/rancher/k3s/server/tls/etcd/.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use custom peer cert and key files.
+        scored: false
 
       - id: 2.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
-        audit: "grep -A 4 'peer-transport-security' $etcdconf | grep 'client-cert-auth'"
+        audit_config: "cat $etcdconf"
         tests:
-          bin_op: or
           test_items:
-            - flag: "--client-cert-auth"
-              set: true
-            - flag: "client-cert-auth"
+            - path: "{.peer-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
-              set: true
         remediation: |
-          Edit the etcd pod specification file $etcdconf on the master
-          node and set the below parameter.
-          --peer-client-cert-auth=true
-        scored: true
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s sets the --peer-cert-auth parameter to true.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to disable peer client certificate authentication.
+        scored: false
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
-        audit: "if grep -q '^peer-auto-tls' $etcdconf;then grep '^peer-auto-tls' $etcdconf;else echo 'notset';fi"
+        audit_config: "cat $etcdconf"
         tests:
           bin_op: or
           test_items:
-            - flag: "--peer-auto-tls"
-              set: false
-            - flag: "--peer-auto-tls"
+            - path: "{.peer-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
-              set: true
+            - path: "{.peer-transport-security.auto-tls}"
+              set: false
         remediation: |
-          Edit the etcd pod specification file $etcdconf on the master
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s does not set the --peer-auto-tls parameter.
+          If this check fails, edit the etcd pod specification file $etcdconf on the master
           node and either remove the --peer-auto-tls parameter or set it to false.
-          --peer-auto-tls=false
-        scored: true
+          peer-transport-security:
+            auto-tls: false
+        scored: false
 
       - id: 2.7
         text: "Ensure that a unique Certificate Authority is used for etcd (Automated)"
-        audit: "if grep -q 'trusted-ca-file' $etcdconf;then grep 'trusted-ca-file' $etcdconf;else echo 'notset';fi"
+        audit_config: "cat $etcdconf"
         tests:
           test_items:
-            - flag: "trusted-ca-file"
-              set: true
+            - path: "{.peer-transport-security.trusted-ca-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/k3s/server/tls/etcd/peer-ca.crt"
         remediation: |
-          [Manual test]
-          Follow the etcd documentation and create a dedicated certificate authority setup for the
-          etcd service.
-          Then, edit the etcd pod specification file $etcdconf on the
-          master node and set the below parameter.
-          --trusted-ca-file=</path/to/ca-file>
+          If running on with sqlite or a external DB, etcd checks are Not Applicable.
+          When running with embedded-etcd, K3s generates a unique certificate authority for etcd.
+          This is located at /var/lib/rancher/k3s/server/tls/etcd/peer-ca.crt.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use a shared certificate authority.
         scored: false

@@ -18,7 +18,7 @@ groups:
             else
               is_compliant="true"
             fi;
-            echo "**role_name: ${role_name} role_binding: ${rolebinding} subject: ${subject} is_compliant: ${is_compliant}"
+            echo "**role_name: ${role_name} role_binding: ${role_binding} subject: ${subject} is_compliant: ${is_compliant}"
           done
         use_multiple_values: true
         tests:
@@ -34,6 +34,7 @@ groups:
           clusterrolebinding to the cluster-admin role : kubectl delete clusterrolebinding [name]
           Condition: is_compliant is false if rolename is not cluster-admin and rolebinding is cluster-admin.
         scored: true
+
       - id: 5.1.2
         text: "Minimize access to secrets (Automated)"
         audit: "echo \"canGetListWatchSecretsAsSystemAuthenticated: $(kubectl auth can-i get,list,watch secrets --all-namespaces --as=system:authenticated)\""
@@ -46,6 +47,7 @@ groups:
         remediation: |
           Where possible, remove get, list and watch access to Secret objects in the cluster.
         scored: true
+
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
         audit: |
@@ -92,6 +94,7 @@ groups:
           Condition: role_is_compliant is false if ["*"] is found in rules.
           Condition: clusterrole_is_compliant is false if ["*"] is found in rules.
         scored: true
+
       - id: 5.1.4
         text: "Minimize access to create pods (Automated)"
         audit: |
@@ -106,7 +109,7 @@ groups:
           Where possible, remove create access to pod objects in the cluster.
         scored: true
       - id: 5.1.5
-        text: "Ensure that default service accounts are not actively used. (Automated)"
+        text: "Ensure that default service accounts are not actively used (Automated)"
         audit: |
           kubectl get serviceaccount --all-namespaces --field-selector metadata.name=default -o=json | jq -r '.items[] | " namespace: \(.metadata.namespace), kind: \(.kind), name: \(.metadata.name), automountServiceAccountToken: \(.automountServiceAccountToken | if . == null then "notset" else . end )"' | xargs -L 1
         use_multiple_values: true
@@ -123,17 +126,18 @@ groups:
           Modify the configuration of each default service account to include this value
           `automountServiceAccountToken: false`.
         scored: true
+
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
         audit: |
           kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
           do
             # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
-            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n ${pod_namespace} ${pod_service_account} -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            pod_is_automountserviceaccounttoken=$(echo ${pod_is_automountserviceaccounttoken} | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            if [[ "${svacc_is_automountserviceaccounttoken}" == "false" && ( "${pod_is_automountserviceaccounttoken}" == "false" || "${pod_is_automountserviceaccounttoken}" == "notset" ) ]]; then
+            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n "${pod_namespace}" "${pod_service_account}" -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
+            pod_is_automountserviceaccounttoken=$(echo "${pod_is_automountserviceaccounttoken}" | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
+            if [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && ( [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ] ); then
               is_compliant="true"
-            elif [[ "${svacc_is_automountserviceaccounttoken}" == "true" && "${pod_is_automountserviceaccounttoken}" == "false" ]]; then
+            elif [ "${svacc_is_automountserviceaccounttoken}" = "true" ] && [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
               is_compliant="true"
             else
               is_compliant="false"
@@ -155,48 +159,56 @@ groups:
             - ServiceAccount is automountServiceAccountToken: false and Pod is automountServiceAccountToken: false or notset
             - ServiceAccount is automountServiceAccountToken: true notset and Pod is automountServiceAccountToken: false
         scored: true
+
       - id: 5.1.7
         text: "Avoid use of system:masters group (Manual)"
         type: "manual"
         remediation: |
           Remove the system:masters group from all users in the cluster.
         scored: false
+
       - id: 5.1.8
         text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove the impersonate, bind and escalate rights from subjects.
         scored: false
+
       - id: 5.1.9
         text: "Minimize access to create persistent volumes (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove create access to PersistentVolume objects in the cluster.
         scored: false
+
       - id: 5.1.10
         text: "Minimize access to the proxy sub-resource of nodes (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove access to the proxy sub-resource of node objects.
         scored: false
+
       - id: 5.1.11
         text: "Minimize access to the approval sub-resource of certificatesigningrequests objects (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove access to the approval sub-resource of certificatesigningrequest objects.
         scored: false
+
       - id: 5.1.12
         text: "Minimize access to webhook configuration objects (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove access to the validatingwebhookconfigurations or mutatingwebhookconfigurations objects
         scored: false
+
       - id: 5.1.13
         text: "Minimize access to the service account token creation (Manual)"
         type: "manual"
         remediation: |
           Where possible, remove access to the token sub-resource of serviceaccount objects.
         scored: false
+
   - id: 5.2
     text: "Pod Security Standards"
     checks:
@@ -207,6 +219,7 @@ groups:
           Ensure that either Pod Security Admission or an external policy control system is in place
           for every namespace which contains user workloads.
         scored: false
+
       - id: 5.2.2
         text: "Minimize the admission of privileged containers (Manual)"
         type: "manual"
@@ -214,6 +227,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of privileged containers.
         scored: false
+
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         type: "manual"
@@ -221,6 +235,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostPID` containers.
         scored: false
+
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
         type: "manual"
@@ -228,6 +243,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostIPC` containers.
         scored: false
+
       - id: 5.2.5
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
         type: "manual"
@@ -235,6 +251,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostNetwork` containers.
         scored: false
+
       - id: 5.2.6
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
         type: "manual"
@@ -242,6 +259,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers with `.spec.allowPrivilegeEscalation` set to `true`.
         scored: false
+
       - id: 5.2.7
         text: "Minimize the admission of root containers (Manual)"
         type: "manual"
@@ -249,6 +267,7 @@ groups:
           Create a policy for each namespace in the cluster, ensuring that either `MustRunAsNonRoot`
           or `MustRunAs` with the range of UIDs not including 0, is set.
         scored: false
+
       - id: 5.2.8
         text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
         type: "manual"
@@ -256,6 +275,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers with the `NET_RAW` capability.
         scored: false
+
       - id: 5.2.9
         text: "Minimize the admission of containers with added capabilities (Manual)"
         type: "manual"
@@ -263,6 +283,7 @@ groups:
           Ensure that `allowedCapabilities` is not present in policies for the cluster unless
           it is set to an empty array.
         scored: false
+
       - id: 5.2.10
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
@@ -271,6 +292,7 @@ groups:
           contains applicaions which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
+
       - id: 5.2.11
         text: "Minimize the admission of Windows HostProcess containers (Manual)"
         type: "manual"
@@ -278,6 +300,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers that have `.securityContext.windowsOptions.hostProcess` set to `true`.
         scored: false
+
       - id: 5.2.12
         text: "Minimize the admission of HostPath volumes (Manual)"
         type: "manual"
@@ -285,6 +308,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers with `hostPath` volumes.
         scored: false
+
       - id: 5.2.13
         text: "Minimize the admission of containers which use HostPorts (Manual)"
         type: "manual"
@@ -292,6 +316,7 @@ groups:
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers which use `hostPort` sections.
         scored: false
+
   - id: 5.3
     text: "Network Policies and CNI"
     checks:
@@ -303,12 +328,14 @@ groups:
           making use of a different plugin, or finding an alternate mechanism for restricting traffic
           in the Kubernetes cluster.
         scored: false
+
       - id: 5.3.2
         text: "Ensure that all Namespaces have NetworkPolicies defined (Manual)"
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
         scored: false
+
   - id: 5.4
     text: "Secrets Management"
     checks:
@@ -319,6 +346,7 @@ groups:
           If possible, rewrite application code to read Secrets from mounted secret files, rather than
           from environment variables.
         scored: false
+
       - id: 5.4.2
         text: "Consider external secret storage (Manual)"
         type: "manual"
@@ -326,6 +354,7 @@ groups:
           Refer to the Secrets management options offered by your cloud provider or a third-party
           secrets management solution.
         scored: false
+
   - id: 5.5
     text: "Extensible Admission Control"
     checks:
@@ -335,6 +364,7 @@ groups:
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
         scored: false
+
   - id: 5.7
     text: "General Policies"
     checks:
@@ -345,6 +375,7 @@ groups:
           Follow the documentation and create namespaces for objects in your deployment as you need
           them.
         scored: false
+
       - id: 5.7.2
         text: "Ensure that the seccomp profile is set to docker/default in your Pod definitions (Manual)"
         type: "manual"
@@ -355,6 +386,7 @@ groups:
               seccompProfile:
                 type: RuntimeDefault
         scored: false
+
       - id: 5.7.3
         text: "Apply SecurityContext to your Pods and Containers (Manual)"
         type: "manual"
@@ -363,6 +395,7 @@ groups:
           suggested list of SecurityContexts, you may refer to the CIS Security Benchmark for Docker
           Containers.
         scored: false
+
       - id: 5.7.4
         text: "The default namespace should not be used (Manual)"
         type: "manual"

@@ -43,22 +43,14 @@ groups:
 
       - id: 5.1.5
         text: "Ensure that default service accounts are not actively used. (Manual)"
-        type: "skip"
-        audit: check_for_default_sa.sh
-        tests:
-          test_items:
-            - flag: "true"
-              compare:
-                op: eq
-                value: "true"
-              set: true
+        type: "manual"
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           automountServiceAccountToken: false
-          Permissive - Kubernetes provides default service accounts to be used.
         scored: false
+
 
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
@@ -138,29 +130,23 @@ groups:
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostPID` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostIPC` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
-        type: "skip"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostNetwork` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
         scored: false
 
       - id: 5.2.6
@@ -199,8 +185,8 @@ groups:
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
         remediation: |
-          Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider adding
+          Review the use of capabilities in applications running on your cluster. Where a namespace
+          contains applications which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
@@ -242,10 +228,8 @@ groups:
 
       - id: 5.3.2
         text: "Ensure that all Namespaces have NetworkPolicies defined (Manual)"
-        type: "skip"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
-          Permissive - Enabling Network Policies can prevent certain applications from communicating with each other.
         scored: false
 
   - id: 5.4
@@ -310,9 +294,7 @@ groups:
 
       - id: 5.7.4
         text: "The default namespace should not be used (Manual)"
-        type: "skip"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
-          Permissive - Kubernetes provides a default namespace.
         scored: false
