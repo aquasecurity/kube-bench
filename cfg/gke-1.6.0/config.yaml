@@ -1,0 +1,9 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+node:
+  proxy:
+    defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
+
+  kubelet:
+    defaultconf: "/etc/kubernetes/kubelet/kubelet-config.yaml"
