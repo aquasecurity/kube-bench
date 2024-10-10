@@ -132,9 +132,10 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 ### Running on OpenShift
 
 | OpenShift Hardening Guide | kube-bench config |
-| ------------------------- | ----------------- |
+|---------------------------|-------------------|
 | ocp-3.10 +                | rh-0.7            |
-| ocp-4.1 +                 | rh-1.0            |
+| ocp-4.1-4.14              | rh-1.0            |
+| ocp-4.15 +                | rh-1.6            |
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 4.1. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or,`--version ocp-4.5` or `--benchmark rh-1.0` 
 
