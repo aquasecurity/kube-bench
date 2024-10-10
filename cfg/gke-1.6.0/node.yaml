@@ -45,7 +45,7 @@ groups:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "644"
+                value: "600"
         remediation: |
           Run the following command (using the kubelet config file location)
 
