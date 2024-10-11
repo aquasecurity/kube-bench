@@ -1,0 +1,1122 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Checks whether Kubernetes is deployed according to security best practices as defined in the CIS Kubernetes Benchmark">
+      
+      
+      
+        <link rel="canonical" href="https://aquasecurity.github.io/kube-bench/v0.9.0/controls/">
+      
+      
+        <link rel="prev" href="../flags-and-commands/">
+      
+      
+        <link rel="next" href="../architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.40+insiders-4.53.14">
+    
+    
+      
+        <title>Understanding the yamls - Kube-bench</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fd1ad6e4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#test-and-config-files" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Kube-bench" class="md-header__button md-logo" aria-label="Kube-bench" data-md-component="logo">
+      
+  <img src="../images/kube-bench-logo-only.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Kube-bench
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Understanding the yamls
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aquasecurity/kube-bench/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Kube-bench" class="md-nav__button md-logo" aria-label="Kube-bench" data-md-component="logo">
+      
+  <img src="../images/kube-bench-logo-only.png" alt="logo">
+
+    </a>
+    Kube-bench
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aquasecurity/kube-bench/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../platforms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Platforms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../running/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    How to run
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asff/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    ASFF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flags-and-commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Flags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Options
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration Options
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding the yamls
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding the yamls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Groups
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#omitting-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Omitting checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-and-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration and Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Groups
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#omitting-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Omitting checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-and-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration and Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="test-and-config-files">Test and config files</h1>
+<p><code>kube-bench</code> runs checks specified in <code>controls</code> files that are a YAML 
+representation of the CIS Kubernetes Benchmark checks (or other distribution-specific hardening guides). </p>
+<h2 id="controls">Controls</h2>
+<p><code>controls</code> is a YAML document that contains checks that must be run against a 
+specific Kubernetes node type, master or node and version.</p>
+<p><code>controls</code> is the fundamental input to <code>kube-bench</code>. The following is an example 
+of a basic <code>controls</code>:</p>
+<div class="highlight"><pre><span></span><code>---
+controls:
+id: 1
+text: &quot;Master Node Security Configuration&quot;
+type: &quot;master&quot;
+groups:
+- id: 1.1
+  text: API Server
+  checks:
+    - id: 1.1.1
+      text: &quot;Ensure that the --allow-privileged argument is set (Scored)&quot;
+      audit: &quot;ps -ef | grep kube-apiserver | grep -v grep&quot;
+      tests:
+      bin_op: or
+      test_items:
+      - flag: &quot;--allow-privileged&quot;
+        set: true
+      - flag: &quot;--some-other-flag&quot;
+        set: false
+      remediation: &quot;Edit the /etc/kubernetes/config file on the master node and
+        set the KUBE_ALLOW_PRIV parameter to &#39;--allow-privileged=false&#39;&quot;
+      scored: true
+- id: 1.2
+  text: Scheduler
+  checks:
+    - id: 1.2.1
+      text: &quot;Ensure that the --profiling argument is set to false (Scored)&quot;
+      audit: &quot;ps -ef | grep kube-scheduler | grep -v grep&quot;
+      tests:
+        bin_op: and
+        test_items:
+          - flag: &quot;--profiling&quot;
+            set: true
+          - flag: &quot;--some-other-flag&quot;
+            set: false
+      remediation: &quot;Edit the /etc/kubernetes/config file on the master node and
+        set the KUBE_ALLOW_PRIV parameter to &#39;--allow-privileged=false&#39;&quot;
+      scored: true
+</code></pre></div>
+<p><code>controls</code> is composed of a hierarchy of groups, sub-groups and checks. Each of
+the <code>controls</code> components have an id and a text description which are displayed 
+in the <code>kube-bench</code> output.</p>
+<p><code>type</code> specifies what kubernetes node type a <code>controls</code> is for. Possible values
+for <code>type</code> are <code>master</code> and <code>node</code>.</p>
+<h2 id="groups">Groups</h2>
+<p><code>groups</code> is a list of subgroups that test the various Kubernetes components
+that run on the node type specified in the <code>controls</code>. </p>
+<p>For example, one subgroup checks parameters passed to the API server binary, while 
+another subgroup checks parameters passed to the controller-manager binary.</p>
+<div class="highlight"><pre><span></span><code>groups:
+- id: 1.1
+  text: API Server
+  # ...
+- id: 1.2
+  text: Scheduler
+  # ...
+</code></pre></div>
+<p>These subgroups have <code>id</code>, <code>text</code> fields which serve the same purposes described
+in the previous paragraphs. The most important part of the subgroup is the
+<code>checks</code> field which is the collection of actual <code>check</code>s that form the subgroup.</p>
+<p>This is an example of a subgroup and checks in the subgroup.</p>
+<div class="highlight"><pre><span></span><code>id: 1.1
+text: API Server
+checks:
+  - id: 1.1.1
+    text: &quot;Ensure that the --allow-privileged argument is set (Scored)&quot;
+    audit: &quot;ps -ef | grep kube-apiserver | grep -v grep&quot;
+    tests:
+    # ...
+  - id: 1.1.2
+    text: &quot;Ensure that the --anonymous-auth argument is set to false (Not Scored)&quot;
+    audit: &quot;ps -ef | grep kube-apiserver | grep -v grep&quot;
+    tests:
+    # ...
+</code></pre></div>
+<p><code>kube-bench</code> supports running a subgroup by specifying the subgroup <code>id</code> on the
+command line, with the flag <code>--group</code> or <code>-g</code>.</p>
+<h2 id="check">Check</h2>
+<p>The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
+specified by flags to Kubernetes binaries, or in configuration files.</p>
+<p>The Benchmark also provides commands to audit a Kubernetes installation, identify
+places where the cluster security can be improved, and steps to remediate these
+identified problems.</p>
+<p>In <code>kube-bench</code>, <code>check</code> objects embody these recommendations.  This an example
+<code>check</code> object:</p>
+<div class="highlight"><pre><span></span><code>id: 1.1.1
+text: &quot;Ensure that the --anonymous-auth argument is set to false (Not Scored)&quot;
+audit: &quot;ps -ef | grep kube-apiserver | grep -v grep&quot;
+tests:
+  test_items:
+  - flag: &quot;--anonymous-auth&quot;
+    compare:
+      op: eq
+      value: false
+    set: true
+remediation: |
+  Edit the API server pod specification file kube-apiserver
+  on the master node and set the below parameter.
+  --anonymous-auth=false
+scored: false
+</code></pre></div>
+<p>A <code>check</code> object has an <code>id</code>, a <code>text</code>, an <code>audit</code>, a <code>tests</code>, <code>remediation</code>
+and <code>scored</code> fields.</p>
+<p><code>kube-bench</code> supports running individual checks by specifying the check's <code>id</code>
+as a comma-delimited list on the command line with the <code>--check</code> flag.</p>
+<p>The <code>audit</code> field specifies the command to run for a check. The output of this
+command is then evaluated for conformance with the CIS Kubernetes Benchmark
+recommendation.</p>
+<p>The audit is evaluated against criteria specified by the <code>tests</code>
+object. <code>tests</code> contain <code>bin_op</code> and <code>test_items</code>.</p>
+<p><code>test_items</code> specify the criteria(s) the <code>audit</code> command's output should meet to
+pass a check. This criteria is made up of keywords extracted from the output of
+the <code>audit</code> command and operations that compare these keywords against
+values expected by the CIS Kubernetes Benchmark. </p>
+<p>There are three ways to run and extract keywords from the output of the command used, 
+| Command | Output var |
+|---|---|
+| <code>audit</code> | <code>flag</code> |
+| <code>audit_config</code> | <code>path</code> | 
+| <code>audit_env</code> | <code>env</code> |</p>
+<p><code>flag</code> is used when the keyword is a command-line flag. The associated <code>audit</code> command could 
+be any binaries available on the system like <code>ps</code> command and a <code>grep</code> for the binary whose flag we are
+checking:</p>
+<div class="highlight"><pre><span></span><code>ps<span class="w"> </span>-ef<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>somebinary<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>grep
+</code></pre></div>
+<p>Here is an example usage of the <code>flag</code> option:</p>
+<div class="highlight"><pre><span></span><code># ...
+audit: &quot;ps -ef | grep kube-apiserver | grep -v grep&quot;
+tests:
+  test_items:
+  - flag: &quot;--anonymous-auth&quot;
+  # ...
+</code></pre></div>
+<p><code>path</code> is used when the keyword is an option set in a JSON or YAML config file.
+The associated <code>audit_command</code> command is usually <code>cat /path/to/config-yaml-or-json</code>.
+For example:</p>
+<div class="highlight"><pre><span></span><code># ...
+text: &quot;Ensure that the --anonymous-auth argument is set to false (Not Scored)&quot;
+audit: &quot;cat /path/to/some/config&quot;
+tests:
+  test_items:
+  - path: &quot;{.someoption.value}&quot;
+    # ...
+</code></pre></div>
+<p><code>env</code> is used to check if the value is present within a specified environment variable. The presence of <code>env</code> is treated as an OR operation, if both <code>flag</code> and <code>env</code> are supplied it will use either to attempt pass the check.
+The command used for checking the environment variables of a process <strong>is generated by default</strong>.</p>
+<p>If the command being generated is causing errors, you can override the command used by setting <code>audit_env</code> on the check.
+Similarly, if you don't want the environment checking command to be generated or run at all, specify <code>disableEnvTesting</code> as true on the check.</p>
+<p>The example below will check if the flag <code>--auto-tls</code> is equal to false <em>OR</em> <code>ETCD_AUTO_TLS</code> is equal to false</p>
+<p><div class="highlight"><pre><span></span><code>  test_items:
+  - flag: &quot;--auto-tls&quot;
+    env: &quot;ETCD_AUTO_TLS&quot;
+    compare:
+      op: eq
+      value: false
+</code></pre></div>
+<strong>Note:</strong> flag, path and env will act as OR if more then one present. </p>
+<p><code>test_item</code> compares the output of the audit command and keywords using the
+<code>set</code> and <code>compare</code> fields.</p>
+<div class="highlight"><pre><span></span><code>  test_items:
+  - flag: &quot;--anonymous-auth&quot;
+    compare:
+      op: eq
+      value: false
+    set: true
+</code></pre></div>
+<p><code>set</code> checks if a keyword is present in the output of the audit command or a config file. The possible values for <code>set</code> are true and false.</p>
+<p>If <code>set</code> is true, the check passes only if the keyword is present in the output
+of the audit command, or config file. If <code>set</code> is false, the check passes only
+if the keyword is not present in the output of the audit command, or config file.
+<code>set</code> is true by default.</p>
+<p><code>compare</code> has two fields <code>op</code> and <code>value</code> to compare keywords with expected
+value. <code>op</code> specifies which operation is used for the comparison, and <code>value</code>
+specifies the value to compare against.</p>
+<blockquote>
+<p>To use <code>compare</code>, <code>set</code> must true. The comparison will be ignored if <code>set</code> is
+false</p>
+</blockquote>
+<p>The <code>op</code> (operations) currently supported in <code>kube-bench</code> are:
+- <code>eq</code>: tests if the keyword is equal to the compared value.
+- <code>noteq</code>: tests if the keyword is unequal to the compared value.
+- <code>gt</code>: tests if the keyword is greater than the compared value.
+- <code>gte</code>: tests if the keyword is greater than or equal to the compared value.
+- <code>lt</code>: tests if the keyword is less than the compared value.
+- <code>lte</code>: tests if the keyword is less than or equal to the compared value.
+- <code>has</code>: tests if the keyword contains the compared value.
+- <code>nothave</code>: tests if the keyword does not contain the compared value.
+- <code>regex</code>: tests if the flag value matches the compared value regular expression.
+   When defining regular expressions in YAML it is generally easier to wrap them in
+   single quotes, for example <code>'^[abc]$'</code>, to avoid issues with string escaping.
+- <code>bitmask</code> : tests if keyward is bitmasked with the compared value, common usege is for 
+   comparing file permissions in linux.</p>
+<h2 id="omitting-checks">Omitting checks</h2>
+<p>If you decide that a recommendation is not appropriate for your environment, you can choose to omit it by editing the test YAML file to give it the check type <code>skip</code> as in this example:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">checks</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.1.1</span>
+<span class="w">    </span><span class="nt">text</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Ensure</span><span class="nv"> </span><span class="s">that</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">--allow-privileged</span><span class="nv"> </span><span class="s">argument</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">set</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">false</span><span class="nv"> </span><span class="s">(Scored)&quot;</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;skip&quot;</span>
+<span class="w">    </span><span class="nt">scored</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>No tests will be run for this check and the output will be marked [INFO].</p>
+<h2 id="configuration-and-variables">Configuration and Variables</h2>
+<p>Kubernetes component configuration and binary file locations and names 
+vary based on cluster deployment methods and Kubernetes distribution used.
+For this reason, the locations of these binaries and config files are configurable
+by editing the <code>cfg/config.yaml</code> file and these binaries and files can be
+referenced in a <code>controls</code> file via variables.</p>
+<p>The <code>cfg/config.yaml</code> file is a global configuration file. Configuration files
+can be created for specific Kubernetes versions (distributions). Values in the
+version-specific config overwrite similar values in <code>cfg/config.yaml</code>.</p>
+<p>For example, the kube-apiserver in Red Hat OCP distribution is run as 
+<code>hypershift openshift-kube-apiserver</code> instead of the default <code>kube-apiserver</code>.
+This difference can be specified by editing the <code>master.apiserver.defaultbin</code>
+entry <code>cfg/rh-0.7/config.yaml</code>.</p>
+<p>Below is the structure of <code>cfg/config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code>nodetype
+  |-- components
+    |-- component1
+  |-- component1
+    |-- bins
+    |-- defaultbin (optional)
+    |-- confs
+    |-- defaultconf (optional)
+    |-- svcs
+    |-- defaultsvc (optional)
+    |-- kubeconfig
+    |-- defaultkubeconfig (optional)
+</code></pre></div>
+<p>Every node type has a subsection that specifies the main configuration items.</p>
+<ul>
+<li><code>components</code>: A list of components for the node type. For example master 
+  will have an entry for <strong>apiserver</strong>, <strong>scheduler</strong> and <strong>controllermanager</strong>.</li>
+</ul>
+<p>Each component has the following entries:</p>
+<ul>
+<li><code>bins</code>: A list of candidate binaries for a component. <code>kube-bench</code> checks this
+   list and selects the <strong>first</strong> binary that is running on the node.</li>
+</ul>
+<p>If none of the binaries in <code>bins</code> list is running, <code>kube-bench</code> checks if the
+   binary specified by <code>defaultbin</code> is running and terminates if none of the 
+   binaries in both <code>bins</code> and <code>defaultbin</code> is running.</p>
+<p>The selected binary for a component can be referenced in <code>controls</code> using a 
+   variable in the form <code>$&lt;component&gt;bin</code>. In the example below, we reference 
+   the selected API server binary with the variable <code>$apiserverbin</code> in an <code>audit</code>
+   command.</p>
+<div class="highlight"><pre><span></span><code>id: 1.1.1
+ text: &quot;Ensure that the --anonymous-auth argument is set to false (Scored)&quot;
+ audit: &quot;ps -ef | grep $apiserverbin | grep -v grep&quot;
+ # ...
+</code></pre></div>
+<ul>
+<li><code>confs</code>: A list of candidate configuration files for a component. <code>kube-bench</code>
+  checks this list and selects the <strong>first</strong> config file that is found on the node.
+  If none of the config files exists, <code>kube-bench</code> defaults conf to the value
+  of <code>defaultconf</code>.</li>
+</ul>
+<p>The selected config for a component can be referenced in <code>controls</code> using a
+  variable in the form <code>$&lt;component&gt;conf</code>. In the example below, we reference the 
+  selected API server config file with the variable <code>$apiserverconf</code> in an <code>audit</code>
+  command.</p>
+<div class="highlight"><pre><span></span><code>id: 1.4.1
+  text: &quot;Ensure that the API server pod specification file permissions are
+  set to 644 or more restrictive (Scored)&quot;
+  audit: &quot;/bin/sh -c &#39;if test -e $apiserverconf; then stat -c %a $apiserverconf; fi&#39;&quot;
+</code></pre></div>
+<ul>
+<li><code>svcs</code>:  A list of candidate unitfiles for a component. <code>kube-bench</code> checks this 
+  list and selects the <strong>first</strong> unitfile that is found on the node. If none of the
+  unitfiles exists, <code>kube-bench</code> defaults unitfile to the value of <code>defaultsvc</code>.</li>
+</ul>
+<p>The selected unitfile for a component can be referenced in <code>controls</code> via a
+  variable in the form <code>$&lt;component&gt;svc</code>. In the example below, the selected 
+  kubelet unitfile is referenced with <code>$kubeletsvc</code> in the <code>remediation</code> of the 
+  <code>check</code>.</p>
+<div class="highlight"><pre><span></span><code>id: 2.1.1
+  # ...
+  remediation: |
+    Edit the kubelet service file $kubeletsvc
+    on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+    --allow-privileged=false
+    Based on your system, restart the kubelet service. For example:
+    systemctl daemon-reload
+    systemctl restart kubelet.service
+  # ...
+</code></pre></div>
+<ul>
+<li>
+<p><code>kubeconfig</code>: A list of candidate kubeconfig files for a component. <code>kube-bench</code>
+    checks this list and selects the <strong>first</strong> file that is found on the node. If none
+    of the files exists, <code>kube-bench</code> defaults kubeconfig to the value of 
+    <code>defaultkubeconfig</code>.</p>
+<p>The selected kubeconfig for a component can be referenced in <code>controls</code> with a variable in the form <code>$&lt;component&gt;kubeconfig</code>. In the example below, the
+selected kubelet kubeconfig is referenced with <code>$kubeletkubeconfig</code> in the
+<code>audit</code> command.</p>
+<div class="highlight"><pre><span></span><code>id: 2.2.1
+  text: &quot;Ensure that the kubelet.conf file permissions are set to 644 or
+  more restrictive (Scored)&quot;
+  audit: &quot;/bin/sh -c &#39;if test -e $kubeletkubeconfig; then stat -c %a $kubeletkubeconfig; fi&#39;&quot;
+  # ...
+</code></pre></div>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.c7c1ca2c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"method": "mike", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.9c5b6415.min.js"></script>
+      
+    
+  </body>
+</html>

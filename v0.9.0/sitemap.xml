@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/architecture/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/asff/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/controls/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/flags-and-commands/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/installation/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/platforms/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+    <url>
+         <loc>https://aquasecurity.github.io/kube-bench/v0.9.0/running/</loc>
+         <lastmod>2024-10-11</lastmod>
+    </url>
+</urlset>
