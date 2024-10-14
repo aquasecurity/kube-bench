@@ -281,7 +281,7 @@ Based on your system, restart the kubelet service. For example:
 systemctl daemon-reload
 systemctl restart kubelet.service
 
-4.2.13 If using a Kubelet config file, edit the file to set TLSCipherSuites: to
+4.2.13 If using a Kubelet config file, edit the file to set tlsCipherSuites: to
 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
 or to a subset of these values.
 If using executable arguments, edit the kubelet service file
