@@ -95,6 +95,7 @@ master:
     datadirs:
       - /var/lib/etcd/default.etcd
       - /var/lib/etcd/data.etcd
+      - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -105,6 +106,7 @@ master:
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
       - /var/lib/rancher/rke2/server/db/etcd/config
+      - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
 
@@ -162,13 +164,13 @@ node:
       - "/var/snap/microk8s/current/credentials/kubelet.config"
       - "/etc/kubernetes/kubeconfig-kubelet"
       - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
-      - "/var/lib/rancher/k3s/server/cred/admin.kubeconfig"
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/etc/kubernetes/kubelet/config.json"
       - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
@@ -188,7 +190,6 @@ node:
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
       - "/etc/kubernetes/kubelet.yaml"
-      - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
 
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
@@ -234,6 +235,7 @@ etcd:
     datadirs:
       - /var/lib/etcd/default.etcd
       - /var/lib/etcd/data.etcd
+      - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
@@ -278,11 +280,15 @@ version_mapping:
   "1.24": "cis-1.24"
   "1.25": "cis-1.7"
   "1.26": "cis-1.8"
+  "1.27": "cis-1.9"
+  "1.28": "cis-1.9"
+  "1.29": "cis-1.9"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
   "eks-1.2.0": "eks-1.2.0"
   "gke-1.0": "gke-1.0"
   "gke-1.2.0": "gke-1.2.0"
+  "gke-1.6.0": "gke-1.6.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
@@ -356,6 +362,12 @@ target_mapping:
     - "controlplane"
     - "etcd"
     - "policies"
+  "cis-1.9":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
   "gke-1.0":
     - "master"
     - "node"
@@ -364,6 +376,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "gke-1.2.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "gke-1.6.0":
     - "master"
     - "node"
     - "controlplane"
@@ -421,6 +439,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.8":
     - "master"
     - "etcd"
     - "controlplane"
