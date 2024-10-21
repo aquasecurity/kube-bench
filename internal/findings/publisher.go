@@ -54,11 +54,11 @@ func (p *Publisher) PublishFinding(finding []types.AwsSecurityFinding) (*Publish
 			errs = errors.Wrap(err, "finding publish failed")
 		}
 		if r != nil {
-			if r.FailedCount != 0 {
-				o.FailedCount += r.FailedCount
+			if *r.FailedCount != 0 {
+				o.FailedCount += *r.FailedCount
 			}
-			if r.SuccessCount != 0 {
-				o.SuccessCount += r.SuccessCount
+			if *r.SuccessCount != 0 {
+				o.SuccessCount += *r.SuccessCount
 			}
 			o.FailedFindings = append(o.FailedFindings, r.FailedFindings...)
 		}

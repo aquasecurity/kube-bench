@@ -9,6 +9,7 @@ env:
   ALIAS: aquasecurity
   DOCKERHUB_ALIAS: aquasec
   REP: kube-bench
+
 jobs:
   publish:
     name: Publish
@@ -22,7 +23,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildxarch-${{ github.sha }}
@@ -46,7 +47,10 @@ jobs:
           images: ${{ env.REP }}
           tag-semver: |
             {{version}}
-
+      - name: Extract variables from makefile (kubectl)
+        id: extract_vars
+        run: |
+          echo "KUBECTL_VERSION=$(grep -oP '^KUBECTL_VERSION\s*\?=\s*\K.*' makefile)" >> $GITHUB_ENV
       - name: Build and push - Docker/ECR
         id: docker_build
         uses: docker/build-push-action@v5
@@ -57,6 +61,7 @@ jobs:
           push: true
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
@@ -76,6 +81,7 @@ jobs:
           file: Dockerfile.ubi
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
@@ -95,6 +101,7 @@ jobs:
           file: Dockerfile.fips.ubi
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips

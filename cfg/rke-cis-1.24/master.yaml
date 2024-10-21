@@ -9,15 +9,16 @@ groups:
     text: "Control Plane Node Configuration Files"
     checks:
       - id: 1.1.1
-        text: "Ensure that the API server pod specification file permissions are set to 600 or more restrictive (Automated)"
-        type: "skip"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
+        text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)"
+        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf;else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "600"
+                value: "644"
+            - flag: "File not found"
         remediation: |
           Cluster provisioned by RKE doesn't require or maintain a configuration file for kube-apiserver.
           All configuration is passed in as arguments at container run time.
@@ -138,7 +139,7 @@ groups:
         scored: false
 
       - id: 1.1.10
-        text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
+        text: "Ensure that the Container Network Interface file ownership is set to root:root (Automated)"
         audit: |
           ps -ef | grep $kubeletbin | grep -- --cni-conf-dir | sed 's%.*cni-conf-dir[= ]\([^ ]*\).*%\1%' | xargs -I{} find {} -mindepth 1 | xargs --no-run-if-empty stat -c %U:%G
           find /var/lib/cni/networks -type f 2> /dev/null | xargs --no-run-if-empty stat -c %U:%G
@@ -150,7 +151,7 @@ groups:
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
           chown root:root <path/to/cni/files>
-        scored: false
+        scored: true
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
@@ -286,11 +287,13 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
-        audit: "find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a"
-        use_multiple_values: true
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Automated)"
+        audit: |
+          if test -n "$(find /node/etc/kubernetes/ssl/ -name '*.pem' ! -name '*key.pem')"; then find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a;else echo "File not found"; fi
         tests:
+          bin_op: or
           test_items:
+            - flag: "File not found"
             - flag: "permissions"
               compare:
                 op: bitmask
@@ -299,23 +302,25 @@ groups:
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
           find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
-        scored: false
+        scored: true
 
       - id: 1.1.21
-        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
-        audit: "find /node/etc/kubernetes/ssl/ -name '*key.pem' | xargs stat -c permissions=%a"
-        use_multiple_values: true
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Automated)"
+        audit: |
+          if test -n "$(find /node/etc/kubernetes/ssl/ -name '*.pem')"; then find /node/etc/kubernetes/ssl/  -name '*.pem' | xargs stat -c permissions=%a;else echo \"File not found\"; fi
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
           find /node/etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
-        scored: false
+        scored: true
 
   - id: 1.2
     text: "API Server"
@@ -369,20 +374,17 @@ groups:
         scored: true
 
       - id: 1.2.4
-        text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)"
+        text: "Ensure that the --kubelet-https argument is set to true (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
-          bin_op: and
           test_items:
-            - flag: "--kubelet-client-certificate"
-            - flag: "--kubelet-client-key"
+            - flag: "--kubelet-https"
+              compare:
+                op: eq
+                value: true
         remediation: |
-          Follow the Kubernetes documentation and set up the TLS connection between the
-          apiserver and kubelets. Then, edit API server pod specification file
-          $apiserverconf on the control plane node and set the
-          kubelet client certificate and key parameters as below.
-          --kubelet-client-certificate=<path/to/client-certificate-file>
-          --kubelet-client-key=<path/to/client-key-file>
+          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+          on the control plane node and remove the --kubelet-https parameter.
         scored: true
 
       - id: 1.2.5
@@ -406,7 +408,6 @@ groups:
 
       - id: 1.2.6
         text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)"
-        type: "skip"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -471,7 +472,7 @@ groups:
         scored: true
 
       - id: 1.2.10
-        text: "Ensure that the admission control plugin EventRateLimit is set (Manual)"
+        text: "Ensure that the admission control plugin EventRateLimit is set (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -486,7 +487,7 @@ groups:
           and set the below parameters.
           --enable-admission-plugins=...,EventRateLimit,...
           --admission-control-config-file=<path/to/configuration/file>
-        scored: false
+        scored: true
 
       - id: 1.2.11
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Automated)"
@@ -521,7 +522,7 @@ groups:
           on the control plane node and set the --enable-admission-plugins parameter to include
           AlwaysPullImages.
           --enable-admission-plugins=...,AlwaysPullImages,...
-        scored: false
+        scored: true
 
       - id: 1.2.13
         text: "Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Automated)"
@@ -542,7 +543,7 @@ groups:
           on the control plane node and set the --enable-admission-plugins parameter to include
           SecurityContextDeny, unless PodSecurityPolicy is already in place.
           --enable-admission-plugins=...,SecurityContextDeny,...
-        scored: false
+        scored: true
 
       - id: 1.2.14
         text: "Ensure that the admission control plugin ServiceAccount is set (Automated)"
@@ -810,8 +811,7 @@ groups:
         scored: true
 
       - id: 1.2.30
-        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Manual)"
-        type: "skip"
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
           test_items:
@@ -822,11 +822,10 @@ groups:
           Then, edit the API server pod specification file $apiserverconf
           on the control plane node and set the --encryption-provider-config parameter to the path of that file.
           For example, --encryption-provider-config=</path/to/EncryptionConfig/File>
-        scored: false
+        scored: true
 
       - id: 1.2.31
-        text: "Ensure that encryption providers are appropriately configured (Manual)"
-        type: "skip"
+        text: "Ensure that encryption providers are appropriately configured (Automated)"
         audit: |
           ENCRYPTION_PROVIDER_CONFIG=$(ps -ef | grep $apiserverbin | grep -- --encryption-provider-config | sed 's%.*encryption-provider-config[= ]\([^ ]*\).*%\1%')
           if test -e $ENCRYPTION_PROVIDER_CONFIG; then grep -A1 'providers:' $ENCRYPTION_PROVIDER_CONFIG | tail -n1 | grep -o "[A-Za-z]*" | sed 's/^/provider=/'; fi
@@ -840,7 +839,7 @@ groups:
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           In this file, choose aescbc, kms or secretbox as the encryption provider.
           Enabling encryption changes how data can be recovered as data is encrypted.
-        scored: false
+        scored: true
 
       - id: 1.2.32
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Automated)"
@@ -862,13 +861,13 @@ groups:
           TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
           TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,
           TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_GCM_SHA384
-        scored: false
+        scored: true
 
   - id: 1.3
     text: "Controller Manager"
     checks:
       - id: 1.3.1
-        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Manual)"
+        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           test_items:
@@ -941,7 +940,6 @@ groups:
 
       - id: 1.3.6
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
-        type: "skip"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
           bin_op: or

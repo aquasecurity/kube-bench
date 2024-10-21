@@ -119,9 +119,6 @@ groups:
         tests:
           test_items:
             - flag: root:root
-              compare:
-                op: eq
-                value: root:root
         remediation: |
           Run the following command to modify the ownership of the --client-ca-file.
           chown root:root <filename>
@@ -443,7 +440,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: false
-
+        type: skip
       - id: 4.2.13
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -456,7 +453,7 @@ groups:
                 op: valid_elements
                 value: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         remediation: |
-          If using a Kubelet config file, edit the file to set `TLSCipherSuites` to
+          If using a Kubelet config file, edit the file to set `tlsCipherSuites` to
           TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
           or to a subset of these values.
           If using executable arguments, edit the kubelet service file

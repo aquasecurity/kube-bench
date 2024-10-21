@@ -345,16 +345,15 @@ groups:
         text: "Ensure that the --DenyServiceExternalIPs is set (Manual)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--enable-admission-plugins"
               compare:
-                op: have
+                op: has
                 value: "DenyServiceExternalIPs"
         remediation: |
           Edit the API server pod specification file $apiserverconf
-          on the control plane node and remove the `DenyServiceExternalIPs`
-          from enabled admission plugins.
+          on the control plane node and add the `DenyServiceExternalIPs` plugin
+          to the enabled admission plugins, as such --enable-admission-plugin=DenyServiceExternalIPs.
         scored: false
 
       - id: 1.2.4
