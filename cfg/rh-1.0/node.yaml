@@ -48,7 +48,7 @@ groups:
           echo "No matching pods found on the current node."
           else
           # Execute the stat command
-          oc exec -n openshift-sdn "$POD_NAME"  - stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME" -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
           fi
         tests:
           bin_op: or

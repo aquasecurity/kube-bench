@@ -164,13 +164,13 @@ node:
       - "/var/snap/microk8s/current/credentials/kubelet.config"
       - "/etc/kubernetes/kubeconfig-kubelet"
       - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
-      - "/var/lib/rancher/k3s/server/cred/admin.kubeconfig"
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/etc/kubernetes/kubelet/config.json"
       - "/etc/kubernetes/kubelet/config"
       - "/home/kubernetes/kubelet-config.yaml"
       - "/home/kubernetes/kubelet-config.yml"
@@ -190,7 +190,6 @@ node:
       - "/etc/systemd/system/snap.kubelet.daemon.service"
       - "/etc/systemd/system/snap.microk8s.daemon-kubelet.service"
       - "/etc/kubernetes/kubelet.yaml"
-      - "/var/lib/rancher/rke2/agent/kubelet.kubeconfig"
 
     defaultconf: "/var/lib/kubelet/config.yaml"
     defaultsvc: "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
@@ -289,6 +288,7 @@ version_mapping:
   "eks-1.2.0": "eks-1.2.0"
   "gke-1.0": "gke-1.0"
   "gke-1.2.0": "gke-1.2.0"
+  "gke-1.6.0": "gke-1.6.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
@@ -381,6 +381,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "gke-1.6.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "eks-1.0.1":
     - "master"
     - "node"
@@ -433,6 +439,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.8":
     - "master"
     - "etcd"
     - "controlplane"

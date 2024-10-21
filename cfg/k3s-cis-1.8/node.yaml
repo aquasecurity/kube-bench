@@ -1,6 +1,6 @@
 ---
 controls:
-version: "k3s-cis-1.24"
+version: "k3s-cis-1.8"
 id: 4
 text: "Worker Node Security Configuration"
 type: "node"
@@ -10,8 +10,8 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
         type: "skip"
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -25,14 +25,16 @@ groups:
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
         type: "skip"
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
         tests:
           test_items:
             - flag: root:root
         remediation: |
           Not Applicable.
           The kubelet is embedded in the k3s process. There is no kubelet service file, all configuration is passed in as arguments at runtime.
+          Not Applicable.
+           All configuration is passed in as arguments at container run time.
         scored: true
 
       - id: 4.1.3
@@ -42,7 +44,6 @@ groups:
           bin_op: or
           test_items:
             - flag: "permissions"
-              set: true
               compare:
                 op: bitmask
                 value: "600"
@@ -54,7 +55,7 @@ groups:
 
       - id: 4.1.4
         text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Automated)"
-        audit: 'stat -c %U:%G $proxykubeconfig'
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
         tests:
           bin_op: or
           test_items:
@@ -84,11 +85,7 @@ groups:
         audit: 'stat -c %U:%G $kubeletkubeconfig'
         tests:
           test_items:
-            - flag: "root:root"
-              compare:
-                op: eq
-                value: "root:root"
-              set: true
+            - flag: root:root
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -104,7 +101,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-              set: true
         remediation: |
           Run the following command to modify the file permissions of the
           --client-ca-file chmod 600 $kubeletcafile
@@ -125,7 +121,7 @@ groups:
         scored: true
 
       - id: 4.1.9
-        text: "If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Automated)"
+        text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         type: "skip"
         tests:
@@ -140,7 +136,7 @@ groups:
         scored: true
 
       - id: 4.1.10
-        text: "If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Automated)"
+        text: "Ensure that the kubelet --config configuration file ownership is set to root:root (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
         type: "skip"
         tests:
@@ -164,7 +160,6 @@ groups:
               compare:
                 op: eq
                 value: false
-              set: true
         remediation: |
           By default, K3s sets the --anonymous-auth to false. If you have set this to a different value, you
           should set it back to false. If using the K3s config file /etc/rancher/k3s/config.yaml, remove any lines similar to below.
@@ -180,6 +175,7 @@ groups:
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
         audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"; else echo "--authorization-mode=Webhook"; fi'' '
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
             - flag: --authorization-mode
@@ -187,7 +183,6 @@ groups:
               compare:
                 op: nothave
                 value: AlwaysAllow
-              set: true
         remediation: |
           By default, K3s does not set the --authorization-mode to AlwaysAllow.
           If using the K3s config file /etc/rancher/k3s/config.yaml, remove any lines similar to below.
@@ -207,7 +202,6 @@ groups:
           test_items:
             - flag: --client-ca-file
               path: '{.authentication.x509.clientCAFile}'
-              set: true
         remediation: |
           By default, K3s automatically provides the client ca certificate for the Kubelet.
           It is generated and located at /var/lib/rancher/k3s/agent/client-ca.crt
@@ -216,6 +210,7 @@ groups:
       - id: 4.2.4
         text: "Verify that the --read-only-port argument is set to 0 (Automated)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           bin_op: or
           test_items:
@@ -263,25 +258,6 @@ groups:
         scored: false
 
       - id: 4.2.6
-        text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
-        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
-        tests:
-          test_items:
-            - flag: --protect-kernel-defaults
-              path: '{.protectKernelDefaults}'
-              compare:
-                op: eq
-                value: true
-              set: true
-        remediation: |
-          If using the K3s config file /etc/rancher/k3s/config.yaml, set the following parameter.
-          protect-kernel-defaults: true
-          If using the command line, run K3s with --protect-kernel-defaults=true.
-          Based on your system, restart the k3s service. For example,
-          systemctl restart k3s.service
-        scored: true
-
-      - id: 4.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         tests:
@@ -291,7 +267,6 @@ groups:
               compare:
                 op: eq
                 value: true
-              set: true
             - flag: --make-iptables-util-chains
               path: '{.makeIPTablesUtilChains}'
               set: false
@@ -305,10 +280,10 @@ groups:
           systemctl restart k3s.service
         scored: true
 
-      - id: 4.2.8
+      - id: 4.2.7
         text: "Ensure that the --hostname-override argument is not set (Automated)"
-        type: "skip"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
+        type: "skip"
         tests:
           test_items:
             - flag: --hostname-override
@@ -319,17 +294,21 @@ groups:
           with cloud providers that require this flag to ensure that hostname matches node names.
         scored: true
 
-      - id: 4.2.9
+      - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
-        audit_config: "/bin/cat $kubeletconf"
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
             - flag: --event-qps
               path: '{.eventRecordQPS}'
               compare:
-                op: eq
+                op: gte
                 value: 0
+            - flag: --event-qps
+              path: '{.eventRecordQPS}'
+              set: false
+          bin_op: or
         remediation: |
           By default, K3s sets the event-qps to 0. Should you wish to change this,
           If using the K3s config file /etc/rancher/k3s/config.yaml, set the following parameter to an appropriate value.
@@ -340,7 +319,7 @@ groups:
           systemctl restart k3s.service
         scored: false
 
-      - id: 4.2.10
+      - id: 4.2.9
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         tests:
@@ -359,7 +338,7 @@ groups:
             - "tls-private-key-file=<path/to/tls-private-key-file>"
         scored: true
 
-      - id: 4.2.11
+      - id: 4.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
@@ -382,9 +361,10 @@ groups:
           systemctl restart k3s.service
         scored: true
 
-      - id: 4.2.12
+      - id: 4.2.11
         text: "Verify that the RotateKubeletServerCertificate argument is set to true (Automated)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
+        audit_config: "/bin/cat $kubeletconf"
         tests:
           bin_op: or
           test_items:
@@ -405,10 +385,10 @@ groups:
           systemctl restart k3s.service
         scored: true
 
-      - id: 4.2.13
+      - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
         audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
-        audit_config: "/bin/cat $kubeletconf"
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
             - flag: --tls-cipher-suites
@@ -424,4 +404,19 @@ groups:
           If using the command line, add the K3s flag --kubelet-arg="tls-cipher-suites=<same values as above>"
           Based on your system, restart the k3s service. For example,
           systemctl restart k3s.service
+        scored: false
+
+      - id: 4.2.13
+        text: "Ensure that a limit is set on pod PIDs (Manual)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        tests:
+          test_items:
+            - flag: --pod-max-pids
+              path: '{.podPidsLimit}'
+        remediation: |
+          Decide on an appropriate level for this parameter and set it,
+          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `podPidsLimit` to
+          kubelet-arg:
+            - "pod-max-pids=<value>"
         scored: false

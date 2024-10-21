@@ -92,7 +92,7 @@ aws ecr create-repository --repository-name k8s/kube-bench --image-tag-mutabilit
 git clone https://github.com/aquasecurity/kube-bench.git
 cd kube-bench
 aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com
-docker build -t k8s/kube-bench .
+make build-docker IMAGE_NAME=k8s/kube-bench
 docker tag k8s/kube-bench:latest <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:latest
 ```
@@ -154,8 +154,9 @@ oc apply -f job.yaml
 | ------------- | ----------------------------------------------------------- |
 | gke-1.0       | master, controlplane, node, etcd, policies, managedservices |
 | gke-1.2.0     | master, controlplane, node, policies, managedservices       |
+| gke-1.6.0     | master, controlplane, node, policies, managedservices       |
 
-kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0` or `--benchmark gke-1.2.0` when you run the `kube-bench` command.
+kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0`, `--benchmark gke-1.2.0` or `--benchmark gke-1.6.0` when you run the `kube-bench` command.
 
 To run the benchmark as a job in your GKE cluster apply the included `job-gke.yaml`.
 
