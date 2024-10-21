@@ -1,0 +1,238 @@
+---
+controls:
+version: "gke-1.6.0"
+id: 4
+text: "Kubernetes Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Automated)"
+        type: "manual"
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
+          if they need this role or if they could use a role with fewer privileges.
+
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+
+            kubectl delete clusterrolebinding [name]
+        scored: false
+
+      - id: 4.1.2
+        text: "Minimize access to secrets (Automated)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 4.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
+        type: "manual"
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 4.1.4
+        text: "Ensure that default service accounts are not actively used (Automated)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific
+          access to the Kubernetes API server.
+
+          Modify the configuration of each default service account to include this value
+
+            automountServiceAccountToken: false
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+      - id: 4.1.6
+        text: "Avoid use of system:masters group (Automated)"
+        type: "manual"
+        remediation: |
+          Remove the system:masters group from all users in the cluster.
+        scored: false
+
+      - id: 4.1.7
+        text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove the impersonate, bind and escalate rights from subjects.
+        scored: false
+
+      - id: 4.1.8
+        text: "Avoid bindings to system:anonymous (Automated)"
+        type: "manual"
+        remediation: |
+          Identify all clusterrolebindings and rolebindings to the user system:anonymous.
+          Check if they are used and review the permissions associated with the binding using the
+          commands in the Audit section above or refer to GKE documentation
+          (https://cloud.google.com/kubernetes-engine/docs/best-practices/rbac#detect-prevent-default).
+
+          Strongly consider replacing unsafe bindings with an authenticated, user-defined group.
+          Where possible, bind to non-default, user-defined groups with least-privilege roles.
+
+          If there are any unsafe bindings to the user system:anonymous, proceed to delete them
+          after consideration for cluster operations with only necessary, safer bindings.
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
+        scored: false
+
+      - id: 4.1.9
+        text: "Avoid non-default bindings to system:unauthenticated (Automated)"
+        type: "manual"
+        remediation: |
+          Identify all non-default clusterrolebindings and rolebindings to the group
+          system:unauthenticated. Check if they are used and review the permissions
+          associated with the binding using the commands in the Audit section above or refer to
+          GKE documentation (https://cloud.google.com/kubernetes-engine/docs/best-practices/rbac#detect-prevent-default).
+
+          Strongly consider replacing non-default, unsafe bindings with an authenticated, user-
+          defined group. Where possible, bind to non-default, user-defined groups with least-
+          privilege roles.
+
+          If there are any non-default, unsafe bindings to the group system:unauthenticated,
+          proceed to delete them after consideration for cluster operations with only necessary,
+          safer bindings.
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
+        scored: false
+
+      - id: 4.1.10
+        text: "Avoid non-default bindings to system:authenticated (Automated)"
+        type: "manual"
+        remediation: |
+          Identify all non-default clusterrolebindings and rolebindings to the group
+          system:authenticated. Check if they are used and review the permissions associated
+          with the binding using the commands in the Audit section above or refer to GKE
+          documentation.
+
+          Strongly consider replacing non-default, unsafe bindings with an authenticated, user-
+          defined group. Where possible, bind to non-default, user-defined groups with least-
+          privilege roles.
+
+          If there are any non-default, unsafe bindings to the group system:authenticated,
+          proceed to delete them after consideration for cluster operations with only necessary,
+          safer bindings.
+
+            kubectl delete clusterrolebinding [CLUSTER_ROLE_BINDING_NAME]
+            kubectl delete rolebinding [ROLE_BINDING_NAME] --namespace [ROLE_BINDING_NAMESPACE]
+        scored: false
+
+  - id: 4.2
+    text: "Pod Security Standards"
+    checks:
+      - id: 4.2.1
+        text: "Ensure that the cluster enforces Pod Security Standard Baseline profile or stricter for all namespaces. (Manual)"
+        type: "manual"
+        remediation: |
+          Ensure that Pod Security Admission is in place for every namespace which contains
+          user workloads.
+          Run the following command to enforce the Baseline profile in a namespace:
+
+            kubectl label namespace pod-security.kubernetes.io/enforce=baseline
+        scored: false
+
+  - id: 4.3
+    text: "Network Policies and CNI"
+    checks:
+      - id: 4.3.1
+        text: "Ensure that the CNI in use supports Network Policies (Manual)"
+        type: "manual"
+        remediation: |
+          To use a CNI plugin with Network Policy, enable Network Policy in GKE, and the CNI plugin
+          will be updated. See Recommendation 5.6.7.
+        scored: false
+
+      - id: 4.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Automated)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as needed.
+          See: https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy#creating_a_network_policy
+          for more information.
+        scored: false
+
+  - id: 4.4
+    text: "Secrets Management"
+    checks:
+      - id: 4.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Automated)"
+        type: "manual"
+        remediation: |
+          if possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 4.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 4.5
+    text: "Extensible Admission Control"
+    checks:
+      - id: 4.5.1
+        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and setup image provenance.
+          Also see recommendation 5.10.4.
+        scored: false
+
+  - id: 4.6
+    text: "General Policies"
+    checks:
+      - id: 4.6.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 4.6.2
+        text: "Ensure that the seccomp profile is set to RuntimeDefault in your pod definitions (Automated)"
+        type: "manual"
+        remediation: |
+          Use security context to enable the RuntimeDefault seccomp profile in your pod
+          definitions. An example is as below:
+
+            {
+              "namespace": "kube-system",
+              "name": "metrics-server-v0.7.0-dbcc8ddf6-gz7d4",
+              "seccompProfile": "RuntimeDefault"
+            }
+        scored: false
+
+      - id: 4.6.3
+        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and apply security contexts to your pods. For a
+          suggested list of security contexts, you may refer to the CIS Google Container-
+          Optimized OS Benchmark.
+        scored: false
+
+      - id: 4.6.4
+        text: "The default namespace should not be used (Automated)"
+        type: "manual"
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false
