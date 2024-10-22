@@ -18,9 +18,9 @@ spec:
               "kube-bench",
               "run",
               "--targets",
-              "node",
+              "node,policies,managedservices,controlplane",
               "--benchmark",
-              "eks-1.2.0",
+              "eks-1.5.0",
             ]
           volumeMounts:
             - name: var-lib-kubelet
