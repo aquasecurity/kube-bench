@@ -9,6 +9,7 @@ env:
   ALIAS: aquasecurity
   DOCKERHUB_ALIAS: aquasec
   REP: kube-bench
+
 jobs:
   publish:
     name: Publish
@@ -46,10 +47,13 @@ jobs:
           images: ${{ env.REP }}
           tag-semver: |
             {{version}}
-
+      - name: Extract variables from makefile (kubectl)
+        id: extract_vars
+        run: |
+          echo "KUBECTL_VERSION=$(grep -oP '^KUBECTL_VERSION\s*\?=\s*\K.*' makefile)" >> $GITHUB_ENV
       - name: Build and push - Docker/ECR
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
@@ -57,6 +61,7 @@ jobs:
           push: true
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
@@ -67,7 +72,7 @@ jobs:
 
       - name: Build and push ubi image - Docker/ECR
         id: docker_build_ubi
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
@@ -76,6 +81,7 @@ jobs:
           file: Dockerfile.ubi
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
@@ -86,7 +92,7 @@ jobs:
 
       - name: Build and push fips ubi image - Docker/ECR
         id: docker_build_fips_ubi
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
@@ -95,6 +101,7 @@ jobs:
           file: Dockerfile.fips.ubi
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips
