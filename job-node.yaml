@@ -9,9 +9,12 @@ spec:
       hostPID: true
       containers:
         - name: kube-bench
-          image: aquasec/kube-bench:latest
+          image: docker.io/aquasec/kube-bench:latest
           command: ["kube-bench", "run", "--targets", "node"]
           volumeMounts:
+            - name: var-lib-cni
+              mountPath: /var/lib/cni
+              readOnly: true
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
               readOnly: true
@@ -49,6 +52,9 @@ spec:
               readOnly: true
       restartPolicy: Never
       volumes:
+        - name: var-lib-cni
+          hostPath:
+            path: "/var/lib/cni"
         - name: var-lib-etcd
           hostPath:
             path: "/var/lib/etcd"

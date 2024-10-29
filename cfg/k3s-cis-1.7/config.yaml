@@ -1,0 +1,64 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+master:
+  components:
+    - apiserver
+    - kubelet
+    - scheduler
+    - controllermanager
+    - etcd
+    - policies
+
+  apiserver:
+    bins:
+      - containerd
+
+  kubelet:
+    bins:
+      - containerd
+    defaultkubeconfig: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
+    defaultcafile: /var/lib/rancher/k3s/agent/client-ca.crt
+
+  scheduler:
+    bins:
+      - containerd
+    kubeconfig:
+      - /var/lib/rancher/k3s/server/cred/scheduler.kubeconfig
+
+  controllermanager:
+    bins:
+      - containerd
+    kubeconfig:
+      - /var/lib/rancher/k3s/server/cred/controller.kubeconfig
+
+  etcd:
+    bins:
+      - containerd
+
+etcd:
+  components:
+    - etcd
+
+  etcd:
+    confs: /var/lib/rancher/k3s/server/db/etcd/config
+
+node:
+  components:
+    - kubelet
+    - proxy
+
+  kubelet:
+    bins:
+      - containerd
+    defaultkubeconfig: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
+    defaultcafile: /var/lib/rancher/k3s/agent/client-ca.crt
+
+  proxy:
+    bins:
+      - containerd
+    defaultkubeconfig: /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig
+
+policies:
+  components:
+    - policies

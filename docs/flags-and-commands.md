@@ -23,12 +23,13 @@ Flag | Description
 --noremediations | Disable printing of remediations section to stdout.
 --noresults | Disable printing of results section to stdout.
 --nototals | Disable calculating and printing of totals for failed, passed, ... checks across all sections 
---outputfile | Writes the JSON results to output file
+--outputfile | Writes the results to output file when run with --json or --junit
 --pgsql | Save the results to PostgreSQL
 --scored | Run the scored CIS checks (default true)
 --skip string | List of comma separated values of checks to be skipped
 --stderrthreshold severity | logs at or above this threshold go to stderr (default 2)
 -v, --v Level | log level for V logs (default 0)
+--unscored | Run the unscored CIS checks (default true)
 --version string | Manually specify Kubernetes version, automatically detected if unset
 --vmodule moduleSpec | comma-separated list of pattern=N settings for file-filtered logging
 
@@ -112,7 +113,8 @@ There are four output states:
 - [INFO] is informational output that needs no further action.
 
 Note:
-- If the test is Manual, this always generates WARN (because the user has to run it manually)
+- Some tests with `Automated` in their description must still be run manually
+- If the user has to run a test manually, this always generates WARN
 - If the test is Scored, and kube-bench was unable to run the test, this generates FAIL (because the test has not been passed, and as a Scored test, if it doesn't pass then it must be considered a failure).
 - If the test is Not Scored, and kube-bench was unable to run the test, this generates WARN.
 - If the test is Scored, type is empty, and there are no `test_items` present, it generates a WARN. This is to highlight tests that appear to be incompletely defined.

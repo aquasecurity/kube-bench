@@ -1,32 +1,32 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/aquasecurity/kube-bench/internal/findings"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/securityhub"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"github.com/spf13/viper"
 )
 
-//REGION ...
+// REGION ...
 const REGION = "AWS_REGION"
 
-func writeFinding(in []*securityhub.AwsSecurityFinding) error {
+func writeFinding(in []types.AwsSecurityFinding) error {
 	r := viper.GetString(REGION)
 	if len(r) == 0 {
 		return fmt.Errorf("%s not set", REGION)
 	}
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(r)},
-	)
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(r))
 	if err != nil {
 		return err
 	}
-	svc := securityhub.New(sess)
-	p := findings.New(svc)
+
+	svc := securityhub.NewFromConfig(cfg)
+	p := findings.New(*svc)
 	out, perr := p.PublishFinding(in)
 	print(out)
 	return perr

@@ -1,0 +1,418 @@
+---
+controls:
+version: "tkgi-1.2.53"
+id: 4
+text: "Worker Node Security Configuration"
+type: "node"
+groups:
+  - id: 4.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kubelet/monit
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chmod 644 /var/vcap/jobs/kubelet/monit
+        scored: true
+
+      - id: 4.1.2
+        text: "Ensure that the kubelet service file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kubelet/monit
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chown root:root /var/vcap/jobs/kubelet/monit
+          Exception
+          File is group owned by vcap
+        scored: true
+
+      - id: 4.1.3
+        text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-proxy/config/kubeconfig
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chmod 644 /var/vcap/jobs/kube-proxy/config/kubeconfig
+        scored: true
+
+      - id: 4.1.4
+        text: "Ensure that the proxy kubeconfig file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kube-proxy/config/kubeconfig
+        type: manual
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example, chown root:root /var/vcap/jobs/kube-proxy/config/kubeconfig
+          Exception
+          File is group owned by vcap
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that the kubelet.conf file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-proxy/config/kubeconfig
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chmod 644 /var/vcap/jobs/kube-proxy/config/kubeconfig
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on worker
+        scored: false
+
+      - id: 4.1.6
+        text: "Ensure that the kubelet.conf file ownership is set to root:root"
+        audit: stat -c %U:%G /etc/kubernetes/kubelet.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chown root:root /etc/kubernetes/kubelet.conf
+          Exception
+          file ownership is vcap:vcap
+        scored: false
+
+      - id: 4.1.7
+        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kubelet/config/kubelet-client-ca.pem
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the following command to modify the file permissions of the
+          --client-ca-file chmod 644 <filename>
+        scored: true
+
+      - id: 4.1.8
+        text: "Ensure that the client certificate authorities file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kubelet/config/kubelet-client-ca.pem
+        type: manual
+        tests:
+          test_items:
+            - flag: root:root
+              compare:
+                op: eq
+                value: root:root
+        remediation: |
+          Run the following command to modify the ownership of the --client-ca-file.
+          chown root:root <filename>
+          Exception
+          File is group owned by vcap
+        scored: false
+
+      - id: 4.1.9
+        text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the following command (using the config file location identified in the Audit step)
+          chmod 644 /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        scored: true
+
+      - id: 4.1.10
+        text: "Ensure that the kubelet --config configuration file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        type: manual
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the following command (using the config file location identified in the Audit step)
+          chown root:root /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+          Exception
+          File is group owned by vcap
+        scored: false
+
+  - id: 4.2
+    text: "Kubelet"
+    checks:
+      - id: 4.2.1
+        text: "Ensure that the anonymous-auth argument is set to false"
+        audit: grep "^authentication:\n\s{2}anonymous:\n\s{4}enabled:\sfalse$" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "enabled: false"
+        remediation: |
+          If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to
+          false.
+          If using executable arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --anonymous-auth=false
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.2
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow"
+        audit: |
+          grep "^authorization:\n\s{2}mode: AlwaysAllow$" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "AlwaysAllow"
+              set: false
+        remediation: |
+          If using a Kubelet config file, edit the file to set authorization: mode to Webhook. If
+          using executable arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_AUTHZ_ARGS variable.
+          --authorization-mode=Webhook
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.3
+        text: "Ensure that the --client-ca-file argument is set as appropriate"
+        audit: |
+          grep ^authentication:\n\s{2}anonymous:\n\s{4}enabled:\sfalse\n(\s{2}webhook:\n\s{4}cacheTTL:\s\d+s\n\s{4}enabled:.*\n)?
+          \s{2}x509:\n\s{4}clientCAFile:\s"\/var\/vcap\/jobs\/kubelet\/config\/kubelet-client-ca\.pem" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "clientCAFile"
+        remediation: |
+          If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to
+          the location of the client CA file.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_AUTHZ_ARGS variable.
+          --client-ca-file=<path/to/client-ca-file>
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.4
+        text: "Ensure that the --read-only-port argument is set to 0"
+        audit: |
+          grep "readOnlyPort: 0" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "readOnlyPort: 0"
+        remediation: |
+          If using a Kubelet config file, edit the file to set readOnlyPort to 0.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --read-only-port=0
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.5
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0"
+        audit: |
+          grep -- "streamingConnectionIdleTimeout: 0"  /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "streamingConnectionIdleTimeout: 0"
+              set: false
+        remediation: |
+          If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a
+          value other than 0.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --streaming-connection-idle-timeout=5m
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.6
+        text: "Ensure that the --protect-kernel-defaults argument is set to true"
+        audit: |
+          grep -- "protectKernelDefaults: true" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "protectKernelDefaults: true"
+        remediation: |
+          If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --protect-kernel-defaults=true
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.7
+        text: "Ensure that the --make-iptables-util-chains argument is set to true"
+        audit: |
+          grep -- "makeIPTablesUtilChains: true" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          test_items:
+            - flag: "makeIPTablesUtilChains: true"
+        remediation: |
+          If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          remove the --make-iptables-util-chains argument from the
+          KUBELET_SYSTEM_PODS_ARGS variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.8
+        text: "Ensure that the --hostname-override argument is not set"
+        audit: |
+          ps -ef | grep [k]ubelet | grep -- --[c]onfig=/var/vcap/jobs/kubelet/config/kubeletconfig.yml | grep -v -- --hostname-override
+        type: manual
+        remediation: |
+          Edit the kubelet service file
+          on each worker node and remove the --hostname-override argument from the
+          KUBELET_SYSTEM_PODS_ARGS variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+          Exception
+          On GCE, the hostname needs to be set to the instance name so the gce cloud provider can manage the instance.
+          In other cases its set to the IP address of the VM.
+        scored: false
+
+      - id: 4.2.9
+        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture"
+        audit: grep -- "--event-qps" /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        type: manual
+        tests:
+          test_items:
+            - flag: "--event-qps"
+              compare:
+                op: eq
+                value: 0
+        remediation: |
+          If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: false
+
+      - id: 4.2.10
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate"
+        audit: |
+          grep  ^tlsCertFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet\.pem\"\ntlsPrivateKeyFile:\s\"\/var\/vcap\/jobs\/kubelet\/config\/kubelet-key\.pem\"$
+          /var/vcap/jobs/kubelet/config/kubeletconfig.yml
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "tlsCertFile"
+            - flag: "tlsPrivateKeyFile"
+        remediation: |
+          If using a Kubelet config file, edit the file to set tlsCertFile to the location
+          of the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile
+          to the location of the corresponding private key file.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
+          --tls-cert-file=<path/to/tls-certificate-file>
+          --tls-private-key-file=<path/to/tls-key-file>
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 4.2.11
+        text: "Ensure that the --rotate-certificates argument is not set to false"
+        audit: ps -ef | grep kubele[t] | grep -- "--rotate-certificates=false"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--rotate-certificates=false"
+              set: false
+        remediation: |
+          If using a Kubelet config file, edit the file to add the line rotateCertificates: true or
+          remove it altogether to use the default value.
+          If using command line arguments, edit the kubelet service file
+          on each worker node and
+          remove --rotate-certificates=false argument from the KUBELET_CERTIFICATE_ARGS
+          variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+          Exception
+          Certificate rotation is handled by Credhub
+        scored: false
+
+      - id: 4.2.12
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true"
+        audit: ps -ef | grep kubele[t] | grep -- "--feature-gates=\(\w\+\|,\)*RotateKubeletServerCertificate=true\(\w\+\|,\)*"
+        type: manual
+        tests:
+          test_items:
+            - flag: "RotateKubeletServerCertificate=true"
+        remediation: |
+          Edit the kubelet service file
+          on each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.
+          --feature-gates=RotateKubeletServerCertificate=true
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+          Exception
+          Certificate rotation is handled by Credhub
+        scored: false
+
+      - id: 4.2.13
+        text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers"
+        audit: ps -ef | grep kubele[t] | grep -- "--tls-cipher-
+          suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        type: manual
+        tests:
+          test_items:
+            - flag: --tls-cipher-suites
+              compare:
+                op: regex
+                value: (TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256|TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256|TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305|TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384|TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305|TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384|TLS_RSA_WITH_AES_256_GCM_SHA384|TLS_RSA_WITH_AES_128_GCM_SHA256)
+        remediation: |
+          If using a Kubelet config file, edit the file to set tlsCipherSuites: to
+          TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+          or to a subset of these values.
+          If using executable arguments, edit the kubelet service file
+          on each worker node and
+          set the --tls-cipher-suites parameter as follows, or to a subset of these values.
+          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: false

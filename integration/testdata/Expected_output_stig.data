@@ -1,0 +1,266 @@
+[INFO] 1 Control Plane Components
+
+== Summary master ==
+0 checks PASS
+0 checks FAIL
+0 checks WARN
+0 checks INFO
+
+[INFO] 2 Control Plane Configuration
+[INFO] 2.1 DISA Category Code I
+[FAIL] V-242390 The Kubernetes API server must have anonymous authentication disabled (Automated)
+[FAIL] V-242400 The Kubernetes API server must have Alpha APIs disabled (Automated)
+[INFO] 2.2 DISA Category Code II
+[WARN] V-242381 The Kubernetes Controller Manager must create unique service accounts for each work payload. (Manual)
+[WARN] V-242402 The Kubernetes API Server must have an audit log path set (Manual)
+[WARN] V-242403 Kubernetes API Server must generate audit records (Manual)
+[WARN] V-242461 Kubernetes API Server audit logs must be enabled. (Manual)
+[WARN] V-242462 The Kubernetes API Server must be set to audit log max size. (Manual)
+[WARN] V-242463 The Kubernetes API Server must be set to audit log maximum backup. (Manual)
+[WARN] V-242464 The Kubernetes API Server audit log retention must be set. (Manual)
+[WARN] V-242465 The Kubernetes API Server audit log path must be set. (Manual)
+[WARN] V-242443  Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. (Manual)
+
+== Remediations controlplane ==
+V-242390 If using a Kubelet config file, edit $kubeletconf to set authentication: anonymous: enabled to
+false.
+If using executable arguments, edit the kubelet service file
+$kubeletsvc on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+--anonymous-auth=false
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+V-242400 Edit any manifest files or $kubeletconf that contain the feature-gates
+setting with AllAlpha set to "true".
+Set the flag to "false" or remove the "AllAlpha" setting
+completely. Restart the kubelet service if the kubelet config file
+if the kubelet config file is changed.
+
+V-242381 Create explicit service accounts wherever a Kubernetes workload requires specific access
+to the Kubernetes API server.
+Modify the configuration of each default service account to include this value
+automountServiceAccountToken: false
+
+V-242402 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242403 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242461 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242462 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242463 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242464 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242465 Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+V-242443 Upgrade Kubernetes to a supported version.
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html
+
+
+== Summary controlplane ==
+0 checks PASS
+2 checks FAIL
+9 checks WARN
+0 checks INFO
+
+[INFO] 3 Worker Node Security Configuration
+[INFO] 3.1 DISA Category Code I
+[WARN] V-242387 The Kubernetes Kubelet must have the read-only port flag disabled (Manual)
+[PASS] V-242391 The Kubernetes Kubelet must have anonymous authentication disabled (Automated)
+[PASS] V-242392 The Kubernetes kubelet must enable explicit authorization (Automated)
+[FAIL] V-242397 The Kubernetes kubelet static PodPath must not enable static pods (Automated)
+[WARN] V-242415 Secrets in Kubernetes must not be stored as environment variables.(Manual)
+[FAIL] V-242434 Kubernetes Kubelet must enable kernel protection (Automated)
+[PASS] V-242435 Kubernetes must prevent non-privileged users from executing privileged functions (Automated)
+[FAIL] V-242393 Kubernetes Worker Nodes must not have sshd service running. (Automated)
+[FAIL] V-242394 Kubernetes Worker Nodes must not have the sshd service enabled. (Automated)
+[WARN] V-242395 Kubernetes dashboard must not be enabled. (Manual)
+[PASS] V-242398 Kubernetes DynamicAuditing must not be enabled. (Automated)
+[PASS] V-242399 Kubernetes DynamicKubeletConfig must not be enabled. (Automated)
+[PASS] V-242404 Kubernetes Kubelet must deny hostname override (Automated)
+[PASS] V-242406 The Kubernetes kubelet configuration file must be owned by root (Automated)
+[PASS] V-242407 The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive (Automated)
+[WARN] V-242414 The Kubernetes cluster must use non-privileged host ports for user pods. (Manual)
+[WARN] V-242442 Kubernetes must remove old components after updated versions have been installed. (Manual)
+[WARN] V-242396 Kubernetes Kubectl cp command must give expected access and results. (Manual)
+
+== Remediations node ==
+V-242387 If using a Kubelet config file, edit /var/lib/kubelet/config.yaml to set readOnlyPort to 0.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+--read-only-port=0
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+V-242397 Edit /var/lib/kubelet/config.yaml on each node to to remove the staticPodPath
+Based on your system, restart the kubelet service. For example,
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+V-242415 Run the following command:
+kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
+If any of the values returned reference environment variables
+rewrite application code to read secrets from mounted secret files, rather than
+from environment variables.
+
+V-242434 If using a Kubelet config file, edit /var/lib/kubelet/config.yaml to set protectKernelDefaults: true.
+If using command line arguments, edit the kubelet service file
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and
+set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+--protect-kernel-defaults=true
+Based on your system, restart the kubelet service. For example:
+systemctl daemon-reload
+systemctl restart kubelet.service
+
+V-242393 To stop the sshd service, run the command: systemctl stop sshd
+
+V-242394 To disable the sshd service, run the command:
+  chkconfig sshd off
+
+V-242395 Run the command: kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard
+If any resources are returned, this is a finding.
+Fix Text: Delete the Kubernetes dashboard deployment with the following command:
+  kubectl delete deployment kubernetes-dashboard --namespace=kube-system
+
+V-242414 For any of the pods that are using ports below 1024,
+reconfigure the pod to use a service to map a host non-privileged
+port to the pod port or reconfigure the image to use non-privileged ports.
+
+V-242442 To view all pods and the images used to create the pods, from the Master node, run the following command:
+ kubectl get pods --all-namespaces -o jsonpath="{..image}" | \
+ tr -s '[[:space:]]' '\n' | \
+ sort | \
+ uniq -c
+ Review the images used for pods running within Kubernetes.
+ Remove any old pods that are using older images.
+
+V-242396 If any Worker nodes are not using kubectl version 1.12.9 or newer, this is a finding.
+Upgrade the Master and Worker nodes to the latest version of kubectl.
+
+
+== Summary node ==
+8 checks PASS
+4 checks FAIL
+6 checks WARN
+0 checks INFO
+
+[INFO] 4 Policies
+[INFO] 4.1 Policies - DISA Category Code I
+[WARN] V-242381 The Kubernetes Controller Manager must create unique service accounts for each work payload. (Manual)
+[WARN] V-242383 User-managed resources must be created in dedicated namespaces. (Manual)
+[WARN] V-242417 Kubernetes must separate user functionality. (Manual)
+
+== Remediations policies ==
+V-242381 Create explicit service accounts wherever a Kubernetes workload requires specific access
+to the Kubernetes API server.
+Modify the configuration of each default service account to include this value
+automountServiceAccountToken: false
+
+V-242383 Move any user-managed resources from the default, kube-public and kube-node-lease namespaces, to user namespaces.
+
+V-242417 Move any user pods that are present in the Kubernetes system namespaces to user specific namespaces.
+
+
+== Summary policies ==
+0 checks PASS
+0 checks FAIL
+3 checks WARN
+0 checks INFO
+
+[INFO] 5 Managed Services
+[INFO] 5.1 DISA Category Code I
+[INFO] V-242386 The Kubernetes API server must have the insecure port flag disabled | Component of EKS Control Plane
+[INFO] V-242388 The Kubernetes API server must have the insecure bind address not set | Component of EKS Control Plane
+[WARN] V-242436 The Kubernetes API server must have the ValidatingAdmissionWebhook enabled (manual)
+[INFO] V-245542 Kubernetes API Server must disable basic authentication to protect information in transit | Component of EKS Control Plane
+[INFO] 5.2 DISA Category Code II
+[INFO] V-242376 The Kubernetes Controller Manager must use TLS 1.2, at a minimum | Component of EKS Control Plane
+[INFO] V-242377 The Kubernetes Scheduler must use TLS 1.2, at a minimum | Component of EKS Control Plane
+[INFO] V-242378 The Kubernetes API Server must use TLS 1.2, at a minimum | Component of EKS Control Plane
+[INFO] V-242379 The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination | Component of EKS Control Plane
+[INFO] V-242380 The Kubernetes etcd must use TLS to protect the confidentiality of sensitive data during electronic dissemination | Component of EKS Control Plane
+[INFO] V-242382 The Kubernetes API Server must enable Node,RBAC as the authorization mode | Component of EKS Control Plane
+[INFO] V-242384 The Kubernetes Scheduler must have secure binding | Component of EKS Control Plane
+[INFO] V-242385 The Kubernetes Controller Manager must have secure binding | Component of EKS Control Plane
+[INFO] V-242389 The Kubernetes API server must have the secure port set | Component of EKS Control Plane
+[INFO] V-242401 The Kubernetes API Server must have an audit policy set | Component of EKS Control Plane
+[INFO] V-242402 The Kubernetes API Server must have an audit log path set | Component of EKS Control Plane
+[INFO] V-242403 Kubernetes API Server must generate audit records | Component of EKS Control Plane
+[INFO] V-242405 The Kubernetes manifests must be owned by root | Component of EKS Control Plane
+[INFO] V-242408 The Kubernetes manifests must have least privileges | Component of EKS Control Plane
+[INFO] V-242409 Kubernetes Controller Manager must disable profiling | Component of EKS Control Plane
+[INFO] V-242410 The Kubernetes API Server must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane
+[INFO] V-242411 The Kubernetes Scheduler must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane
+[INFO] V-242412 The Kubernetes Controllers must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane
+[INFO] V-242413 The Kubernetes etcd must enforce PPS that adhere to PPSM CAL | Component of EKS Control Plane
+[INFO] V-242418 The Kubernetes API server must use approved cipher suites | Component of EKS Control Plane
+[INFO] V-242419 Kubernetes API Server must have the SSL Certificate Authority set | Component of EKS Control Plane
+[INFO] V-242420 Kubernetes Kubelet must have the SSL Certificate Authority set | Component of EKS Control Plane
+[INFO] V-242421 Kubernetes Controller Manager must have the SSL Certificate Authority set | Component of EKS Control Plane
+[INFO] V-242422 Kubernetes API Server must have a certificate for communication | Component of EKS Control Plane
+[INFO] V-242423 Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane
+[INFO] V-242424 Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane
+[INFO] V-242425 Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service | Component of EKS Control Plane
+[INFO] V-242426 Kubernetes etcd must enable client authentication to secure service | Component of EKS Control Plane
+[INFO] V-242427 Kubernetes etcd must have a key file for secure communication | Component of EKS Control Plane
+[INFO] V-242428 Kubernetes etcd must have a certificate for communication | Component of EKS Control Plane
+[INFO] V-242429 Kubernetes etcd must have the SSL Certificate Authority set | Component of EKS Control Plane
+[INFO] V-242430 Kubernetes etcd must have a certificate for communication | Component of EKS Control Plane
+[INFO] V-242431 Kubernetes etcd must have a key file for secure communication | Component of EKS Control Plane
+[INFO] V-242432 Kubernetes etcd must have peer-cert-file set for secure communication | Component of EKS Control Plane
+[INFO] V-242433 Kubernetes etcd must have a peer-key-file set for secure communication | Component of EKS Control Plane
+[INFO] V-242438 Kubernetes API Server must configure timeouts to limit attack surface | Component of EKS Control Plane
+[INFO] V-242444 The Kubernetes component manifests must be owned by root | Component of EKS Control Plane
+[INFO] V-242445 The Kubernetes component etcd must be owned by etcd | Component of EKS Control Plane
+[INFO] V-242446 The Kubernetes conf files must be owned by root | Component of EKS Control Plane
+[INFO] V-242447 The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242448 The Kubernetes Kube Proxy must be owned by root | Component of EKS Control Plane
+[INFO] V-242449 The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242450 The Kubernetes Kubelet certificate authority must be owned by root | Component of EKS Control Plane
+[INFO] V-242451 The Kubernetes component PKI must be owned by root | Component of EKS Control Plane
+[INFO] V-242452 The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242453 The Kubernetes kubelet config must be owned by root | Component of EKS Control Plane
+[INFO] V-242454 The Kubernetes kubeadm.conf must be owned by root | Component of EKS Control Plane
+[INFO] V-242455 The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242456 The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242457 The Kubernetes kubelet config must be owned by root | Component of EKS Control Plane
+[INFO] V-242458 The Kubernetes API Server must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242459 The Kubernetes etcd must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242460 The Kubernetes admin.conf must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242466 The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive | Component of EKS Control Plane
+[INFO] V-242467 The Kubernetes PKI keys must have file permissions set to 600 or more restrictive | Component of EKS Control Plane
+[INFO] V-242468 The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0 | Component of EKS Control Plane
+[INFO] V-245541 Kubernetes Kubelet must not disable timeouts | Component of EKS Control Plane
+[INFO] V-245543 Kubernetes API Server must disable token authentication to protect information in transit | Component of EKS Control Plane
+[INFO] V-245544 Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit | Component of EKS Control Plane
+
+== Remediations managedservices ==
+V-242436 Amazon EKS version 1.18 and later automatically enable ValidatingAdmissionWebhook
+Ref: https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html
+
+
+== Summary managedservices ==
+0 checks PASS
+0 checks FAIL
+1 checks WARN
+62 checks INFO
+
+== Summary total ==
+8 checks PASS
+6 checks FAIL
+19 checks WARN
+62 checks INFO
+

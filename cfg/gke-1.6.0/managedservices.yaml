@@ -1,0 +1,617 @@
+---
+controls:
+version: "gke-1.6.0"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Ensure Image Vulnerability Scanning is enabled (Automated)"
+        type: "manual"
+        remediation: |
+          For Images Hosted in GCR:
+          Using Command Line:
+
+            gcloud services enable containeranalysis.googleapis.com
+
+          For Images Hosted in AR:
+          Using Command Line:
+
+            gcloud services enable containerscanning.googleapis.com
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access to Container Image repositories (Manual)"
+        type: "manual"
+        remediation: |
+          For Images Hosted in AR:
+          Using Command Line:
+
+            gcloud artifacts repositories set-iam-policy <repository-name> <path-to-policy-file> \
+              --location <repository-location>
+
+          To learn how to configure policy files see: https://cloud.google.com/artifact-registry/docs/access-control#grant
+
+          For Images Hosted in GCR:
+          Using Command Line:
+          To change roles at the GCR bucket level:
+          Firstly, run the following if read permissions are required:
+
+            gsutil iam ch <type>:<email_address>:objectViewer gs://artifacts.<project_id>.appspot.com
+
+          Then remove the excessively privileged role (Storage Admin / Storage Object
+          Admin / Storage Object Creator) using:
+
+            gsutil iam ch -d <type>:<email_address>:<role> gs://artifacts.<project_id>.appspot.com
+
+          where:
+          <type> can be one of the following:
+            user, if the <email_address> is a Google account.
+            serviceAccount, if <email_address> specifies a Service account.
+            <email_address> can be one of the following:
+              a Google account (for example, someone@example.com).
+              a Cloud IAM service account.
+
+          To modify roles defined at the project level and subsequently inherited within the GCR
+          bucket, or the Service Account User role, extract the IAM policy file, modify it
+          accordingly and apply it using:
+
+            gcloud projects set-iam-policy <project_id> <policy_file>
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for Container Image repositories (Manual)"
+        type: "manual"
+        remediation: |
+          For Images Hosted in AR:
+          Using Command Line:
+          Add artifactregistry.reader role
+
+            gcloud artifacts repositories add-iam-policy-binding <repository> \
+            --location=<repository-location> \
+            --member='serviceAccount:<email-address>' \
+            --role='roles/artifactregistry.reader'
+
+          Remove any roles other than artifactregistry.reader
+
+            gcloud artifacts repositories remove-iam-policy-binding <repository> \
+            --location <repository-location> \
+            --member='serviceAccount:<email-address>' \
+            --role='<role-name>'
+
+          For Images Hosted in GCR:
+          For an account explicitly granted to the bucket:
+          Firstly add read access to the Kubernetes Service Account:
+
+            gsutil iam ch <type>:<email_address>:objectViewer gs://artifacts.<project_id>.appspot.com
+
+            where:
+              <type> can be one of the following:
+                user, if the <email_address> is a Google account.
+                serviceAccount, if <email_address> specifies a Service account.
+                <email_address> can be one of the following:
+                  a Google account (for example, someone@example.com).
+                  a Cloud IAM service account.
+
+          Then remove the excessively privileged role (Storage Admin / Storage Object
+          Admin / Storage Object Creator) using:
+
+            gsutil iam ch -d <type>:<email_address>:<role> gs://artifacts.<project_id>.appspot.com
+
+          For an account that inherits access to the GCR Bucket through Project level
+          permissions, modify the Projects IAM policy file accordingly, then upload it using:
+
+            gcloud projects set-iam-policy <project_id> <policy_file>
+        scored: false
+
+      - id: 5.1.4
+        text: "Ensure only trusted container images are used (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Update the cluster to enable Binary Authorization:
+
+            gcloud container cluster update <cluster_name> --enable-binauthz
+
+          Create a Binary Authorization Policy using the Binary Authorization Policy Reference:
+          https://cloud.google.com/binary-authorization/docs/policy-yaml-reference for guidance.
+
+          Import the policy file into Binary Authorization:
+
+            gcloud container binauthz policy import <yaml_policy>
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Ensure GKE clusters are not running using the Compute Engine default service account (Automated))"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To create a minimally privileged service account:
+
+            gcloud iam service-accounts create <node_sa_name> \
+              --display-name "GKE Node Service Account"
+            export NODE_SA_EMAIL=gcloud iam service-accounts list \
+              --format='value(email)' --filter='displayName:GKE Node Service Account'
+
+          Grant the following roles to the service account:
+
+            export PROJECT_ID=gcloud config get-value project
+            gcloud projects add-iam-policy-binding <project_id> --member \
+              serviceAccount:<node_sa_email> --role roles/monitoring.metricWriter
+            gcloud projects add-iam-policy-binding <project_id> --member \
+              serviceAccount:<node_sa_email> --role roles/monitoring.viewer
+            gcloud projects add-iam-policy-binding <project_id> --member \
+              serviceAccount:<node_sa_email> --role roles/logging.logWriter
+
+          To create a new Node pool using the Service account, run the following command:
+
+            gcloud container node-pools create <node_pool> \
+              --service-account=<sa_name>@<project_id>.iam.gserviceaccount.com \
+              --cluster=<cluster_name> --zone <compute_zone>
+
+          Note: The workloads will need to be migrated to the new Node pool, and the old node
+          pools that use the default service account should be deleted to complete the
+          remediation.
+        scored: false
+
+      - id: 5.2.2
+        text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+
+            gcloud container clusters update <cluster_name> --zone <cluster_zone> \
+            --workload-pool <project_id>.svc.id.goog
+
+          Note that existing Node pools are unaffected. New Node pools default to --workload-
+          metadata-from-node=GKE_METADATA_SERVER.
+
+          Then, modify existing Node pools to enable GKE_METADATA_SERVER:
+
+            gcloud container node-pools update <node_pool_name> --cluster <cluster_name> \
+              --zone <cluster_zone> --workload-metadata=GKE_METADATA
+
+          Workloads may need to be modified in order for them to use Workload Identity as
+          described within: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity.
+          Also consider the effects on the availability of hosted workloads as Node pools
+          are updated. It may be more appropriate to create new Node Pools.
+        scored: false
+
+  - id: 5.3
+    text: "Cloud Key Management Service (Cloud KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Automated)"
+        type: "manual"
+        remediation: |
+          To create a key:
+          Create a key ring:
+
+            gcloud kms keyrings create <ring_name> --location <location> --project \
+              <key_project_id>
+
+          Create a key:
+
+            gcloud kms keys create <key_name> --location <location> --keyring <ring_name> \
+              --purpose encryption --project <key_project_id>
+
+          Grant the Kubernetes Engine Service Agent service account the Cloud KMS
+          CryptoKey Encrypter/Decrypter role:
+
+            gcloud kms keys add-iam-policy-binding <key_name> --location <location> \
+            --keyring <ring_name> --member serviceAccount:<service_account_name> \
+            --role roles/cloudkms.cryptoKeyEncrypterDecrypter --project <key_project_id>
+
+          To create a new cluster with Application-layer Secrets Encryption:
+
+            gcloud container clusters create <cluster_name> --cluster-version=latest \
+            --zone <zone> \
+            --database-encryption-key projects/<key_project_id>/locations/<location>/keyRings/<ring_name>/cryptoKeys/<key_name> \
+            --project <cluster_project_id>
+
+          To enable on an existing cluster:
+
+            gcloud container clusters update <cluster_name> --zone <zone> \
+            --database-encryption-key projects/<key_project_id>/locations/<location>/keyRings/<ring_name>/cryptoKeys/<key_name> \
+            --project <cluster_project_id>
+        scored: false
+
+  - id: 5.4
+    text: "Node Metadata"
+    checks:
+      - id: 5.4.1
+        text: "Ensure the GKE Metadata Server is Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+
+            gcloud container clusters update <cluster_name> --identity-namespace=<project_id>.svc.id.goog
+
+          Note that existing Node pools are unaffected. New Node pools default to --workload-
+          metadata-from-node=GKE_METADATA_SERVER.
+
+          To modify an existing Node pool to enable GKE Metadata Server:
+
+            gcloud container node-pools update <node_pool_name> --cluster=<cluster_name> \
+              --workload-metadata-from-node=GKE_METADATA_SERVER
+
+          Workloads may need modification in order for them to use Workload Identity as
+          described within: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity.
+        scored: false
+
+  - id: 5.5
+    text: "Node Configuration and Maintenance"
+    checks:
+      - id: 5.5.1
+        text: "Ensure Container-Optimized OS (cos_containerd) is used for GKE node images (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To set the node image to cos for an existing cluster's Node pool:
+
+            gcloud container clusters upgrade <cluster_name> --image-type cos_containerd \
+              --zone <compute_zone> --node-pool <node_pool_name>
+        scored: false
+
+      - id: 5.5.2
+        text: "Ensure Node Auto-Repair is enabled for GKE nodes (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To enable node auto-repair for an existing cluster's Node pool:
+
+            gcloud container node-pools update <node_pool_name> --cluster <cluster_name> \
+              --zone <compute_zone> --enable-autorepair
+        scored: false
+
+      - id: 5.5.3
+        text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To enable node auto-upgrade for an existing cluster's Node pool, run the following
+          command:
+
+            gcloud container node-pools update <node_pool_name> --cluster <cluster_name> \
+              --zone <cluster_zone> --enable-autoupgrade
+        scored: false
+
+      - id: 5.5.4
+        text: "When creating New Clusters - Automate GKE version management using Release Channels (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Create a new cluster by running the following command:
+
+            gcloud container clusters create <cluster_name> --zone <cluster_zone> \
+              --release-channel <release_channel>
+
+          where <release_channel> is stable or regular, according to requirements.
+        scored: false
+
+      - id: 5.5.5
+        text: "Ensure Shielded GKE Nodes are Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To migrate an existing cluster, the flag --enable-shielded-nodes needs to be
+          specified in the cluster update command:
+
+            gcloud container clusters update <cluster_name> --zone <cluster_zone> \
+              --enable-shielded-nodes
+        scored: false
+
+      - id: 5.5.6
+        text: "Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To create a Node pool within the cluster with Integrity Monitoring enabled, run the
+          following command:
+
+            gcloud container node-pools create <node_pool_name> --cluster <cluster_name> \
+              --zone <compute_zone> --shielded-integrity-monitoring
+
+          Workloads from existing non-conforming Node pools will need to be migrated to the
+          newly created Node pool, then delete non-conforming Node pools to complete the
+          remediation
+        scored: false
+
+      - id: 5.5.7
+        text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To create a Node pool within the cluster with Secure Boot enabled, run the following
+          command:
+
+            gcloud container node-pools create <node_pool_name> --cluster <cluster_name> \
+              --zone <compute_zone> --shielded-secure-boot
+
+          Workloads will need to be migrated from existing non-conforming Node pools to the
+          newly created Node pool, then delete the non-conforming pools.
+        scored: false
+
+  - id: 5.6
+    text: "Cluster Networking"
+    checks:
+      - id: 5.6.1
+        text: "Enable VPC Flow Logs and Intranode Visibility (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          1. Find the subnetwork name associated with the cluster.
+
+            gcloud container clusters describe <cluster_name> \
+              --region <cluster_region> - -format json | jq '.subnetwork'
+
+          2. Update the subnetwork to enable VPC Flow Logs.
+            gcloud compute networks subnets update <subnet_name> --enable-flow-logs
+        scored: false
+
+      - id: 5.6.2
+        text: "Ensure use of VPC-native clusters (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To enable Alias IP on a new cluster, run the following command:
+
+            gcloud container clusters create <cluster_name> --zone <compute_zone> \
+              --enable-ip-alias
+
+          If using Autopilot configuration mode:
+
+            gcloud container clusters create-auto <cluster_name> \
+              --zone <compute_zone>
+        scored: false
+
+      - id: 5.6.3
+        text: "Ensure Control Plane Authorized Networks is Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To enable Control Plane Authorized Networks for an existing cluster, run the following
+          command:
+
+            gcloud container clusters update <cluster_name> --zone <compute_zone> \
+              --enable-master-authorized-networks
+
+          Along with this, you can list authorized networks using the --master-authorized-networks
+          flag which contains a list of up to 20 external networks that are allowed to
+          connect to your cluster's control plane through HTTPS. You provide these networks as
+          a comma-separated list of addresses in CIDR notation (such as 90.90.100.0/24).
+        scored: false
+
+      - id: 5.6.4
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Create a cluster with a Private Endpoint enabled and Public Access disabled by including
+          the --enable-private-endpoint flag within the cluster create command:
+
+            gcloud container clusters create <cluster_name> --enable-private-endpoint
+
+          Setting this flag also requires the setting of --enable-private-nodes, --enable-ip-alias
+          and --master-ipv4-cidr=<master_cidr_range>.
+        scored: false
+
+      - id: 5.6.5
+        text: "Ensure clusters are created with Private Nodes (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To create a cluster with Private Nodes enabled, include the --enable-private-nodes
+          flag within the cluster create command:
+
+            gcloud container clusters create <cluster_name> --enable-private-nodes
+
+          Setting this flag also requires the setting of --enable-ip-alias and
+          --master-ipv4-cidr=<master_cidr_range>.
+        scored: false
+
+      - id: 5.6.6
+        text: "Consider firewalling GKE worker nodes (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Use the following command to generate firewall rules, setting the variables as
+          appropriate:
+
+            gcloud compute firewall-rules create <firewall_rule_name> \
+            --network <network> --priority <priority> --direction <direction> \
+            --action <action> --target-tags <tag> \
+            --target-service-accounts <service_account> \
+            --source-ranges <source_cidr_range> --source-tags <source_tags> \
+            --source-service-accounts <source_service_account> \
+            --destination-ranges <destination_cidr_range> --rules <rules>
+        scored: false
+
+      - id: 5.6.7
+        text: "Ensure use of Google-managed SSL Certificates (Automated)"
+        type: "manual"
+        remediation: |
+          If services of type:LoadBalancer are discovered, consider replacing the Service with
+          an Ingress.
+
+          To configure the Ingress and use Google-managed SSL certificates, follow the
+          instructions as listed at: https://cloud.google.com/kubernetes-engine/docs/how-
+          to/managed-certs.
+        scored: false
+
+  - id: 5.7
+    text: "Logging"
+    checks:
+      - id: 5.7.1
+        text: "Ensure Logging and Cloud Monitoring is Enabled (Automated)"
+        type: "manual"
+        remediation: |
+          To enable Logging for an existing cluster, run the following command:
+            gcloud container clusters update <cluster_name> --zone <compute_zone> \
+            --logging=<components_to_be_logged>
+
+          See https://cloud.google.com/sdk/gcloud/reference/container/clusters/update#--logging
+          for a list of available components for logging.
+
+          To enable Cloud Monitoring for an existing cluster, run the following command:
+            gcloud container clusters update <cluster_name> --zone <compute_zone> \
+            --monitoring=<components_to_be_logged>
+
+          See https://cloud.google.com/sdk/gcloud/reference/container/clusters/update#--
+          monitoring for a list of available components for Cloud Monitoring.
+        scored: false
+
+      - id: 5.7.2
+        text: "Enable Linux auditd logging (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Download the example manifests:
+            curl https://raw.githubusercontent.com/GoogleCloudPlatform/k8s-node-tools/master/os-audit/cos-auditd-logging.yaml > cos-auditd-logging.yaml
+
+          Edit the example manifests if needed. Then, deploy them:
+            kubectl apply -f cos-auditd-logging.yaml
+
+          Verify that the logging Pods have started. If a different Namespace was defined in the
+          manifests, replace cos-auditd with the name of the namespace being used:
+            kubectl get pods --namespace=cos-auditd
+        scored: false
+
+  - id: 5.8
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.8.1
+        text: "Ensure authentication using Client Certificates is Disabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Create a new cluster without a Client Certificate:
+            gcloud container clusters create [CLUSTER_NAME] \
+              --no-issue-client-certificate
+        scored: false
+
+      - id: 5.8.2
+        text: "Manage Kubernetes RBAC users with Google Groups for GKE (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Follow the G Suite Groups instructions at: https://cloud.google.com/kubernetes-
+          engine/docs/how-to/role-based-access-control#google-groups-for-gke.
+
+          Then, create a cluster with:
+            gcloud container clusters create <cluster_name> --security-group <security_group_name>
+
+          Finally create Roles, ClusterRoles, RoleBindings, and ClusterRoleBindings that
+          reference the G Suite Groups.
+        scored: false
+
+      - id: 5.8.3
+        text: "Ensure Legacy Authorization (ABAC) is Disabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To disable Legacy Authorization for an existing cluster, run the following command:
+            gcloud container clusters update <cluster_name> --zone <compute_zone> \
+              --no-enable-legacy-authorization
+        scored: false
+
+  - id: 5.9
+    text: "Storage"
+    checks:
+      - id: 5.9.1
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Follow the instructions detailed at: https://cloud.google.com/kubernetes-engine/docs/how-to/using-cmek.
+        scored: false
+
+      - id: 5.9.2
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for Boot Disks (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Create a new node pool using customer-managed encryption keys for the node boot
+          disk, of <disk_type> either pd-standard or pd-ssd:
+            gcloud container node-pools create <cluster_name> --disk-type <disk_type> \
+            --boot-disk-kms-key projects/<key_project_id>/locations/<location>/keyRings/<ring_name>/cryptoKeys/<key_name>
+
+          Create a cluster using customer-managed encryption keys for the node boot disk, of
+          <disk_type> either pd-standard or pd-ssd:
+            gcloud container clusters create <cluster_name> --disk-type <disk_type> \
+            --boot-disk-kms-key projects/<key_project_id>/locations/<location>/keyRings/<ring_name>/cryptoKeys/<key_name>
+        scored: false
+
+  - id: 5.10
+    text: "Other Cluster Configurations"
+    checks:
+      - id: 5.10.1
+        text: "Ensure Kubernetes Web UI is Disabled (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To disable the Kubernetes Dashboard on an existing cluster, run the following
+          command:
+            gcloud container clusters update <cluster_name> --zone <zone> \
+              --update-addons=KubernetesDashboard=DISABLED
+        scored: false
+
+      - id: 5.10.2
+        text: "Ensure that Alpha clusters are not used for production workloads (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Upon creating a new cluster
+            gcloud container clusters create [CLUSTER_NAME] \
+              --zone [COMPUTE_ZONE]
+
+          Do not use the --enable-kubernetes-alpha argument.
+        scored: false
+
+      - id: 5.10.3
+        text: "Consider GKE Sandbox for running untrusted workloads (Manual)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          To enable GKE Sandbox on an existing cluster, a new Node pool must be created,
+          which can be done using:
+            gcloud container node-pools create <node_pool_name> --zone <compute-zone> \
+              --cluster <cluster_name> --image-type=cos_containerd --sandbox="type=gvisor"
+        scored: false
+
+      - id: 5.10.4
+        text: "Ensure use of Binary Authorization (Automated)"
+        type: "manual"
+        remediation: |
+          Using Command Line:
+          Update the cluster to enable Binary Authorization:
+            gcloud container cluster update <cluster_name> --zone <compute_zone> \
+            --binauthz-evaluation-mode=<evaluation_mode>
+
+          Example:
+            gcloud container clusters update $CLUSTER_NAME --zone $COMPUTE_ZONE \
+            --binauthz-evaluation-mode=PROJECT_SINGLETON_POLICY_ENFORCE
+
+          See: https://cloud.google.com/sdk/gcloud/reference/container/clusters/update#--binauthz-evaluation-mode
+          for more details around the evaluation modes available.
+
+          Create a Binary Authorization Policy using the Binary Authorization Policy Reference:
+          https://cloud.google.com/binary-authorization/docs/policy-yaml-reference for guidance.
+
+          Import the policy file into Binary Authorization:
+            gcloud container binauthz policy import <yaml_policy>
+        scored: false
+
+      - id: 5.10.5
+        text: "Enable Security Posture (Manual)"
+        type: "manual"
+        remediation: |
+          Enable security posture via the UI, gCloud or API.
+          https://cloud.google.com/kubernetes-engine/docs/how-to/protect-workload-configuration
+        scored: false

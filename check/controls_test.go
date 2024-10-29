@@ -19,14 +19,13 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/securityhub"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +52,7 @@ func TestYamlFiles(t *testing.T) {
 		}
 		if !info.IsDir() {
 			t.Logf("reading file: %s", path)
-			in, err := ioutil.ReadFile(path)
+			in, err := os.ReadFile(path)
 			if err != nil {
 				t.Fatalf("error opening file %s: %v", path, err)
 			}
@@ -374,7 +373,7 @@ func TestControls_ASFF(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []*securityhub.AwsSecurityFinding
+		want    []types.AwsSecurityFinding
 		wantErr bool
 	}{
 		{
@@ -405,32 +404,32 @@ func TestControls_ASFF(t *testing.T) {
 						},
 					},
 				}},
-			want: []*securityhub.AwsSecurityFinding{
+			want: []types.AwsSecurityFinding{
 				{
 					AwsAccountId:  aws.String("foo account"),
-					Confidence:    aws.Int64(100),
+					Confidence:    aws.Int32(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", fmt.Sprintf(ARN, "somewhere"), "1", "check1id")),
 					Description:   aws.String("check1text"),
 					ProductArn:    aws.String(fmt.Sprintf(ARN, "somewhere")),
 					SchemaVersion: aws.String(SCHEMA),
 					Title:         aws.String(fmt.Sprintf("%s %s", "check1id", "check1text")),
-					Types:         []*string{aws.String(TYPE)},
-					Severity: &securityhub.Severity{
-						Label: aws.String(securityhub.SeverityLabelHigh),
+					Types:         []string{*aws.String(TYPE)},
+					Severity: &types.Severity{
+						Label: types.SeverityLabelHigh,
 					},
-					Remediation: &securityhub.Remediation{
-						Recommendation: &securityhub.Recommendation{
+					Remediation: &types.Remediation{
+						Recommendation: &types.Recommendation{
 							Text: aws.String("fix me"),
 						},
 					},
-					ProductFields: map[string]*string{
-						"Reason":          aws.String("failed"),
-						"Actual result":   aws.String("failed"),
-						"Expected result": aws.String("failed"),
-						"Section":         aws.String(fmt.Sprintf("%s %s", "test1", "test runnner")),
-						"Subsection":      aws.String(fmt.Sprintf("%s %s", "g1", "Group text")),
+					ProductFields: map[string]string{
+						"Reason":          "failed",
+						"Actual result":   "failed",
+						"Expected result": "failed",
+						"Section":         fmt.Sprintf("%s %s", "test1", "test runnner"),
+						"Subsection":      fmt.Sprintf("%s %s", "g1", "Group text"),
 					},
-					Resources: []*securityhub.Resource{
+					Resources: []types.Resource{
 						{
 							Id:   aws.String("foo Cluster"),
 							Type: aws.String(TYPE),

@@ -40,9 +40,9 @@ groups:
           #To view openshift apiserver log files
           oc adm node-logs --role=master --path=openshift-apiserver/
           #To verify kube apiserver audit config
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig[]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig[]?'
           #To verify openshift apiserver audit config
-          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig[]'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig[]?'
         type: manual
         remediation: |
           No remediation required.
@@ -52,9 +52,9 @@ groups:
         text: "Ensure that the audit policy covers key security concerns (Manual)"
         audit: |
           #To verify openshift apiserver audit config
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
           #To verify kube apiserver audit config
-          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]'
+          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
         type: manual
         remediation: |
           In OpenShift 4.6 and higher, if appropriate for your needs,

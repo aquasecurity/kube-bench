@@ -1,17 +1,16 @@
 [![GitHub Release][release-img]][release]
-![Downloads][download]
-![Docker Pulls][docker-pull]
+[![Downloads][download]][release]
+[![Docker Pulls][docker-pull]][docker]
 [![Go Report Card][report-card-img]][report-card]
 [![Build Status](https://github.com/aquasecurity/kube-bench/workflows/Build/badge.svg?branch=main)](https://github.com/aquasecurity/kube-bench/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/aquasecurity/kube-bench/blob/main/LICENSE)
-[![Docker image](https://images.microbadger.com/badges/image/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench "Get your own image badge on microbadger.com")
-[![Source commit](https://images.microbadger.com/badges/commit/aquasec/kube-bench.svg)](https://microbadger.com/images/aquasec/kube-bench)
 [![Coverage Status][cov-img]][cov]
 
 [download]: https://img.shields.io/github/downloads/aquasecurity/kube-bench/total?logo=github
 [release-img]: https://img.shields.io/github/release/aquasecurity/kube-bench.svg?logo=github
 [release]: https://github.com/aquasecurity/kube-bench/releases
 [docker-pull]: https://img.shields.io/docker/pulls/aquasec/kube-bench?logo=docker&label=docker%20pulls%20%2F%20kube-bench
+[docker]: https://hub.docker.com/r/aquasec/kube-bench
 [cov-img]: https://codecov.io/github/aquasecurity/kube-bench/branch/main/graph/badge.svg
 [cov]: https://codecov.io/github/aquasecurity/kube-bench
 [report-card-img]: https://goreportcard.com/badge/github.com/aquasecurity/kube-bench
@@ -25,7 +24,12 @@ Tests are configured with YAML files, making this tool easy to update as test sp
 
 ![Kubernetes Bench for Security](/docs/images/output.png "Kubernetes Bench for Security")
 
-### Quick start
+## CIS Scanning as part of Trivy and the Trivy Operator
+
+[Trivy](https://github.com/aquasecurity/trivy), the all in one cloud native security scanner, can be deployed as a [Kubernetes Operator](https://github.com/aquasecurity/trivy-operator) inside a cluster.
+Both, the [Trivy CLI](https://github.com/aquasecurity/trivy), and the [Trivy Operator](https://github.com/aquasecurity/trivy-operator) support CIS Kubernetes Benchmark scanning among several other features.
+
+## Quick start
 
 There are multiple ways to run kube-bench.
 You can run kube-bench inside a pod, but it will need access to the host's PID namespace in order to check the running processes, as well as access to some directories on the host where config files and other files are stored.

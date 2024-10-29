@@ -1,0 +1,67 @@
+---
+controls:
+version: "tkgi-1.2.53"
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Client certificate authentication should not be used for users"
+        audit: ps -ef | grep kube-apiserver | grep -- "--oidc-issuer-url="
+        type: "manual"
+        remediation: |
+          Alternative mechanisms provided by Kubernetes such as the use of OIDC should be
+          implemented in place of client certificates.
+          Exception
+          This setting is site-specific. It can be set in the "Configure created clusters to use UAA as the OIDC provider."
+          section of the "UAA"
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--audit-policy-file="
+        tests:
+          test_items:
+            - flag: "--audit-policy-file"
+        remediation: |
+          Create an audit policy file for your cluster.
+        scored: true
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns"
+        audit: |
+          diff /var/vcap/jobs/kube-apiserver/config/audit_policy.yml \ <(echo "--- apiVersion: audit.k8s.io/v1beta1 kind:
+          Policy rules: - level: None resources: - group: '' resources: - endpoints - services - services/status users: -
+          system:kube-proxy verbs: - watch - level: None resources: - group: '' resources: - nodes - nodes/status users: -
+          kubelet verbs: - get - level: None resources: - group: '' resources: - nodes - nodes/status userGroups: -
+          system:nodes verbs: - get - level: None namespaces: - kube-system resources: - group: '' resources: -
+          endpoints users: - system:kube-controller-manager - system:kube-scheduler - system:serviceaccount:kube-
+          system:endpoint-controller verbs: - get - update - level: None resources: - group: '' resources: - namespaces -
+          namespaces/status - namespaces/finalize users: - system:apiserver verbs: - get - level: None resources: -
+          group: metrics.k8s.io users: - system:kube-controller-manager verbs: - get - list - level: None
+          nonResourceURLs: - \"/healthz*\" - \"/version\" - \"/swagger*\" - level: None resources: - group: '' resources: -
+          events - level: Request omitStages: - RequestReceived resources: - group: '' resources: - nodes/status -
+          pods/status userGroups: - system:nodes verbs: - update - patch - level: Request omitStages: -
+          RequestReceived users: - system:serviceaccount:kube-system:namespace-controller verbs: - deletecollection -
+          level: Metadata omitStages: - RequestReceived resources: - group: '' resources: - secrets - configmaps - group:
+          authentication.k8s.io resources: - tokenreviews - level: Request omitStages: - RequestReceived resources: -
+          group: '' - group: admissionregistration.k8s.io - group: apiextensions.k8s.io - group: apiregistration.k8s.io -
+          group: apps - group: authentication.k8s.io - group: authorization.k8s.io - group: autoscaling - group: batch -
+          group: certificates.k8s.io - group: extensions - group: metrics.k8s.io - group: networking.k8s.io - group: policy -
+          group: rbac.authorization.k8s.io - group: settings.k8s.io - group: storage.k8s.io verbs: - get - list - watch - level:
+          RequestResponse omitStages: - RequestReceived resources: - group: '' - group: admissionregistration.k8s.io -
+          group: apiextensions.k8s.io - group: apiregistration.k8s.io - group: apps - group: authentication.k8s.io - group:
+          authorization.k8s.io - group: autoscaling - group: batch - group: certificates.k8s.io - group: extensions - group:
+          metrics.k8s.io - group: networking.k8s.io - group: policy - group: rbac.authorization.k8s.io - group:
+          settings.k8s.io - group: storage.k8s.io - level: Metadata omitStages: - RequestReceived ")
+        type: "manual"
+        remediation: |
+          Consider modification of the audit policy in use on the cluster to include these items, at a
+          minimum.
+        scored: false

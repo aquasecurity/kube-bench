@@ -1,0 +1,119 @@
+---
+controls:
+version: "cis-1.6-k3s"
+id: 2
+text: "Etcd Node Configuration"
+type: "etcd"
+groups:
+  - id: 2
+    text: "Etcd Node Configuration Files"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate if use etcd as database (Automated)"
+        audit: grep -A 4 'client-transport-security' $etcdconf | grep -E 'cert-file|key-file'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "cert-file"
+            - flag: "key-file"
+        remediation: |
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
+          The config file contains client-transport-security: which has fields that have the peer cert and peer key files. No manual remediation needed.
+        scored: true
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
+        audit: grep 'client-cert-auth' $etcdconf
+        tests:
+          test_items:
+            - flag: "client-cert-auth"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
+          client-cert-auth is set to true. No manual remediation needed.
+        scored: true
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Automated)"
+        audit: grep 'auto-tls' $etcdconf | cat
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "auto-tls"
+              set: false
+            - flag: "auto-tls"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          By default, K3s starts Etcd without this flag. It is set to false by default.
+        scored: true
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
+        set as appropriate (Automated)"
+        audit: grep -A 4 'peer-transport-security' $etcdconf | grep -E 'cert-file|key-file'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "cert-file"
+            - flag: "key-file"
+        remediation: |
+          By default, K3s starts Etcd with a config file found here, $etcdconf.
+          The config file contains peer-transport-security: which has fields that have the peer cert and peer key files.
+        scored: true
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
+        audit: grep -A 4 'peer-transport-security' $etcdconf | grep 'client-cert-auth'
+        tests:
+          test_items:
+            - flag: "client-cert-auth"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
+          The config file contains peer-transport-security: which has client-cert-auth set to true. No manual remediation needed.
+        scored: true
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
+        audit: grep 'peer-auto-tls' $etcdconf | cat
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "peer-auto-tls"
+              set: false
+            - flag: "peer-auto-tls"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          By default, K3s uses a config file for etcd that can be found at $etcdconf.
+          Within the file, it does not contain the peer-auto-tls field. No manual remediation needed.
+        scored: true
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for etcd (Manual)"
+        audit: |
+          if [ -f "$etcdconf" ];then
+            etcd_ca=$(grep 'trusted-ca-file' $etcdconf | awk -F ":|: *" '{print $NF}');
+            apiserver_ca=$(journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "trusted-ca-file" | awk -F "=" '{print $NF}')
+            if [ "$etcd_ca" == "$apiserver_ca" ]; then
+              echo 'etcd_and_apiserver_have_same_ca';
+            else
+              echo 'etcd_and_apiserver_ca_not_same1' ;
+            fi
+          else
+            echo 'etcd_and_apiserver_ca_not_same'; return ;
+          fi
+        tests:
+          test_items:
+            - flag: "etcd_and_apiserver_ca_not_same"
+        remediation: |
+          By default, K3s uses a config file for etcd that can be found at $etcdconf
+          and the trusted-ca-file parameters in it are set to unique values specific to etcd. No manual remediation needed.
+        scored: false

@@ -4,12 +4,15 @@ DOCKER_ORG ?= aquasec
 VERSION ?= $(shell git rev-parse --short=7 HEAD)
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
+IMAGE_NAME_UBI ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)-ubi
 GOOS ?= linux
 BUILD_OS := linux
 uname := $(shell uname -s)
-BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm
+BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le,linux/s390x
 DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
+KUBECTL_VERSION ?= 1.31.0
+ARCH ?= $(shell go env GOARCH)
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
 	BUILD_OS := windows
@@ -38,12 +41,25 @@ build: $(BINARY)
 $(BINARY): $(SOURCES)
 	GOOS=$(GOOS) CGO_ENABLED=0 go build -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
 
+build-fips:
+	GOOS=$(GOOS) CGO_ENABLED=0 GOEXPERIMENT=boringcrypto go build -tags fipsonly -ldflags "-X github.com/aquasecurity/kube-bench/cmd.KubeBenchVersion=$(KUBEBENCH_VERSION)" -o $(BINARY) .
+
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-             --build-arg VCS_REF=$(VERSION) \
-			 --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-             -t $(IMAGE_NAME) .
+                     	--build-arg VCS_REF=$(VERSION) \
+		     	--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+	             	--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg TARGETARCH=$(ARCH) \
+                       	-t $(IMAGE_NAME) .
+
+build-docker-ubi:
+	docker build -f Dockerfile.ubi --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            		--build-arg VCS_REF=$(VERSION) \
+			--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+			--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg TARGETARCH=$(ARCH) \
+            		-t $(IMAGE_NAME_UBI) .
 
 # unit tests
 tests:
@@ -78,3 +94,15 @@ kind-run: kind-push
 		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
 		kubectl logs job/kube-bench > ./test.data && \
 		diff ./test.data integration/testdata/Expected_output.data
+
+kind-run-stig: KUBECONFIG = "./kubeconfig.kube-bench"
+kind-run-stig: kind-push
+	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind-stig.yaml > ./hack/kind-stig.test.yaml
+	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
+	-KUBECONFIG=$(KUBECONFIG) \
+		kubectl delete job kube-bench
+	KUBECONFIG=$(KUBECONFIG) \
+		kubectl apply -f ./hack/kind-stig.test.yaml && \
+		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
+		kubectl logs job/kube-bench > ./test.data && \
+		diff ./test.data integration/testdata/Expected_output_stig.data

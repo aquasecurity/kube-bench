@@ -3,7 +3,6 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,13 +11,13 @@ import (
 )
 
 func TestLoadCertificate(t *testing.T) {
-	tmp, err := ioutil.TempDir("", "TestFakeLoadCertificate")
+	tmp, err := os.MkdirTemp("", "TestFakeLoadCertificate")
 	if err != nil {
 		t.Fatalf("unable to create temp directory: %v", err)
 	}
 	defer os.RemoveAll(tmp)
 
-	goodCertFile, _ := ioutil.TempFile(tmp, "good-cert-*")
+	goodCertFile, _ := os.CreateTemp(tmp, "good-cert-*")
 	_, _ = goodCertFile.Write([]byte(`-----BEGIN CERTIFICATE-----
 MIICyDCCAbCgAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
 cm5ldGVzMB4XDTE5MTEwODAxNDAwMFoXDTI5MTEwNTAxNDAwMFowFTETMBEGA1UE
@@ -36,7 +35,7 @@ jLv3UYZRHMpuNS8BJU74BuVzVPHd55RAl+bV8yemdZJ7pPzMvGbZ7zRXWODTDlge
 CQb9lY+jYErisH8Sq7uABFPvi7RaTh8SS7V7OxqHZvmttNTdZs4TIkk45JK7Y+Xq
 FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 -----END CERTIFICATE-----`))
-	badCertFile, _ := ioutil.TempFile(tmp, "bad-cert-*")
+	badCertFile, _ := os.CreateTemp(tmp, "bad-cert-*")
 
 	cases := []struct {
 		file string
@@ -72,7 +71,6 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 					t.Errorf("Expected error")
 				}
 			}
-
 		})
 	}
 }
@@ -124,8 +122,8 @@ func TestGetWebData(t *testing.T) {
 			}
 		})
 	}
-
 }
+
 func TestGetWebDataWithRetry(t *testing.T) {
 	okfn := func(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprintln(w, `{
@@ -173,8 +171,8 @@ func TestGetWebDataWithRetry(t *testing.T) {
 			}
 		})
 	}
-
 }
+
 func TestExtractVersion(t *testing.T) {
 	okJSON := []byte(`{
 	"major": "1",
@@ -231,7 +229,6 @@ func TestExtractVersion(t *testing.T) {
 }
 
 func TestGetKubernetesURL(t *testing.T) {
-
 	resetEnvs := func() {
 		os.Unsetenv("KUBE_BENCH_K8S_ENV")
 		os.Unsetenv("KUBERNETES_SERVICE_HOST")
@@ -266,16 +263,9 @@ func TestGetKubernetesURL(t *testing.T) {
 			}
 			k8sURL := getKubernetesURL()
 
-			if !c.useDefault {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
-				}
-			} else {
-				if k8sURL != c.expected {
-					t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
-				}
+			if k8sURL != c.expected {
+				t.Errorf("Expected %q but Got %q", k8sURL, c.expected)
 			}
 		})
 	}
-
 }

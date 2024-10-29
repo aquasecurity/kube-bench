@@ -9,59 +9,102 @@ env:
   ALIAS: aquasecurity
   DOCKERHUB_ALIAS: aquasec
   REP: kube-bench
+
 jobs:
   publish:
     name: Publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildxarch-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildxarch-
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to ECR
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: public.ecr.aws
           username: ${{ secrets.ECR_ACCESS_KEY_ID }}
           password: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
       - name: Get version
         id: get_version
-        uses: crazy-max/ghaction-docker-meta@v3
+        uses: crazy-max/ghaction-docker-meta@v5
         with:
           images: ${{ env.REP }}
           tag-semver: |
             {{version}}
-
+      - name: Extract variables from makefile (kubectl)
+        id: extract_vars
+        run: |
+          echo "KUBECTL_VERSION=$(grep -oP '^KUBECTL_VERSION\s*\?=\s*\K.*' makefile)" >> $GITHUB_ENV
       - name: Build and push - Docker/ECR
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           build-args: |
             KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
           tags: |
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}
             ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:latest
             public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache/release
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
+
+      - name: Build and push ubi image - Docker/ECR
+        id: docker_build_ubi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          file: Dockerfile.ubi
+          build-args: |
+            KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
+          tags: |
+            ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
+            public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
+          cache-from: type=local,src=/tmp/.buildx-cache/release
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Build and push fips ubi image - Docker/ECR
+        id: docker_build_fips_ubi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          file: Dockerfile.fips.ubi
+          build-args: |
+            KUBEBENCH_VERSION=${{ steps.get_version.outputs.version }}
+            KUBECTL_VERSION=${{ env.KUBECTL_VERSION }}
+          tags: |
+            ${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips
+            public.ecr.aws/${{ env.ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi-fips
           cache-from: type=local,src=/tmp/.buildx-cache/release
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache/release
       - name: Image digest

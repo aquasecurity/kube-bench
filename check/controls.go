@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/securityhub"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
@@ -206,13 +206,13 @@ func (controls *Controls) JUnit() ([]byte, error) {
 }
 
 // ASFF encodes the results of last run to AWS Security Finding Format(ASFF).
-func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
-	fs := []*securityhub.AwsSecurityFinding{}
-	a, err := getConfig("AWS_ACCOUNT")
+func (controls *Controls) ASFF() ([]types.AwsSecurityFinding, error) {
+	fs := []types.AwsSecurityFinding{}
+	account, err := getConfig("AWS_ACCOUNT")
 	if err != nil {
 		return nil, err
 	}
-	c, err := getConfig("CLUSTER_ARN")
+	cluster, err := getConfig("CLUSTER_ARN")
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +220,7 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 	if err != nil {
 		return nil, err
 	}
+	nodeName, _ := getConfig("NODE_NAME")
 	arn := fmt.Sprintf(ARN, region)
 
 	ti := time.Now()
@@ -244,47 +245,52 @@ func (controls *Controls) ASFF() ([]*securityhub.AwsSecurityFinding, error) {
 				if len(check.Reason) > 1024 {
 					reason = check.Reason[0:1023]
 				}
+				id := aws.String(fmt.Sprintf("%s%sEKSnodeID+%s+%s", arn, account, check.ID, cluster))
+				if nodeName != "" {
+					id = aws.String(fmt.Sprintf("%s%sEKSnodeID+%s+%s+%s", arn, account, check.ID, cluster, nodeName))
+				}
 
-				f := securityhub.AwsSecurityFinding{
-					AwsAccountId:  aws.String(a),
-					Confidence:    aws.Int64(100),
+				f := types.AwsSecurityFinding{
+					AwsAccountId:  aws.String(account),
+					Confidence:    aws.Int32(100),
 					GeneratorId:   aws.String(fmt.Sprintf("%s/cis-kubernetes-benchmark/%s/%s", arn, controls.Version, check.ID)),
-					Id:            aws.String(fmt.Sprintf("%s%sEKSnodeID+%s%s", arn, a, check.ID, tf)),
+					Id:            id,
 					CreatedAt:     aws.String(tf),
 					Description:   aws.String(check.Text),
 					ProductArn:    aws.String(arn),
 					SchemaVersion: aws.String(SCHEMA),
 					Title:         aws.String(fmt.Sprintf("%s %s", check.ID, check.Text)),
 					UpdatedAt:     aws.String(tf),
-					Types:         []*string{aws.String(TYPE)},
-					Severity: &securityhub.Severity{
-						Label: aws.String(securityhub.SeverityLabelHigh),
+					Types:         []string{*aws.String(TYPE)},
+					Severity: &types.Severity{
+						Label: types.SeverityLabelHigh,
 					},
-					Remediation: &securityhub.Remediation{
-						Recommendation: &securityhub.Recommendation{
+					Remediation: &types.Remediation{
+						Recommendation: &types.Recommendation{
 							Text: aws.String(remediation),
 						},
 					},
-					ProductFields: map[string]*string{
-						"Reason":          aws.String(reason),
-						"Actual result":   aws.String(actualValue),
-						"Expected result": aws.String(check.ExpectedResult),
-						"Section":         aws.String(fmt.Sprintf("%s %s", controls.ID, controls.Text)),
-						"Subsection":      aws.String(fmt.Sprintf("%s %s", g.ID, g.Text)),
+					ProductFields: map[string]string{
+						"Reason":          reason,
+						"Actual result":   actualValue,
+						"Expected result": check.ExpectedResult,
+						"Section":         fmt.Sprintf("%s %s", controls.ID, controls.Text),
+						"Subsection":      fmt.Sprintf("%s %s", g.ID, g.Text),
 					},
-					Resources: []*securityhub.Resource{
+					Resources: []types.Resource{
 						{
-							Id:   aws.String(c),
+							Id:   aws.String(cluster),
 							Type: aws.String(TYPE),
 						},
 					},
 				}
-				fs = append(fs, &f)
+				fs = append(fs, f)
 			}
 		}
 	}
 	return fs, nil
 }
+
 func getConfig(name string) (string, error) {
 	r := viper.GetString(name)
 	if len(r) == 0 {
@@ -292,6 +298,7 @@ func getConfig(name string) (string, error) {
 	}
 	return r, nil
 }
+
 func summarize(controls *Controls, state State) {
 	switch state {
 	case PASS:

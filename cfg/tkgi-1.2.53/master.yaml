@@ -1,0 +1,1098 @@
+---
+controls:
+version: "tkgi-1.2.53"
+id: 1
+text: "Master Node Security Configuration"
+type: "master"
+groups:
+  - id: 1.1
+    text: "Master Node Configuration Files"
+    checks:
+      - id: 1.1.1
+        text: "Ensure that the API server pod specification file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-apiserver/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chmod 644 /var/vcap/jobs/kube-apiserver/config/bpm.yml
+        scored: true
+
+      - id: 1.1.2
+        text: "Ensure that the API server pod specification file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kube-apiserver/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chown root:root /var/vcap/jobs/kube-apiserver/config/bpm.yml
+        scored: true
+
+      - id: 1.1.3
+        text: "Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-controller-manager/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chmod 644 /var/vcap/jobs/kube-apiserver/config/bpm.yml
+        scored: true
+
+      - id: 1.1.4
+        text: "Ensure that the controller manager pod specification file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kube-controller-manager/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chown root:root /etc/kubernetes/manifests/kube-controller-manager.yaml
+        scored: true
+
+      - id: 1.1.5
+        text: "Ensure that the scheduler pod specification file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the
+          master node.
+          For example, chown 644 /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        scored: true
+
+      - id: 1.1.6
+        text: "Ensure that the scheduler pod specification file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root /var/vcap/jobs/kube-scheduler/config/bpm.yml
+        scored: true
+
+      - id: 1.1.7
+        text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/jobs/etcd/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod 644 stat -c permissions=%a /var/vcap/jobs/etcd/config/bpm.yml
+        scored: true
+
+      - id: 1.1.8
+        text: "Ensure that the etcd pod specification file ownership is set to root:root"
+        audit: stat -c %U:%G /var/vcap/jobs/etcd/config/bpm.yml
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root /var/vcap/jobs/etcd/config/bpm.yml
+        scored: true
+
+      - id: 1.1.9
+        text: "Ensure that the Container Network Interface file permissions are set to 644 or more restrictive"
+        audit: find ((CNI_DIR))/config/ -type f -not -perm 640 | awk 'END{print NR}' | grep "^0$"
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod 644 <path/to/cni/files>
+        scored: false
+
+      - id: 1.1.10
+        text: "Ensure that the Container Network Interface file ownership is set to root:root"
+        audit: find ((CNI_DIR))/config/ -type f -not -user root -or -not -group root | awk 'END{print NR}' | grep "^0$"
+        type: manual
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root <path/to/cni/files>
+        scored: false
+
+      - id: 1.1.11
+        text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive"
+        audit: stat -c permissions=%a /var/vcap/store/etcd/
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "700"
+        remediation: |
+          Run the below command (based on the etcd data directory found above). For example,
+          chmod 700 /var/vcap/store/etcd/
+        scored: true
+
+      - id: 1.1.12
+        text: "Ensure that the etcd data directory ownership is set to etcd:etcd"
+        audit: stat -c %U:%G /var/vcap/store/etcd/
+        type: manual
+        tests:
+          test_items:
+            - flag: "etcd:etcd"
+        remediation: |
+          Run the below command (based on the etcd data directory found above).
+          For example, chown etcd:etcd /var/vcap/store/etcd/
+          Exception: All bosh processes run as vcap user
+          The etcd data directory ownership is vcap:vcap
+        scored: false
+
+      - id: 1.1.13
+        text: "Ensure that the admin.conf file permissions are set to 644 or more restrictive"
+        audit: stat -c permissions=%a /etc/kubernetes/admin.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod 644 /etc/kubernetes/admin.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.14
+        text: "Ensure that the admin.conf file ownership is set to root:root"
+        audit: stat -c %U:%G /etc/kubernetes/admin.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root /etc/kubernetes/admin.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on
+          master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.15
+        text: "Ensure that the scheduler configuration file permissions are set to 644"
+        audit: stat -c permissions=%a /etc/kubernetes/scheduler.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod 644 /etc/kubernetes/scheduler.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on
+          master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.16
+        text: "Ensure that the scheduler configuration file ownership is set to root:root"
+        audit: stat -c %U:%G /etc/kubernetes/scheduler.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root /etc/kubernetes/scheduler.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on
+          master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.17
+        text: "Ensure that the controller manager configuration file permissions are set to 644"
+        audit: stat -c permissions=%a /etc/kubernetes/controller-manager.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod 644 /etc/kubernetes/controller-manager.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on
+          master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.18
+        text: "Ensure that the controller manager configuration file ownership is set to root:root"
+        audit: stat -c %U:%G /etc/kubernetes/controller-manager.conf
+        type: manual
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown root:root /etc/kubernetes/controller-manager.conf
+          Exception
+          kubeadm is not used to provision/bootstrap the cluster. kubeadm and associated config files do not exist on
+          master
+          Reference: https://kubernetes.io/docs/reference/setup-tools/kubeadm/implementation-details/#generate-
+          kubeconfig-files-for-control-plane-components
+        scored: false
+
+      - id: 1.1.19
+        text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root"
+        audit: |
+          find -L /var/vcap/jobs/kube-apiserver/config /var/vcap/jobs/kube-controller-manager/config /var/vcap/jobs/kube-
+          scheduler/config ((CNI_DIR))/config /var/vcap/jobs/etcd/config | sort -u | xargs ls -ld | awk '{ print $3 " " $4}' |
+          grep -c -v "root root" | grep "^0$"
+        type: manual
+        tests:
+          test_items:
+            - flag: "root:root"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chown -R root:root /etc/kubernetes/pki/
+          Exception
+          Files are group owned by vcap
+        scored: false
+
+      - id: 1.1.20
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive"
+        audit: |
+          find -L /var/vcap/jobs/kube-apiserver/config \( -name '*.crt' -or -name '*.pem' \) -and -not -perm 640 | grep -v
+          "packages/golang" | grep -v "packages/ncp_rootfs" | awk 'END{print NR}' | grep "^0$"
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod -R 644 /etc/kubernetes/pki/*.crt
+          Exception
+          Ignoring packages/golang as the package includes test certs used by golang. Ignoring packages/ncp_rootfs on
+          TKG1 with NSX-T container plugin uses the package is used as the overlay filesystem `mount | grep
+          "packages/ncp_rootfs"`
+        scored: false
+
+      - id: 1.1.21
+        text: "Ensure that the Kubernetes PKI key file permissions are set to 600"
+        audit: |
+          find -L /var/vcap/jobs/kube-apiserver/config -name '*.key' -and -not -perm 600 | awk 'END{print NR}' | grep "^0$"
+        type: manual
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: eq
+                value: "600"
+        remediation: |
+          Run the below command (based on the file location on your system) on the master node.
+          For example,
+          chmod -R 600 /etc/kubernetes/pki/*.key
+          Exception
+          Permission on etcd .key files is set to 640, to allow read access to vcap group
+        scored: false
+
+  - id: 1.2
+    text: "API Server"
+    checks:
+      - id: 1.2.1
+        text: "Ensure that the --anonymous-auth argument is set to false"
+        audit: ps -ef | grep kube-apiserver | grep -- "--anonymous-auth=false"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--anonymous-auth=false"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the below parameter.
+          --anonymous-auth=false
+          Exception
+          The flag is set to true to enable API discoveribility.
+          "Starting in 1.6, the ABAC and RBAC authorizers require explicit authorization of the system:anonymous user or the
+          system:unauthenticated group, so legacy policy rules that grant access to the * user or * group do not include
+          anonymous users."
+          -authorization-mode is set to RBAC
+        scored: false
+
+      - id: 1.2.2
+        text: "Ensure that the --basic-auth-file argument is not set"
+        audit: ps -ef | grep kube-apiserver | grep -v -- "--basic-auth-file"
+        tests:
+          test_items:
+            - flag: "--basic-auth-file"
+              set: false
+        remediation: |
+          Follow the documentation and configure alternate mechanisms for authentication. Then,
+          edit the API server pod specification file kube-apiserver
+          on the master node and remove the --basic-auth-file=<filename> parameter.
+        scored: true
+
+      - id: 1.2.3
+        text: "Ensure that the --token-auth-file parameter is not set"
+        audit: ps -ef | grep "/var/vcap/packages/kubernetes/bin/kube-apiserve[r]" | grep -v tini | grep -v -- "--token-auth-file="
+        type: manual
+        tests:
+          test_items:
+            - flag: "--token-auth-file"
+              set: false
+        remediation: |
+          Follow the documentation and configure alternate mechanisms for authentication. Then,
+          edit the API server pod specification file /var/vcap/packages/kubernetes/bin/kube-apiserve[r]
+          on the master node and remove the --token-auth-file=<filename> parameter.
+          Exception
+          Since k8s processes' lifecyle are managed by BOSH, token based authentication is required when processes
+          restart. The file has 0640 permission and root:vcap ownership
+        scored: false
+
+      - id: 1.2.4
+        text: "Ensure that the --kubelet-https argument is set to true"
+        audit: ps -ef | grep kube-apiserver | grep -v -- "--kubelet-https=true"
+        tests:
+          test_items:
+            - flag: "--kubelet-https=true"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and remove the --kubelet-https parameter.
+        scored: true
+
+      - id: 1.2.5
+        text: "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -- "--kubelet-client-certificate=/var/vcap/jobs/kube-apiserver/config/kubelet-
+          client-cert.pem" | grep -- "--kubelet-client-key=/var/vcap/jobs/kube-apiserver/config/kubelet-client-key.pem"
+        type: manual
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--kubelet-client-certificate"
+            - flag: "--kubelet-client-key"
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection between the
+          apiserver and kubelets. Then, edit API server pod specification file
+          kube-apiserver on the master node and set the
+          kubelet client certificate and key parameters as below.
+          --kubelet-client-certificate=<path/to/client-certificate-file>
+          --kubelet-client-key=<path/to/client-key-file>
+        scored: false
+
+      - id: 1.2.6
+        text: "Ensure that the --kubelet-certificate-authority argument is set as appropriate"
+        audit: ps -ef | grep kube-apiserver | grep -- "--kubelet-certificate-authority="
+        type: manual
+        tests:
+          test_items:
+            - flag: "--kubelet-certificate-authority"
+        remediation: |
+          Follow the Kubernetes documentation and setup the TLS connection between
+          the apiserver and kubelets. Then, edit the API server pod specification file
+          kube-apiserver on the master node and set the
+          --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.
+          --kubelet-certificate-authority=<ca-string>
+          Exception
+          JIRA ticket #PKS-696 created to investigate a fix. PR opened to address the issue https://github.com/cloudfoundry-
+          incubator/kubo-release/pull/179
+        scored: false
+
+      - id: 1.2.7
+        text: "Ensure API server authorization modes does not include AlwaysAllow"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -- "--authorization-mode" && ps -ef | grep kube-apiserver | grep -v -- "--
+          authorization-mode=\(\w\+\|,\)*AlwaysAllow\(\w\+\|,\)*"
+        tests:
+          test_items:
+            - flag: "--authorization-mode"
+              compare:
+                op: nothave
+                value: "AlwaysAllow"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --authorization-mode parameter to values other than AlwaysAllow.
+          One such example could be as below.
+          --authorization-mode=RBAC
+        scored: true
+
+      - id: 1.2.8
+        text: "Ensure that the --authorization-mode argument includes Node"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--authorization-mode=\(\w\+\|,\)*Node\(\w\+\|,\)* --"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--authorization-mode"
+              compare:
+                op: has
+                value: "Node"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --authorization-mode parameter to a value that includes Node.
+          --authorization-mode=Node,RBAC
+          Exception
+          This flag can be added using Kubernetes Profiles. Please follow instructions here https://docs.pivotal.io/tkgi/1-
+          8/k8s-profiles.html
+        scored: false
+
+      - id: 1.2.9
+        text: "Ensure that the --authorization-mode argument includes RBAC"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--authorization-mode=\(\w\+\|,\)*RBAC\(\w\+\|,\)* --"
+        tests:
+          test_items:
+            - flag: "--authorization-mode"
+              compare:
+                op: has
+                value: "RBAC"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --authorization-mode parameter to a value that includes RBAC,
+          for example:
+          --authorization-mode=Node,RBAC
+        scored: true
+
+      - id: 1.2.10
+        text: "Ensure that the admission control plugin EventRateLimit is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--enable-admission-plugins=\(\w\+\|,\)*EventRateLimit\
+          (\w\+\|,\)*"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: has
+                value: "EventRateLimit"
+        remediation: |
+          Follow the Kubernetes documentation and set the desired limits in a configuration file.
+          Then, edit the API server pod specification file kube-apiserver
+          and set the below parameters.
+          --enable-admission-plugins=...,EventRateLimit,...
+          --admission-control-config-file=<path/to/configuration/file>
+          Exception
+          "Note: This is an Alpha feature in the Kubernetes v1.13"
+          Control provides rate limiting and is site-specific
+        scored: false
+
+      - id: 1.2.11
+        text: "Ensure that the admission control plugin AlwaysAdmit is not set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v -- "--enable-admission-plugins=\(\w\+\|,\)*AlwaysAdmit\(\w\+\|,\)*"
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: nothave
+                value: AlwaysAdmit
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and either remove the --enable-admission-plugins parameter, or set it to a
+          value that does not include AlwaysAdmit.
+        scored: true
+
+      - id: 1.2.12
+        text: "Ensure that the admission control plugin AlwaysPullImages is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--enable-admission-plugins=\(\w\+\|,\)*AlwaysPullImages\
+          (\w\+\|,\)* --"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: has
+                value: "AlwaysPullImages"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --enable-admission-plugins parameter to include
+          AlwaysPullImages.
+          --enable-admission-plugins=...,AlwaysPullImages,...
+          Exception
+          "Credentials would be required to pull the private images every time. Also, in trusted
+          environments, this might increases load on network, registry, and decreases speed.
+          This setting could impact offline or isolated clusters, which have images pre-loaded and do
+          not have access to a registry to pull in-use images. This setting is not appropriate for
+          clusters which use this configuration."
+          TKGi is packages with pre-loaded images.
+        scored: false
+
+      - id: 1.2.13
+        text: "Ensure that the admission control plugin SecurityContextDeny is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--enable-admission-plugins=\(\w\+\|,\)*SecurityContextDeny\
+          (\w\+\|,\)* --"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: has
+                value: "SecurityContextDeny"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --enable-admission-plugins parameter to include
+          SecurityContextDeny, unless PodSecurityPolicy is already in place.
+          --enable-admission-plugins=...,SecurityContextDeny,...
+          Exception
+          This setting is site-specific. It can be set in the "Admission Plugins" section of the appropriate "Plan"
+        scored: false
+
+      - id: 1.2.14
+        text: "Ensure that the admission control plugin ServiceAccount is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--disable-admission-plugins=\(\w\+\|,\)*ServiceAccount\
+          (\w\+\|,\)* --"
+        tests:
+          test_items:
+            - flag: "--disable-admission-plugins"
+              compare:
+                op: nothave
+                value: "ServiceAccount"
+        remediation: |
+          Follow the documentation and create ServiceAccount objects as per your environment.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and ensure that the --disable-admission-plugins parameter is set to a
+          value that does not include ServiceAccount.
+        scored: true
+
+      - id: 1.2.15
+        text: "Ensure that the admission control plugin NamespaceLifecycle is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--disable-admission-plugins=\
+          (\w\+\|,\)*NamespaceLifecycle\(\w\+\|,\)* --"
+        tests:
+          test_items:
+            - flag: "--disable-admission-plugins"
+              compare:
+                op: nothave
+                value: "NamespaceLifecycle"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --disable-admission-plugins parameter to
+          ensure it does not include NamespaceLifecycle.
+        scored: true
+
+      - id: 1.2.16
+        text: "Ensure that the admission control plugin PodSecurityPolicy is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--enable-admission-plugins=\(\w\+\|,\)*PodSecurityPolicy\
+          (\w\+\|,\)* --"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: has
+                value: "PodSecurityPolicy"
+        remediation: |
+          Follow the documentation and create Pod Security Policy objects as per your environment.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the --enable-admission-plugins parameter to a
+          value that includes PodSecurityPolicy:
+          --enable-admission-plugins=...,PodSecurityPolicy,...
+          Then restart the API Server.
+          Exception
+          This setting is site-specific. It can be set in the "Admission Plugins" section of the appropriate "Plan"
+        scored: false
+
+      - id: 1.2.17
+        text: "Ensure that the admission control plugin NodeRestriction is set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--enable-admission-plugins=\(\w\+\|,\)*NodeRestriction\
+          (\w\+\|,\)* --"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--enable-admission-plugins"
+              compare:
+                op: has
+                value: "NodeRestriction"
+        remediation: |
+          Follow the Kubernetes documentation and configure NodeRestriction plug-in on kubelets.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the --enable-admission-plugins parameter to a
+          value that includes NodeRestriction.
+          --enable-admission-plugins=...,NodeRestriction,...
+          Exception
+          PR opened to address the issue https://github.com/cloudfoundry-incubator/kubo-release/pull/179"
+        scored: true
+
+      - id: 1.2.18
+        text: "Ensure that the --insecure-bind-address argument is not set"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--insecure-bind-address"
+        tests:
+          test_items:
+            - flag: "--insecure-bind-address"
+              set: false
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and remove the --insecure-bind-address parameter.
+        scored: true
+
+      - id: 1.2.19
+        text: "Ensure that the --insecure-port argument is set to 0"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--insecure-port=0"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--insecure-port=0"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the below parameter.
+          --insecure-port=0
+          Exception
+          Related to 1.2.1
+          The insecure port is 8080, and is binding only to localhost on the master node, in use by other components on the
+          master that are bypassing authn/z.
+          The components connecting to the APIServer are:
+          kube-controller-manager
+          kube-proxy
+          kube-scheduler
+          Pods are not scheduled on the master node.
+        scored: false
+
+      - id: 1.2.20
+        text: "Ensure that the --secure-port argument is not set to 0"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--secure-port=0"
+        tests:
+          test_items:
+            - flag: "--secure-port"
+              compare:
+                op: noteq
+                value: 0
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and either remove the --secure-port parameter or
+          set it to a different (non-zero) desired port.
+        scored: true
+
+      - id: 1.2.21
+        text: "Ensure that the --profiling argument is set to false"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--profiling=false"
+        tests:
+          test_items:
+            - flag: "--profiling=false"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the below parameter.
+          --profiling=false
+        scored: true
+
+      - id: 1.2.22
+        text: "Ensure that the --audit-log-path argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--audit-log-path=\/var\/vcap\/sys\/log\/kube-apiserver\/audit.log"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--audit-log-path"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --audit-log-path parameter to a suitable path and
+          file where you would like audit logs to be written, for example:
+          --audit-log-path=/var/log/apiserver/audit.log
+        scored: false
+
+      - id: 1.2.23
+        text: "Ensure that the --audit-log-maxage argument is set to 30 or as appropriate"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--audit-log-maxage=30"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--audit-log-maxage=30"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --audit-log-maxage parameter to 30 or as an appropriate number of days:
+          --audit-log-maxage=30
+          Exception
+          This setting can be set to expected value using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles.html
+        scored: false
+
+      - id: 1.2.24
+        text: "Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--audit-log-maxbackup=10"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--audit-log-maxbackup=10"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --audit-log-maxbackup parameter to 10 or to an appropriate
+          value.
+          --audit-log-maxbackup=10
+          Exception
+          This setting can be set to expected value using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles.html
+        scored: false
+
+      - id: 1.2.25
+        text: "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--audit-log-maxsize=100"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--audit-log-maxsize=100"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --audit-log-maxsize parameter to an appropriate size in MB.
+          For example, to set it as 100 MB:
+          --audit-log-maxsize=100
+          Exception
+          This setting can be set to expected value using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles.html
+        scored: false
+
+      - id: 1.2.26
+        text: "Ensure that the --request-timeout argument is set as appropriate"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--request-timeout="
+        type: manual
+        tests:
+          test_items:
+            - flag: "--request-timeout"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          and set the below parameter as appropriate and if needed.
+          For example,
+          --request-timeout=300s
+        scored: false
+
+      - id: 1.2.27
+        text: "Ensure that the --service-account-lookup argument is set to true"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -v -- "--service-account-lookup"
+        tests:
+          test_items:
+            - flag: "--service-account-lookup=true"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the below parameter.
+          --service-account-lookup=true
+          Alternatively, you can delete the --service-account-lookup parameter from this file so
+          that the default takes effect.
+        scored: true
+
+      - id: 1.2.28
+        text: "Ensure that the --service-account-key-file argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--service-account-key-file=/var/vcap/jobs/kube-
+          apiserver/config/service-account-public-key.pem"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--service-account-key-file"
+        remediation: |
+          Edit the API server pod specification file kube-apiserver
+          on the master node and set the --service-account-key-file parameter
+          to the public key file for service accounts:
+          --service-account-key-file=<filename>
+        scored: false
+
+      - id: 1.2.29
+        text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--etcd-certfile=/var/vcap/jobs/kube-apiserver/config/etcd-
+          client.crt" | grep -- "--etcd-keyfile=/var/vcap/jobs/kube-apiserver/config/etcd-client.key"
+        type: manual
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--etcd-certfile"
+            - flag: "--etcd-keyfile"
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the etcd certificate and key file parameters.
+          --etcd-certfile=<path/to/client-certificate-file>
+          --etcd-keyfile=<path/to/client-key-file>
+        scored: false
+
+      - id: 1.2.30
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--tls-cert-file=/var/vcap/jobs/kube-apiserver/config/kubernetes.pem" | grep -- "--tls-private-key-file=/var/vcap/jobs/kube-
+          apiserver/config/kubernetes-key.pem"
+        type: manual
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--tls-cert-file"
+            - flag: "--tls-private-key-file"
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the TLS certificate and private key file parameters.
+          --tls-cert-file=<path/to/tls-certificate-file>
+          --tls-private-key-file=<path/to/tls-key-file>
+        scored: false
+
+      - id: 1.2.31
+        text: "Ensure that the --client-ca-file argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--client-ca-file=/var/vcap/jobs/kube-apiserver/config/kubernetes-ca.pem"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--client-ca-file"
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the client certificate authority file.
+          --client-ca-file=<path/to/client-ca-file>
+        scored: false
+
+      - id: 1.2.32
+        text: "Ensure that the --etcd-cafile argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--etcd-cafile=/var/vcap/jobs/kube-apiserver/config/etcd-ca.crt"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--etcd-cafile"
+        remediation: |
+          Follow the Kubernetes documentation and set up the TLS connection between the apiserver and etcd.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the etcd certificate authority file parameter.
+          --etcd-cafile=<path/to/ca-file>
+        scored: false
+
+      - id: 1.2.33
+        text: "Ensure that the --encryption-provider-config argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-apiserver | grep -v tini | grep -- "--encryption-provider-config="
+        type: manual
+        tests:
+          test_items:
+            - flag: "--encryption-provider-config"
+        remediation: |
+          Follow the Kubernetes documentation and configure a EncryptionConfig file.
+          Then, edit the API server pod specification file kube-apiserver
+          on the master node and set the --encryption-provider-config parameter to the path of that file: --encryption-provider-config=</path/to/EncryptionConfig/File>
+          Exception
+          Encrypting Secrets in an etcd database can be enabled using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles-encrypt-etcd.html
+        scored: false
+
+      - id: 1.2.34
+        text: "Ensure that the encryption provider is set to aescbc"
+        audit: |
+          ENC_CONF=`ps -ef | grep kube-apiserver | grep -v tini | sed $'s/ /\\\\\\n/g' | grep -- '--encryption-provider-
+          config=' | cut -d'=' -f2` grep -- "- \(aescbc\|kms\|secretbox\):" $ENC_CONF
+        type: manual
+        remediation: |
+          Follow the Kubernetes documentation and configure a EncryptionConfig file.
+          In this file, choose aescbc, kms or secretbox as the encryption provider.
+          Exception
+          Encrypting Secrets in an etcd database can be enabled using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles-encrypt-etcd.html
+        scored: false
+
+      - id: 1.2.35
+        text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers"
+        audit: ps -ef | grep kube-apiserver | grep -v tini | grep -- "--tls-cipher-suites="
+        type: manual
+        tests:
+          test_items:
+            - flag: "--tls-cipher-suites"
+              compare:
+                op: valid_elements
+                value: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+        remediation: |
+          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+          on the master node and set the below parameter.
+          --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM
+          _SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM
+          _SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM
+          _SHA384
+        scored: false
+
+  - id: 1.3
+    text: "Controller Manager"
+    checks:
+      - id: 1.3.1
+        text: "Ensure that the --terminated-pod-gc-threshold argument is set as appropriate"
+        audit: ps -ef | grep kube-controller-manager | grep -- "--terminated-pod-gc-threshold=100"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--terminated-pod-gc-threshold"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and set the --terminated-pod-gc-threshold to an appropriate threshold,
+          for example:
+          --terminated-pod-gc-threshold=10
+        scored: false
+
+      - id: 1.3.2
+        text: "Ensure controller manager profiling is disabled"
+        audit: ps -ef | grep kube-controller-manager | grep -- "--profiling=false"
+        tests:
+          test_items:
+            - flag: "--profiling=false"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and set the below parameter.
+          --profiling=false
+        scored: true
+
+      - id: 1.3.3
+        text: "Ensure that the --use-service-account-credentials argument is set to true"
+        audit: ps -ef | grep kube-controller-manager | grep -- "--use\-service\-account\-credentials=true"
+        tests:
+          test_items:
+            - flag: "--use-service-account-credentials=true"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node to set the below parameter.
+          --use-service-account-credentials=true
+        scored: true
+
+      - id: 1.3.4
+        text: "Ensure that the --service-account-private-key-file argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-controller-manager | grep -- "--service\-account\-private\-key\-file=\/var\/vcap\/jobs\/kube\-
+          controller\-manager\/config\/service\-account\-private\-key.pem"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--service-account-private-key-file"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and set the --service-account-private-key-file parameter
+          to the private key file for service accounts.
+          --service-account-private-key-file=<filename>
+        scored: false
+
+      - id: 1.3.5
+        text: "Ensure that the --root-ca-file argument is set as appropriate"
+        audit: |
+          ps -ef | grep kube-controller-manager | grep -- "--root\-ca\-file=\/var\/vcap\/jobs\/kube\-controller\-manager\/config\/ca.pem"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--root-ca-file"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and set the --root-ca-file parameter to the certificate bundle file`.
+          --root-ca-file=<path/to/file>
+        scored: false
+
+      - id: 1.3.6
+        text: "Ensure that the RotateKubeletServerCertificate argument is set to true"
+        audit: |
+          ps -ef | grep kube-controller-manager | grep -- "--feature-gates=\
+          (\w\+\|,\)*RotateKubeletServerCertificate=true\(\w\+\|,\)*"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--feature-gates=RotateKubeletServerCertificate=true"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true.
+          --feature-gates=RotateKubeletServerCertificate=true
+          Exception
+          Certificate rotation is handled by Credhub
+        scored: false
+
+      - id: 1.3.7
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1"
+        audit: |
+          ps -ef | grep "/var/vcap/packages/kubernetes/bin/kube-controller-manage[r]" | grep -v tini | grep -- "--bind-address=127.0.0.1"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--bind-address=127.0.0.1"
+        remediation: |
+          Edit the Controller Manager pod specification file controller manager conf
+          on the master node and ensure the correct value for the --bind-address parameter
+          Exception
+          This setting can be set to expected value using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles.html
+        scored: false
+
+  - id: 1.4
+    text: "Scheduler"
+    checks:
+      - id: 1.4.1
+        text: "Ensure that the --profiling argument is set to false"
+        audit: ps -ef | grep kube-scheduler | grep -v tini | grep -- "--profiling=false"
+        tests:
+          test_items:
+            - flag: "--profiling=false"
+        remediation: |
+          Edit the Scheduler pod specification file scheduler config file
+          on the master node and set the below parameter.
+          --profiling=false
+        scored: true
+
+      - id: 1.4.2
+        text: "Ensure that the --bind-address argument is set to 127.0.0.1"
+        audit: ps -ef | grep "/var/vcap/packages/kubernetes/bin/kube-schedule[r]" | grep -v tini | grep -- "--bind-address=127.0.0.1"
+        type: manual
+        tests:
+          test_items:
+            - flag: "--bind-address"
+              compare:
+                op: eq
+                value: "127.0.0.1"
+        remediation: |
+          Edit the Scheduler pod specification file scheduler config
+          on the master node and ensure the correct value for the --bind-address parameter
+          Exception
+          This setting can be set to expected value using Kubernetes Profiles. Please follow instructions here
+          https://docs.pivotal.io/tkgi/1-8/k8s-profiles.html
+        scored: false

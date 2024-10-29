@@ -1,0 +1,253 @@
+---
+controls:
+version: "cis-1.6-k3s"
+id: 4
+text: "Worker Node Security Configuration"
+type: "node"
+groups:
+  - id: 4.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Not Applicable)"
+        scored: false
+
+      - id: 4.1.2
+        text: "Ensure that the kubelet service file ownership is set to root:root (Not Applicable)"
+        scored: false
+
+      - id: 4.1.3
+        text: "If proxy kubeproxy.kubeconfig file exists ensure permissions are set to 644 or more restrictive (Automated)"
+        audit: stat -c %a $proxykubeconfig
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "permissions"
+              set: true
+              compare:
+                op: bitmask
+                value: "644"
+            - flag: "$proxykubeconfig"
+              set: false
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chmod 644 $proxykubeconfig
+        scored: true
+
+      - id: 4.1.4
+        text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        tests:
+          bin_op: or
+          test_items:
+            - flag: root:root
+            - flag: "$proxykubeconfig"
+              set: false
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example, chown root:root $proxykubeconfig
+        scored: true
+
+      - id: 4.1.5
+        text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          By default, K3s creates $kubeletkubeconfig with 644 permissions. No manual remediation needed.
+        scored: true
+
+      - id: 4.1.6
+        text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          By default, K3s creates $kubeletkubeconfig with root:root ownership. No manual remediation needed.
+        scored: true
+
+      - id: 4.1.7
+        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
+        audit: stat -c permissions=%a $kubeletcafile
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          By default, K3s creates $kubeletcafile with 644 permissions.
+        scored: true
+
+      - id: 4.1.8
+        text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
+        audit: stat -c %U:%G $kubeletcafile
+        tests:
+          test_items:
+            - flag: root:root
+              compare:
+                op: eq
+                value: root:root
+        remediation: |
+          By default, K3s creates $kubeletcafile with root:root ownership.
+        scored: true
+
+      - id: 4.1.9
+        text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Not Applicable)"
+        scored: false
+
+      - id: 4.1.10
+        text: "Ensure that the kubelet --config configuration file ownership is set to root:root (Not Applicable)"
+        scored: false
+
+  - id: 4.2
+    text: "Kubelet"
+    checks:
+      - id: 4.2.1
+        text: "Ensure that the anonymous-auth argument is set to false (Automated)"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          By default, K3s starts kubelet with --anonymous-auth set to false. No manual remediation needed.
+        scored: true
+
+      - id: 4.2.2
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"
+        tests:
+          test_items:
+            - flag: --authorization-mode
+              compare:
+                op: nothave
+                value: AlwaysAllow
+        remediation: |
+          K3s starts kubelet with Webhook as the value for the --authorization-mode argument. No manual remediation needed.
+        scored: true
+
+      - id: 4.2.3
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        audit: journalctl -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"
+        tests:
+          test_items:
+            - flag: --client-ca-file
+        remediation: |
+          By default, K3s starts the kubelet process with the --client-ca-file. No manual remediation needed.
+        scored: true
+
+      - id: 4.2.4
+        text: "Ensure that the --read-only-port argument is set to 0 (Automated)"
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "read-only-port"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--read-only-port"
+              compare:
+                op: eq
+                value: 0
+            - flag: "--read-only-port"
+              set: false
+        remediation: |
+          By default, K3s starts the kubelet process with the --read-only-port argument set to 0.
+        scored: false
+
+      - id: 4.2.5
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "streaming-connection-idle-timeout"
+        tests:
+          test_items:
+            - flag: --streaming-connection-idle-timeout
+              compare:
+                op: noteq
+                value: 0
+            - flag: --streaming-connection-idle-timeout
+              set: false
+          bin_op: or
+        remediation: |
+          By default, K3s does not set --streaming-connection-idle-timeout when starting kubelet.
+        scored: true
+
+      - id: 4.2.6
+        text: "Ensure that the --protect-kernel-defaults argument is set to true (Automated)"
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "protect-kernel-defaults"
+        tests:
+          test_items:
+            - flag: --protect-kernel-defaults
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          K3s server needs to be started with the following, --protect-kernel-defaults=true.
+        scored: true
+
+      - id: 4.2.7
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep "make-iptables-util-chains"
+        tests:
+          test_items:
+            - flag: --make-iptables-util-chains
+              compare:
+                op: eq
+                value: true
+            - flag: --make-iptables-util-chains
+              set: false
+          bin_op: or
+        remediation: |
+          K3s server needs to be run with the following, --kube-apiserver-arg='make-iptables-util-chains=true'.
+        scored: true
+
+      - id: 4.2.8
+        text: "Ensure that the --hostname-override argument is not set (Not Applicable)"
+        scored: false
+
+      - id: 4.2.9
+        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Manual)"
+        audit: /bin/ps -fC containerd
+        tests:
+          test_items:
+            - flag: --event-qps
+              compare:
+                op: eq
+                value: 0
+        remediation: |
+          If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.
+          If using command line arguments, edit the kubelet service file
+          $kubeletsvc on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: false
+
+      - id: 4.2.10
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
+        audit: journalctl -u k3s | grep "Running kubelet" | tail -n1 | grep -E 'tls-cert-file|tls-private-key-file'
+        tests:
+          test_items:
+            - flag: --tls-cert-file
+            - flag: --tls-private-key-file
+        remediation: |
+          By default, K3s sets the --tls-cert-file and --tls-private-key-file arguments when executing the kubelet process.
+        scored: false
+
+      - id: 4.2.11
+        text: "Ensure that the --rotate-certificates argument is not set to false (Not Applicable)"
+        scored: false
+
+      - id: 4.2.12
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true (Not Applicable)"
+        scored: false
+
+      - id: 4.2.13
+        text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Applicable)"
+        scored: false

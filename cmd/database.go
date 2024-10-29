@@ -38,7 +38,7 @@ func getPsqlConnInfo() (PsqlConnInfo, error) {
 	if value := viper.GetString("PGSQL_DBNAME"); value != "" {
 		dbName = value
 	} else {
-		return PsqlConnInfo{}, fmt.Errorf("%s_PGSQL_USER env var is required", envVarsPrefix)
+		return PsqlConnInfo{}, fmt.Errorf("%s_PGSQL_DBNAME env var is required", envVarsPrefix)
 	}
 
 	var sslMode string
