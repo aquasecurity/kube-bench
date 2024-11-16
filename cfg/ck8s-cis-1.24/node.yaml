@@ -323,7 +323,7 @@ groups:
           Edit the kubelet configuration file
           $kubeletconf on each worker node and
           set the following argument:
-          
+
           `--make-iptables-util-chains=true`
 
           Restart the kubelet service.

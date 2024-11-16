@@ -353,7 +353,7 @@ target_mapping:
     - "node"
     - "controlplane"
     - "etcd"
-    - "policies"    
+    - "policies"
   "cis-1.7":
     - "master"
     - "node"
