@@ -900,14 +900,11 @@ groups:
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--bind-address"
               compare:
                 op: eq
                 value: "127.0.0.1"
-            - flag: "--bind-address"
-              set: false
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the control plane node and ensure the correct value for the --bind-address parameter
@@ -935,14 +932,11 @@ groups:
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--bind-address"
               compare:
                 op: eq
                 value: "127.0.0.1"
-            - flag: "--bind-address"
-              set: false
         remediation: |
           Edit the Scheduler pod specification file $schedulerconf
           on the control plane node and ensure the correct value for the --bind-address parameter
