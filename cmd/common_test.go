@@ -245,6 +245,8 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "1.27", succeed: true, exp: "cis-1.9"},
 		{kubeVersion: "1.28", succeed: true, exp: "cis-1.9"},
 		{kubeVersion: "1.29", succeed: true, exp: "cis-1.9"},
+		{kubeVersion: "1.30", succeed: true, exp: "cis-1.10"},
+		{kubeVersion: "1.31", succeed: true, exp: "cis-1.10"},
 		{kubeVersion: "gke-1.2.0", succeed: true, exp: "gke-1.2.0"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
