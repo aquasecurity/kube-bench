@@ -336,8 +336,8 @@ groups:
             - flag: "--token-auth-file"
               set: false
         remediation: |
-          Follow the documentation and configure alternate mechanisms for authentication. Then,
-          edit the API server configuration file $apiserverconf
+          Follow the Kubernetes documentation and configure alternate mechanisms for
+          authentication. Then, edit the API server configuration file $apiserverconf
           on the control plane node and remove the --token-auth-file argument.
         scored: true
 
@@ -843,7 +843,7 @@ groups:
           Edit the Controller Manager configuration file $controllermanagerconf
           on the control plane node and set the --terminated-pod-gc-threshold to an appropriate threshold.
 
-          `--terminated-pod-gc-threshold=10`
+          `--terminated-pod-gc-threshold=12500`
         scored: false
 
       - id: 1.3.2
