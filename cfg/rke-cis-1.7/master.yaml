@@ -300,7 +300,7 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
-        audit: "check_files_owner_in_dir.sh /node/etc/kubernetes/ssl"
+        audit: "check_files_owner_in_dir.sh /etc/kubernetes/ssl"
         tests:
           test_items:
             - flag: "true"
@@ -311,12 +311,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          chown -R root:root /etc/kubernetes/pki/
+          chown -R root:root /etc/kubernetes/ssl/
         scored: true
 
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
-        audit: "find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a"
+        audit: "find /etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -327,12 +327,12 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
+          find /etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
         scored: false
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Manual)"
-        audit: "find /node/etc/kubernetes/ssl/ -name '*key.pem' | xargs stat -c permissions=%a"
+        audit: "find /etc/kubernetes/ssl/ -name '*key.pem' | xargs stat -c permissions=%a"
         use_multiple_values: true
         tests:
           test_items:
@@ -343,7 +343,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          find /node/etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
+          find /etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
         scored: false
 
   - id: 1.2
