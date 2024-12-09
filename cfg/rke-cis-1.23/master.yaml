@@ -263,7 +263,7 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
-        audit: "check_files_owner_in_dir.sh /node/etc/kubernetes/ssl"
+        audit: "check_files_owner_in_dir.sh /etc/kubernetes/ssl"
         tests:
           test_items:
             - flag: "true"

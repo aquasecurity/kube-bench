@@ -272,7 +272,7 @@ groups:
 
       - id: 1.1.19
         text: "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)"
-        audit: "check_files_owner_in_dir.sh /node/etc/kubernetes/ssl"
+        audit: "check_files_owner_in_dir.sh /etc/kubernetes/ssl"
         tests:
           test_items:
             - flag: "true"
@@ -289,7 +289,7 @@ groups:
       - id: 1.1.20
         text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Automated)"
         audit: |
-          if test -n "$(find /node/etc/kubernetes/ssl/ -name '*.pem' ! -name '*key.pem')"; then find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a;else echo "File not found"; fi
+          if test -n "$(find /etc/kubernetes/ssl/ -name '*.pem' ! -name '*key.pem')"; then find /etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' | xargs stat -c permissions=%a;else echo "File not found"; fi
         tests:
           bin_op: or
           test_items:
@@ -301,13 +301,13 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          find /node/etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
+          find /etc/kubernetes/ssl/  -name '*.pem' ! -name '*key.pem' -exec chmod -R 600 {} +
         scored: true
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Automated)"
         audit: |
-          if test -n "$(find /node/etc/kubernetes/ssl/ -name '*.pem')"; then find /node/etc/kubernetes/ssl/  -name '*.pem' | xargs stat -c permissions=%a;else echo \"File not found\"; fi
+          if test -n "$(find /etc/kubernetes/ssl/ -name '*.pem')"; then find /etc/kubernetes/ssl/  -name '*.pem' | xargs stat -c permissions=%a;else echo \"File not found\"; fi
         tests:
           bin_op: or
           test_items:
@@ -319,7 +319,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          find /node/etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
+          find /etc/kubernetes/ssl/ -name '*key.pem' -exec chmod -R 600 {} +
         scored: true
 
   - id: 1.2

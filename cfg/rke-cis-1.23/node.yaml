@@ -93,7 +93,7 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
-        audit: "stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: "stat -c permissions=%a /etc/kubernetes/ssl/kube-ca.pem"
         tests:
           test_items:
             - flag: "permissions"
@@ -107,7 +107,7 @@ groups:
 
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: "stat -c %U:%G /etc/kubernetes/ssl/kube-ca.pem"
         tests:
           test_items:
             - flag: root:root

@@ -92,7 +92,7 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c "if test -e /node/etc/kubernetes/ssl/kube-ca.pem; then stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
+        audit: '/bin/sh -c "if test -e /etc/kubernetes/ssl/kube-ca.pem; then stat -c permissions=%a /etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
         tests:
           bin_op: or
           test_items:
@@ -107,7 +107,7 @@ groups:
         scored: true
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c "if test -e /node/etc/kubernetes/ssl/kube-ca.pem; then stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
+        audit: '/bin/sh -c "if test -e /etc/kubernetes/ssl/kube-ca.pem; then stat -c %U:%G /etc/kubernetes/ssl/kube-ca.pem; else echo \"File not found\"; fi"'
         tests:
           bin_op: or
           test_items:
