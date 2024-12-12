@@ -248,6 +248,7 @@ func TestMapToCISVersion(t *testing.T) {
 		{kubeVersion: "gke-1.2.0", succeed: true, exp: "gke-1.2.0"},
 		{kubeVersion: "ocp-3.10", succeed: true, exp: "rh-0.7"},
 		{kubeVersion: "ocp-3.11", succeed: true, exp: "rh-0.7"},
+		{kubeVersion: "ocp-4.15", succeed: true, exp: "rh-1.6"},
 		{kubeVersion: "unknown", succeed: false, exp: "", expErr: "unable to find a matching Benchmark Version match for kubernetes version: unknown"},
 	}
 	for _, c := range cases {
