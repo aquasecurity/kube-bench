@@ -93,7 +93,7 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
-        audit: "stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: "stat -c permissions=%a /etc/kubernetes/ssl/kube-ca.pem"
         tests:
           test_items:
             - flag: "permissions"
@@ -107,7 +107,7 @@ groups:
 
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: "stat -c %U:%G /etc/kubernetes/ssl/kube-ca.pem"
         tests:
           test_items:
             - flag: root:root
@@ -453,7 +453,7 @@ groups:
                 op: valid_elements
                 value: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         remediation: |
-          If using a Kubelet config file, edit the file to set `TLSCipherSuites` to
+          If using a Kubelet config file, edit the file to set `tlsCipherSuites` to
           TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
           or to a subset of these values.
           If using executable arguments, edit the kubelet service file

@@ -32,7 +32,7 @@ jobs:
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
       - name: Setup golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
           version: v1.57.2
           args: --verbose
@@ -49,7 +49,7 @@ jobs:
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.txt
   e2e:
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Setup Kubernetes cluster (KIND)
-        uses: engineerd/setup-kind@v0.5.0
+        uses: engineerd/setup-kind@v0.6.2
         with:
           version: ${{ env.KIND_VERSION }}
           image: ${{ env.KIND_IMAGE }}

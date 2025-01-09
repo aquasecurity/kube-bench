@@ -152,7 +152,7 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kubelet" | wc -l) -gt 0; then journalctl -m -u k3s -u k3s-agent | grep "Running kubelet" | tail -n1 | grep "anonymous-auth" | grep -v grep; else echo "--anonymous-auth=false"; fi'' '
         tests:
           test_items:
             - flag: "--anonymous-auth"
@@ -174,7 +174,7 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "authorization-mode"; else echo "--authorization-mode=Webhook"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s -u k3s-agent | grep "Running kubelet" | wc -l) -gt 0; then journalctl -m -u k3s -u k3s-agent | grep "Running kubelet" | tail -n1 | grep "authorization-mode"; else echo "--authorization-mode=Webhook"; fi'' '
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           test_items:
@@ -197,7 +197,7 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s -u k3s-agent | grep "Running kubelet" | wc -l) -gt 0; then journalctl -m -u k3s -u k3s-agent | grep "Running kubelet" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
         tests:
           test_items:
             - flag: --client-ca-file
@@ -397,7 +397,7 @@ groups:
                 op: valid_elements
                 value: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256
         remediation: |
-          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `TLSCipherSuites` to
+          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `tlsCipherSuites` to
           kubelet-arg:
             - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
           or to a subset of these values.
