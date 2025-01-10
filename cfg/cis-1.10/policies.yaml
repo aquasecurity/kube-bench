@@ -369,9 +369,9 @@ groups:
                 value: true
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
-          admission of containers with `.spec.allowPrivilegeEscalation` set to `true`.
-          Audit: the audit retrieves each Pod's container(s) `.spec.allowPrivilegeEscalation`.
-          Condition: is_compliant is false if container's `.spec.allowPrivilegeEscalation` is set to `true`.
+          admission of containers with `.securityContext.allowPrivilegeEscalation` set to `true`.
+          Audit: the audit retrieves each Pod's container(s) `.securityContext.allowPrivilegeEscalation`.
+          Condition: is_compliant is false if container's `.securityContext.allowPrivilegeEscalation` is set to `true`.
           Default: If notset, privilege escalation is allowed (default to true). However if PSP/PSA is used with a `restricted` profile,
           privilege escalation is explicitly disallowed unless configured otherwise.
         scored: false
