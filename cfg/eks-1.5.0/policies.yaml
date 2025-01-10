@@ -1,0 +1,250 @@
+---
+controls:
+version: "eks-1.5.0"
+id: 4
+text: "Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Automated)"
+        type: "manual"
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and if
+          they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
+        scored: false
+
+      - id: 4.1.2
+        text: "Minimize access to secrets (Automated)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 4.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
+        type: "manual"
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 4.1.4
+        text: "Minimize access to create pods (Automated)"
+        type: "manual"
+        remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: false
+
+      - id: 4.1.5
+        text: "Ensure that default service accounts are not actively used. ((Automated)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific
+          access to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+
+          Automatic remediation for the default account:
+          kubectl patch serviceaccount default -p
+          $'automountServiceAccountToken: false'
+        scored: false
+
+      - id: 4.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+      - id: 4.1.7
+        text: "Avoid use of system:masters group (Automated)"
+        type: "manual"
+        remediation: |
+          Remove the system:masters group from all users in the cluster.
+        scored: false
+
+      - id: 4.1.8
+        text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove the impersonate, bind and escalate rights from subjects.
+        scored: false
+
+  - id: 4.2
+    text: "Pod Security Standards"
+    checks:
+      - id: 4.2.1
+        text: "Minimize the admission of privileged containers (Automated)"
+        type: "manual"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of privileged containers.
+          To enable PSA for a namespace in your cluster, set the pod-security.kubernetes.io/enforce
+          label with the policy value you want to enforce.
+          kubectl label --overwrite ns NAMESPACE pod-security.kubernetes.io/enforce=restricted
+          The above command enforces the restricted policy for the NAMESPACE namespace.
+          You can also enable Pod Security Admission for all your namespaces. For example:
+          kubectl label --overwrite ns --all pod-security.kubernetes.io/warn=baseline
+        scored: false
+
+      - id: 4.2.2
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostPID containers.
+        scored: false
+
+      - id: 4.2.3
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostIPC containers.
+        scored: false
+
+      - id: 4.2.4
+        text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
+        type: "manual"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostNetwork containers.
+        scored: false
+
+      - id: 4.2.5
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
+        type: "manual"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of containers with .spec.allowPrivilegeEscalation set to true.
+        scored: false
+
+  - id: 4.3
+    text: "CNI Plugin"
+    checks:
+      - id: 4.3.1
+        text: "Ensure CNI plugin supports network policies (Manual)"
+        type: "manual"
+        remediation: |
+          As with RBAC policies, network policies should adhere to the policy of least privileged
+          access. Start by creating a deny all policy that restricts all inbound and outbound traffic
+          from a namespace or create a global policy using Calico.
+        scored: false
+
+      - id: 4.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Automated)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as you need them.
+        scored: false
+
+  - id: 4.4
+    text: "Secrets Management"
+    checks:
+      - id: 4.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Automated)"
+        type: "manual"
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 4.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 4.5
+    text: "General Policies"
+    checks:
+      - id: 4.5.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 4.5.2
+        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        type: "manual"
+        remediation: |
+          As a best practice we recommend that you scope the binding for privileged pods to
+          service accounts within a particular namespace, e.g. kube-system, and limiting access
+          to that namespace. For all other serviceaccounts/namespaces, we recommend
+          implementing a more restrictive policy such as this:
+
+          apiVersion: policy/v1beta1
+          kind: PodSecurityPolicy
+          metadata:
+            name: restricted
+            annotations:
+              seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
+              apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+              seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+              apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+          spec:
+            privileged: false
+            # Required to prevent escalations to root.
+            allowPrivilegeEscalation: false
+            # This is redundant with non-root + disallow privilege escalation,
+            # but we can provide it for defense in depth.
+            requiredDropCapabilities:
+            - ALL
+            # Allow core volume types.
+            volumes:
+            - 'configMap'
+            - 'emptyDir'
+            - 'projected'
+            - 'secret'
+            - 'downwardAPI'
+            # Assume that persistentVolumes set up by the cluster admin are safe to use.
+            - 'persistentVolumeClaim'
+            hostNetwork: false
+            hostIPC: false
+            hostPID: false
+            runAsUser:
+            # Require the container to run without root privileges.
+            rule: 'MustRunAsNonRoot'
+            seLinux:
+            # This policy assumes the nodes are using AppArmor rather than SELinux.
+            rule: 'RunAsAny'
+            supplementalGroups:
+            rule: 'MustRunAs'
+            ranges:
+              # Forbid adding the root group.
+              - min: 1
+                max: 65535
+            fsGroup:
+            rule: 'MustRunAs'
+            ranges:
+              # Forbid adding the root group.
+              - min: 1
+                max: 65535
+            readOnlyRootFilesystem: false
+
+          This policy prevents pods from running as privileged or escalating privileges. It also
+          restricts the types of volumes that can be mounted and the root supplemental groups
+          that can be added.
+          Another, albeit similar, approach is to start with policy that locks everything down and
+          incrementally add exceptions for applications that need looser restrictions such as
+          logging agents which need the ability to mount a host path.
+        scored: false
+
+      - id: 4.5.3
+        text: "The default namespace should not be used (Automated)"
+        type: "manual"
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false

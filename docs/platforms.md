@@ -5,7 +5,7 @@ kube-bench supports running tests for Kubernetes.
 Most of our supported benchmarks are defined in one of the following:
     [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/)
     [STIG Document Library](https://public.cyber.mil/stigs/downloads)
-    
+
 Some defined by other hardenening guides.
 
 | Source | Kubernetes Benchmark                                                                                                                                                                              | kube-bench config        | Kubernetes versions |
@@ -24,6 +24,7 @@ Some defined by other hardenening guides.
 | CIS    | [EKS 1.0.1](https://workbench.cisecurity.org/benchmarks/6041)                                                                                                                                     | eks-1.0.1                | EKS                 |
 | CIS    | [EKS 1.1.0](https://workbench.cisecurity.org/benchmarks/6248)                                                                                                                                     | eks-1.1.0                | EKS                 |
 | CIS    | [EKS 1.2.0](https://workbench.cisecurity.org/benchmarks/9681)                                                                                                                                     | eks-1.2.0                | EKS                 |
+| CIS    | [EKS 1.5.0](https://workbench.cisecurity.org/benchmarks/17733)                                                                                                                                    | eks-1.5.0                | EKS                 |
 | CIS    | [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467)                                                                                                                                     | ack-1.0                  | ACK                 |
 | CIS    | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347)                                                                                                                                     | aks-1.0                  | AKS                 |
 | RHEL   | RedHat OpenShift hardening guide                                                                                                                                                                  | rh-0.7                   | OCP 3.10-3.11       |
