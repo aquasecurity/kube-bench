@@ -5,7 +5,7 @@ env:
   - CGO_ENABLED=0
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
 builds:
-  - main: main.go
+  - main: .
     binary: kube-bench
     tags:
       - osusergo
