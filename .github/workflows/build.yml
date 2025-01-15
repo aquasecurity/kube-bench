@@ -35,7 +35,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.61
-          args: --verbose
+          args: --verbose --timeout 2m
   unit:
     name: Unit tests
     runs-on: ubuntu-latest
