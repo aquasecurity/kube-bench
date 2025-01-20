@@ -58,9 +58,14 @@ CMD ["install"]
 ARG BUILD_DATE
 ARG VCS_REF
 LABEL org.label-schema.build-date=$BUILD_DATE \
-    org.label-schema.name="kube-bench" \
-    org.label-schema.description="Run the CIS Kubernetes Benchmark tests" \
-    org.label-schema.url="https://github.com/aquasecurity/kube-bench" \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="https://github.com/aquasecurity/kube-bench" \
-    org.label-schema.schema-version="1.0"
+      org.label-schema.name="kube-bench" \
+      org.label-schema.vendor="Aqua Security Software Ltd." \
+      org.label-schema.version=$KUBEBENCH_VERSION \
+      org.label-schema.release=$KUBEBENCH_VERSION \
+      org.label-schema.summary="Aqua security server" \
+      org.label-schema.maintainer="admin@aquasec.com" \
+      org.label-schema.description="Run the CIS Kubernetes Benchmark tests" \
+      org.label-schema.url="https://github.com/aquasecurity/kube-bench" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/aquasecurity/kube-bench" \
+      org.label-schema.schema-version="1.0"
