@@ -50,6 +50,8 @@ CMD ["install"]
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
+ARG KUBEBENCH_VERSION
+
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="kube-bench" \
       org.label-schema.vendor="Aqua Security Software Ltd." \
