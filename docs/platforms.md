@@ -5,7 +5,7 @@ kube-bench supports running tests for Kubernetes.
 Most of our supported benchmarks are defined in one of the following:
     [CIS Kubernetes Benchmarks](https://www.cisecurity.org/benchmark/kubernetes/)
     [STIG Document Library](https://public.cyber.mil/stigs/downloads)
-    
+
 Some defined by other hardenening guides.
 
 | Source | Kubernetes Benchmark                                                                                                                                                                              | kube-bench config        | Kubernetes versions |
@@ -18,12 +18,14 @@ Some defined by other hardenening guides.
 | CIS    | [1.7](https://workbench.cisecurity.org/benchmarks/11107)                                                                                                                                          | cis-1.7                  | 1.25                |
 | CIS    | [1.8](https://workbench.cisecurity.org/benchmarks/12958)                                                                                                                                          | cis-1.8                  | 1.26                |
 | CIS    | [1.9](https://workbench.cisecurity.org/benchmarks/16828)                                                                                                                                          | cis-1.9                  | 1.27-1.29           |
+| CIS    | [1.10](https://workbench.cisecurity.org/benchmarks/17568)                                                                                                                                         | cis-1.10                  | 1.28-1.31          |
 | CIS    | [GKE 1.0.0](https://workbench.cisecurity.org/benchmarks/4536)                                                                                                                                     | gke-1.0                  | GKE                 |
 | CIS    | [GKE 1.2.0](https://workbench.cisecurity.org/benchmarks/7534)                                                                                                                                     | gke-1.2.0                | GKE                 |
 | CIS    | [GKE 1.6.0](https://workbench.cisecurity.org/benchmarks/16093)                                                                                                                                    | gke-1.6.0                | GKE                 |
 | CIS    | [EKS 1.0.1](https://workbench.cisecurity.org/benchmarks/6041)                                                                                                                                     | eks-1.0.1                | EKS                 |
 | CIS    | [EKS 1.1.0](https://workbench.cisecurity.org/benchmarks/6248)                                                                                                                                     | eks-1.1.0                | EKS                 |
 | CIS    | [EKS 1.2.0](https://workbench.cisecurity.org/benchmarks/9681)                                                                                                                                     | eks-1.2.0                | EKS                 |
+| CIS    | [EKS 1.5.0](https://workbench.cisecurity.org/benchmarks/17733)                                                                                                                                    | eks-1.5.0                | EKS                 |
 | CIS    | [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467)                                                                                                                                     | ack-1.0                  | ACK                 |
 | CIS    | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347)                                                                                                                                     | aks-1.0                  | AKS                 |
 | RHEL   | RedHat OpenShift hardening guide                                                                                                                                                                  | rh-0.7                   | OCP 3.10-3.11       |
