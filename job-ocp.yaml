@@ -89,7 +89,15 @@ spec:
       serviceAccountName: kube-bench-sa
       automountServiceAccountToken: true
       containers:
-        - command: ["kube-bench"]
+        - command:
+            [
+              "kube-bench",
+              "run",
+              "--targets",
+              "master,controlplane,node,etcd,policies",
+              "--benchmark",
+              "rh-1.6",
+            ]
           image: docker.io/aquasec/kube-bench:latest
           name: kube-bench
           volumeMounts:
