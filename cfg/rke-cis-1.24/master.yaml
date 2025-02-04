@@ -155,7 +155,7 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: stat -c %a /node/var/lib/etcd
+        audit: stat -c %a /var/lib/etcd
         tests:
           test_items:
             - flag: "700"
@@ -962,15 +962,12 @@ groups:
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $controllermanagerbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--bind-address"
               compare:
                 op: eq
                 value: "127.0.0.1"
               set: true
-            - flag: "--bind-address"
-              set: false
         remediation: |
           Edit the Controller Manager pod specification file $controllermanagerconf
           on the control plane node and ensure the correct value for the --bind-address parameter
@@ -999,15 +996,12 @@ groups:
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)"
         audit: "/bin/ps -ef | grep $schedulerbin | grep -v grep"
         tests:
-          bin_op: or
           test_items:
             - flag: "--bind-address"
               compare:
                 op: eq
                 value: "127.0.0.1"
               set: true
-            - flag: "--bind-address"
-              set: false
         remediation: |
           Edit the Scheduler pod specification file $schedulerconf
           on the control plane node and ensure the correct value for the --bind-address parameter

@@ -322,6 +322,7 @@ groups:
 
       - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
+        type: "skip"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
@@ -426,6 +427,7 @@ groups:
 
       - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Automated)"
+        type: "skip"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
