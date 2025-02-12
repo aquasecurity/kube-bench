@@ -18,25 +18,31 @@ Install kube-bench binary for your platform using the commands below. Note that 
 Ubuntu/Debian:
 
 ```
-curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.6.2/kube-bench_0.6.2_linux_amd64.deb -o kube-bench_0.6.2_linux_amd64.deb
+KUBE_BENCH_VERSION=0.10.1
 
-sudo apt install ./kube-bench_0.6.2_linux_amd64.deb -f
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v${KUBE_BENCH_VERSION}/kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.deb -o kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.deb
+
+sudo apt install ./kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.deb -f
 ```
 
 RHEL:
 
 ```
-curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.6.2/kube-bench_0.6.2_linux_amd64.rpm -o kube-bench_0.6.2_linux_amd64.rpm
+KUBE_BENCH_VERSION=0.10.1
 
-sudo yum install kube-bench_0.6.2_linux_amd64.rpm -y
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v${KUBE_BENCH_VERSION}/kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.rpm -o kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.rpm
+
+sudo yum install kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.rpm -y
 ```
 
 Alternatively, you can manually download and extract the kube-bench binary:
 
 ```
-curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.6.2/kube-bench_0.6.2_linux_amd64.tar.gz -o kube-bench_0.6.2_linux_amd64.tar.gz
+KUBE_BENCH_VERSION=0.10.1
 
-tar -xvf kube-bench_0.6.2_linux_amd64.tar.gz
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v${KUBE_BENCH_VERSION}/kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.tar.gz -o kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.tar.gz
+
+tar -xvf kube-bench_${KUBE_BENCH_VERSION}_linux_amd64.tar.gz
 ```
 
 You can then run kube-bench directly:
