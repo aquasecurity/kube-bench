@@ -507,6 +507,8 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 			return "rh-0.7"
 		case "4.1":
 			return "rh-1.0"
+		case "4.15":
+			return "rh-1.6"
 		}
 	case "vmware":
 		return "tkgi-1.2.53"
@@ -581,7 +583,7 @@ func getOcpValidVersion(ocpVer string) (string, error) {
 
 	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
-		if ocpVer == "3.10" || ocpVer == "4.1" {
+		if ocpVer == "4.15" || ocpVer == "4.1" || ocpVer == "3.10" {
 			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}
