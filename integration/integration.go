@@ -16,10 +16,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/kind/pkg/cluster"
-	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(ctx *cluster.Context, clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
+func runWithKind(provider *cluster.Provider, clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
 	err := deployJob(clientset, kubebenchYAML, kubebenchImg)
 	if err != nil {
 		return "", err
@@ -40,15 +39,15 @@ func runWithKind(ctx *cluster.Context, clientset *kubernetes.Clientset, jobName,
 	return output, nil
 }
 
-func setupCluster(clusterName, kindCfg string, duration time.Duration) (*cluster.Context, error) {
-	options := create.WithConfigFile(kindCfg)
-	toptions := create.WaitForReady(duration)
-	ctx := cluster.NewContext(clusterName)
-	if err := ctx.Create(options, toptions); err != nil {
+func setupCluster(clusterName, kindCfg string, duration time.Duration) (*cluster.Provider, error) {
+	options := cluster.CreateWithConfigFile(kindCfg)
+	durationOptions := cluster.CreateWithWaitForReady(duration)
+	provider := cluster.NewProvider()
+	if err := provider.Create(clusterName, options, durationOptions); err != nil {
 		return nil, err
 	}
 
-	return ctx, nil
+	return provider, nil
 }
 
 func getClientSet(configPath string) (*kubernetes.Clientset, error) {

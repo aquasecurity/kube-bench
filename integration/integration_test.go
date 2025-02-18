@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package integration
@@ -42,26 +43,31 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 			ExpectedFile:  fmt.Sprintf("./testdata/%s/job-master.data", testdataDir),
 		},
 	}
-	ctx, err := setupCluster("kube-bench", fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
+	provider, err := setupCluster("kube-bench", fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
 	if err != nil {
 		t.Fatalf("failed to setup KIND cluster error: %v", err)
 	}
 	defer func() {
-		ctx.Delete()
+		provider.Delete("kube-bench", "./testdata/%s/add-tls-kind.yaml")
 	}()
 
-	if err := loadImageFromDocker(*kubebenchImg, ctx); err != nil {
+	if err := loadImageFromDocker(*kubebenchImg, provider); err != nil {
 		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
 	}
 
-	clientset, err := getClientSet(ctx.KubeConfigPath())
+	provideKubeConfig, err := provider.KubeConfig("kube-bench", true)
+	if err != nil {
+		t.Fatalf("failed to get the kube config: %v", err)
+	}
+
+	clientset, err := getClientSet(provideKubeConfig)
 	if err != nil {
 		t.Fatalf("failed to connect to Kubernetes cluster error: %v", err)
 	}
 
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
-			resultData, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
+			resultData, err := runWithKind(provider, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}

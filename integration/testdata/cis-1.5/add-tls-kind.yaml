@@ -1,6 +1,5 @@
 ---
 apiVersion: kind.x-k8s.io/v1alpha4
-name: cis1-5-test-cluster
 kind: Cluster
 networking:
   apiServerAddress: "0.0.0.0"
@@ -8,11 +7,10 @@ networking:
 nodes:
   - role: control-plane
     image: "kindest/node:v1.32.2"
-
-kubeletConfigPatches:
-  - |
-    apiVersion: kubelet.config.k8s.io/v1beta1
-    kind: KubeletConfiguration
-    tlsCipherSuites:
-      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-      - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    kubeadmConfigPatches:
+      - |
+        apiVersion: kubelet.config.k8s.io/v1beta1
+        kind: KubeletConfiguration
+        tlsCipherSuites:
+          - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+          - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
