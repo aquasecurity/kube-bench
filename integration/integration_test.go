@@ -9,10 +9,14 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
+
+const KIND_CLUSTER_NAME = "integration-test"
 
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
 var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
@@ -43,24 +47,21 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 			ExpectedFile:  fmt.Sprintf("./testdata/%s/job-master.data", testdataDir),
 		},
 	}
-	provider, err := setupCluster("kube-bench", fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
+	provider, err := setupCluster(KIND_CLUSTER_NAME, fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
 	if err != nil {
 		t.Fatalf("failed to setup KIND cluster error: %v", err)
 	}
 	defer func() {
-		provider.Delete("kube-bench", "./testdata/%s/add-tls-kind.yaml")
+		provider.Delete(KIND_CLUSTER_NAME, "./testdata/%s/add-tls-kind.yaml")
 	}()
 
 	if err := loadImageFromDocker(*kubebenchImg, provider); err != nil {
 		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
 	}
 
-	provideKubeConfig, err := provider.KubeConfig("kube-bench", true)
-	if err != nil {
-		t.Fatalf("failed to get the kube config: %v", err)
-	}
+	kubeDefaultPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 
-	clientset, err := getClientSet(provideKubeConfig)
+	clientset, err := getClientSet(kubeDefaultPath)
 	if err != nil {
 		t.Fatalf("failed to connect to Kubernetes cluster error: %v", err)
 	}
