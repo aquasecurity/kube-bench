@@ -1,18 +1,18 @@
 package integration
 
 import (
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"sigs.k8s.io/kind/pkg/cluster/nodeutils"
+	"sigs.k8s.io/kind/pkg/fs"
 
 	"sigs.k8s.io/kind/pkg/cluster"
 	"sigs.k8s.io/kind/pkg/cluster/nodes"
+	"sigs.k8s.io/kind/pkg/errors"
 	"sigs.k8s.io/kind/pkg/exec"
 )
 
-func loadImageFromDocker(imageName string, provider *cluster.Provider) error {
-
+func loadImageFromDocker(imageName string, provider *cluster.Provider, kindClusterName string) error {
 	// Check that the image exists locally and gets its ID, if not return error
 	cmd := exec.Command("docker", "inspect", "--format", "{{.Id}}", imageName)
 	err := cmd.Run()
@@ -20,34 +20,34 @@ func loadImageFromDocker(imageName string, provider *cluster.Provider) error {
 		return errors.Errorf("Image: %q not present locally", imageName)
 	}
 
-	nodes, err := provider.ListInternalNodes("kube-bench")
+	internalNodes, err := provider.ListInternalNodes(kindClusterName)
 	if err != nil {
 		return err
 	}
 
+	var fns []func() error
 	// Save the image into a tar
-	dir, err := os.MkdirTemp("", "image-tar")
+	// Setup the tar path where the images will be saved
+	dir, err := fs.TempDir("", "images-tar")
 	if err != nil {
 		return errors.Wrap(err, "failed to create tempdir")
 	}
 	defer os.RemoveAll(dir)
-	imageTarPath := filepath.Join(dir, "image.tar")
-
-	cmd = exec.Command("docker", "save", "-o", imageTarPath, imageName)
-	err = cmd.Run()
+	imagesTarPath := filepath.Join(dir, "images.tar")
+	// Save the images into a tar
+	err = save(imageName, imagesTarPath)
 	if err != nil {
 		return err
 	}
 
-	// Load the image on the selected nodes
-	for _, node := range nodes {
-		err := loadImage(imageTarPath, node)
-		if err != nil {
-			return err
-		}
+	// Load the images on the selected nodes
+	for _, selectedNode := range internalNodes {
+		selectedNode := selectedNode // capture loop variable
+		fns = append(fns, func() error {
+			return loadImage(imagesTarPath, selectedNode)
+		})
 	}
-
-	return nil
+	return errors.UntilErrorConcurrent(fns)
 }
 
 // loads an image tarball onto a node
@@ -58,4 +58,10 @@ func loadImage(imageTarName string, node nodes.Node) error {
 	}
 	defer f.Close()
 	return nodeutils.LoadImageArchive(node, f)
+}
+
+// save saves images to dest, as in `docker save`
+func save(image string, dest string) error {
+	commandArgs := append([]string{"save", "-o", dest}, image)
+	return exec.Command("docker", commandArgs...).Run()
 }
