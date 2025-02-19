@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package integration
@@ -8,10 +9,14 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
+
+const KIND_CLUSTER_NAME = "integration-test"
 
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
 var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
@@ -42,26 +47,27 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 			ExpectedFile:  fmt.Sprintf("./testdata/%s/job-master.data", testdataDir),
 		},
 	}
-	ctx, err := setupCluster("kube-bench", fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout)
+	kubeDefaultPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	provider, err := setupCluster(KIND_CLUSTER_NAME, fmt.Sprintf("./testdata/%s/add-tls-kind.yaml", testdataDir), *timeout, kubeDefaultPath)
 	if err != nil {
 		t.Fatalf("failed to setup KIND cluster error: %v", err)
 	}
 	defer func() {
-		ctx.Delete()
+		provider.Delete(KIND_CLUSTER_NAME, kubeDefaultPath)
 	}()
 
-	if err := loadImageFromDocker(*kubebenchImg, ctx); err != nil {
+	if err := loadImageFromDocker(*kubebenchImg, provider, KIND_CLUSTER_NAME); err != nil {
 		t.Fatalf("failed to load kube-bench image from Docker to KIND error: %v", err)
 	}
 
-	clientset, err := getClientSet(ctx.KubeConfigPath())
+	clientset, err := getClientSet(kubeDefaultPath)
 	if err != nil {
 		t.Fatalf("failed to connect to Kubernetes cluster error: %v", err)
 	}
 
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
-			resultData, err := runWithKind(ctx, clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
+			resultData, err := runWithKind(clientset, c.TestName, c.KubebenchYAML, *kubebenchImg, *timeout)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
@@ -73,6 +79,7 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 
 			expectedData := strings.TrimSpace(string(c))
 			resultData = strings.TrimSpace(resultData)
+			fmt.Print(resultData)
 			if expectedData != resultData {
 				t.Errorf("expected results\n\nExpected\t(<)\nResult\t(>)\n\n%s\n\n", generateDiff(expectedData, resultData))
 			}

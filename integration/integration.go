@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -16,10 +16,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/kind/pkg/cluster"
-	"sigs.k8s.io/kind/pkg/cluster/create"
 )
 
-func runWithKind(ctx *cluster.Context, clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
+func runWithKind(clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebenchImg string, timeout time.Duration) (string, error) {
 	err := deployJob(clientset, kubebenchYAML, kubebenchImg)
 	if err != nil {
 		return "", err
@@ -40,15 +39,35 @@ func runWithKind(ctx *cluster.Context, clientset *kubernetes.Clientset, jobName,
 	return output, nil
 }
 
-func setupCluster(clusterName, kindCfg string, duration time.Duration) (*cluster.Context, error) {
-	options := create.WithConfigFile(kindCfg)
-	toptions := create.WaitForReady(duration)
-	ctx := cluster.NewContext(clusterName)
-	if err := ctx.Create(options, toptions); err != nil {
+func setupCluster(clusterName, kindCfg string, duration time.Duration, kubeDefaultPath string) (*cluster.Provider, error) {
+	options := cluster.CreateWithConfigFile(kindCfg)
+	durationOptions := cluster.CreateWithWaitForReady(duration)
+	provider := cluster.NewProvider()
+
+	// Check if the cluster exists
+	clusters, err := provider.List()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list clusters: %v", err)
+	}
+
+	// If the cluster exists, delete it
+	for _, existingCluster := range clusters {
+		if existingCluster == clusterName {
+			fmt.Printf("Cluster %s already exists, deleting it...\n", clusterName)
+			err := provider.Delete(clusterName, kubeDefaultPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to delete existing cluster %s: %v", clusterName, err)
+			}
+			break
+		}
+	}
+
+	if err := provider.Create(clusterName, options, durationOptions); err != nil {
 		return nil, err
 	}
 
-	return ctx, nil
+	return provider, nil
 }
 
 func getClientSet(configPath string) (*kubernetes.Clientset, error) {
@@ -65,7 +84,7 @@ func getClientSet(configPath string) (*kubernetes.Clientset, error) {
 }
 
 func deployJob(clientset *kubernetes.Clientset, kubebenchYAML, kubebenchImg string) error {
-	jobYAML, err := ioutil.ReadFile(kubebenchYAML)
+	jobYAML, err := os.ReadFile(kubebenchYAML)
 	if err != nil {
 		return err
 	}

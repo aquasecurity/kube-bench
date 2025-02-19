@@ -1,4 +1,6 @@
 ---
+version: 2
+
 env:
   - GO111MODULE=on
   - KUBEBENCH_CFG=/etc/kube-bench/cfg
@@ -20,7 +22,7 @@ builds:
 # Archive customization
 archives:
   - id: default
-    format: tar.gz
+    formats: ['tar.gz']
     name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
     files:
       - "cfg/**/*"
@@ -32,9 +34,17 @@ nfpms:
     description: "The Kubernetes Bench for Security is a Go application that checks whether Kubernetes is deployed according to security best practices"
     license: Apache-2.0
     homepage: https://github.com/aquasecurity/kube-bench
-    files:
-      "cfg/**/*": "/etc/kube-bench/cfg"
-      "cfg/config.yaml": "/etc/kube-bench/cfg"
+    contents:
+      - src: "cfg/**/*"
+        dst: "/etc/kube-bench/cfg"
+        file_info:
+          mode: 0644
+          mtime: "{{ .CommitDate }}"
+      - src: "cfg/config.yaml"
+        dst: "/etc/kube-bench/cfg"
+        file_info:
+          mode: 0644
+          mtime: "{{ .CommitDate }}"
     formats:
       - deb
       - rpm

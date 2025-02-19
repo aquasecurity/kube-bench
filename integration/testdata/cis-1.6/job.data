@@ -40,7 +40,7 @@
 [FAIL] 1.2.16 Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
 [PASS] 1.2.17 Ensure that the admission control plugin NodeRestriction is set (Automated)
 [PASS] 1.2.18 Ensure that the --insecure-bind-address argument is not set (Automated)
-[PASS] 1.2.19 Ensure that the --insecure-port argument is set to 0 (Automated)
+[FAIL] 1.2.19 Ensure that the --insecure-port argument is set to 0 (Automated)
 [PASS] 1.2.20 Ensure that the --secure-port argument is not set to 0 (Automated)
 [FAIL] 1.2.21 Ensure that the --profiling argument is set to false (Automated)
 [FAIL] 1.2.22 Ensure that the --audit-log-path argument is set (Automated)
@@ -117,6 +117,10 @@ value that includes PodSecurityPolicy:
 --enable-admission-plugins=...,PodSecurityPolicy,...
 Then restart the API Server.
 
+1.2.19 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+on the master node and set the below parameter.
+--insecure-port=0
+
 1.2.21 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 on the master node and set the below parameter.
 --profiling=false
@@ -174,8 +178,8 @@ on the master node and set the below parameter.
 
 
 == Summary master ==
-44 checks PASS
-10 checks FAIL
+43 checks PASS
+11 checks FAIL
 11 checks WARN
 0 checks INFO
 
@@ -418,7 +422,7 @@ resources and that all new resources are created in a specific namespace.
 0 checks INFO
 
 == Summary total ==
-71 checks PASS
-11 checks FAIL
+70 checks PASS
+12 checks FAIL
 40 checks WARN
 0 checks INFO

@@ -275,7 +275,7 @@ groups:
       - id: 5.2.9
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         audit: |
-          for i in `oc get scc --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}'`; do 
+          for i in `oc get scc --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}'`; do
               echo "Capabilities=$(oc describe scc $i | grep "Required Drop Capabilities" | sed 's/[[:blank:]]*Required[[:blank:]]*Drop[[:blank:]]*Capabilities:[[:blank:]]*//')"
           done
         use_multiple_values: true
@@ -436,9 +436,9 @@ groups:
           oc get all -n default -o jsonpath="{range .items[*]}{.metadata.name}{'\n'}{end}{'\n'}" | tr '\n' ',' | sed -e 's/^/default-namespace-items=/' -e 's/,$//' -e 's/=$/=<none>/' -e 's/,$//'
         tests:
           test_items:
-            - flag: "default-namespace-items" 
-              compare: 
-                op: eq 
+            - flag: "default-namespace-items"
+              compare:
+                op: eq
                 value: "<none>"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
