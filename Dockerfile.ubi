@@ -35,7 +35,7 @@ RUN microdnf install -y yum findutils openssl \
 
 WORKDIR /opt/kube-bench/
 
-ENV PATH=$PATH:/usr/local/mount-from-host/bin 
+ENV PATH=$PATH:/usr/local/mount-from-host/bin
 
 COPY LICENSE /licenses/LICENSE
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
@@ -63,4 +63,4 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       version=$KUBEBENCH_VERSION \
       release=$KUBEBENCH_VERSION \
       summary="Aqua Security Kube-bench." \
-      description=""Run the CIS Kubernetes Benchmark tests"
+      description="Run the CIS Kubernetes Benchmark tests"
