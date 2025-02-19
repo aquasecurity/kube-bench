@@ -79,6 +79,7 @@ func testCheckCISWithKind(t *testing.T, testdataDir string) {
 
 			expectedData := strings.TrimSpace(string(c))
 			resultData = strings.TrimSpace(resultData)
+			fmt.Print(resultData)
 			if expectedData != resultData {
 				t.Errorf("expected results\n\nExpected\t(<)\nResult\t(>)\n\n%s\n\n", generateDiff(expectedData, resultData))
 			}
