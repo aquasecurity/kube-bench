@@ -6,8 +6,6 @@ networking:
 
 nodes:
   - role: control-plane
-    labels:
-      node-role.kubernetes.io/master: ""
     image: "kindest/node:v1.32.2"
     kubeadmConfigPatches:
       - |

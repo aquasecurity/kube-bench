@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const KIND_CLUSTER_NAME = "kube-bench"
+const KIND_CLUSTER_NAME = "integration-test"
 
 var kubebenchImg = flag.String("kubebenchImg", "aquasec/kube-bench:latest", "kube-bench image used as part of this test")
 var timeout = flag.Duration("timeout", 10*time.Minute, "Test Timeout")
