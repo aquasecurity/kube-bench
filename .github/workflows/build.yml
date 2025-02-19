@@ -35,7 +35,7 @@ jobs:
       - name: Run integration tests
         run: make integration-tests
       - name: Dry-run release snapshot
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6.2.1
         with:
-          version: v0.148.0
+          version: '~> v2'
           args: release --snapshot --skip-publish --rm-dist
