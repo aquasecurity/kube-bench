@@ -22,7 +22,7 @@ builds:
 # Archive customization
 archives:
   - id: default
-    formats: [ 'tar.gz' ]
+    formats: ['tar.gz']
     name_template: '{{ .Binary }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{.Arm }}{{ end }}'
     files:
       - "cfg/**/*"
