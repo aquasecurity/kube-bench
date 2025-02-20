@@ -19,28 +19,28 @@ metadata:
     app: kube-bench
   name: kube-bench-cluster-role
 rules:
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - 'get'
-  - 'list'
-- apiGroups:
-  - '*'
-  resources:
-  - 'pods/exec'
-  verbs:
-  - 'create'
-- apiGroups:
-  - '*'
-  resources:
-  - 'pods'
-  - 'namespaces'
-  verbs:
-  - 'create'
-  - 'delete'
-  - 'watch'
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - 'get'
+      - 'list'
+  - apiGroups:
+      - '*'
+    resources:
+      - 'pods/exec'
+    verbs:
+      - 'create'
+  - apiGroups:
+      - '*'
+    resources:
+      - 'pods'
+      - 'namespaces'
+    verbs:
+      - 'create'
+      - 'delete'
+      - 'watch'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -53,10 +53,10 @@ roleRef:
   kind: ClusterRole
   name: kube-bench-cluster-role
 subjects:
-- kind: ServiceAccount
-  name: kube-bench-sa
-  # It is mandatory to give namespace here and it doesn't pick the one mentioned in kubeconfig file.
-  namespace: kube-bench
+  - kind: ServiceAccount
+    name: kube-bench-sa
+    # It is mandatory to give namespace here and it doesn't pick the one mentioned in kubeconfig file.
+    namespace: kube-bench
 # In kube-bench pod for Openshift, oc cli creates random namespaces to deploy debug pods for CIS checks.
 # So, it will need privileged access.
 ---
@@ -71,9 +71,9 @@ roleRef:
   kind: ClusterRole
   name: system:openshift:scc:privileged
 subjects:
-- kind: ServiceAccount
-  name: kube-bench-sa
-  namespace: kube-bench
+  - kind: ServiceAccount
+    name: kube-bench-sa
+    namespace: kube-bench
 ---
 apiVersion: batch/v1
 kind: Job
