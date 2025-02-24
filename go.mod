@@ -3,9 +3,9 @@ module github.com/aquasecurity/kube-bench
 go 1.23.6
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.36.0
+	github.com/aws/aws-sdk-go-v2 v1.36.2
 	github.com/aws/aws-sdk-go-v2/config v1.29.4
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.55.8
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.55.11
 	github.com/fatih/color v1.18.0
 	github.com/golang/glog v1.2.4
 	github.com/magiconair/properties v1.8.9
@@ -24,8 +24,8 @@ require (
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.57 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.27 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.31 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.31 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.33 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.33 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.12 // indirect
