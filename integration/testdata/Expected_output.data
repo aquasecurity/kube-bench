@@ -385,7 +385,7 @@ UIDs not including 0.
 it is set to an empty array.
 
 5.2.9 Review the use of capabilites in applications running on your cluster. Where a namespace
-contains applicaions which do not require any Linux capabities to operate consider adding
+contains applications which do not require any Linux capabities to operate consider adding
 a PSP which forbids the admission of containers which do not drop all capabilities.
 
 5.3.1 If the CNI plugin in use does not support network policies, consideration should be given to
