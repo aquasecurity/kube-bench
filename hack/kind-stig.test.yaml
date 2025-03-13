@@ -12,12 +12,12 @@ spec:
       hostPID: true
       containers:
         - name: kube-bench
-          image: docker.io/aquasec/kube-bench:latest
+          image: docker.io/aquasec/kube-bench:152d0e7
           command: [
             "kube-bench",
             "run",
             "--benchmark",
-            "eks-stig-kubernetes-v1r6",
+            "gke-stig-kubernetes-v2r2",
           ]
           volumeMounts:
             - name: var-lib-etcd

@@ -1,0 +1,487 @@
+---
+controls:
+version: "gke-stig-kubernetes-v1r6"
+id: 3
+text: "Node Configuration"
+type: "node"
+groups:
+  - id: 3.1
+    text: "DISA Category Code I"
+    checks:
+      - id: V-242387   # CIS 3.2.4
+        text: "The Kubernetes Kubelet must have the read-only port flag disabled (Manual)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat /home/kubernetes/kubelet-config.yaml"
+        tests:
+          test_items:
+            - flag: "--read-only-port"
+              path: '{.readOnlyPort}'
+              set: false
+            - flag: "--read-only-port"
+              path: '{.readOnlyPort}'
+              compare:
+                op: eq
+                value: 0
+          bin_op: or
+        remediation: |
+          If modifying the Kubelet config file, edit the kubelet-config.json file
+          /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to 0
+
+            "readOnlyPort": 0
+
+          If using executable arguments, edit the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
+          worker node and add the below parameter at the end of the KUBELET_ARGS variable
+          string.
+
+            --read-only-port=0
+
+          For each remediation:
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: V-242391 # CIS 3.2.1
+        text: "Ensure that the Anonymous Auth is Not Enabled (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat /home/kubernetes/kubelet-config.yaml"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              path: '{.authentication.anonymous.enabled}'
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          Remediation Method 1:
+          If configuring via the Kubelet config file, you first need to locate the file.
+          To do this, SSH to each node and execute the following command to find the kubelet
+          process:
+
+            ps -ef | grep kubelet
+
+          The output of the above command provides details of the active kubelet process, from
+          which we can see the location of the configuration file provided to the kubelet service
+          with the --config argument. The file can be viewed with a command such as more or
+          less, like so:
+
+            sudo less /home/kubernetes/kubelet-config.yaml
+
+          Disable Anonymous Authentication by setting the following parameter:
+
+            "authentication": { "anonymous": { "enabled": false } }
+
+          Remediation Method 2:
+          If using executable arguments, edit the kubelet service file on each worker node and
+          ensure the below parameters are part of the KUBELET_ARGS variable string.
+
+          For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
+          Bottlerocket AMIs, then this file can be found at
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf. Otherwise,
+          you may need to look up documentation for your chosen operating system to determine
+          which service manager is configured:
+
+            --anonymous-auth=false
+
+          For Both Remediation Steps:
+          Based on your system, restart the kubelet service and check the service status.
+          The following example is for operating systems using systemd, such as the Amazon
+          EKS Optimised Amazon Linux or Bottlerocket AMIs, and invokes the systemctl
+          command. If systemctl is not available then you will need to look up documentation for
+          your chosen operating system to determine which service manager is configured:
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: V-242392 # CIS 3.2.2
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat /home/kubernetes/kubelet-config.yaml"
+        tests:
+          test_items:
+            - flag: --authorization-mode
+              path: '{.authorization.mode}'
+              compare:
+                op: nothave
+                value: AlwaysAllow
+        remediation: |
+          Remediation Method 1:
+          If configuring via the Kubelet config file, you first need to locate the file.
+          To do this, SSH to each node and execute the following command to find the kubelet
+          process:
+
+            ps -ef | grep kubelet
+
+          The output of the above command provides details of the active kubelet process, from
+          which we can see the location of the configuration file provided to the kubelet service
+          with the --config argument. The file can be viewed with a command such as more or
+          less, like so:
+
+            sudo less /path/to/kubelet-config.json
+
+          Enable Webhook Authentication by setting the following parameter:
+
+            "authentication": { "webhook": { "enabled": true } }
+
+          Next, set the Authorization Mode to Webhook by setting the following parameter:
+
+            "authorization": { "mode": "Webhook }
+
+          Finer detail of the authentication and authorization fields can be found in the
+          Kubelet Configuration documentation (https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/).
+
+          Remediation Method 2:
+          If using executable arguments, edit the kubelet service file on each worker node and
+          ensure the below parameters are part of the KUBELET_ARGS variable string.
+          For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
+          Bottlerocket AMIs, then this file can be found at
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf. Otherwise,
+          you may need to look up documentation for your chosen operating system to determine
+          which service manager is configured:
+
+              --authentication-token-webhook
+              --authorization-mode=Webhook
+
+          For Both Remediation Steps:
+          Based on your system, restart the kubelet service and check the service status.
+          The following example is for operating systems using systemd, such as the Amazon
+          EKS Optimised Amazon Linux or Bottlerocket AMIs, and invokes the systemctl
+          command. If systemctl is not available then you will need to look up documentation for
+          your chosen operating system to determine which service manager is configured:
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+      # TODO Verify this, low confidence this will work
+      - id: V-242393
+        text: "Kubernetes Worker Nodes must not have sshd service running. (Automated)"
+        audit: '/bin/sh -c ''systemctl show -p ActiveState sshd'' '
+        tests:
+          test_items:
+            - flag: ActiveState
+              compare:
+                op: eq
+                value: inactive
+        remediation: |
+          To stop the sshd service, run the command: systemctl stop sshd
+        scored: true
+      # TODO Verify this, low confidence this will work
+      - id: V-242394
+        text: "Kubernetes Worker Nodes must not have the sshd service enabled. (Automated)"
+        audit: "/bin/sh -c 'systemctl is-enabled sshd.service'"
+        tests:
+          test_items:
+            - flag: "disabled"
+        remediation: |
+          To disable the sshd service, run the command:
+            chkconfig sshd off
+        scored: true
+      # TODO: Verify this, probably requires rbac permissions using kubectl
+      - id: V-242395
+        text: "Kubernetes dashboard must not be enabled."
+        audit: "kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard"
+        tests:
+          test_items:
+            - flag: "k8s-app=kubernetes-dashboard"
+              set: false
+        remediation: |
+          Delete the Kubernetes dashboard deployment with the following command:
+          kubectl delete deployment kubernetes-dashboard --namespace=kube-system
+        scored: true
+      #  TODO This could be automated, but requires a little more effort or adding jq to the docker image
+      # maybe test path will work
+      - id: V-242396
+        text: "Kubernetes Kubectl cp command must give expected access and results. (Manual)"
+        type: "manual"
+        remediation: |
+          If any Worker nodes are not using kubectl version 1.12.9 or newer, this is a finding.
+          Upgrade the Master and Worker nodes to the latest version of kubectl.
+        scored: false
+      - id: V-242397
+        text: "The Kubernetes kubelet static PodPath must not enable static pods (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - path: '{.staticPodPath}'
+              set: false
+        remediation: |
+          Edit $kubeletconf on each node to to remove the staticPodPath
+          Based on your system, restart the kubelet service. For example,
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+      - id: V-242398
+        text: "Kubernetes DynamicAuditing must not be enabled. (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--feature-gates"
+              compare:
+                op: nothave
+                value: "DynamicAuditing=true"
+              set: true
+            - flag: "--feature-gates"
+              set: false
+        remediation: |
+          Edit any manifest files or kubelet config files that contain the feature-gates
+          setting with DynamicAuditing set to "true".
+          Set the flag to "false" or remove the "DynamicAuditing" setting
+          completely. Restart the kubelet service if the kubelet config file
+          if the kubelet config file is changed.
+        scored: true
+      - id: V-242399
+        text: "Kubernetes DynamicKubeletConfig must not be enabled. (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--feature-gates"
+              compare:
+                op: nothave
+                value: "DynamicKubeletConfig=true"
+              set: true
+            - flag: "--feature-gates"
+              set: false
+        remediation: |
+          Edit any manifest files or $kubeletconf that contain the feature-gates
+          setting with DynamicKubeletConfig set to "true".
+          Set the flag to "false" or remove the "DynamicKubeletConfig" setting
+          completely. Restart the kubelet service if the kubelet config file
+          if the kubelet config file is changed.
+        scored: true
+      - id: V-242404 # CIS 3.2.8
+        text: "Ensure that the --rotate-certificates argument is not present or is set to true (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat /home/kubernetes/kubelet-config.yaml"
+        tests:
+          test_items:
+            - flag: --rotate-certificates
+              path: '{.rotateCertificates}'
+              compare:
+                op: eq
+                value: true
+            - flag: --rotate-certificates
+              path: '{.rotateCertificates}'
+              set: false
+          bin_op: or
+        remediation: |
+          Remediation Method 1:
+          If modifying the Kubelet config file, edit the kubelet-config.yaml file
+          /etc/kubernetes/kubelet/kubelet-config.yaml and set the below parameter to
+          true
+
+            "RotateCertificate":true
+
+          Additionally, ensure that the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf does not set the --RotateCertificate
+          executable argument to false because this would override the Kubelet
+          config file.
+
+          Remediation Method 2:
+          If using executable arguments, edit the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
+          worker node and add the below parameter at the end of the KUBELET_ARGS variable
+          string.
+
+            --RotateCertificate=true
+        scored: true
+      - id: V-242406
+        text: "The Kubernetes kubelet configuration file must be owned by root (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node.
+          For example,
+          chown root:root $kubeletkubeconfig
+        scored: true
+      - id: V-242407
+        text: "The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the following command (using the config file location identified in the Audit step)
+          chmod 644 $kubeletconf
+        scored: true
+      - id: V-242414
+        text: "The Kubernetes cluster must use non-privileged host ports for user pods. (Manual)"
+        type: "manual"
+        remediation: |
+          For any of the pods that are using ports below 1024,
+          reconfigure the pod to use a service to map a host non-privileged
+          port to the pod port or reconfigure the image to use non-privileged ports.
+        scored: false
+      - id: V-242415
+        text: "Secrets in Kubernetes must not be stored as environment variables.(Manual)"
+        type: "manual"
+        remediation: |
+         Run the following command:
+         kubectl get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
+         If any of the values returned reference environment variables
+         rewrite application code to read secrets from mounted secret files, rather than
+         from environment variables.
+        scored: false
+      - id: V-242442
+        text: "Kubernetes must remove old components after updated versions have been installed. (Manual)"
+        type: "manual"
+        remediation: |
+           To view all pods and the images used to create the pods, from the Master node, run the following command:
+            kubectl get pods --all-namespaces -o jsonpath="{..image}" | \
+            tr -s '[[:space:]]' '\n' | \
+            sort | \
+            uniq -c
+            Review the images used for pods running within Kubernetes.
+            Remove any old pods that are using older images.
+        scored: false
+  - id: 3.2
+    text: "DISA Category Code II - Node Security"
+    checks:
+      - id: V-242391
+        text: "The Kubernetes Kubelet must have anonymous authentication disabled."
+        audit: "ps -ef | grep kubelet | grep -- --anonymous-auth"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              compare:
+                op: eq
+                value: "false"
+        remediation: |
+          Edit the Kubernetes Kubelet configuration file.
+          Set the value of "anonymousAuth" to "false".
+          Restart the kubelet service using:
+          systemctl daemon-reload && systemctl restart kubelet
+        scored: true
+
+      - id: V-242392
+        text: "The Kubernetes kubelet must enable explicit authorization."
+        audit: "ps -ef | grep kubelet | grep -- --authorization-mode"
+        tests:
+          test_items:
+            - flag: "--authorization-mode"
+              compare:
+                op: eq
+                value: "Webhook"
+        remediation: |
+          Edit the Kubernetes Kubelet configuration file.
+          Set the "authorization.mode" to "Webhook".
+          Restart the kubelet service using:
+          systemctl daemon-reload && systemctl restart kubelet
+        scored: true
+
+      - id: V-242393
+        text: "Kubernetes Worker Nodes must not have sshd service running."
+        audit: "systemctl status sshd"
+        tests:
+          test_items:
+            - flag: "sshd"
+              compare:
+                op: eq
+                value: "inactive"
+        remediation: |
+          To stop the sshd service, run the command:
+          systemctl stop sshd
+          To disable the service:
+          systemctl disable sshd
+        scored: true
+
+      - id: V-242394
+        text: "Kubernetes Worker Nodes must not have the sshd service enabled."
+        audit: "systemctl is-enabled sshd"
+        tests:
+          test_items:
+            - flag: "sshd"
+              compare:
+                op: eq
+                value: "disabled"
+        remediation: |
+          To disable the sshd service, run the command:
+          systemctl disable sshd
+        scored: true
+
+      - id: V-242397
+        text: "The Kubernetes kubelet staticPodPath must not enable static pods."
+        audit: "ps -ef | grep kubelet | grep -- --config"
+        tests:
+          test_items:
+            - flag: "staticPodPath"
+              set: false
+        remediation: |
+          Edit the Kubernetes kubelet configuration file.
+          Remove the setting "staticPodPath".
+          Restart the kubelet service using:
+          systemctl daemon-reload && systemctl restart kubelet
+        scored: true
+
+      - id: V-242434 # CIS 3.2.6
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat /home/kubernetes/kubelet-config.yaml"
+        tests:
+          test_items:
+            - flag: --make-iptables-util-chains
+              path: '{.makeIPTablesUtilChains}'
+              compare:
+                op: eq
+                value: true
+            - flag: --make-iptables-utils-chains
+              path: '{.makeIPTablesUtilChains}'
+              set: false
+          bin_op: or
+        remediation: |
+          Remediation Method 1:
+          If modifying the Kubelet config file, edit the kubelet-config.json file
+          /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to
+          true
+
+            "makeIPTablesUtilChains": true
+
+          Ensure that /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf
+          does not set the --make-iptables-util-chains argument because that would
+          override your Kubelet config file.
+
+          Remediation Method 2:
+          If using executable arguments, edit the kubelet service file
+          /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
+          worker node and add the below parameter at the end of the KUBELET_ARGS variable
+          string.
+
+            --make-iptables-util-chains:true
+
+          Remediation Method 3:
+          If using the api configz endpoint consider searching for the status of
+          "makeIPTablesUtilChains.: true by extracting the live configuration from the nodes
+          running kubelet.
+
+          **See detailed step-by-step configmap procedures in Reconfigure a Node's Kubelet in a
+          Live Cluster (https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/),
+          and then rerun the curl statement from audit process to check for kubelet
+          configuration changes
+
+            kubectl proxy --port=8001 &
+            export HOSTNAME_PORT=localhost:8001 (example host and port number)
+            export NODE_NAME=gke-cluster-1-pool1-5e572947-r2hg (example node name from
+            "kubectl get nodes")
+            curl -sSL "http://${HOSTNAME_PORT}/api/v1/nodes/${NODE_NAME}/proxy/configz"
+
+          For all three remediations:
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true

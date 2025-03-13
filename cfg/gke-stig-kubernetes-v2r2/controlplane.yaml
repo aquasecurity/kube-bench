@@ -1,0 +1,250 @@
+---
+controls:
+version: "gke-stig-kubernetes-v1r6"
+id: 2
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 2.1
+    text: "DISA Category Code I - API Server Security"
+    checks:
+      - id: V-242378
+        text: "The Kubernetes API Server must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+        audit: "grep -i tls-min-version /etc/kubernetes/manifests/kube-apiserver.yaml"
+        tests:
+          test_items:
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS10"
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS11"
+        remediation: |
+          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Set the value of "--tls-min-version" to "VersionTLS12" or higher.
+        scored: true
+      - id: V-242388
+        text: "The Kubernetes API server must not have the insecure bind address set."
+        audit: "grep -i insecure-bind-address /etc/kubernetes/manifests/kube-apiserver.yaml"
+        tests:
+          test_items:
+            - flag: "--insecure-bind-address"
+              set: false
+        remediation: |
+          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Remove the value of "--insecure-bind-address" setting.
+        scored: true
+
+      - id: V-242389
+        text: "The Kubernetes API server must have the secure port set."
+        audit: "grep -i secure-port /etc/kubernetes/manifests/kube-apiserver.yaml"
+        tests:
+          test_items:
+            - flag: "--secure-port"
+              compare:
+                op: gt
+                value: "0"
+        remediation: |
+          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Set the value of "--secure-port" to a value greater than "0".
+        scored: true
+
+
+      - id: V-242390 # Similar to CIS 3.2.1
+        text: "The Kubernetes API server must have anonymous authentication disabled (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              path: '{.authentication.anonymous.enabled}'
+              set: true
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          If using a Kubelet config file, edit $kubeletconf to set authentication: anonymous: enabled to
+          false.
+          If using executable arguments, edit the kubelet service file
+          $kubeletsvc on each worker node and
+          set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --anonymous-auth=false
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+
+      # TODO: This is pretty different from what the stig is asking for, double check
+      - id: V-242400
+        text: "The Kubernetes API server must have Alpha APIs disabled (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--feature-gates"
+              compare:
+                op: nothave
+                value: "AllAlpha=true"
+              set: true
+            - flag: "--feature-gates"
+              set: false
+        remediation: |
+          Edit any manifest files or $kubeletconf that contain the feature-gates
+          setting with AllAlpha set to "true".
+          Set the flag to "false" or remove the "AllAlpha" setting
+          completely. Restart the kubelet service if the kubelet config file
+          if the kubelet config file is changed.
+        scored: true
+
+
+      # - id: V-242400
+      #   text: "The Kubernetes API server must have Alpha APIs disabled."
+      #   audit: "grep -i feature-gates /etc/kubernetes/manifests/kube-apiserver.yaml"
+      #   tests:
+      #     test_items:
+      #       - flag: "--feature-gates"
+      #         compare:
+      #           op: nothave
+      #           value: "AllAlpha=true"
+      #   remediation: |
+      #     Edit any manifest file that contains the "--feature-gates" setting with "AllAlpha" set to "true".
+      #     Set the value of "AllAlpha" to "false" or remove the setting completely.
+      #   scored: true
+
+  - id: 2.2
+    text: "DISA Category Code II - Controller Manager Security"
+    checks:
+      - id: V-242381
+        text: "The Kubernetes Controller Manager must create unique service accounts for each work payload. (Manual)"
+        type: "manual"
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific access
+          to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+        scored: false
+      - id: V-242376
+        text: "The Kubernetes Controller Manager must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+        audit: "grep -i tls-min-version /etc/kubernetes/manifests/kube-controller-manager.yaml"
+        tests:
+          test_items:
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS10"
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS11"
+        remediation: |
+          Edit the Kubernetes Controller Manager manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Set the value of "--tls-min-version" to "VersionTLS12" or higher.
+        scored: true
+      - id: V-242443
+        text: " Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. (Manual)"
+        type: "manual"
+        remediation: |
+         Upgrade Kubernetes to a supported version.
+
+      # TODO: Update this ref
+      - id: V-242461
+        text: "Kubernetes API Server audit logs must be enabled. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+
+
+      # TODO: Validate this one
+      - id: V-242462
+        text: "The Kubernetes PKI directory must be owned by root."
+        audit: "stat -c %U:%G /etc/kubernetes/pki"
+        tests:
+          test_items:
+            - flag: "root:root"
+              set: true
+        remediation: |
+          Change the ownership of the PKI directory to root:root by executing the command:
+          chown -R root:root /etc/kubernetes/pki
+        scored: true
+
+      # TODO: Validate this one
+      - id: V-242463
+        text: "The Kubernetes PKI directory must have file permissions set to 644 or more restrictive."
+        audit: "find /etc/kubernetes/pki -type f -name '*.crt' -exec stat -c %a {} \\;"
+        tests:
+          test_items:
+            - flag: "644"
+              compare:
+                op: lte
+                value: "644"
+        remediation: |
+          Change the permissions of the PKI certificate files to 644 by executing the command:
+          find /etc/kubernetes/pki -type f -name '*.crt' -exec chmod 644 {} \;
+        scored: true
+
+      # TODO: Validate this one
+      - id: V-242464
+        text: "The Kubernetes PKI keys must have file permissions set to 600 or more restrictive."
+        audit: "find /etc/kubernetes/pki -type f -name '*.key' -exec stat -c %a {} \\;"
+        tests:
+          test_items:
+            - flag: "600"
+              compare:
+                op: lte
+                value: "600"
+        remediation: |
+          Change the permissions of the PKI key files to 600 by executing the command:
+          find /etc/kubernetes/pki -type f -name '*.key' -exec chmod 600 {} \;
+        scored: true
+
+      # TODO: Validate this one
+      - id: V-242465
+        text: "The Kubernetes Controller Manager must have secure binding."
+        audit: "grep -i bind-address /etc/kubernetes/manifests/kube-controller-manager.yaml"
+        tests:
+          test_items:
+            - flag: "--bind-address"
+              compare:
+                op: eq
+                value: "127.0.0.1"
+        remediation: |
+          Edit the Kubernetes Controller Manager manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Ensure the "--bind-address" flag is set to "127.0.0.1".
+        scored: true
+
+  - id: 2.3
+    text: "DISA Category Code III - Scheduler Security"
+    checks:
+      - id: V-242377
+        text: "The Kubernetes Scheduler must use TLS 1.2, at a minimum, to protect the confidentiality of sensitive data during electronic dissemination."
+        audit: "grep -i tls-min-version /etc/kubernetes/manifests/kube-scheduler.yaml"
+        tests:
+          test_items:
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS10"
+            - flag: "--tls-min-version"
+              compare:
+                op: nothave
+                value: "VersionTLS11"
+        remediation: |
+          Edit the Kubernetes Scheduler manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
+          Set the value of "--tls-min-version" to "VersionTLS12" or higher.
+        scored: true
+      - id: V-242411
+        text: "The Kubernetes Scheduler must enforce ports, protocols, and services (PPS) that adhere to the PPSM CAL."
+        audit: "grep -i scheduler /etc/kubernetes/manifests/kube-scheduler.yaml"
+        tests:
+          test_items:
+            - flag: "--secure-port"
+              compare:
+                op: gt
+                value: "0"
+        remediation: |
+          Amend any system documentation requiring revision to comply with the PPSM CAL.
+          Update Kubernetes Scheduler manifest and namespace PPS configuration to comply with the PPSM CAL.
+        scored: true

@@ -1,0 +1,110 @@
+---
+controls:
+version: "gke-stig-kubernetes-v1r6"
+id: 4
+text: "Kubernetes Security Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "DISA Category Code I - Pod Security Policies"
+    checks:
+      - id: V-242381
+        text: "The Kubernetes Controller Manager must create unique service accounts for each work payload. (Manual)"
+        type: "manual"
+        remediation: |
+         Create explicit service accounts wherever a Kubernetes workload requires specific access
+         to the Kubernetes API server.
+         Modify the configuration of each default service account to include this value
+         automountServiceAccountToken: false
+        scored: false
+
+      - id: V-242383
+        text: "User-managed resources must be created in dedicated namespaces. (Manual)"
+        type: "manual"
+        remediation: |
+         Move any user-managed resources from the default, kube-public and kube-node-lease namespaces, to user namespaces.
+        scored: false
+      - id: V-242437
+        text: "Kubernetes must have a pod security policy set."
+        audit: "kubectl get podsecuritypolicy"
+        tests:
+          test_items:
+            - flag: "runAsUser"
+              compare:
+                op: eq
+                value: "MustRunAsNonRoot"
+            - flag: "supplementalGroups"
+              compare:
+                op: gt
+                value: "0"
+            - flag: "fsGroup"
+              compare:
+                op: gt
+                value: "0"
+        remediation: |
+          From the Control Plane, save the following policy to a file called restricted.yml:
+
+          apiVersion: policy/v1beta1
+          kind: PodSecurityPolicy
+          metadata:
+            name: restricted
+          spec:
+            privileged: false
+            allowPrivilegeEscalation: false
+            requiredDropCapabilities:
+              - ALL
+            volumes:
+              - configMap
+              - emptyDir
+              - projected
+              - secret
+              - downwardAPI
+              - persistentVolumeClaim
+            hostNetwork: false
+            hostIPC: false
+            hostPID: false
+            runAsUser:
+              rule: MustRunAsNonRoot
+            seLinux:
+              rule: RunAsAny
+            supplementalGroups:
+              rule: MustRunAs
+              ranges:
+                - min: 1
+                  max: 65535
+            fsGroup:
+              rule: MustRunAs
+              ranges:
+                - min: 1
+                  max: 65535
+            readOnlyRootFilesystem: false
+
+          Apply the policy with:
+
+          kubectl create -f restricted.yml
+        scored: true
+      - id: V-242417
+        text: "Kubernetes must separate user functionality. (Manual)"
+        type: "manual"
+        remediation: |
+         Move any user pods that are present in the Kubernetes system namespaces to user specific namespaces.
+        scored: false
+        
+  - id: 4.2
+    text: "DISA Category Code I - PodSecurity Admission Controller"
+    checks:
+      - id: V-254801
+        text: "Kubernetes must enable PodSecurity admission controller on static pods and Kubelets."
+        audit: "grep -i feature-gates /etc/kubernetes/manifests/*"
+        tests:
+          test_items:
+            - flag: "--feature-gates"
+              compare:
+                op: eq
+                value: "PodSecurity=true"
+        remediation: |
+          On the Control Plane, change to the manifests directory:
+
+          grep -i feature-gates /etc/kubernetes/manifests/*
+
+          Ensure the argument "--feature-gates=PodSecurity=true" i
