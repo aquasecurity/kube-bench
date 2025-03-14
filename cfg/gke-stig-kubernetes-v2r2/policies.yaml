@@ -24,6 +24,7 @@ groups:
         remediation: |
          Move any user-managed resources from the default, kube-public and kube-node-lease namespaces, to user namespaces.
         scored: false
+        
       - id: V-242437
         text: "Kubernetes must have a pod security policy set."
         audit: "kubectl get podsecuritypolicy"

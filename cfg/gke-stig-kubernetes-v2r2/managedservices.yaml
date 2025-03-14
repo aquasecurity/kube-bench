@@ -8,42 +8,13 @@ groups:
   - id: 5.1
     text: "DISA Category Code I"
     checks:
-      # TODO: Validate this one
       - id: V-242386
-        text: "The Kubernetes API server must have the insecure port flag disabled."
-        audit: "grep -i insecure-port /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--insecure-port"
-              compare:
-                op: eq
-                value: "0"
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--insecure-port" to "0".
-          Note: The "--insecure-port" flag has been deprecated and can only be set to "0". This flag will be removed in Kubernetes v1.24.
-        scored: false
+        text: "The Kubernetes API server must have the insecure port flag disabled | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242386
-      #   text: "The Kubernetes API server must have the insecure port flag disabled | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO: Validate this one
       - id: V-242388
-        text: "The Kubernetes API server must not have the insecure bind address set."
-        audit: "grep -i insecure-bind-address /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--insecure-bind-address"
-              set: false
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Remove the value of "--insecure-bind-address" setting.
-        scored: false
-
-      # - id: V-242388
-      #   text: "The Kubernetes API server must have the insecure bind address not set | Component of GKE Control Plane"
-      #   type: "skip"
+        text: "The Kubernetes API server must have the insecure bind address not set | Component of GKE Control Plane"
+        type: "skip"
 
     # TODO Verify this one (can't find it like on the aws side https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html)
       - id: V-242436
@@ -101,63 +72,17 @@ groups:
         text: "The Kubernetes API Server must enable Node,RBAC as the authorization mode | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO: Move to controlplane if this works in GKE
       - id: V-242384
-        text: "The Kubernetes Scheduler must have secure binding."
-        audit: "grep -i bind-address /etc/kubernetes/manifests/kube-scheduler.yaml"
-        tests:
-          test_items:
-            - flag: "--bind-address"
-              compare:
-                op: eq
-                value: "127.0.0.1"
-        remediation: |
-          Edit the Kubernetes Scheduler manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the argument "--bind-address" to "127.0.0.1".
-        scored: false
+        text: "The Kubernetes Scheduler must have secure binding | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242384
-      #   text: "The Kubernetes Scheduler must have secure binding | Component of GKE Control Plane"
-      #   type: "skip"
-
-
-      # TODO: Move to controlplane if this works in GKE
       - id: V-242385
-        text: "The Kubernetes Controller Manager must have secure binding."
-        audit: "grep -i bind-address /etc/kubernetes/manifests/kube-controller-manager.yaml"
-        tests:
-          test_items:
-            - flag: "--bind-address"
-              compare:
-                op: eq
-                value: "127.0.0.1"
-        remediation: |
-          Edit the Kubernetes Controller Manager manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the argument "--bind-address" to "127.0.0.1".
-        scored: false
+        text: "The Kubernetes Controller Manager must have secure binding | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242385
-      #   text: "The Kubernetes Controller Manager must have secure binding | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO: Move to controlplane if this works in GKE
       - id: V-242389
-        text: "The Kubernetes API server must have the secure port set."
-        audit: "grep -i secure-port /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--secure-port"
-              compare:
-                op: gt
-                value: "0"
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--secure-port" to a value greater than "0".
-        scored: false
-
-      # - id: V-242389
-      #   text: "The Kubernetes API server must have the secure port set | Component of EKS Control Plane"
-      #   type: "skip"
+        text: "The Kubernetes API server must have the secure port set | Component of EKS Control Plane"
+        type: "skip"
 
       # TODO: Didn't actually see this one in the k8s stig file
       # - id: V-242401

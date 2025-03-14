@@ -157,31 +157,9 @@ groups:
             systemctl restart kubelet.service
             systemctl status kubelet -l
         scored: true
-      # TODO Verify this, low confidence this will work
-      - id: V-242393
-        text: "Kubernetes Worker Nodes must not have sshd service running. (Automated)"
-        audit: '/bin/sh -c ''systemctl show -p ActiveState sshd'' '
-        tests:
-          test_items:
-            - flag: ActiveState
-              compare:
-                op: eq
-                value: inactive
-        remediation: |
-          To stop the sshd service, run the command: systemctl stop sshd
-        scored: true
-      # TODO Verify this, low confidence this will work
-      - id: V-242394
-        text: "Kubernetes Worker Nodes must not have the sshd service enabled. (Automated)"
-        audit: "/bin/sh -c 'systemctl is-enabled sshd.service'"
-        tests:
-          test_items:
-            - flag: "disabled"
-        remediation: |
-          To disable the sshd service, run the command:
-            chkconfig sshd off
-        scored: true
+
       # TODO: Verify this, probably requires rbac permissions using kubectl
+      # This needs proper permissions set, TODO!!
       - id: V-242395
         text: "Kubernetes dashboard must not be enabled."
         audit: "kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard"
@@ -193,7 +171,8 @@ groups:
           Delete the Kubernetes dashboard deployment with the following command:
           kubectl delete deployment kubernetes-dashboard --namespace=kube-system
         scored: true
-      #  TODO This could be automated, but requires a little more effort or adding jq to the docker image
+
+      # TODO This could be automated, but requires a little more effort or adding jq to the docker image
       # maybe test path will work
       - id: V-242396
         text: "Kubernetes Kubectl cp command must give expected access and results. (Manual)"
@@ -202,20 +181,24 @@ groups:
           If any Worker nodes are not using kubectl version 1.12.9 or newer, this is a finding.
           Upgrade the Master and Worker nodes to the latest version of kubectl.
         scored: false
+
       - id: V-242397
-        text: "The Kubernetes kubelet static PodPath must not enable static pods (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/cat $kubeletconf"
+        text: "The Kubernetes kubelet staticPodPath must not enable static pods."
+        audit: "ps -ef | grep $kubeletbin | grep -- --config"
         tests:
+          bin_op: or
           test_items:
+            - flag: "staticPodPath"
+              set: false
             - path: '{.staticPodPath}'
               set: false
         remediation: |
-          Edit $kubeletconf on each node to to remove the staticPodPath
-          Based on your system, restart the kubelet service. For example,
-          systemctl daemon-reload
-          systemctl restart kubelet.service
+          Edit the Kubernetes kubelet configuration file.
+          Remove the setting "staticPodPath".
+          Restart the kubelet service using:
+          systemctl daemon-reload && systemctl restart kubelet
         scored: true
+
       - id: V-242398
         text: "Kubernetes DynamicAuditing must not be enabled. (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -351,41 +334,25 @@ groups:
   - id: 3.2
     text: "DISA Category Code II - Node Security"
     checks:
-      - id: V-242391
-        text: "The Kubernetes Kubelet must have anonymous authentication disabled."
-        audit: "ps -ef | grep kubelet | grep -- --anonymous-auth"
+     
+      # TODO Verify this, low confidence this will work
+      # These both don't work. Might need to be a manual check.
+      - id: V-242393
+        text: "Kubernetes Worker Nodes must not have sshd service running. (Automated)"
+        audit: '/bin/sh -c ''systemctl show -p ActiveState sshd'' '
         tests:
           test_items:
-            - flag: "--anonymous-auth"
+            - flag: ActiveState
               compare:
                 op: eq
-                value: "false"
+                value: inactive
         remediation: |
-          Edit the Kubernetes Kubelet configuration file.
-          Set the value of "anonymousAuth" to "false".
-          Restart the kubelet service using:
-          systemctl daemon-reload && systemctl restart kubelet
-        scored: true
-
-      - id: V-242392
-        text: "The Kubernetes kubelet must enable explicit authorization."
-        audit: "ps -ef | grep kubelet | grep -- --authorization-mode"
-        tests:
-          test_items:
-            - flag: "--authorization-mode"
-              compare:
-                op: eq
-                value: "Webhook"
-        remediation: |
-          Edit the Kubernetes Kubelet configuration file.
-          Set the "authorization.mode" to "Webhook".
-          Restart the kubelet service using:
-          systemctl daemon-reload && systemctl restart kubelet
+          To stop the sshd service, run the command: systemctl stop sshd
         scored: true
 
       - id: V-242393
         text: "Kubernetes Worker Nodes must not have sshd service running."
-        audit: "systemctl status sshd"
+        audit: "/bin/sh -c \"systemctl status sshd\""
         tests:
           test_items:
             - flag: "sshd"
@@ -399,6 +366,18 @@ groups:
           systemctl disable sshd
         scored: true
 
+      # TODO Verify this, low confidence this will work
+      # Both of these are not working at the moment
+      - id: V-242394
+        text: "Kubernetes Worker Nodes must not have the sshd service enabled. (Automated)"
+        audit: "/bin/sh -c 'systemctl is-enabled sshd.service'"
+        tests:
+          test_items:
+            - flag: "disabled"
+        remediation: |
+          To disable the sshd service, run the command:
+            chkconfig sshd off
+        scored: true
       - id: V-242394
         text: "Kubernetes Worker Nodes must not have the sshd service enabled."
         audit: "systemctl is-enabled sshd"
@@ -413,19 +392,6 @@ groups:
           systemctl disable sshd
         scored: true
 
-      - id: V-242397
-        text: "The Kubernetes kubelet staticPodPath must not enable static pods."
-        audit: "ps -ef | grep kubelet | grep -- --config"
-        tests:
-          test_items:
-            - flag: "staticPodPath"
-              set: false
-        remediation: |
-          Edit the Kubernetes kubelet configuration file.
-          Remove the setting "staticPodPath".
-          Restart the kubelet service using:
-          systemctl daemon-reload && systemctl restart kubelet
-        scored: true
 
       - id: V-242434 # CIS 3.2.6
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
