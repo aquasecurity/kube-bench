@@ -1,0 +1,93 @@
+---
+controls:
+version: "cis-1.24"
+id: 2
+text: "Datastore Node Configuration"
+type: "etcd"
+groups:
+  - id: 2
+    text: "Datastore Node Configuration"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
+        tests:
+          test_items:
+            - flag: "--not-applicable"
+              set: false
+        remediation: |
+          Not applicable. Canonical K8s uses dqlite and the communication to this service is done through a
+          local socket (/var/snap/k8s/common/var/lib/k8s-dqlite/k8s-dqlite.sock) accessible to users with root permissions.
+        scored: true
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
+        tests:
+          test_items:
+            - flag: "--not-applicable"
+              set: false
+        remediation: |
+          Not applicable. Canonical K8s uses dqlite and the communication to this service is done through a
+          local socket (/var/snap/k8s/common/var/lib/k8s-dqlite/k8s-dqlite.sock) accessible to users with root permissions.
+        scored: true
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Automated)"
+        tests:
+          test_items:
+            - flag: "--not-applicable"
+              set: false
+        remediation: |
+          Not applicable. Canonical K8s uses dqlite and the communication to this service is done through a
+          local socket (/var/snap/k8s/common/var/lib/k8s-dqlite/k8s-dqlite.sock) accessible to users with root permissions.
+        scored: true
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)"
+        audit: "if test -e /var/snap/k8s/common/var/lib/k8s-dqlite/cluster.crt && test -e /var/snap/k8s/common/var/lib/k8s-dqlite/cluster.key; then echo 'certs-found'; fi"
+        tests:
+          test_items:
+            - flag: "certs-found"
+        remediation: |
+          The certificate pair for dqlite and tls peer communication is
+          /var/snap/k8s/common/var/lib/k8s-dqlite/cluster.crt and
+          /var/snap/k8s/common/var/lib/k8s-dqlite/cluster.key.
+        scored: true
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
+        audit: "/bin/cat $etcdconf | /bin/grep enable-tls || true; echo $?"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--enable-tls"
+              compare:
+                op: eq
+                value: true
+            - flag: "--enable-tls"
+              set: false
+        remediation: |
+          Dqlite peer communication uses TLS unless the --enable-tls is set to false in
+          /var/snap/k8s/common/args/k8s-dqlite.
+        scored: true
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
+        tests:
+          test_items:
+            - flag: "--not-applicable"
+              set: false
+        remediation: |
+          Not applicable. Canonical K8s uses dqlite and tls peer communication uses the certificates
+          created upon the snap creation.
+        scored: false
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for the datastore (Manual)"
+        tests:
+          test_items:
+            - flag: "--not-applicable"
+              set: false
+        remediation: |
+          Not applicable. Canonical K8s uses dqlite and tls peer communication uses certificates
+          created upon cluster setup.
+        scored: true
