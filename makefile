@@ -104,5 +104,5 @@ kind-run-stig: kind-push
 	KUBECONFIG=$(KUBECONFIG) \
 		kubectl apply -f ./hack/kind-stig.test.yaml && \
 		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
-		kubectl logs job/kube-bench > ./test.data 
-		cat ./test.data
+		kubectl logs job/kube-bench > ./test.data && \
+		diff ./test.data integration/testdata/Expected_output_stig.data

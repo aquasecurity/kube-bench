@@ -17,7 +17,7 @@ spec:
             "kube-bench",
             "run",
             "--benchmark",
-            "gke-stig-kubernetes-v2r2",
+            "eks-stig-kubernetes-v1r6",
           ]
           volumeMounts:
             - name: var-lib-etcd
