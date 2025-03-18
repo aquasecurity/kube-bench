@@ -1,5 +1,4 @@
 # Service account role required for 242395
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -15,11 +14,7 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["list"]
-    resourceNames: []  # Can't use labels here, enforced via RBAC + admission controls
-  # - apiGroups: [""]
-  #   resources: ["pods"]
-  #   verbs: ["get"]
-  #   resourceNames: []  # For explicit pod access if needed
+    resourceNames: []
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -48,18 +43,15 @@ spec:
       containers:
         - name: kube-bench
           imagePullPolicy: Always
-          # Push the image to your ECR and then refer to it here
-          # image: <ID.dkr.ecr.region.amazonaws.com/aquasec/kube-bench:ref>
-          image: us-docker.pkg.dev/dev-frm-core/dev-frm/kube-bench:gke-stig
-          # To send findings to AWS Security Hub, refer to `job-eks-asff.yaml` instead
+          # Push the image to your GCP Artifact Registry and then refer to it here
+          # image: <region>-docker.pkg.dev/<registry>/<repository>/kube-bench:latest
+          image: docker.io/aquasec/kube-bench:latest
           command:
             [
               "kube-bench",
               "run",
               "--benchmark",
-              "gke-stig-kubernetes-v2r2",
-              "-v",
-              "10",
+              "gke-stig-kubernetes-v2r2"
             ]
           volumeMounts:
             - name: var-lib-kubelet
