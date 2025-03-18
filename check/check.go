@@ -23,7 +23,7 @@ import (
 	"github.com/golang/glog"
 )
 
-// NodeType indicates the type of node (master, node, federated, etcd, controlplane, policies, managedservices).
+// NodeType indicates the type of node (master, node).
 type NodeType string
 
 // State is the state of a control check.

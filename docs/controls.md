@@ -57,7 +57,7 @@ the `controls` components have an id and a text description which are displayed
 in the `kube-bench` output.
 
 `type` specifies what kubernetes node type a `controls` is for. Possible values
-for `type` are `[master, node, federated, etcd, controlplane, policies, managedservices]`.
+for `type` are `master` and `node`.
 
 ## Groups
 
