@@ -67,10 +67,9 @@ groups:
         text: "The Kubernetes API server must have the secure port set | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO: Didn't actually see this one in the k8s stig file
-      # - id: V-242401
-      #   text: "The Kubernetes API Server must have an audit policy set | Component of GKE Control Plane"
-      #   type: "skip"
+      - id: V-242401
+        text: "The Kubernetes API Server must have an audit policy set | Component of GKE Control Plane"
+        type: "skip"
 
       - id: V-242402
         text: "The Kubernetes API Server must have an audit log path set | Component of GKE Control Plane"
