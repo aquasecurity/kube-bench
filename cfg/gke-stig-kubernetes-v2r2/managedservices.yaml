@@ -16,33 +16,16 @@ groups:
         text: "The Kubernetes API server must have the insecure bind address not set | Component of GKE Control Plane"
         type: "skip"
 
-    # TODO Verify this one (can't find it like on the aws side https://docs.aws.amazon.com/eks/latest/userguide/platform-versions.html)
       - id: V-242436
-        text: "The Kubernetes API server must have the ValidatingAdmissionWebhook enabled (manual)"
-        type: "manual"
-        remediation: GKE automatically enable ValidatingAdmissionWebhook
-        scored: false
+        text: "The Kubernetes API server must have the ValidatingAdmissionWebhook enabled | Component of GKE Control Plane"
+        type: "skip"
       
       - id: V-242437
         text: "[Deprecated] Kubernetes must have a pod security policy set. policy/v1beta1 PodSecurityPolicy is deprecated in v1.21+, unavailable in v1.25+"
         type: "skip"
 
-      # TODO pretty sure this doesn't work
-      # - id: V-245542
-      #   text: "Kubernetes API Server must disable basic authentication to protect information in transit."
-      #   audit: "grep -i basic-auth-file /etc/kubernetes/manifests/kube-apiserver.yaml"
-      #   tests:
-      #     test_items:
-      #       - flag: "--basic-auth-file"
-      #         set: false
-      #   remediation: |
-      #     Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-      #     Remove the setting "--basic-auth-file".
-      #   scored: false
-
-
       - id: V-245542
-        text: "Kubernetes API Server must disable basic authentication to protect information in transit | Component of EKS Control Plane"
+        text: "Kubernetes API Server must disable basic authentication to protect information in transit | Component of GKE Control Plane"
         type: "skip"
 
   - id: 5.2
@@ -81,7 +64,7 @@ groups:
         type: "skip"
 
       - id: V-242389
-        text: "The Kubernetes API server must have the secure port set | Component of EKS Control Plane"
+        text: "The Kubernetes API server must have the secure port set | Component of GKE Control Plane"
         type: "skip"
 
       # TODO: Didn't actually see this one in the k8s stig file
@@ -97,68 +80,13 @@ groups:
         text: "Kubernetes API Server must generate audit records | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO This will need tweaks to work I think but might be automatable
-      # - id: V-242405
-      #   text: "The Kubernetes manifests must be owned by root."
-      #   audit: "ls -l /etc/kubernetes/manifests/*"
-      #   tests:
-      #     test_items:
-      #       - flag: "owner"
-      #         compare:
-      #           op: eq
-      #           value: "root:root"
-      #   remediation: |
-      #     On the Control Plane, change to the /etc/kubernetes/manifests directory.
-      #     Run the command:
-      #     chown root:root *
-          
-      #     To verify the change took place, run the command:
-      #     ls -l *
-          
-      #     All the manifest files should be owned by root:root.
-      #   scored: false
-
       - id: V-242405
         text: "The Kubernetes manifests must be owned by root | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO verify this one, I think the permissions flag just needs to be added to the ls cmd
       - id: V-242408
-        text: "The Kubernetes manifest files must have least privileges."
-        audit: "ls -l /etc/kubernetes/manifests/*"
-        tests:
-          test_items:
-            - flag: "permissions"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          On both Control Plane and Worker Nodes, change to the /etc/kubernetes/manifests directory.
-          Run the command:
-          chmod 644 *
-          To verify the change took place, run the command:
-          ls -l *
-          All the manifest files should now have privileges of "644".
-        scored: false
-
-      # - id: V-242408
-      #   text: "The Kubernetes manifests must have least privileges | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Pretty sure this is actually a GKE setting
-      # - id: V-242409
-      #   text: "Kubernetes Controller Manager must disable profiling."
-      #   audit: "grep -i profiling /etc/kubernetes/manifests/kube-controller-manager.yaml"
-      #   tests:
-      #     test_items:
-      #       - flag: "--profiling"
-      #         compare:
-      #           op: eq
-      #           value: "false"
-      #   remediation: |
-      #     Edit the Kubernetes Controller Manager manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-      #     Set the argument "--profiling" to "false".
-      #   scored: false
+        text: "The Kubernetes manifests must have least privileges | Component of GKE Control Plane"
+        type: "skip"
 
       - id: V-242409
         text: "Kubernetes Controller Manager must disable profiling | Component of GKE Control Plane"
@@ -184,729 +112,135 @@ groups:
         text: "The Kubernetes API server must use approved cipher suites | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO Validate this one
       - id: V-242419
-        text: "Kubernetes API Server must have the SSL Certificate Authority set."
-        audit: "grep -i client-ca-file /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--client-ca-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--client-ca-file" to the path containing an Approved Organizational Certificate.
-        scored: false
+        text: "Kubernetes API Server must have the SSL Certificate Authority set | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242419
-      #   text: "Kubernetes API Server must have the SSL Certificate Authority set | Component of GKE Control Plane"
-      #   type: "skip"
 
-      # TODO Validate this one
-      - id: V-242420
-        text: "Kubernetes Kubelet must have the SSL Certificate Authority set."
-        audit: "ps -ef | grep kubelet | grep -- --client-ca-file"
-        tests:
-          test_items:
-            - flag: "--client-ca-file"
-              set: true
-        remediation: |
-          On the Control Plane, run the command:
-          ps -ef | grep kubelet
-
-          If the "--client-ca-file" option exists, verify its value is correctly set.
-          Note the path to the config file (identified by --config).
-
-          Edit the Kubernetes Kubelet config file:
-          Set the value of "clientCAFile" to a path containing an Approved Organizational Certificate.
-
-          Restart the kubelet service using the following command:
-          systemctl daemon-reload && systemctl restart kubelet
-        scored: false
-
-      # - id: V-242420
-      #   text: "Kubernetes Kubelet must have the SSL Certificate Authority set | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242421
-        text: "Kubernetes Controller Manager must have the SSL Certificate Authority set."
-        audit: "grep -i root-ca-file /etc/kubernetes/manifests/kube-controller-manager.yaml"
-        tests:
-          test_items:
-            - flag: "--root-ca-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes Controller Manager manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--root-ca-file" to a path containing an Approved Organizational Certificate.
-        scored: false
+        text: "Kubernetes Controller Manager must have the SSL Certificate Authority set | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242421
-      #   text: "Kubernetes Controller Manager must have the SSL Certificate Authority set | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242422
-        text: "Kubernetes API Server must have a certificate for communication."
-        audit: "grep -i tls-cert-file /etc/kubernetes/manifests/kube-apiserver.yaml && grep -i tls-private-key-file /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          bin_op: and
-          test_items:
-            - flag: "--tls-cert-file"
-              set: true
-            - flag: "--tls-private-key-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Ensure the "--tls-cert-file" and "--tls-private-key-file" flags are set to paths containing an Approved Organizational Certificate and corresponding private key.
-        scored: false
+        text: "Kubernetes API Server must have a certificate for communication | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242422
-      #   text: "Kubernetes API Server must have a certificate for communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242423
-        text: "Kubernetes etcd must enable client authentication to secure service."
-        audit: "grep -i client-cert-auth /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--client-cert-auth"
-              compare:
-                op: eq
-                value: "true"
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--client-cert-auth" to "true" for etcd.
-        scored: false
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242423
-      #   text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242424
-        text: "Kubernetes etcd must have a certificate for communication."
-        audit: "grep -i cert-file /etc/kubernetes/manifests/etcd.yaml && grep -i key-file /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          bin_op: and
-          test_items:
-            - flag: "--cert-file"
-              set: true
-            - flag: "--key-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Ensure the "--cert-file" and "--key-file" flags are set to paths containing an Approved Organizational Certificate and corresponding private key.
-        scored: false
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242424
-      #   text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242425
-        text: "Kubernetes Kubelet must have a certificate for communication."
-        audit: "ps -ef | grep kubelet | grep -- --tls-cert-file"
-        tests:
-          test_items:
-            - flag: "--tls-cert-file"
-              set: true
-        remediation: |
-          On the Control Plane, run the command:
-          ps -ef | grep kubelet
+        text: "Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service | Component of GKE Control Plane"
+        type: "skip"
 
-          If the "--tls-cert-file" option exists, verify its value is correctly set.
-          Note the path to the config file (identified by --config).
-
-          Edit the Kubernetes Kubelet config file:
-          Set the value of "tlsCertFile" to a path containing an Approved Organizational Certificate.
-
-          Restart the kubelet service using the following command:
-          systemctl daemon-reload && systemctl restart kubelet
-        scored: false
-
-
-      # - id: V-242425
-      #   text: "Kubernetes Kubelet must enable tls-cert-file for client authentication to secure service | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242426
-        text: "Kubernetes etcd must enable peer client authentication."
-        audit: "grep -i peer-client-cert-auth /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--peer-client-cert-auth"
-              compare:
-                op: eq
-                value: "true"
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--peer-client-cert-auth" to "true" for etcd.
-        scored: false
+        text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242426
-      #   text: "Kubernetes etcd must enable client authentication to secure service | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242427
-        text: "Kubernetes etcd must have a key file for secure communication."
-        audit: "grep -i key-file /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--key-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--key-file" to the Approved Organizational Certificate.
-        scored: false
+        text: "Kubernetes etcd must have a key file for secure communication | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242427
-      #   text: "Kubernetes etcd must have a key file for secure communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242428
-        text: "Kubernetes etcd must have a certificate for communication."
-        audit: "grep -i cert-file /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--cert-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--cert-file" to the Approved Organizational Certificate.
-        scored: false
+        text: "Kubernetes etcd must have a certificate for communication | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242428
-      #   text: "Kubernetes etcd must have a certificate for communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242429
-        text: "Kubernetes etcd must have the SSL Certificate Authority set."
-        audit: "grep -i etcd-cafile /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--etcd-cafile"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--etcd-cafile" to the Certificate Authority for etcd.
-        scored: false
+        text: "Kubernetes etcd must have the SSL Certificate Authority set | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242429
-      #   text: "Kubernetes etcd must have the SSL Certificate Authority set | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242430
-        text: "Kubernetes etcd must have a certificate for communication."
-        audit: "grep -i etcd-certfile /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--etcd-certfile"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--etcd-certfile" to the certificate to be used for communication with etcd.
-        scored: false
+        text: "Kubernetes etcd must have a certificate for communication | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242430
-      #   text: "Kubernetes etcd must have a certificate for communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242431
-        text: "Kubernetes etcd must have a key file for secure communication."
-        audit: "grep -i etcd-keyfile /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--etcd-keyfile"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--etcd-keyfile" to the key file used for secure communication with etcd.
-        scored: false
+        text: "Kubernetes etcd must have a key file for secure communication | Component of GKE Control Plane"
+        type: "skip"
 
-
-      # - id: V-242431
-      #   text: "Kubernetes etcd must have a key file for secure communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242432
-        text: "Kubernetes etcd must have peer-cert-file set for secure communication."
-        audit: "grep -i peer-cert-file /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--peer-cert-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--peer-cert-file" to the certificate to be used for communication with etcd.
-        scored: false
+        text: "Kubernetes etcd must have peer-cert-file set for secure communication | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242432
-      #   text: "Kubernetes etcd must have peer-cert-file set for secure communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242433
-        text: "Kubernetes etcd must have a peer-key-file set for secure communication."
-        audit: "grep -i peer-key-file /etc/kubernetes/manifests/etcd.yaml"
-        tests:
-          test_items:
-            - flag: "--peer-key-file"
-              set: true
-        remediation: |
-          Edit the Kubernetes etcd manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--peer-key-file" to the certificate to be used for communication with etcd.
-        scored: false
+        text: "Kubernetes etcd must have a peer-key-file set for secure communication | Component of GKE Control Plane"
+        type: "skip"
 
-
-      # - id: V-242433
-      #   text: "Kubernetes etcd must have a peer-key-file set for secure communication | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242438
-        text: "Kubernetes API Server must configure timeouts to limit attack surface."
-        audit: "grep -i request-timeout /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          test_items:
-            - flag: "--request-timeout"
-              compare:
-                op: gt
-                value: "0"
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Ensure the "--request-timeout" flag is set to a value greater than "0".
-        scored: false
+        text: "Kubernetes API Server must configure timeouts to limit attack surface | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242438
-      #   text: "Kubernetes API Server must configure timeouts to limit attack surface | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242444
-        text: "The Kubernetes component manifests must be owned by root."
-        audit: "stat -c %U:%G /etc/kubernetes/manifests/*"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the manifest files to root:root by executing the command:
-          chown root:root /etc/kubernetes/manifests/*
-        scored: false
-
-      # - id: V-242444
-      #   text: "The Kubernetes component manifests must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
+        text: "The Kubernetes component manifests must be owned by root | Component of GKE Control Plane"
+        type: "skip"
 
       - id: V-242445
         text: "The Kubernetes component etcd must be owned by etcd | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO Validate this one
       - id: V-242446
-        text: "The Kubernetes conf files must be owned by root."
-        audit: "stat -c %U:%G /etc/kubernetes/admin.conf /etc/kubernetes/scheduler.conf /etc/kubernetes/controller-manager.conf"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the Kubernetes conf files to root:root by executing the commands:
-          chown root:root /etc/kubernetes/admin.conf
-          chown root:root /etc/kubernetes/scheduler.conf
-          chown root:root /etc/kubernetes/controller-manager.conf
-        scored: false
+        text: "The Kubernetes conf files must be owned by root | Component of GKE Control Plane"
+        type: "skip"
 
-
-      # - id: V-242446
-      #   text: "The Kubernetes conf files must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242447
-        text: "The Kubernetes Kube Proxy kubeconfig must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a $proxykubeconfig"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the Kube Proxy kubeconfig to 644 by executing the command:
-          chmod 644 $proxykubeconfig
-        scored: false
+        text: "The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
+        type: "skip"
 
-
-      # - id: V-242447
-      #   text: "The Kubernetes Kube Proxy must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242448
-        text: "The Kubernetes Kube Proxy kubeconfig must be owned by root."
-        audit: "stat -c %U:%G $proxykubeconfig"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the Kube Proxy kubeconfig to root:root by executing the command:
-          chown root:root $proxykubeconfig
-        scored: false
+        text: "The Kubernetes Kube Proxy must be owned by root | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242448
-      #   text: "The Kubernetes Kube Proxy must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242449
-        text: "The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a $kubeletcafile"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the Kubernetes Kubelet certificate authority file to 644 by executing the command:
-          chmod 644 $kubeletcafile
-        scored: false
+        text: "The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242449
-      #   text: "The Kubernetes Kubelet certificate authority file must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242450
-        text: "The Kubernetes Kubelet certificate authority must be owned by root."
-        audit: "stat -c %U:%G $kubeletcafile"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the Kubernetes Kubelet certificate authority file to root:root by executing the command:
-          chown root:root $kubeletcafile
-        scored: false
+        text: "The Kubernetes Kubelet certificate authority must be owned by root | Component of GKE Control Plane"
+        type: "skip"
 
-
-      # - id: V-242450
-      #   text: "The Kubernetes Kubelet certificate authority must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242451
-        text: "The Kubernetes component PKI must be owned by root."
-        audit: "stat -c %U:%G /etc/kubernetes/pki/*"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the PKI directory and its contents to root:root by executing the command:
-          chown -R root:root /etc/kubernetes/pki/
-        scored: false
-
-
-      # - id: V-242451
-      #   text: "The Kubernetes component PKI must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
-      - id: V-242452
-        text: "The Kubernetes kubelet KubeConfig must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a /etc/kubernetes/kubelet.conf"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the Kubelet KubeConfig file to 644 by executing the command:
-          chmod 644 /etc/kubernetes/kubelet.conf
-        scored: false
-
-      # - id: V-242452
-      #   text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
-      - id: V-242453
-        text: "The Kubernetes kubelet KubeConfig file must be owned by root."
-        audit: "stat -c %U:%G /etc/kubernetes/kubelet.conf"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the kubelet.conf file to root:root by executing the command:
-          chown root:root /etc/kubernetes/kubelet.conf
-        scored: false
-
-      # - id: V-242453
-      #   text: "The Kubernetes kubelet config must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
-      - id: V-242454
-        text: "The Kubernetes kubeadm.conf must be owned by root."
-        audit: "stat -c %U:%G $kubeletdefaultsvc"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the kubeadm.conf to root:root by executing the command:
-          chown root:root $kubeletdefaultsvc
-        scored: false
-
-      # - id: V-242454
-      #   text: "The Kubernetes kubeadm.conf must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
-      - id: V-242455
-        text: "The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a $kubeletdefaultsvc"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the kubeadm.conf to 644 by executing the command:
-          chmod 644 $kubeletdefaultsvc
-        scored: false
-
-      # - id: V-242455
-      #   text: "The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-
-      # TODO Validate this one
-      - id: V-242456
-        text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a /var/lib/kubelet/config.yaml"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the config.yaml to 644 by executing the command:
-          chmod 644 /var/lib/kubelet/config.yaml
-        scored: false
-
-
-      # - id: V-242456
-      #   text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
-      - id: V-242457
-        text: "The Kubernetes kubelet config must be owned by root."
-        audit: "stat -c %U:%G /var/lib/kubelet/config.yaml"
-        tests:
-          test_items:
-            - flag: "root:root"
-              set: true
-        remediation: |
-          Change the ownership of the kubelet config file to root:root by executing the command:
-          chown root:root /var/lib/kubelet/config.yaml
-        scored: false
-
-
-      # - id: V-242457
-      #   text: "The Kubernetes kubelet config must be owned by root | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one don't think it works
-      # - id: V-242458
-      #   text: "The Kubernetes etcd must have file permissions set to 644 or more restrictive."
-      #   audit: "stat -c %a /var/lib/etcd/*"
-      #   tests:
-      #     test_items:
-      #       - flag: "644"
-      #         compare:
-      #           op: lte
-      #           value: "644"
-      #   remediation: |
-      #     Change the permissions of the etcd data directory to 644 by executing the command:
-      #     chmod -R 644 /var/lib/etcd/*
-      #   scored: false
-
-      - id: V-242458
-        text: "The Kubernetes API Server must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
+        text: "The Kubernetes component PKI must be owned by root | Component of GKE Control Plane"
         type: "skip"
 
       - id: V-242459
         text: "The Kubernetes etcd must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO Validate this one
       - id: V-242460
-        text: "The Kubernetes admin kubeconfig must have file permissions set to 644 or more restrictive."
-        audit: "stat -c %a /etc/kubernetes/admin.conf"
-        tests:
-          test_items:
-            - flag: "644"
-              compare:
-                op: lte
-                value: "644"
-        remediation: |
-          Change the permissions of the admin kubeconfig file to 644 by executing the command:
-          chmod 644 /etc/kubernetes/admin.conf
-        scored: false
+        text: "The Kubernetes admin.conf must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242460
-      #   text: "The Kubernetes admin.conf must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242466
-        text: "The Kubernetes Scheduler must have secure binding."
-        audit: "grep -i bind-address /etc/kubernetes/manifests/kube-scheduler.yaml"
-        tests:
-          test_items:
-            - flag: "--bind-address"
-              compare:
-                op: eq
-                value: "127.0.0.1"
-        remediation: |
-          Edit the Kubernetes Scheduler manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Ensure the "--bind-address" flag is set to "127.0.0.1".
-        scored: false
+        text: "The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-242466
-      #   text: "The Kubernetes PKI CRT must have file permissions set to 644 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
-
-      # TODO Validate this one
       - id: V-242467
-        text: "The Kubernetes PKI keys must have file permissions set to 600 or more restrictive."
-        audit: "find /etc/kubernetes/pki -type f -name '*.key' -exec stat -c %a {} \\;"
-        tests:
-          test_items:
-            - flag: "600"
-              compare:
-                op: lte
-                value: "600"
-        remediation: |
-          Change the permissions of the PKI key files to 600 by executing the command:
-          find /etc/kubernetes/pki -type f -name '*.key' -exec chmod 600 {} \;
-        scored: false
-
-      # - id: V-242467
-      #   text: "The Kubernetes PKI keys must have file permissions set to 600 or more restrictive | Component of GKE Control Plane"
-      #   type: "skip"
+        text: "The Kubernetes PKI keys must have file permissions set to 600 or more restrictive | Component of GKE Control Plane"
+        type: "skip"
 
       - id: V-242468
-        text: "The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0 | Component of EKS Control Plane"
+        text: "The Kubernetes API Server must prohibit communication using TLS version 1.0 and 1.1, and SSL 2.0 and 3.0 | Component of GKE Control Plane"
         type: "skip"
-
-#TODO Test this, pretty sure it doesn't work
-      # - id: V-245541
-      #   text: "Kubernetes Kubelet must not disable timeouts."
-      #   audit: "ps -ef | grep kubelet | grep -- --streaming-connection-idle-timeout"
-      #   tests:
-      #     test_items:
-      #       - flag: "--streaming-connection-idle-timeout"
-      #         compare:
-      #           op: gte
-      #           value: "5m"
-      #   remediation: |
-      #     On the Control Plane, run the command:
-      #     ps -ef | grep kubelet
-
-      #     If the "--streaming-connection-idle-timeout" option exists, verify its value.
-
-      #     Edit the Kubernetes Kubelet config file:
-      #     Set the argument "streamingConnectionIdleTimeout" to a value of "5m" or greater.
-
-      #     Restart the kubelet service using the following command:
-      #     systemctl daemon-reload && systemctl restart kubelet
-      #   scored: false
-
-      - id: V-245541
-        text: "Kubernetes Kubelet must not disable timeouts | Component of GKE Control Plane"
-        type: "skip"
-
-      # TODO Check this, probably doesn't work
-      # - id: V-245543
-      #   text: "Kubernetes API Server must disable token authentication to protect information in transit."
-      #   audit: "grep -i token-auth-file /etc/kubernetes/manifests/kube-apiserver.yaml"
-      #   tests:
-      #     test_items:
-      #       - flag: "--token-auth-file"
-      #         set: false
-      #   remediation: |
-      #     Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-      #     Remove the setting "--token-auth-file".
-      #   scored: false
 
       - id: V-245543
         text: "Kubernetes API Server must disable token authentication to protect information in transit | Component of GKE Control Plane"
         type: "skip"
 
-      # TODO Verify this one
       - id: V-245544
-        text: "Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit."
-        audit: "grep -i kubelet-client-certificate /etc/kubernetes/manifests/kube-apiserver.yaml && grep -i kubelet-client-key /etc/kubernetes/manifests/kube-apiserver.yaml"
-        tests:
-          bin_op: and
-          test_items:
-            - flag: "--kubelet-client-certificate"
-              set: true
-            - flag: "--kubelet-client-key"
-              set: true
-        remediation: |
-          Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-          Set the value of "--kubelet-client-certificate" and "--kubelet-client-key" to an Approved Organizational Certificate and key pair.
-          Restart the kubelet service using the following command:
-          service kubelet restart
+        text: "Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit | Component of GKE Control Plane"
+        type: "skip"
 
-      # - id: V-245544
-      #   text: "Kubernetes endpoints must use approved organizational certificate and key pair to protect information in transit | Component of GKE Control Plane"
-      #   type: "skip"
+      - id: V-254800
+        text: "Kubernetes must have a Pod Security Admission control file configured. | Component of GKE Control Plane"
+        type: "skip"
 
-      # TODO This one is "new" doesn't appear to work though
-      # - id: V-254800
-      #   text: "Kubernetes must have a Pod Security Admission control file configured."
-      #   audit: "grep -i admission-control-config-file /etc/kubernetes/manifests/kube-apiserver.yaml"
-      #   tests:
-      #     test_items:
-      #       - flag: "--admission-control-config-file"
-      #         set: true
-      #   remediation: |
-      #     Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-      #     Set the value of "--admission-control-config-file" to a valid path for the file.
-      #     Create an admission controller config file with the necessary PodSecurity configuration.
-      #   scored: false
+      - id: V-254801
+        text: "Kubernetes must enable PodSecurity admission controller on static pods and Kubelets. | Component of GKE Control Plane"
+        type: "skip"
 
-      # TODO This one is "new" doesn't appear to work though
-      # - id: V-254801
-      #   text: "Kubernetes must enable PodSecurity admission controller on static pods and Kubelets."
-      #   audit: "grep -i feature-gates /etc/kubernetes/manifests/kube-apiserver.yaml"
-      #   tests:
-      #     test_items:
-      #       - flag: "--feature-gates"
-      #         compare:
-      #           op: has
-      #           value: "PodSecurity=true"
-      #   remediation: |
-      #     Edit the Kubernetes API Server manifest file in the /etc/kubernetes/manifests directory on the Kubernetes Control Plane.
-      #     Ensure the argument "--feature-gates=PodSecurity=true" is present.
-      #   scored: false
+      - id: V-242394
+        text: "Kubernetes Worker Nodes must not have the sshd service enabled | Component of GKE Control Plane"
+        type: "skip"
