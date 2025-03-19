@@ -44,6 +44,7 @@ var (
 	junitFmt             bool
 	pgSQL                bool
 	aSFF                 bool
+	GSCC                 bool
 	masterFile           = "master.yaml"
 	nodeFile             = "node.yaml"
 	etcdFile             = "etcd.yaml"
@@ -168,6 +169,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&junitFmt, "junit", false, "Prints the results as JUnit")
 	RootCmd.PersistentFlags().BoolVar(&pgSQL, "pgsql", false, "Save the results to PostgreSQL")
 	RootCmd.PersistentFlags().BoolVar(&aSFF, "asff", false, "Send the results to AWS Security Hub")
+	RootCmd.PersistentFlags().BoolVar(&GSCC, "gscc", false, "Send the results to GCP Security Command Center")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Scored, "scored", true, "Run the scored CIS checks")
 	RootCmd.PersistentFlags().BoolVar(&filterOpts.Unscored, "unscored", true, "Run the unscored CIS checks")
 	RootCmd.PersistentFlags().StringVar(&skipIds, "skip", "", "List of comma separated values of checks to be skipped")
