@@ -1,0 +1,18 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+## These settings are required if you are using the --gscc option to report findings to GCP Security Command Center
+## GCP Organization ID is required.
+GCP_SCC_SOURCE_ID: "<GCP_SCC_SOURCE_ID>"
+## GCP project ID is required.
+GCP_PROJECT_ID: "<GCP_PROJECT_ID>"
+## GCP region is required.
+GCP_REGION: "<GCP_REGION>"
+## GKE Cluster Name is required.
+CLUSTER_NAME: "<CLUSTER_NAME>"
+
+
+node:
+  kubelet:
+    confs:
+      - "/home/kubernetes/kubelet-config.yaml"
+      - "/etc/kubernetes/kubelet-config.yaml"

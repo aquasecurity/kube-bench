@@ -416,6 +416,9 @@ func writeOutput(controlsCollection []*check.Controls) {
 		writeASFFOutput(controlsCollection)
 		return
 	}
+	if GSCC {
+		writeGSCCOutput((controlsCollection))
+	}
 	writeStdoutOutput(controlsCollection)
 }
 
@@ -468,8 +471,20 @@ func writeASFFOutput(controlsCollection []*check.Controls) {
 		if err != nil {
 			exitWithError(fmt.Errorf("failed to format findings as ASFF: %v", err))
 		}
-		if err := writeFinding(out); err != nil {
+		if err := writeASSFFinding(out); err != nil {
 			exitWithError(fmt.Errorf("failed to output to ASFF: %v", err))
+		}
+	}
+}
+
+func writeGSCCOutput(controlsCollection []*check.Controls) {
+	for _, controls := range controlsCollection {
+		out, err := controls.GSCC()
+		if err != nil {
+			exitWithError(fmt.Errorf("failed to format findings as GSCC: %v", err))
+		}
+		if err := writeGSCCFinding(out); err != nil {
+			exitWithError(fmt.Errorf("failed to output to GSCC: %v", err))
 		}
 	}
 }

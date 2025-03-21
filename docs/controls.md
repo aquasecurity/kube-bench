@@ -104,7 +104,7 @@ command line, with the flag `--group` or `-g`.
 
 ## Check
 
-The CIS Kubernetes Benchmark recommends configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
+The STIG/CIS Kubernetes Benchmarks recommend configurations to harden Kubernetes components. These recommendations are usually configuration options and can be 
 specified by flags to Kubernetes binaries, or in configuration files.
 
 The Benchmark also provides commands to audit a Kubernetes installation, identify
@@ -130,10 +130,15 @@ remediation: |
   on the master node and set the below parameter.
   --anonymous-auth=false
 scored: false
+severity: high
 ```
 
 A `check` object has an `id`, a `text`, an `audit`, a `tests`, `remediation`
 and `scored` fields.
+
+Optionally, `severity` can be provided. The severity will default to `high` if not set.
+This field is used for sending GCP SCC results. AWS Security Hub does not currently support setting severity.
+Valid options are `high`, `medium` or `low`.
 
 `kube-bench` supports running individual checks by specifying the check's `id`
 as a comma-delimited list on the command line with the `--check` flag.

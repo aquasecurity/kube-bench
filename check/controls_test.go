@@ -193,6 +193,7 @@ groups:
     remediation: |
       Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.
     scored: true
+    severity: medium
 `)
 		// and
 		controls, err := NewControls(MASTER, in, "")
@@ -224,6 +225,7 @@ groups:
 		assert.Equal(t, "SomeSampleFlag=true", G2.Checks[0].Tests.TestItems[0].Flag)
 		assert.Equal(t, "Edit the config file /this/is/a/file/path and set SomeSampleFlag to true.\n", G2.Checks[0].Remediation)
 		assert.Equal(t, true, G2.Checks[0].Scored)
+		assert.Equal(t, "medium", G2.Checks[0].Severity)
 		assertEqualGroupSummary(t, 0, 1, 0, 0, G2)
 		// and
 		assert.Equal(t, 1, controls.Summary.Pass)
