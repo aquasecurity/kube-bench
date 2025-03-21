@@ -31,6 +31,18 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-bench-gke-config
+data:
+  config.yaml: |
+    GCP_PROJECT_ID: "<PROJECT_ID>"
+    GCP_REGION: "<REGION>"
+    CLUSTER_NAME: "<CLUSTER_NAME>"
+    GCP_SCC_SOURCE_ID: "projects/<PROJECT_ID>/sources/<SOURCE_ID>"
+
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -47,7 +59,13 @@ spec:
           # image: <region>-docker.pkg.dev/<registry>/<repository>/kube-bench:latest
           image: docker.io/aquasec/kube-bench:latest
           command:
-            ["kube-bench", "run", "--benchmark", "gke-stig-kubernetes-v2r2"]
+            [
+              "kube-bench",
+              "run",
+              "--benchmark",
+              "gke-stig-kubernetes-v2r2",
+              "--gscc",
+            ]
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet

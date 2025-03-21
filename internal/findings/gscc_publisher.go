@@ -11,8 +11,14 @@ import (
 
 // Publisher represents an object that publishes findings to GCP Security Command Center (SCC).
 type GSCCPublisher struct {
-	client *securitycenter.Client // GCP SCC Client
-	sourceID string               // SCC Source ID
+	client   *securitycenter.Client // GCP SCC Client
+	sourceID string                 // SCC Source ID
+}
+
+// Capture the error and the finding which threw the error
+type FailedFinding struct {
+	Error   string              `json:"error"`
+	Finding *securitypb.Finding `json:"finding"`
 }
 
 type GSCCPublisherOutput struct {
@@ -22,7 +28,7 @@ type GSCCPublisherOutput struct {
 	FailedCount int32
 
 	// The list of findings that failed to import.
-	FailedFindings []string
+	FailedFindings []FailedFinding
 
 	// The number of findings that were successfully imported.
 	//
@@ -47,7 +53,7 @@ func (p *GSCCPublisher) PublishFinding(findings []*securitypb.Finding) (*GSCCPub
 	for _, finding := range findings {
 		req := &securitypb.CreateFindingRequest{
 			Parent:    p.sourceID,
-			FindingId: finding.GetName(), // Ensure unique finding ID
+			FindingId: finding.GetName(),
 			Finding:   finding,
 		}
 
@@ -55,7 +61,10 @@ func (p *GSCCPublisher) PublishFinding(findings []*securitypb.Finding) (*GSCCPub
 		if err != nil {
 			errs = errors.Wrap(err, "finding publish failed")
 			o.FailedCount++
-			o.FailedFindings = append(o.FailedFindings, finding.GetName())
+			o.FailedFindings = append(o.FailedFindings, FailedFinding{
+				Error:   err.Error(),
+				Finding: finding,
+			})
 			continue
 		}
 		fmt.Printf("Finding created: %s\n", resp.Name)

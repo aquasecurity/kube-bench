@@ -94,6 +94,33 @@ func TestCheck_Run(t *testing.T) {
 			},
 			Expected: FAIL,
 		},
+		{
+			name: "Scored checks that pass should FAIL when config file is not present",
+			check: Check{
+				Scored:      true,
+				AuditConfig: "/test/config.yaml",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "hello",
+					Set:  true,
+				}}},
+				Severity: "medium",
+			},
+			Expected: FAIL,
+		},
+		{
+			name: "Scored checks that pass should PASS when config file is not present",
+			check: Check{
+				Scored:      true,
+				Audit:       "echo hello",
+				AuditConfig: "/test/config.yaml",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "hello",
+					Set:  true,
+				}}},
+				Severity: "high",
+			},
+			Expected: PASS,
+		},
 	}
 
 	for _, testCase := range testCases {

@@ -12,6 +12,7 @@ groups:
         text: "The Kubernetes Kubelet must have the read-only port flag disabled"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
+        severity: high
         tests:
           test_items:
             - flag: "--read-only-port"
@@ -354,6 +355,7 @@ groups:
       - id: V-242393
         text: "Kubernetes Worker Nodes must not have sshd service running. (Automated)"
         audit: 'ps aux | grep sshd'
+        severity: medium
         tests:
           test_items:
             - flag: bin/sshd
@@ -395,6 +397,7 @@ groups:
 
       - id: V-242434 # CIS 3.2.6
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
+        severity: high
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -453,6 +456,7 @@ groups:
         scored: true
 
       - id: V-242420
+        severity: medium
         text: "Kubernetes Kubelet must have the SSL Certificate Authority set."
         audit: "ps -ef | grep kubelet"
         audit_config: "/bin/cat $kubeletconf"
@@ -478,6 +482,7 @@ groups:
         scored: false
 
       - id: V-242452
+        severity: medium
         text: "The Kubernetes kubelet KubeConfig must have file permissions set to 644 or more restrictive."
         audit: "stat -c %a $kubeletconf"
         tests:
@@ -492,6 +497,7 @@ groups:
         scored: false
 
       - id: V-242453
+        severity: medium
         text: "The Kubernetes kubelet KubeConfig file must be owned by root."
         audit: "stat -c %U:%G $kubeletconf"
         tests:
@@ -504,6 +510,7 @@ groups:
         scored: false
 
       - id: V-242454
+        severity: medium
         text: "The Kubernetes kubeadm.conf must be owned by root."
         audit: "stat -c %U:%G $kubeletsvc"
         tests:
@@ -516,6 +523,7 @@ groups:
         scored: false
 
       - id: V-242455
+        severity: medium
         text: "The Kubernetes kubeadm.conf must have file permissions set to 644 or more restrictive."
         audit: "stat -c %a $kubeletsvc"
         tests:
@@ -530,6 +538,7 @@ groups:
         scored: false
 
       - id: V-242456
+        severity: medium
         text: "The Kubernetes kubelet config must have file permissions set to 644 or more restrictive."
         audit: "stat -c %a $kubeletconf"
         tests:
@@ -544,6 +553,7 @@ groups:
         scored: false
 
       - id: V-242457
+        severity: medium
         text: "The Kubernetes kubelet config must be owned by root."
         audit: "stat -c %U:%G $kubeletconf"
         tests:
@@ -556,6 +566,7 @@ groups:
         scored: false
 
       - id: V-245541
+        severity: medium
         text: "Kubernetes Kubelet must not disable timeouts."
         audit: "ps -ef | grep kubelet"
         audit_config: "/bin/cat $kubeletconf"
@@ -583,6 +594,7 @@ groups:
         scored: true
 
       - id: V-242390 # Similar to CIS 3.2.1
+        severity: high
         text: "The Kubernetes API server must have anonymous authentication disabled (Automated)"
         # audit: "/bin/ps -fC kubelet"
         audit: "/bin/ps -fC $kubeletbin"

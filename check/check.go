@@ -85,6 +85,7 @@ type Check struct {
 	AuditEnvOutput    string `json:"-"`
 	AuditConfigOutput string `json:"-"`
 	DisableEnvTesting bool   `json:"-"`
+	Severity          string `json:"severity,omitempty"`
 }
 
 // Runner wraps the basic Run method.

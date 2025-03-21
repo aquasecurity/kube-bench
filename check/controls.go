@@ -20,12 +20,14 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	securitypb "cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"github.com/golang/glog"
+	"github.com/google/uuid"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -297,7 +299,7 @@ func (controls *Controls) ASFF() ([]types.AwsSecurityFinding, error) {
 
 func (controls *Controls) GSCC() ([]*securitypb.Finding, error) {
 	fs := []*securitypb.Finding{}
-	project, err := getConfig("GCP_PROJECT")
+	project, err := getConfig("GCP_PROJECT_ID")
 	if err != nil {
 		return nil, err
 	}
@@ -318,6 +320,7 @@ func (controls *Controls) GSCC() ([]*securitypb.Finding, error) {
 				actualValue := check.ActualValue
 				remediation := check.Remediation
 				reason := check.Reason
+				severity := securitypb.Finding_HIGH
 
 				if len(actualValue) > 1024 {
 					actualValue = actualValue[:1023]
@@ -329,15 +332,26 @@ func (controls *Controls) GSCC() ([]*securitypb.Finding, error) {
 					reason = reason[:1023]
 				}
 
-				id := fmt.Sprintf("%s/stig-kubernetes-benchmark/%s/%s", resourceName, controls.Version, check.ID)
+				if strings.ToLower(check.Severity) == "medium" {
+					severity = securitypb.Finding_MEDIUM
+				}
+
+				if strings.ToLower(check.Severity) == "low" {
+					severity = securitypb.Finding_LOW
+				}
+
+
+				// id := fmt.Sprintf("%s/stig/%s/%s", cluster, controls.Version, check.ID)
+				id := strings.Replace(uuid.New().String(), "-", "", -1)
 
 					// Create SourceProperties map with structpb.NewValue() properly handled
 				sourceProperties, err := structpb.NewStruct(map[string]interface{}{
 					"Reason":          reason,
-					"Actual result":   actualValue,
-					"Expected result": check.ExpectedResult,
+					"ActualResult":    actualValue,
+					"ExpectedResult":  check.ExpectedResult,
 					"Section":         fmt.Sprintf("%s %s", controls.ID, controls.Text),
 					"Subsection":      fmt.Sprintf("%s %s", g.ID, g.Text),
+					"Remediation":     remediation,
 				})
 				if err != nil {
 					log.Fatalf("Failed to create SourceProperties: %v", err)
@@ -345,12 +359,13 @@ func (controls *Controls) GSCC() ([]*securitypb.Finding, error) {
 
 				f := &securitypb.Finding{
 					Name:         id,
-					Category:     "CIS_KUBERNETES_BENCHMARK",
+					Category:     "KUBERNETES_BENCHMARK",
 					ResourceName: resourceName,
-					Severity:     securitypb.Finding_HIGH,
+					FindingClass: securitypb.Finding_MISCONFIGURATION,
+					Severity:     severity,
 					State:        securitypb.Finding_ACTIVE,
 					EventTime:    ti,
-					Description:  check.Text,
+					Description:  fmt.Sprintf("%s - %s", check.ID, check.Text),
 					SourceProperties: sourceProperties.GetFields(),
 				}
 				fs = append(fs, f)
