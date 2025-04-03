@@ -23,6 +23,9 @@ spec:
             - name: var-vcap-jobs
               mountPath: /var/vcap/jobs
               readOnly: true
+            - name: var-vcap-data-jobs
+              mountPath: /var/vcap/data/jobs
+              readOnly: true
             - name: var-vcap-packages
               mountPath: /var/vcap/packages
               readOnly: true
@@ -32,6 +35,9 @@ spec:
             - name: var-vcap-sys
               mountPath: /var/vcap/sys
               readOnly: true
+            - name: var-vcap-data-sys
+              mountPath: /var/vcap/data/sys
+              readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
               readOnly: true
@@ -40,6 +46,9 @@ spec:
         - name: var-vcap-jobs
           hostPath:
             path: "/var/vcap/jobs"
+        - name: var-vcap-data-jobs
+          hostPath:
+            path: "/var/vcap/data/jobs"
         - name: var-vcap-packages
           hostPath:
             path: "/var/vcap/packages"
@@ -49,6 +58,9 @@ spec:
         - name: var-vcap-sys
           hostPath:
             path: "/var/vcap/sys"
+        - name: var-vcap-data-sys
+          hostPath:
+            path: "/var/vcap/data/sys"
         - name: etc-kubernetes
           hostPath:
             path: "/etc/kubernetes"
