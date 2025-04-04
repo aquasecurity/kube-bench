@@ -239,7 +239,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /var/lib/rancher/rke2/server/cred/scheduler.kubeconfig"
+        audit: "stat -c %U:%G $schedulerkubeconfig"
         tests:
           test_items:
             - flag: "root:root"
@@ -271,7 +271,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /var/lib/rancher/rke2/server/cred/controller.kubeconfig"
+        audit: "stat -c %U:%G $controllermanagerkubeconfig"
         tests:
           test_items:
             - flag: "root:root"
@@ -282,7 +282,7 @@ groups:
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
-          chown root:root /var/lib/rancher/rke2/server/cred/controller.kubeconfig
+          chown root:root $controllermanagerkubeconfig
         scored: true
 
       - id: 1.1.19
