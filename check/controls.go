@@ -19,13 +19,19 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
+	securitypb "cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"github.com/golang/glog"
+	"github.com/google/uuid"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gopkg.in/yaml.v2"
 )
 
@@ -290,6 +296,85 @@ func (controls *Controls) ASFF() ([]types.AwsSecurityFinding, error) {
 	}
 	return fs, nil
 }
+
+func (controls *Controls) GSCC() ([]*securitypb.Finding, error) {
+	fs := []*securitypb.Finding{}
+	project, err := getConfig("GCP_PROJECT_ID")
+	if err != nil {
+		return nil, err
+	}
+	region, err := getConfig("GCP_REGION")
+	if err != nil {
+		return nil, err
+	}
+	cluster, err := getConfig("CLUSTER_NAME")
+	if err != nil {
+		return nil, err
+	}
+	resourceName := fmt.Sprintf("//container.googleapis.com/projects/%s/locations/%s/clusters/%s", project, region, cluster)
+
+	ti := timestamppb.Now()
+	for _, g := range controls.Groups {
+		for _, check := range g.Checks {
+			if check.State == FAIL || check.State == WARN {
+				actualValue := check.ActualValue
+				remediation := check.Remediation
+				reason := check.Reason
+				severity := securitypb.Finding_HIGH
+
+				if len(actualValue) > 1024 {
+					actualValue = actualValue[:1023]
+				}
+				if len(remediation) > 512 {
+					remediation = remediation[:511]
+				}
+				if len(reason) > 1024 {
+					reason = reason[:1023]
+				}
+
+				if strings.ToLower(check.Severity) == "medium" {
+					severity = securitypb.Finding_MEDIUM
+				}
+
+				if strings.ToLower(check.Severity) == "low" {
+					severity = securitypb.Finding_LOW
+				}
+
+
+				// id := fmt.Sprintf("%s/stig/%s/%s", cluster, controls.Version, check.ID)
+				id := strings.Replace(uuid.New().String(), "-", "", -1)
+
+					// Create SourceProperties map with structpb.NewValue() properly handled
+				sourceProperties, err := structpb.NewStruct(map[string]interface{}{
+					"Reason":          reason,
+					"ActualResult":    actualValue,
+					"ExpectedResult":  check.ExpectedResult,
+					"Section":         fmt.Sprintf("%s %s", controls.ID, controls.Text),
+					"Subsection":      fmt.Sprintf("%s %s", g.ID, g.Text),
+					"Remediation":     remediation,
+				})
+				if err != nil {
+					log.Fatalf("Failed to create SourceProperties: %v", err)
+				}
+
+				f := &securitypb.Finding{
+					Name:         id,
+					Category:     "KUBERNETES_BENCHMARK",
+					ResourceName: resourceName,
+					FindingClass: securitypb.Finding_MISCONFIGURATION,
+					Severity:     severity,
+					State:        securitypb.Finding_ACTIVE,
+					EventTime:    ti,
+					Description:  fmt.Sprintf("%s - %s", check.ID, check.Text),
+					SourceProperties: sourceProperties.GetFields(),
+				}
+				fs = append(fs, f)
+			}
+		}
+	}
+	return fs, nil
+}
+
 
 func getConfig(name string) (string, error) {
 	r := viper.GetString(name)

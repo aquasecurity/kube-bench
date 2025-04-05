@@ -13,12 +13,12 @@ import (
 )
 
 // REGION ...
-const REGION = "AWS_REGION"
+const AWS_REGION = "AWS_REGION"
 
-func writeFinding(in []types.AwsSecurityFinding) error {
-	r := viper.GetString(REGION)
+func writeASSFFinding(in []types.AwsSecurityFinding) error {
+	r := viper.GetString(AWS_REGION)
 	if len(r) == 0 {
-		return fmt.Errorf("%s not set", REGION)
+		return fmt.Errorf("%s not set", AWS_REGION)
 	}
 	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(r))
 	if err != nil {
@@ -28,11 +28,11 @@ func writeFinding(in []types.AwsSecurityFinding) error {
 	svc := securityhub.NewFromConfig(cfg)
 	p := findings.New(*svc)
 	out, perr := p.PublishFinding(in)
-	print(out)
+	printASSF(out)
 	return perr
 }
 
-func print(out *findings.PublisherOutput) {
+func printASSF(out *findings.PublisherOutput) {
 	if out.SuccessCount > 0 {
 		log.Printf("Number of findings that were successfully imported:%v\n", out.SuccessCount)
 	}
