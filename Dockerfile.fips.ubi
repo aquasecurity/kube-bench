@@ -18,8 +18,8 @@ RUN /bin/bash -c 'echo "$(<kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum 
 RUN chmod +x /usr/local/bin/kubectl
 
 
-# ubi8-minimal base image for build with ubi standards
-FROM registry.access.redhat.com/ubi9/ubi-minimal as run
+# ubi9-minimal base image for build with ubi standards
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:ac61c96b93894b9169221e87718733354dd3765dd4a62b275893c7ff0d876869 AS run
 
 RUN microdnf install -y yum findutils openssl \
   && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
