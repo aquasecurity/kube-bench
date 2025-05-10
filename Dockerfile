@@ -35,7 +35,7 @@ RUN apk --no-cache upgrade apk-tools
 # Ensuring that we update/upgrade before installing openssl, to mitigate CVE-2021-3711 and CVE-2021-3712
 RUN apk update && apk upgrade && apk --no-cache add openssl
 
-# Add glibc for running oc command 
+# Add glibc for running oc command
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 RUN apk add gcompat
 RUN apk add jq
@@ -44,6 +44,9 @@ RUN apk add jq
 RUN apk add bash
 
 ENV PATH=$PATH:/usr/local/mount-from-host/bin:/go/bin
+
+RUN adduser -S -s /bin/sh -G root -u 1001 kube-bench
+USER kube-bench
 
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY --from=build /usr/local/bin/kubectl /usr/local/bin/kubectl
