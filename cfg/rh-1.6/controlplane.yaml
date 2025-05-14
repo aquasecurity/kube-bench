@@ -1,0 +1,67 @@
+---
+controls:
+version: rh-1.6
+id: 3
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 3.1
+    text: "Authentication and Authorization"
+    checks:
+      - id: 3.1.1
+        text: "Client certificate authentication should not be used for users (Manual)"
+        audit: |
+          # To verify user authentication is enabled
+          oc describe authentication
+          # To verify that an identity provider is configured
+          oc get oauth -o json | jq '.items[].spec.identityProviders'
+          # To verify that a custom cluster-admin user exists
+          oc get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind | grep cluster-admin | grep User
+          # To verity that kbueadmin is removed, no results should be returned
+          oc get secrets kubeadmin -n kube-system
+        type: manual
+        remediation: |
+          Configure an identity provider for the OpenShift cluster.
+          Understanding identity provider configuration | Authentication | OpenShift
+          Container Platform 4.15. Once an identity provider has been defined,
+          you can use RBAC to define and apply permissions.
+          After you define an identity provider and create a new cluster-admin user,
+          remove the kubeadmin user to improve cluster security.
+        scored: false
+
+  - id: 3.2
+    text: "Logging"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that a minimal audit policy is created (Manual)"
+        audit: |
+          #View the audit log profile
+          oc get apiserver cluster -o json | jq .spec.audit.profile
+          #To verify kube apiserver audit config
+          oc get cm -n openshift-kube-apiserver config -o json | jq -r '.data."config.yaml"' | jq .apiServerArguments
+          #To verify openshift apiserver audit config
+          oc get cm -n openshift-apiserver config -o json | jq -r '.data."config.yaml"' | jq .apiServerArguments
+          #Review the audit policies of openshift apiserver
+          oc get cm -n openshift-apiserver audit -o json | jq -r '.data."policy.yaml"'
+          #Review the audit policies of kube apiserver
+          oc get cm -n openshift-kube-apiserver kube-apiserver-audit-policies -o json | jq -r '.data."policy.yaml"'
+          #To view kube apiserver log files
+          oc adm node-logs --role=master --path=kube-apiserver/
+          #To view openshift apiserver log files
+          oc adm node-logs --role=master --path=openshift-apiserver/
+        type: manual
+        remediation: |
+          No remediation required.
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the audit policy covers key security concerns (Manual)"
+        audit: |
+          #To verify openshift apiserver audit config
+          oc get configmap -n openshift-kube-apiserver kube-apiserver-audit-policies -ojson | jq -r '.data."policy.yaml"'
+          #To verify kube apiserver audit config
+          oc get configmap -n openshift-apiserver audit -o json | jq -r '.data."policy.yaml"'
+        type: manual
+        remediation: |
+          Update the audit log policy profile to use WriteRequestBodies.
+        scored: false
