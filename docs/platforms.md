@@ -28,6 +28,9 @@ Some defined by other hardenening guides.
 | CIS    | [EKS 1.5.0](https://workbench.cisecurity.org/benchmarks/17733)                                                                                                                                    | eks-1.5.0                | EKS                 |
 | CIS    | [ACK 1.0.0](https://workbench.cisecurity.org/benchmarks/6467)                                                                                                                                     | ack-1.0                  | ACK                 |
 | CIS    | [AKS 1.0.0](https://workbench.cisecurity.org/benchmarks/6347)                                                                                                                                     | aks-1.0                  | AKS                 |
+| CIS    | [AKS 1.7.0](https://workbench.cisecurity.org/benchmarks/
+20359)
+  | aks-1.7                   | AKS                 |
 | RHEL   | RedHat OpenShift hardening guide                                                                                                                                                                  | rh-0.7                   | OCP 3.10-3.11       |
 | CIS    | [OCP4 1.1.0](https://workbench.cisecurity.org/benchmarks/6778)                                                                                                                                    | rh-1.0                   | OCP 4.1-            |
 | CIS    | [1.6.0-k3s](https://docs.rancher.cn/docs/k3s/security/self-assessment/_index)                                                                                                                     | cis-1.6-k3s              | k3s v1.16-v1.24     |
