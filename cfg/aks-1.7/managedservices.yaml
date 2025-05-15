@@ -12,9 +12,9 @@ groups:
         text: "Ensure Image Vulnerability Scanning using Microsoft Defender for Cloud (MDC) image scanning or a third party provider (Automated)"
         type: "manual"
         remediation: |
-          Enable MDC for Container Registries by running the following Azure CLI command:          
+          Enable MDC for Container Registries by running the following Azure CLI command:
           az security pricing create --name ContainerRegistry --tier Standard
-          Alternatively, use the following command to enable image scanning for your container registry:          
+          Alternatively, use the following command to enable image scanning for your container registry:
           az resource update --ids /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/Microsoft.ContainerRegistry/registries/{registry-name} --set properties.enabled=true
           Replace `subscription-id`, `resource-group-name`, and `registry-name` with the correct values for your environment.
           Please note that enabling MDC for Container Registries will incur additional costs, so be sure to review the pricing information provided in the Azure documentation before enabling it.
@@ -50,7 +50,7 @@ groups:
           If you are using **Azure Container Registry**, you can restrict access using firewall rules as described in the official documentation:
           https://docs.microsoft.com/en-us/azure/container-registry/container-registry-firewall-access-rules
           For other non-AKS repositories, you can use **admission controllers** or **Azure Policy** to enforce registry access restrictions.
-          Limiting or locking down egress traffic to specific container registries is also recommended. For more information, refer to:         
+          Limiting or locking down egress traffic to specific container registries is also recommended. For more information, refer to:
           https://docs.microsoft.com/en-us/azure/aks/limit-egress-traffic
         scored: false
 
@@ -142,7 +142,6 @@ groups:
         type: "manual"
         remediation: |
           Utilize Calico or another network policy engine to segment and isolate your traffic.
-          
           Enable network policies on your AKS cluster by following the Azure documentation or using the `az aks` CLI to enable the network policy add-on.
         scored: false
 
