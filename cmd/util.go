@@ -490,6 +490,8 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 	switch platform.Name {
 	case "eks":
 		return "eks-1.5.0"
+	case "aks":
+		return "aks-1.7"
 	case "gke":
 		switch platform.Version {
 		case "1.15", "1.16", "1.17", "1.18", "1.19":

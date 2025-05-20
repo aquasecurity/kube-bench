@@ -11,7 +11,7 @@ spec:
         - name: kube-bench
           image: docker.io/aquasec/kube-bench:latest
           command:
-            ["kube-bench", "run", "--targets", "node", "--benchmark", "aks-1.0"]
+            ["kube-bench", "run", "--targets", "node", "--benchmark", "aks-1.7"]
           volumeMounts:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
