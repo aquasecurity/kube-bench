@@ -10,7 +10,16 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the cluster-admin role is only used where required (Automated)"
-        type: "manual"
+        audit: "kubectl get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].name"
+        audit_config: "kubectl get clusterrolebindings"
+        tests:
+          test_items:
+            - flag: cluster-admin
+              path: '{.roleRef.name}'
+              set: true
+              compare:
+                op: eq
+                value: "cluster-admin"
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
@@ -21,7 +30,34 @@ groups:
 
       - id: 4.1.2
         text: "Minimize access to secrets (Automated)"
-        type: "manual"
+        audit: "kubectl get roles,rolebindings --all-namespaces -o=custom-columns=NAME:.metadata.name,ROLE:.rules[*].resources,SUBJECT:.subjects[*].name"
+        audit_config: "kubectl get roles --all-namespaces"
+        tests:
+          test_items:
+            - flag: secrets
+              path: '{.rules[*].resources}'
+              set: true
+              compare:
+                op: eq
+                value: "secrets"
+            - flag: get
+              path: '{.rules[*].verbs}'
+              set: true
+              compare:
+                op: contains
+                value: "get"
+            - flag: list
+              path: '{.rules[*].verbs}'
+              set: true
+              compare:
+                op: contains
+                value: "list"
+            - flag: watch
+              path: '{.rules[*].verbs}'
+              set: true
+              compare:
+                op: contains
+                value: "watch"
         remediation: |
           Where possible, remove get, list and watch access to secret objects in the cluster.
         scored: false
@@ -45,14 +81,44 @@ groups:
 
       - id: 4.1.4
         text: "Minimize access to create pods (Automated)"
-        type: "manual"
+        audit: "kubectl get roles,rolebindings --all-namespaces -o=custom-columns=NAME:.metadata.name,ROLE:.rules[*].resources,SUBJECT:.subjects[*].name"
+        audit_config: "kubectl get roles --all-namespaces"
+        tests:
+          test_items:
+            - flag: pods
+              path: '{.rules[*].resources}'
+              set: true
+              compare:
+                op: eq
+                value: "pods"
+            - flag: create
+              path: '{.rules[*].verbs}'
+              set: true
+              compare:
+                op: contains
+                value: "create"
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
 
       - id: 4.1.5
         text: "Ensure that default service accounts are not actively used (Automated)"
-        type: "manual"
+        audit: "kubectl get serviceaccounts --all-namespaces -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace,TOKEN:.automountServiceAccountToken"
+        audit_config: "kubectl get serviceaccounts --all-namespaces"
+        tests:
+          test_items:
+            - flag: default
+              path: '{.metadata.name}'
+              set: true
+              compare:
+                op: eq
+                value: "default"
+            - flag: automountServiceAccountToken
+              path: '{.automountServiceAccountToken}'
+              set: true
+              compare:
+                op: eq
+                value: "false"
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
@@ -62,7 +128,16 @@ groups:
 
       - id: 4.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
-        type: "manual"
+        audit: "kubectl get pods --all-namespaces -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace,SERVICE_ACCOUNT:.spec.serviceAccountName,MOUNT_TOKEN:.spec.automountServiceAccountToken"
+        audit_config: "kubectl get pods --all-namespaces"
+        tests:
+          test_items:
+            - flag: automountServiceAccountToken
+              path: '{.spec.automountServiceAccountToken}'
+              set: true
+              compare:
+                op: eq
+                value: "false"
         remediation: |
           Modify the definition of pods and service accounts which do not need to mount service
           account tokens to disable it.
@@ -258,7 +333,16 @@ groups:
 
       - id: 4.6.3
         text: "The default namespace should not be used (Automated)"
-        type: "manual"
+        audit: "kubectl get all -n default"
+        audit_config: "kubectl get all -n default"
+        tests:
+          test_items:
+            - flag: "namespace"
+              path: "{.metadata.namespace}"
+              set: true
+              compare:
+                op: eq
+                value: "default"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
