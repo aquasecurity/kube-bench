@@ -300,7 +300,7 @@ func getKubeVersion() (*KubeVersion, error) {
 		glog.V(3).Infof("Error fetching cluster config: %s", err)
 	}
 	isRKE := false
-	isAKS := false // Variable to track AKS detection
+	isAKS := false
 	if err == nil && kubeConfig != nil {
 		k8sClient, err := kubernetes.NewForConfig(kubeConfig)
 		if err != nil {
@@ -317,7 +317,7 @@ func getKubeVersion() (*KubeVersion, error) {
 				glog.V(3).Infof("Error detecting AKS cluster: %s", err)
 			}
 		}
-		
+
 	}
 
 	if k8sVer, err := getKubeVersionFromRESTAPI(); err == nil {
@@ -326,7 +326,7 @@ func getKubeVersion() (*KubeVersion, error) {
 			k8sVer.GitVersion = k8sVer.GitVersion + "-rancher1"
 		}
 		if isAKS {
-			k8sVer.GitVersion = k8sVer.GitVersion + "-aks1" // Mark it as AKS in the version
+			k8sVer.GitVersion = k8sVer.GitVersion + "-aks1"
 		}
 		return k8sVer, nil
 	}
@@ -495,19 +495,18 @@ func getPlatformInfoFromVersion(s string) Platform {
 }
 
 func IsAKS(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
-	// Query the nodes for any annotations that indicate AKS (Azure Kubernetes Service)
 	nodes, err := k8sClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{Limit: 1})
 	if err != nil {
 		return false, err
 	}
 
-	// If the cluster contains nodes with specific AKS annotations, it’s likely AKS
 	if len(nodes.Items) == 0 {
 		return false, nil
 	}
 
-	annotations := nodes.Items[0].Annotations
-	if _, exists := annotations["azure-identity-binding"]; exists { // "azure-identity-binding" is one possible AKS-specific annotation
+	node := nodes.Items[0]
+
+	if strings.HasPrefix(node.Spec.ProviderID, "azure://") {
 		return true, nil
 	}
 
