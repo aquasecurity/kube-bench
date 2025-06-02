@@ -505,6 +505,10 @@ func IsAKS(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
 	}
 
 	node := nodes.Items[0]
+	labels := node.Labels
+	if _, exists := labels["kubernetes.azure.com/cluster"]; exists {
+		return true, nil
+	}
 
 	if strings.HasPrefix(node.Spec.ProviderID, "azure://") {
 		return true, nil
