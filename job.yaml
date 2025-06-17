@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - command: ["kube-bench"]
-          image: docker.io/aquasec/kube-bench:v0.11.0
+          image: docker.io/aquasec/kube-bench:v0.11.1
           name: kube-bench
           volumeMounts:
             - name: var-lib-cni
