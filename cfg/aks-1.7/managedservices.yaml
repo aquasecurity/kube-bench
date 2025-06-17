@@ -1,0 +1,169 @@
+---
+controls:
+version: "aks-1.7"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Ensure Image Vulnerability Scanning using Microsoft Defender for Cloud (MDC) image scanning or a third party provider (Manual)"
+        type: "manual"
+        remediation: |
+          Enable MDC for Container Registries by running the following Azure CLI command:
+          az security pricing create --name ContainerRegistry --tier Standard
+          Alternatively, use the following command to enable image scanning for your container registry:
+          az resource update --ids /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/Microsoft.ContainerRegistry/registries/{registry-name} --set properties.enabled=true
+          Replace `subscription-id`, `resource-group-name`, and `registry-name` with the correct values for your environment.
+          Please note that enabling MDC for Container Registries will incur additional costs, so be sure to review the pricing information provided in the Azure documentation before enabling it.
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access to Azure Container Registry (ACR) (Manual)"
+        type: "manual"
+        remediation: |
+          Azure Container Registry
+          If you use Azure Container Registry (ACR) as your container image store, you need to grant
+          permissions to the service principal for your AKS cluster to read and pull images. Currently,
+          the recommended configuration is to use the az aks create or az aks update command to
+          integrate with a registry and assign the appropriate role for the service principal. For
+          detailed steps, see Authenticate with Azure Container Registry from Azure Kubernetes
+          Service.
+          To avoid needing an Owner or Azure account administrator role, you can configure a
+          service principal manually or use an existing service principal to authenticate ACR from
+          AKS. For more information, see ACR authentication with service principals or Authenticate
+          from Kubernetes with a pull secret.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only for Azure Container Registry (ACR) (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        type: "manual"
+        remediation: |
+          If you are using **Azure Container Registry**, you can restrict access using firewall rules as described in the official documentation:
+          https://docs.microsoft.com/en-us/azure/container-registry/container-registry-firewall-access-rules
+          For other non-AKS repositories, you can use **admission controllers** or **Azure Policy** to enforce registry access restrictions.
+          Limiting or locking down egress traffic to specific container registries is also recommended. For more information, refer to:
+          https://docs.microsoft.com/en-us/azure/aks/limit-egress-traffic
+        scored: false
+
+
+  - id: 5.2
+    text: "Access and identity options for Azure Kubernetes Service (AKS)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated AKS Service Accounts (Manual)"
+        type: "manual"
+        remediation: |
+          Azure Active Directory integration
+          The security of AKS clusters can be enhanced with the integration of Azure Active Directory
+          (AD). Built on decades of enterprise identity management, Azure AD is a multi-tenant,
+          cloud-based directory, and identity management service that combines core directory
+          services, application access management, and identity protection. With Azure AD, you can
+          integrate on-premises identities into AKS clusters to provide a single source for account
+          management and security.
+          Azure Active Directory integration with AKS clusters
+          With Azure AD-integrated AKS clusters, you can grant users or groups access to Kubernetes
+          resources within a namespace or across the cluster. To obtain a kubectl configuration
+          context, a user can run the az aks get-credentials command. When a user then interacts
+          with the AKS cluster with kubectl, they're prompted to sign in with their Azure AD
+          credentials. This approach provides a single source for user account management and
+          password credentials. The user can only access the resources as defined by the cluster
+          administrator.
+          Azure AD authentication is provided to AKS clusters with OpenID Connect. OpenID Connect
+          is an identity layer built on top of the OAuth 2.0 protocol. For more information on OpenID
+          Connect, see the Open ID connect documentation. From inside of the Kubernetes cluster,
+          Webhook Token Authentication is used to verify authentication tokens. Webhook token
+          authentication is configured and managed as part of the AKS cluster.
+        scored: false
+
+
+  - id: 5.3
+    text: "Key Management Service (KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Ensure Kubernetes Secrets are encrypted (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+
+  - id: 5.4
+    text: "Cluster Networking"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Manual)"
+        type: "manual"
+        remediation: |
+          By enabling private endpoint access to the Kubernetes API server, all communication between your nodes and the API server stays within your VPC. You can also limit the IP addresses that can access your API server from the internet, or completely disable internet access to the API server.
+          With this in mind, you can update your cluster accordingly using the AKS CLI to ensure that Private Endpoint Access is enabled.
+          If you choose to also enable Public Endpoint Access then you should also configure a list of allowable CIDR blocks, resulting in restricted access from the internet. If you specify no CIDR blocks, then the public API server endpoint is able to receive and process requests from all IP addresses by defaulting to ['0.0.0.0/0'].
+          Example:
+          az aks update --name ${CLUSTER_NAME} --resource-group ${RESOURCE_GROUP} --api-server-access-profile enablePrivateCluster=true --api-server-access-profile authorizedIpRanges=192.168.1.0/24
+        scored: false
+
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        type: "manual"
+        remediation: |
+          To use a private endpoint, create a new private endpoint in your virtual network, then create a link between your virtual network and a new private DNS zone.
+          You can also restrict access to the public endpoint by enabling only specific CIDR blocks to access it. For example:
+          az aks update --name ${CLUSTER_NAME} --resource-group ${RESOURCE_GROUP} --api-server-access-profile enablePublicFqdn=false
+          This command disables the public API endpoint for your AKS cluster.
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Manual)"
+        type: "manual"
+        remediation: |
+          To create a private cluster, use the following command:
+          az aks create \
+          --resource-group <private-cluster-resource-group> \
+          --name <private-cluster-name> \
+          --load-balancer-sku standard \
+          --enable-private-cluster \
+          --network-plugin azure \
+          --vnet-subnet-id <subnet-id> \
+          --docker-bridge-address <docker-bridge-address> \
+          --dns-service-ip <dns-service-ip> \
+          --service-cidr <service-cidr>
+          Ensure that --enable-private-cluster flag is set to enable private nodes in your cluster.
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
+        type: "manual"
+        remediation: |
+          Utilize Calico or another network policy engine to segment and isolate your traffic.
+          Enable network policies on your AKS cluster by following the Azure documentation or using the `az aks` CLI to enable the network policy add-on.
+        scored: false
+
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Manage Kubernetes RBAC users with Azure AD (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
+
+      - id: 5.5.2
+        text: "Use Azure RBAC for Kubernetes Authorization (Manual)"
+        type: "manual"
+        remediation: "No remediation"
+        scored: false
