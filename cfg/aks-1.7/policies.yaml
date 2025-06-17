@@ -12,9 +12,9 @@ groups:
         text: "Ensure that the cluster-admin role is only used where required (Automated)"
         audit: |
           kubectl get clusterrolebindings -o json | jq -r '
-            .items[] 
-            | select(.roleRef.name == "cluster-admin") 
-            | .subjects[]? 
+            .items[]
+            | select(.roleRef.name == "cluster-admin")
+            | .subjects[]?
             | select(.kind != "Group" or (.name != "system:masters" and .name != "system:nodes"))
             | "FOUND_CLUSTER_ADMIN_BINDING"
           ' || echo "NO_CLUSTER_ADMIN_BINDINGS"
@@ -41,9 +41,9 @@ groups:
         text: "Minimize access to secrets (Automated)"
         audit: |
           count=$(kubectl get roles --all-namespaces -o json | jq '
-            .items[] 
-            | select(.rules[]? 
-              | (.resources[]? == "secrets") 
+            .items[]
+            | select(.rules[]?
+              | (.resources[]? == "secrets")
               and ((.verbs[]? == "get") or (.verbs[]? == "list") or (.verbs[]? == "watch"))
             )' | wc -l)
 
@@ -341,7 +341,6 @@ groups:
         scored: true
 
 
-
   - id: 4.5
     text: "Secrets Management"
     checks:
@@ -416,4 +415,3 @@ groups:
           kubectl get deployment my-app -n default -o yaml | sed 's/namespace: default/namespace: my-namespace/' | kubectl apply -f -
           kubectl delete deployment my-app -n default
         scored: true
-
