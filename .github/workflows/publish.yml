@@ -90,6 +90,27 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
+      - name: Redhat Operator certification preflight tests
+        run: |
+          targetImage=${{ env.DOCKERHUB_ALIAS }}/${{ env.REP }}:${{ steps.get_version.outputs.version }}-ubi
+          preflightVersion=1.14.0
+          localArch=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+          
+          curl -LOs https://github.com/redhat-openshift-ecosystem/openshift-preflight/releases/download/${preflightVersion}/preflight-linux-${localArch}
+          chmod +x ./preflight-linux-${localArch}
+          sudo mv ./preflight-linux-${localArch} /usr/local/bin/preflight
+          out = $(preflight check container ${targetImage} --docker-config ~/.docker/config.json)
+          # Try to extract the .passed value using jq
+          passed=$(echo "out" | jq -r 'select(.passed != null) | .passed')
+          
+          # Check if the value exists and is true
+          if [[ "$passed" == "true" ]]; then
+              echo "Command succeeded"
+          else
+              echo "Command failed"
+              exit 1
+          fi
+
       - name: Build and push fips ubi image - Docker/ECR
         id: docker_build_fips_ubi
         uses: docker/build-push-action@v6
