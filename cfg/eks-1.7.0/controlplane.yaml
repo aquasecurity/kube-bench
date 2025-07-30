@@ -46,7 +46,6 @@ groups:
                   resources: ["pods"]
           Apply the audit policy configuration to the cluster:
             kubectl apply -f <path-to-audit-policy>.yaml
-          
           Ensure audit logs are forwarded to a centralized logging system like CloudWatch, Elasticsearch, or another log management solution:
             kubectl create configmap cluster-audit-policy --from-file=audit-policy.yaml -n kube-system
             kubectl apply -f - <<EOF
