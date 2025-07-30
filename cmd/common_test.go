@@ -446,6 +446,12 @@ func TestValidTargets(t *testing.T) {
 			expected:  true,
 		},
 		{
+			name:      "aks-1.7 valid",
+			benchmark: "aks-1.7",
+			targets:   []string{"node", "policies", "controlplane", "managedservices"},
+			expected:  true,
+		},
+		{
 			name:      "eks-1.0.1 valid",
 			benchmark: "eks-1.0.1",
 			targets:   []string{"node", "policies", "controlplane", "managedservices"},

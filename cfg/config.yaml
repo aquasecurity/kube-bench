@@ -60,6 +60,7 @@ master:
       - /etc/kubernetes/scheduler.conf
       - /var/lib/kube-scheduler/kubeconfig
       - /var/lib/kube-scheduler/config.yaml
+      - /var/lib/rancher/rke2/server/cred/scheduler.kubeconfig
       - /system/secrets/kubernetes/kube-scheduler/kubeconfig
     defaultkubeconfig: /etc/kubernetes/scheduler.conf
 
@@ -84,6 +85,7 @@ master:
     kubeconfig:
       - /etc/kubernetes/controller-manager.conf
       - /var/lib/kube-controller-manager/kubeconfig
+      - /var/lib/rancher/rke2/server/cred/controller.kubeconfig
       - /system/secrets/kubernetes/kube-controller-manager/kubeconfig
     defaultkubeconfig: /etc/kubernetes/controller-manager.conf
 
@@ -297,6 +299,7 @@ version_mapping:
   "ocp-4.0": "rh-1.0"
   "ocp-4.15": "rh-1.6"
   "aks-1.0": "aks-1.0"
+  "aks-1.7": "aks-1.7"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
@@ -425,6 +428,12 @@ target_mapping:
     - "master"
     - "node"
   "aks-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "aks-1.7":
     - "master"
     - "node"
     - "controlplane"
