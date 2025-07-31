@@ -519,9 +519,13 @@ func IsAKS(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
 
 func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
-	switch platform.Name {
 	case "eks":
-		return "eks-1.7.0"
+		switch platform.Name {
+		case "1.29", "1.30", "1.31":
+			return "eks-1.7.0"
+		default:
+			return "eks-1.5.0"
+		}
 	case "aks":
 		return "aks-1.7"
 	case "gke":
