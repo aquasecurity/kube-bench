@@ -521,12 +521,14 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform.Name {
 	case "eks":
-		switch platform.Version {
-		case "1.29", "1.30", "1.31":
+		v, err := strconv.ParseFloat(platform.Version, 64)
+		if err == nil {
+			if v < 1.29 {
+				return "eks-1.5.0"
+			}
 			return "eks-1.7.0"
-		default:
-			return "eks-1.5.0"
 		}
+		return "eks-1.7.0"
 	case "aks":
 		return "aks-1.7"
 	case "gke":
