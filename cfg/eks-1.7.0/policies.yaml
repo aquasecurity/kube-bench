@@ -1,0 +1,358 @@
+---
+controls:
+version: "eks-1.7.0"
+id: 4
+text: "Policies"
+type: "policies"
+groups:
+  - id: 4.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Automated)"
+        audit: |
+          kubectl get clusterrolebindings -o json | jq -r '
+            .items[]
+            | select(.roleRef.name == "cluster-admin")
+            | .subjects[]?
+            | select(.kind != "Group" or (.name != "system:masters" and .name != "system:nodes"))
+            | "FOUND_CLUSTER_ADMIN_BINDING"
+          ' || echo "NO_CLUSTER_ADMIN_BINDINGS"
+        tests:
+          test_items:
+            - flag: "NO_CLUSTER_ADMIN_BINDINGS"
+              set: true
+              compare:
+                op: eq
+                value: "NO_CLUSTER_ADMIN_BINDINGS"
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and if
+          they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
+        scored: true
+
+      - id: 4.1.2
+        text: "Minimize access to secrets (Automated)"
+        audit: |
+          count=$(kubectl get roles --all-namespaces -o json | jq '
+            .items[]
+            | select(.rules[]?
+              | (.resources[]? == "secrets")
+              and ((.verbs[]? == "get") or (.verbs[]? == "list") or (.verbs[]? == "watch"))
+            )' | wc -l)
+
+          if [ "$count" -gt 0 ]; then
+            echo "SECRETS_ACCESS_FOUND"
+          fi
+        tests:
+          test_items:
+            - flag: "SECRETS_ACCESS_FOUND"
+              set: false
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: true
+
+      - id: 4.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
+        audit: |
+          wildcards=$(kubectl get roles --all-namespaces -o json | jq '
+            .items[] | select(
+              .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
+            )' | wc -l)
+
+          wildcards_clusterroles=$(kubectl get clusterroles -o json | jq '
+            .items[] | select(
+              .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
+            )' | wc -l)
+
+          total=$((wildcards + wildcards_clusterroles))
+
+          if [ "$total" -gt 0 ]; then
+            echo "wildcards_present"
+          fi
+        tests:
+          test_items:
+            - flag: wildcards_present
+              set: false
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: true
+
+      - id: 4.1.4
+        text: "Minimize access to create pods (Automated)"
+        audit: |
+          access=$(kubectl get roles,clusterroles -A -o json | jq '
+            [.items[] |
+              select(
+                .rules[]? |
+                (.resources[]? == "pods" and .verbs[]? == "create")
+              )
+            ] | length')
+
+          if [ "$access" -gt 0 ]; then
+            echo "pods_create_access"
+          fi
+        tests:
+          test_items:
+            - flag: pods_create_access
+              set: false
+        remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: true
+
+      - id: 4.1.5
+        text: "Ensure that default service accounts are not actively used. (Automated)"
+        audit: |
+          default_sa_count=$(kubectl get serviceaccounts --all-namespaces -o json | jq '
+            [.items[] | select(.metadata.name == "default" and (.automountServiceAccountToken != false))] | length')
+          if [ "$default_sa_count" -gt 0 ]; then
+            echo "default_sa_not_auto_mounted"
+          fi
+
+          pods_using_default_sa=$(kubectl get pods --all-namespaces -o json | jq '
+            [.items[] | select(.spec.serviceAccountName == "default")] | length')
+          if [ "$pods_using_default_sa" -gt 0 ]; then
+            echo "default_sa_used_in_pods"
+          fi
+        tests:
+          test_items:
+            - flag: default_sa_not_auto_mounted
+              set: false
+            - flag: default_sa_used_in_pods
+              set: false
+        remediation: |
+          Create explicit service accounts wherever a Kubernetes workload requires specific
+          access to the Kubernetes API server.
+          Modify the configuration of each default service account to include this value
+          automountServiceAccountToken: false
+
+          Automatic remediation for the default account:
+          kubectl patch serviceaccount default -p
+          $'automountServiceAccountToken: false'
+        scored: true
+
+      - id: 4.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
+        audit: |
+          pods_with_token_mount=$(kubectl get pods --all-namespaces -o json | jq '
+            [.items[] | select(.spec.automountServiceAccountToken != false)] | length')
+
+          if [ "$pods_with_token_mount" -gt 0 ]; then
+            echo "automountServiceAccountToken"
+          fi
+        tests:
+          test_items:
+            - flag: automountServiceAccountToken
+              set: false
+        remediation: |
+          Regularly review pod and service account objects in the cluster to ensure that the automountServiceAccountToken setting is false for pods and accounts that do not explicitly require API server access.
+        scored: true
+
+      - id: 4.1.7
+        text: "Cluster Access Manager API to streamline and enhance the management of access controls within EKS clusters (Manual)"
+        type: "manual"
+        remediation: |
+          Log in to the AWS Management Console.
+            Navigate to Amazon EKS and select your EKS cluster.
+
+            Go to the Access tab and click on "Manage Access" in the "Access Configuration section".
+            Under Cluster Authentication Mode for Cluster Access settings.
+            Click EKS API to change cluster will source authenticated IAM principals only from EKS access entry APIs.
+            Click ConfigMap to change cluster will source authenticated IAM principals only from the aws-auth ConfigMap.
+          Note: EKS API and ConfigMap must be selected during Cluster creation and cannot be changed once the Cluster is provisioned.
+        scored: false
+
+      - id: 4.1.8
+        text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove the impersonate, bind and escalate rights from subjects.
+        scored: false
+
+  - id: 4.2
+    text: "Pod Security Standards"
+    checks:
+      - id: 4.2.1
+        text: "Minimize the admission of privileged containers (Automated)"
+        audit: |
+          kubectl get pods --all-namespaces -o json | \
+            jq -r 'if any(.items[]?.spec.containers[]?; .securityContext?.privileged == true) then "PRIVILEGED_FOUND" else "NO_PRIVILEGED" end'
+        tests:
+          test_items:
+            - flag: "NO_PRIVILEGED"
+              set: true
+              compare:
+                op: eq
+                value: "NO_PRIVILEGED"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the admission of privileged containers.
+            To enable PSA for a namespace in your cluster, set the pod-security.kubernetes.io/enforce label with the policy value you want to enforce.
+            kubectl label --overwrite ns NAMESPACE pod-security.kubernetes.io/enforce=restricted
+            The above command enforces the restricted policy for the NAMESPACE namespace.
+          You can also enable Pod Security Admission for all your namespaces. For example:
+            kubectl label --overwrite ns --all pod-security.kubernetes.io/warn=baseline
+        scored: true
+
+      - id: 4.2.2
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Automated)"
+        audit: |
+          kubectl get pods --all-namespaces -o json | \
+            jq -r 'if any(.items[]?; .spec.hostPID == true) then "HOSTPID_FOUND" else "NO_HOSTPID" end'
+        tests:
+          test_items:
+            - flag: "NO_HOSTPID"
+              set: true
+              compare:
+                op: eq
+                value: "NO_HOSTPID"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostPID containers.
+        scored: true
+
+      - id: 4.2.3
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Automated)"
+        audit: |
+          kubectl get pods --all-namespaces -o json | jq -r 'if any(.items[]?; .spec.hostIPC == true) then "HOSTIPC_FOUND" else "NO_HOSTIPC" end'
+        tests:
+          test_items:
+            - flag: "NO_HOSTIPC"
+              set: true
+              compare:
+                op: eq
+                value: "NO_HOSTIPC"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostIPC containers.
+        scored: true
+
+      - id: 4.2.4
+        text: "Minimize the admission of containers wishing to share the host network namespace (Automated)"
+        audit: |
+          kubectl get pods --all-namespaces -o json | jq -r 'if any(.items[]?; .spec.hostNetwork == true) then "HOSTNETWORK_FOUND" else "NO_HOSTNETWORK" end'
+        tests:
+          test_items:
+            - flag: "NO_HOSTNETWORK"
+              set: true
+              compare:
+                op: eq
+                value: "NO_HOSTNETWORK"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of hostNetwork containers.
+        scored: true
+
+      - id: 4.2.5
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
+        audit: |
+          kubectl get pods --all-namespaces -o json | \
+            jq -r 'if any(.items[]?.spec.containers[]?; .securityContext?.allowPrivilegeEscalation == true) then "ALLOWPRIVILEGEESCALTION_FOUND" else "NO_ALLOWPRIVILEGEESCALTION" end'
+        tests:
+          test_items:
+            - flag: "NO_ALLOWPRIVILEGEESCALTION"
+              set: true
+              compare:
+                op: eq
+                value: "NO_ALLOWPRIVILEGEESCALTION"
+        remediation: |
+          Add policies to each namespace in the cluster which has user workloads to restrict the
+          admission of containers with .spec.allowPrivilegeEscalation set to true.
+        scored: true
+
+  - id: 4.3
+    text: "CNI Plugin"
+    checks:
+      - id: 4.3.1
+        text: "Ensure CNI plugin supports network policies (Manual)"
+        type: "manual"
+        remediation: |
+          As with RBAC policies, network policies should adhere to the policy of least privileged
+          access. Start by creating a deny all policy that restricts all inbound and outbound traffic
+          from a namespace or create a global policy using Calico.
+        scored: false
+
+      - id: 4.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Automated)"
+        audit: |
+          ns_without_np=$(kubectl get namespaces -o json | jq -r '.items[].metadata.name' | while read ns; do
+            count=$(kubectl get networkpolicy -n $ns --no-headers 2>/dev/null | wc -l)
+            if [ "$count" -eq 0 ]; then echo $ns; fi
+          done)
+          if [ -z "$ns_without_np" ]; then
+            echo "ALL_NAMESPACES_HAVE_NETWORK_POLICIES"
+          else
+            echo "NAMESPACES_WITHOUT_NETWORK_POLICIES: $ns_without_np"
+          fi
+        tests:
+          test_items:
+            - flag: "ALL_NAMESPACES_HAVE_NETWORK_POLICIES"
+              set: true
+              compare:
+                op: eq
+                value: "ALL_NAMESPACES_HAVE_NETWORK_POLICIES"
+        remediation: |
+          Create at least one NetworkPolicy in each namespace to control and restrict traffic between pods as needed.
+        scored: true
+
+  - id: 4.4
+    text: "Secrets Management"
+    checks:
+      - id: 4.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Automated)"
+        audit: |
+          result=$(kubectl get all --all-namespaces -o jsonpath='{range .items[?(@..secretKeyRef)]}{.metadata.namespace} {.kind} {.metadata.name}{"\n"}{end}')
+          if [ -z "$result" ]; then
+            echo "NO_SECRETS_AS_ENV_VARS"
+          else
+            echo "SECRETS_AS_ENV_VARS_FOUND: $result"
+          fi
+        tests:
+          test_items:
+            - flag: "NO_SECRETS_AS_ENV_VARS"
+              set: true
+              compare:
+                op: eq
+                value: "NO_SECRETS_AS_ENV_VARS"
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: true
+
+      - id: 4.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 4.5
+    text: "General Policies"
+    checks:
+      - id: 4.5.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 4.5.2
+        text: "The default namespace should not be used (Automated)"
+        audit: |
+          output=$(kubectl get $(kubectl api-resources --verbs=list --namespaced=true -o name | paste -sd, -) --ignore-not-found -n default 2>/dev/null | grep -v "^kubernetes ")
+          if [ -z "$output" ]; then
+            echo "NO_USER_RESOURCES_IN_DEFAULT"
+          else
+            echo "USER_RESOURCES_IN_DEFAULT_FOUND: $output"
+          fi
+        tests:
+          test_items:
+            - flag: "NO_USER_RESOURCES_IN_DEFAULT"
+              set: true
+        remediation: |
+          Create and use dedicated namespaces for resources instead of the default namespace. Move any user-defined objects out of the default namespace to improve resource segregation and RBAC control.
+        scored: true

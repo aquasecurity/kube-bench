@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -521,7 +522,11 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform.Name {
 	case "eks":
-		return "eks-1.5.0"
+		oldEKSVersions := []string{"1.15", "1.16", "1.17", "1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27", "1.28"}
+		if slices.Contains(oldEKSVersions, platform.Version) {
+			return "eks-1.5.0"
+		}
+		return "eks-1.7.0"
 	case "aks":
 		return "aks-1.7"
 	case "gke":
