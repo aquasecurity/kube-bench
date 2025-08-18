@@ -237,7 +237,6 @@ groups:
         text: "Minimize the admission of root containers (manual)"
         audit: |
           sccs=$(oc get scc -o json | jq -r '.items[] | select(.runAsUser.type == "MustRunAsNonRoot") | .metadata.name')
-          
           if [[ -n "$sccs" ]]; then
             echo "pass"
           else
@@ -272,7 +271,6 @@ groups:
         text: "Minimize the admission of containers with the NET_RAW capability (manual)"
         audit: |
           sccs=$(oc get scc -o json | jq -r '.items[] | select(.requiredDropCapabilities[]? == "ALL") | .metadata.name')
-          
           if [[ -n "$sccs" ]]; then
             echo "pass"
           else
@@ -301,7 +299,7 @@ groups:
           - system:authenticated
           ---
 
-          Apply this SCC to workloads that do not require NET_RAW.  
+          Apply this SCC to workloads that do not require NET_RAW.
           If NET_RAW is required (e.g., for low-level networking apps), isolate those workloads with a specific SCC and restrict access via RBAC.
         scored: true
 
