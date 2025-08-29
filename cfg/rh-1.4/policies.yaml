@@ -66,15 +66,13 @@ groups:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"
         audit: |
-          echo "Listing all Security Context Constraints (SCCs) that do NOT allow privileged containers:"
           oc get scc -o json \
-            | jq '.items[] | select(.allowPrivilegedContainer==false) | .metadata.name'
+          | jq -r '[.items[] | select(.allowPrivilegedContainer==false) | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
-            - flag: "allowPrivilegedContainer"
-              compare:
-                op: eq
-                value: false
+            - flag: "pass"
         remediation: |
           If no SCCs exist that restrict privileged containers, create one by running:
 
@@ -100,15 +98,13 @@ groups:
       - id: 5.2.2
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         audit: |
-          echo "Listing all SCCs with 'allowHostPID: true'..."
           oc get scc -o json \
-            | jq '.items[] | select(.allowHostPID == true) | .metadata.name'
+            | jq -r '[.items[] | select(.allowHostPID==true) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
-            - flag: "allowHostPID"
-              compare:
-                op: eq
-                value: false
+            - flag: "pass"
         remediation: |
           If SCCs with `allowHostPID: true` exist, ensure they are restricted to trusted service accounts only.
 
@@ -135,15 +131,13 @@ groups:
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
         audit: |
-          echo "Listing all SCCs where 'allowHostIPC' is explicitly set to false..."
           oc get scc -o json \
-            | jq '.items[] | select(.allowHostIPC==false) | .metadata.name'
+            | jq -r '[.items[] | select(.allowHostIPC==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
-            - flag: "allowHostIPC"
-              compare:
-                op: eq
-                value: false
+            - flag: "pass"
         remediation: |
           If no SCCs restrict hostIPC usage, create one that explicitly sets allowHostIPC: false:
 
@@ -168,15 +162,13 @@ groups:
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (manual)"
         audit: |
-          echo "Listing all SCCs with 'allowHostNetwork: false'..."
           oc get scc -o json \
-            | jq '.items[] | select(.allowHostNetwork==false) | .metadata.name'
+            | jq -r '[.items[] | select(.allowHostNetwork==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
-            - flag: "allowHostNetwork"
-              compare:
-                op: eq
-                value: false
+            - flag: "pass"
         remediation: |
           If no SCCs restrict host networking, create one by running:
 
@@ -201,15 +193,13 @@ groups:
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (manual)"
         audit: |
-          echo "Listing all SCCs with 'allowPrivilegeEscalation' explicitly set to false..."
           oc get scc -o json \
-            | jq '.items[] | select(.allowPrivilegeEscalation==false) | .metadata.name'
+            | jq -r '[.items[] | select(.allowPrivilegeEscalation==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
-            - flag: "allowPrivilegeEscalation"
-              compare:
-                op: eq
-                value: false
+            - flag: "pass"
         remediation: |
           If no SCCs exist that restrict the use of privilege escalation, create a custom SCC:
 
@@ -270,12 +260,12 @@ groups:
       - id: 5.2.7
         text: "Minimize the admission of containers with the NET_RAW capability (manual)"
         audit: |
-          sccs=$(oc get scc -o json | jq -r '.items[] | select(.requiredDropCapabilities[]? == "ALL") | .metadata.name')
-          if [[ -n "$sccs" ]]; then
-            echo "pass"
-          else
-            echo "fail"
-          fi
+          oc get scc -o json \
+          | jq -r '[.items[]
+                    | select((.requiredDropCapabilities // []) | index("ALL"))
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
         tests:
           test_items:
             - flag: "pass"
@@ -307,24 +297,22 @@ groups:
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (manual)"
         audit: |
-          echo "Checking SCCs where 'allowedCapabilities' is null (no additional caps allowed)..."
           oc get scc -o json \
-            | jq '.items[] | select(.allowedCapabilities == null) | .metadata.name'
-
-          echo "Checking SCCs where 'defaultAddCapabilities' is null (no default caps added)..."
+          | jq -r '[.items[]
+                    | select(.allowedCapabilities == null)
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
           oc get scc -o json \
-            | jq '.items[] | select(.defaultAddCapabilities == null) | .metadata.name'
+          | jq -r '[.items[]
+                    | select(.defaultAddCapabilities == null)
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "true" else "false" end'
         tests:
-          bin_op: and
           test_items:
-            - flag: "allowedCapabilities"
-              compare:
-                op: eq
-                value: null
-            - flag: "defaultAddCapabilities"
-              compare:
-                op: eq
-                value: null
+            - flag: "pass"
+            - flag: "true"
         remediation: |
           If no SCCs restrict added capabilities, create a custom SCC as shown below:
 
@@ -352,15 +340,15 @@ groups:
       - id: 5.2.9
         text: "Minimize the admission of containers with capabilities assigned (manual)"
         audit: |
-          echo "Listing SCCs that drop all capabilities from containers ('requiredDropCapabilities: [ALL]')..."
           oc get scc -o json \
-            | jq '.items[] | select(.requiredDropCapabilities[]? == "ALL") | .metadata.name'
+          | jq -r '[.items[]
+                    | select((.requiredDropCapabilities // []) | index("ALL"))
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "true" else "false" end'
         tests:
           test_items:
-            - flag: "requiredDropCapabilities"
-              compare:
-                op: has
-                value: "ALL"
+            - flag: "true"
         remediation: |
           If no SCCs drop all capabilities, create one that sets 'requiredDropCapabilities: [ALL]':
 

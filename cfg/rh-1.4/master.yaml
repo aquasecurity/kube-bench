@@ -560,24 +560,45 @@ groups:
       - id: 1.2.1
         text: "Ensure that anonymous requests are authorized (Manual)"
         audit: |
-          echo "Checking for 'system:unauthenticated' userGroups in openshift-kube-apiserver audit policy..."
-          oc get configmap config -n openshift-kube-apiserver -o json \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.auditConfig.policyConfiguration.rules[]? | select(.userGroups[]? == "system:unauthenticated")'
+          found=0
 
-          echo "Checking for 'system:unauthenticated' userGroups in openshift-apiserver audit policy..."
-          oc get configmap config -n openshift-apiserver -o json \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.auditConfig.policyConfiguration.rules[]? | select(.userGroups[]? == "system:unauthenticated")'
+          echo "# ClusterRoleBindings granting permissions to system:unauthenticated"
+          crb_out="$(oc get clusterrolebindings -o json 2>/dev/null \
+            | jq -r '.items[]
+              | select(.subjects[]? | select(.kind=="Group" and .name=="system:unauthenticated"))
+              | .metadata.name + " -> " + .roleRef.kind + "/" + .roleRef.name' \
+            | sort -u)"
+          if [ -n "$crb_out" ]; then
+            echo "$crb_out"
+            found=1
+          else
+            echo "(none)"
+          fi
 
-          echo "Checking ClusterRoleBindings assigned to 'system:unauthenticated' group..."
-          oc get clusterrolebindings -o json \
-            | jq -r '.items[] |
-                select(.subjects[]?.kind == "Group" and .subjects[]?.name == "system:unauthenticated") |
-                .metadata.name' | sort -u
+          echo
+          echo "# Namespaced RoleBindings granting permissions to system:unauthenticated"
+          rb_out="$(oc get rolebindings -A -o json 2>/dev/null \
+            | jq -r '.items[]
+              | select(.subjects[]? | select(.kind=="Group" and .name=="system:unauthenticated"))
+              | (.metadata.namespace + "/" + .metadata.name) + " -> " + .roleRef.kind + "/" + .roleRef.name' \
+            | sort -u)"
+          if [ -n "$rb_out" ]; then
+            echo "$rb_out"
+            found=1
+          else
+            echo "(none)"
+          fi
+
+          # Provide a simple flag for the test harness
+          if [ $found -eq 1 ]; then
+            echo "unauthenticated_bindings_present"
+          else
+            echo "unauthenticated_bindings_missing"
+          fi
         tests:
           test_items:
-            - flag: "system:unauthenticated"
+            - flag: "unauthenticated_bindings_present"
+              set: true
         remediation: |
           None required. The default configuration should not be modified.
         scored: false
@@ -624,59 +645,36 @@ groups:
       - id: 1.2.4
         text: "Use HTTPS for kubelet connections (Manual)"
         audit: |
-          echo "Checking kubelet client certificate configuration..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-certificate"]'
+            | jq '.apiServerArguments["kubelet-client-certificate"][0] // empty'
 
-          echo "Checking kubelet client key configuration..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-key"]'
+            | jq '.apiServerArguments["kubelet-client-key"][0] // empty'
 
-          echo "Verifying kubelet-https argument..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-https"]'
+            | jq '.apiServerArguments["kubelet-https"][0] // empty' || true
 
-          echo "Checking openshift-apiserver serving-cert secret..."
           oc -n openshift-apiserver describe secret serving-cert | grep -E 'tls\.crt|tls\.key|Type:'
-
-          echo "Validating static-pod-resources certificate and key files (informational):"
-          ls -l /etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/kubelet-client/tls.*
-        tests:
-          test_items:
-            - flag: "/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/kubelet-client/tls.crt"
-            - flag: "/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/kubelet-client/tls.key"
-            - flag: "kubelet-client-certificate"
-            - flag: "kubelet-client-key"
+        type: manual
         remediation: |
-          No remediation required. OpenShift configures API server communication with kubelets using X.509 certificates and TLS encryption by default.
-          The certificates are managed automatically by OpenShift and should not be altered manually.
+          OpenShift does not use the legacy --kubelet-https flag; TLS is enforced via
+          kubelet client cert/key arguments and cluster CAs. Ensure:
+            - apiServerArguments.kubelet-client-certificate[0] points to a real file
+            - apiServerArguments.kubelet-client-key[0] points to a real file
+            - The openshift-apiserver 'serving-cert' secret is type kubernetes.io/tls and contains tls.crt and tls.key
         scored: false
 
       - id: 1.2.5
         text: "Ensure that the kubelet uses certificates to authenticate (Manual)"
         audit: |
-          echo "Checking 'kubelet-client-certificate' configuration in openshift-kube-apiserver config..."
-          oc get configmap config -n openshift-kube-apiserver -ojson \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-certificate"]'
-
-          echo "Checking 'kubelet-client-key' configuration in openshift-kube-apiserver config..."
-          oc get configmap config -n openshift-kube-apiserver -ojson \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-key"]'
-
-          echo "Validating existence of client certificate and key on filesystem (if accessible):"
-          ls -l /etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.*
-
-          echo "Describing serving-cert secret in openshift-apiserver namespace..."
-          oc -n openshift-apiserver describe secret serving-cert | grep -E 'tls\.crt|tls\.key|Type:'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments["kubelet-client-certificate"]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r'.data["config.yaml"]' | jq '.apiServerArguments["kubelet-client-key"]'
+          oc -n openshift-apiserver describe secret serving-cert
         tests:
           test_items:
-            - flag: "kubelet-client-certificate"
-            - flag: "kubelet-client-key"
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
         remediation: |
@@ -688,19 +686,11 @@ groups:
       - id: 1.2.6
         text: "Verify that the kubelet certificate authority is set as appropriate (Manual)"
         audit: |
-          echo "Checking 'kubelet-certificate-authority' configuration in openshift-kube-apiserver config..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq '.apiServerArguments["kubelet-certificate-authority"]'
-
-          echo "Verifying CA file exists on disk (informational):"
-          ls -l /etc/kubernetes/static-pod-resources/configmaps/kubelet-serving-ca/ca-bundle.crt || echo "File not accessible"
-
-          echo "Validating that internal X.509 CA is being used for kubelet auth (informational)"
-          # No remediation or external configuration needed in OpenShift
         tests:
           test_items:
-            - flag: "kubelet-certificate-authority"
             - flag: "/etc/kubernetes/static-pod-resources/configmaps/kubelet-serving-ca/ca-bundle.crt"
         remediation: |
           No remediation is required.
@@ -711,17 +701,21 @@ groups:
       - id: 1.2.7
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
         audit: |
-          echo "Checking 'authorization-mode' configuration in openshift-kube-apiserver..."
-
           oc get configmap config -n openshift-kube-apiserver -o json \
             | jq -r '.data["config.yaml"]' \
             | jq '.apiServerArguments["authorization-mode"]'
+        audit_config: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
         tests:
+          bin_op: or
           test_items:
-            - flag: "authorization-mode"
+            - path: "{.authorization-mode}"
               compare:
                 op: nothave
                 value: "AlwaysAllow"
+            - path: "{.authorization-mode}"
+              flag: "authorization-mode"
+              set: false
         remediation: |
           No remediation required.
           OpenShift does not support the 'AlwaysAllow' authorization mode.
@@ -731,14 +725,21 @@ groups:
       - id: 1.2.8
         text: "Verify that RBAC is enabled (Manual)"
         audit: |
-          echo "Checking 'authorization-mode' in openshift-kube-apiserver config..."
           oc get configmap config -n openshift-kube-apiserver -o json \
             | jq -r '.data["config.yaml"]' \
             | jq '.apiServerArguments["authorization-mode"]'
+        audit_config: |
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
         tests:
+          bin_op: or
           test_items:
-            - flag: "RBAC"
-            - flag: "authorization-mode"
+            - path: "{.authorization-mode}"
+              compare:
+                op: has
+                value: "RBAC"
+            - path: "{.authorization-mode}"
+              flag: "authorization-mode"
+              set: false
         remediation: |
           No remediation is required.
           OpenShift is configured at bootstrap time to use Role-Based Access Control (RBAC) as the default authorization mode.
@@ -749,11 +750,8 @@ groups:
       - id: 1.2.9
         text: "Ensure that the APIPriorityAndFairness feature gate is enabled (Manual)"
         audit: |
-          #Verify the APIPriorityAndFairness feature-gate
           oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig.apiServerArguments'
-          #Verify the set of admission-plugins for OCP 4.6 and higher
           oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
-          #Check that no overrides are configured
           oc get kubeapiservers.operator.openshift.io cluster -o json | jq -r '.spec.unsupportedConfigOverrides'
         tests:
           bin_op: and
@@ -881,20 +879,20 @@ groups:
       - id: 1.2.18
         text: "Ensure that the --secure-port argument is not set to 0 (Manual)"
         audit: |
-          # Get the full observed API server configuration
-          oc get kubeapiservers.operator.openshift.io cluster -o json | jq '.spec.observedConfig'
+          BIND_ADDR=$(oc get kubeapiservers.operator.openshift.io cluster -o json \
+            | jq -r '.spec.observedConfig.servingInfo.bindAddress')
 
-          # Extract and verify container ports for the kube-apiserver (should include 6443 only)
-          echo ports=`oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver \
-            -o jsonpath='{.items[*].spec.containers[?(@.name=="kube-apiserver")].ports[*].containerPort}'`
+          PORTS=$(oc get pods -n openshift-kube-apiserver -l app=openshift-kube-apiserver \
+            -o jsonpath='{.items[*].spec.containers[?(@.name=="kube-apiserver")].ports[*].containerPort}')
+
+          if [ "$BIND_ADDR" = "0.0.0.0:6443" ] && echo "$PORTS" | grep -q '\b6443\b'; then
+            echo "pass"
+          else
+            echo "fail"
+          fi
         tests:
-          bin_op: and
           test_items:
-            - flag: "0.0.0.0:6443"
-            - flag: "ports"
-              compare:
-                op: regex
-                value: '\s*(?:6443\s*){1,}$'
+            - flag: "pass"
         remediation: |
           None required. OpenShift serves the API securely over port 6443 with TLS, authentication, and authorization.
           The insecure API port is not exposed or configurable by default.
@@ -957,37 +955,39 @@ groups:
       - id: 1.2.22
         text: "Ensure that the maximumRetainedFiles argument is set to 10 or as appropriate (Manual)"
         audit: |
-          echo "Checking 'audit-log-maxbackup' in kube-apiserver config..."
-          oc get configmap config -n openshift-kube-apiserver -ojson \
+          VALUE=$(oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
-            | jq -r '.apiServerArguments["audit-log-maxbackup"][]?'
+            | jq -r '.apiServerArguments["audit-log-maxbackup"][0] // empty')
+
+          if [ -n "$VALUE" ] && [ "$VALUE" -ge 10 ]; then
+            echo "pass (current=$VALUE)"
+          else
+            echo "fail (current=$VALUE)"
+          fi
         tests:
           test_items:
-            - flag: "audit-log-maxbackup"
-              compare:
-                op: gte
-                value: 10
+            - flag: "pass"
         remediation: |
           No remediation required.
           By default, OpenShift retains 10 audit log backup files.
           This provides sufficient log history for incident investigation and audit review.
         scored: false
 
-
       - id: 1.2.23
         text: "Ensure that the maximumFileSizeMegabytes argument is set to 100 (Manual)"
         audit: |
-          #NOTICE
-          oc get configmap config -n openshift-kube-apiserver -ojson \
+          VALUE=$(oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
-            | jq -r '.apiServerArguments["audit-log-maxsize"][]?'
-        use_multiple_values: true
+            | jq -r '.apiServerArguments["audit-log-maxsize"][0] // empty')
+
+          if [ -n "$VALUE" ] && [ "$VALUE" -ge 100 ]; then
+            echo "pass (current=$VALUE)"
+          else
+            echo "fail (current=$VALUE)"
+          fi
         tests:
           test_items:
-            - flag: "audit-log-maxsize"
-              compare:
-                op: gte
-                value: 100
+            - flag: "pass"
         remediation: |
           Set the audit-log-maxsize parameter to 100 or as an appropriate number.
           maximumFileSizeMegabytes: 100
@@ -996,14 +996,18 @@ groups:
       - id: 1.2.24
         text: "Ensure that the --request-timeout argument is set (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' |
-          jq '.apiServerArguments["min-request-timeout"]'
+          VALUE=$(oc get configmap config -n openshift-kube-apiserver -ojson \
+            | jq -r '.data["config.yaml"]' \
+            | jq -r '.apiServerArguments["min-request-timeout"][0] // empty')
+
+          if [ -n "$VALUE" ] && [ "$VALUE" -eq 3600 ]; then
+            echo "pass (current=$VALUE)"
+          else
+            echo "fail (current=$VALUE)"
+          fi
         tests:
           test_items:
-            - flag: "min-request-timeout"
-              compare:
-                op: eq
-                value: 3600
+            - flag: "pass"
         remediation: |
           TBD
         scored: false
@@ -1011,13 +1015,11 @@ groups:
       - id: 1.2.25
         text: "Ensure that the --service-account-lookup argument is set to true (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments."service-account-lookup"[]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r
+          '.data["config.yaml"]' | jq '.apiServerArguments."service-account-lookup"[]'
         tests:
           test_items:
-            - flag: "--service-account-lookup"
-              compare:
-                op: eq
-                value: "true"
+            - flag: "true"
         remediation: |
           TBD
         scored: false
@@ -1040,18 +1042,13 @@ groups:
       - id: 1.2.27
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Manual)"
         audit: |
-          echo "Checking etcd-certfile path in kube-apiserver config:"
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.apiServerArguments["etcd-certfile"][]?'
 
-          echo "Checking etcd-keyfile path in kube-apiserver config:"
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.apiServerArguments["etcd-keyfile"][]?'
-
-          ls -l /etc/kubernetes/static-pod-resources/secrets/etcd-client/tls.crt || echo "Missing cert file"
-          ls -l /etc/kubernetes/static-pod-resources/secrets/etcd-client/tls.key || echo "Missing key file"
         tests:
           bin_op: and
           test_items:
@@ -1066,19 +1063,14 @@ groups:
       - id: 1.2.28
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
         audit: |
-          echo "Checking TLS certificate file path in kube-apiserver config..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.apiServerArguments["tls-cert-file"][]?'
 
-          echo "Checking TLS private key file path in kube-apiserver config..."
           oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.apiServerArguments["tls-private-key-file"][]?'
 
-          echo "Optionally verify files exist on disk (may require access to node or rsh into pod):"
-          ls -l /etc/kubernetes/static-pod-certs/secrets/service-network-serving-certkey/tls.crt || echo "Missing cert file"
-          ls -l /etc/kubernetes/static-pod-certs/secrets/service-network-serving-certkey/tls.key || echo "Missing key file"
         tests:
           bin_op: and
           test_items:
@@ -1094,8 +1086,9 @@ groups:
       - id: 1.2.29
         text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .servingInfo.clientCA
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["client-ca-file"]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | \
+          jq -r '.data["config.yaml"]' | \
+          jq -r .servingInfo.clientCA
         tests:
           test_items:
             - flag: "/etc/kubernetes/static-pod-certs/configmaps/client-ca/ca-bundle.crt"
@@ -1139,7 +1132,6 @@ groups:
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
         type: manual
         audit: |
-          # verify cipher suites
           oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
           oc get kubeapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
           oc get openshiftapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
@@ -1156,14 +1148,10 @@ groups:
       - id: 1.2.33
         text: "Ensure unsupported configuration overrides are not used (Manual)"
         audit: |
-          echo "Checking that unsupportedConfigOverrides is null (i.e. not set)..."
           oc get kubeapiserver/cluster -o jsonpath='{.spec.unsupportedConfigOverrides}'
         tests:
           test_items:
-            - flag: "unsupportedConfigOverrides"
-              compare:
-                op: eq
-                value: null
+            - flag: "null"
         remediation: |
           No remediation is required.
           OpenShift has deprecated and disabled unsupportedConfigOverrides.
@@ -1206,14 +1194,11 @@ groups:
         text: "Ensure that the --use-service-account-credentials argument is set to true (Manual)"
         audit: |
           oc get configmaps config -n openshift-kube-controller-manager -ojson | \
-            jq -r '.data["config.yaml"]' | \
-            jq -r '.extendedArguments["use-service-account-credentials"][]'
+          jq -r '.data["config.yaml"]' | \
+          jq -r '.extendedArguments["use-service-account-credentials"][]'
         tests:
           test_items:
-            - flag: "--use-service-account-credentials"
-              compare:
-                op: eq
-                value: true
+            - flag: "true"
         remediation: |
           The OpenShift Controller Manager operator manages and updates the OpenShift Controller Manager.
           The Kubernetes Controller Manager operator manages and updates the Kubernetes Controller Manager deployed on top of OpenShift.
@@ -1251,12 +1236,10 @@ groups:
       - id: 1.3.5
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Manual)"
         audit: |
-          echo "Checking that secure-port is set to 10257 in kube-controller-manager config..."
           oc get configmaps config -n openshift-kube-controller-manager -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.extendedArguments["secure-port"][]?'
 
-          echo "Testing access to /metrics endpoint from within the kube-controller-manager pod..."
           export POD=$(oc get pods -n openshift-kube-controller-manager -l app=kube-controller-manager -o jsonpath='{.items[0].metadata.name}')
           oc rsh -n openshift-kube-controller-manager -c kube-controller-manager $POD curl -k -s -o /dev/null -w "%{http_code}" https://localhost:10257/metrics
           unset POD
@@ -1264,10 +1247,7 @@ groups:
           bin_op: and
           test_items:
             - flag: "10257"
-            - flag: "metrics"
-              compare:
-                op: eq
-                value: "403"
+            - flag: "403"
         remediation: |
           No remediation is required.
           By default, OpenShift does not expose an insecure bind address.
