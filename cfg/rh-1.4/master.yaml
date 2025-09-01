@@ -32,7 +32,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.2
         text: "Ensure that the API server pod specification file ownership is set to root:root (Manual)"
@@ -55,7 +55,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 600 or more restrictive (Manual)"
@@ -81,7 +81,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root (Manual)"
@@ -104,7 +104,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Manual)"
@@ -130,7 +130,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Manual))"
@@ -153,7 +153,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Manual))"
@@ -179,7 +179,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
@@ -202,7 +202,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 600 or more restrictive (Manual)"
@@ -251,7 +251,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
@@ -296,7 +296,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Manual)"
@@ -322,7 +322,7 @@ groups:
                 value: "700"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Manual)"
@@ -345,7 +345,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.13
         text: "Ensure that the kubeconfig file permissions are set to 600 or more restrictive (Manual)"
@@ -361,7 +361,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.14
         text: "Ensure that the kubeconfig file ownership is set to root:root (Manual)"
@@ -374,7 +374,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.15
         text: "Ensure that the scheduler kubeconfig file permissions are set to 600 or more restrictive (Manual)"
@@ -400,7 +400,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.16
         text: "Ensure that the scheduler kubeconfig file ownership is set to root:root (Manual)"
@@ -423,7 +423,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.17
         text: "Ensure that the controller-manager kubeconfig file permissions are set to 600 or more restrictive (Manual)"
@@ -449,7 +449,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.18
         text: "Ensure that the controller-manager kubeconfig file ownership is set to root:root (Manual)"
@@ -472,7 +472,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.19
         text: "Ensure that the OpenShift PKI directory and file ownership is set to root:root (Manual)"
@@ -500,7 +500,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.20
         text: "Ensure that the OpenShift PKI certificate file permissions are set to 600 or more restrictive (Manual)"
@@ -526,7 +526,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.21
         text: "Ensure that the OpenShift PKI key file permissions are set to 600 (Manual)"
@@ -552,7 +552,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
   - id: 1.2
     text: "API Server"
@@ -601,7 +601,7 @@ groups:
               set: true
         remediation: |
           None required. The default configuration should not be modified.
-        scored: false
+        scored: true
 
       - id: 1.2.2
         text: "Ensure that the --basic-auth-file argument is not set (Manual)"
@@ -620,7 +620,7 @@ groups:
                 value: true
         remediation: |
           None required. --basic-auth-file cannot be configured on OpenShift.
-        scored: false
+        scored: true
 
       - id: 1.2.3
         text: "Ensure that the --token-auth-file parameter is not set (Manual)"
@@ -640,7 +640,7 @@ groups:
                 value: true
         remediation: |
           None is required.
-        scored: false
+        scored: true
 
       - id: 1.2.4
         text: "Use HTTPS for kubelet connections (Manual)"
@@ -681,7 +681,7 @@ groups:
           No remediation is required.
           OpenShift automatically manages kubelet authentication using X.509 certificates issued by the internal platform CA.
           Manual modification of these certificates is not supported and can disrupt platform components.
-        scored: false
+        scored: true
 
       - id: 1.2.6
         text: "Verify that the kubelet certificate authority is set as appropriate (Manual)"
@@ -696,7 +696,7 @@ groups:
           No remediation is required.
           OpenShift uses internal X.509 certificates and platform-managed CAs to verify kubelet server identities.
           This is not user-configurable and should not be modified.
-        scored: false
+        scored: true
 
       - id: 1.2.7
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
@@ -720,7 +720,7 @@ groups:
           No remediation required.
           OpenShift does not support the 'AlwaysAllow' authorization mode.
           The API server is bootstrapped with secure authorization mechanisms including RBAC and Node by default.
-        scored: false
+        scored: true
 
       - id: 1.2.8
         text: "Verify that RBAC is enabled (Manual)"
@@ -744,7 +744,7 @@ groups:
           No remediation is required.
           OpenShift is configured at bootstrap time to use Role-Based Access Control (RBAC) as the default authorization mode.
           RBAC is always enabled, and cannot be disabled through configuration.
-        scored: false
+        scored: true
 
 
       - id: 1.2.9
@@ -761,7 +761,7 @@ groups:
               set: false
         remediation: |
           No remediation is required
-        scored: false
+        scored: true
 
       - id: 1.2.10
         text: "Ensure that the admission control plugin AlwaysAdmit is not set (Manual)"
@@ -773,7 +773,7 @@ groups:
               set: false
         remediation: |
           No remediation is required. The AlwaysAdmit admission controller cannot be enabled in OpenShift.
-        scored: false
+        scored: true
 
       - id: 1.2.11
         text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
@@ -785,7 +785,7 @@ groups:
               set: false
         remediation: |
           None required.
-        scored: false
+        scored: true
 
       - id: 1.2.12
         text: "Ensure that the admission control plugin ServiceAccount is set (Manual)"
@@ -797,7 +797,7 @@ groups:
               set: true
         remediation: |
           None required. OpenShift is configured to use service accounts by default.
-        scored: false
+        scored: true
 
       - id: 1.2.13
         text: "Ensure that the admission control plugin NamespaceLifecycle is set (Manual)"
@@ -810,7 +810,7 @@ groups:
             - flag: "NamespaceLifecycle"
         remediation: |
           Ensure that the --disable-admission-plugins parameter does not include NamespaceLifecycle.
-        scored: false
+        scored: true
 
       - id: 1.2.14
         text: "Ensure that the admission control plugin SecurityContextConstraint is set (Manual)"
@@ -823,7 +823,7 @@ groups:
             - flag: "security.openshift.io/SecurityContextConstraint"
         remediation: |
           None required. Security Context Constraints are enabled by default in OpenShift and cannot be disabled.
-        scored: false
+        scored: true
 
       - id: 1.2.15
         text: "Ensure that the admission control plugin NodeRestriction is set (Manual)"
@@ -836,7 +836,7 @@ groups:
             - flag: "NodeRestriction"
         remediation: |
           The NodeRestriction plugin cannot be disabled.
-        scored: false
+        scored: true
 
       - id: 1.2.16
         text: "Ensure that the --insecure-bind-address argument is not set (manual)"
@@ -862,7 +862,7 @@ groups:
           No remediation is required.
           By default, OpenShift uses secure HTTPS ports (6443 and 8443) for all API communications.
           The API servers are not configured to expose insecure ports and are isolated within the pod network.
-        scored: false
+        scored: true
 
 
       - id: 1.2.17
@@ -874,7 +874,7 @@ groups:
             - flag: "6443"
         remediation: |
           None required. The configuration is managed by the API server operator.
-        scored: false
+        scored: true
 
       - id: 1.2.18
         text: "Ensure that the --secure-port argument is not set to 0 (Manual)"
@@ -896,7 +896,7 @@ groups:
         remediation: |
           None required. OpenShift serves the API securely over port 6443 with TLS, authentication, and authorization.
           The insecure API port is not exposed or configurable by default.
-        scored: false
+        scored: true
 
       - id: 1.2.19
         text: "Ensure that the healthz endpoint is protected by RBAC (Manual)"
@@ -942,7 +942,7 @@ groups:
           By default, the audit log paths are:
           - /var/log/kube-apiserver/audit.log
           - /var/log/openshift-apiserver/audit.log
-        scored: false
+        scored: true
 
       - id: 1.2.21
         text: "Ensure that the audit logs are forwarded off the cluster for retention (Manual)"
@@ -971,7 +971,7 @@ groups:
           No remediation required.
           By default, OpenShift retains 10 audit log backup files.
           This provides sufficient log history for incident investigation and audit review.
-        scored: false
+        scored: true
 
       - id: 1.2.23
         text: "Ensure that the maximumFileSizeMegabytes argument is set to 100 (Manual)"
@@ -991,7 +991,7 @@ groups:
         remediation: |
           Set the audit-log-maxsize parameter to 100 or as an appropriate number.
           maximumFileSizeMegabytes: 100
-        scored: false
+        scored: true
 
       - id: 1.2.24
         text: "Ensure that the --request-timeout argument is set (Manual)"
@@ -1010,7 +1010,7 @@ groups:
             - flag: "pass"
         remediation: |
           TBD
-        scored: false
+        scored: true
 
       - id: 1.2.25
         text: "Ensure that the --service-account-lookup argument is set to true (Manual)"
@@ -1022,7 +1022,7 @@ groups:
             - flag: "true"
         remediation: |
           TBD
-        scored: false
+        scored: true
 
       - id: 1.2.26
         text: "Ensure that the --service-account-key-file argument is set as appropriate (Manual)"
@@ -1037,7 +1037,7 @@ groups:
           The OpenShift API server does not use the service-account-key-file argument.
           The ServiceAccount token authenticator is configured with serviceAccountConfig.publicKeyFiles.
           OpenShift does not reuse the apiserver TLS key. This is not configurable.
-        scored: false
+        scored: true
 
       - id: 1.2.27
         text: "Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Manual)"
@@ -1058,7 +1058,7 @@ groups:
           No remediation is required.
           OpenShift automatically manages X.509 client certificates and TLS encryption for secure communication with etcd.
           These settings are handled by the platform and should not be manually modified.
-        scored: false
+        scored: true
 
       - id: 1.2.28
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
@@ -1080,7 +1080,7 @@ groups:
           No remediation is required. OpenShift automatically configures the API server with valid X.509 certificates and TLS keys.
           These are used to encrypt traffic between the API server and clients, including kubelets and users.
           Certificate rotation and lifecycle management are handled by the OpenShift platform.
-        scored: false
+        scored: true
 
 
       - id: 1.2.29
@@ -1101,7 +1101,7 @@ groups:
           User-provided certificates must be provided in a kubernetes.io/tls type Secret in the openshift-config namespace.
           Update the API server cluster configuration,
           the apiserver/cluster resource, to enable the use of the user-provided certificate.
-        scored: false
+        scored: true
 
       - id: 1.2.30
         text: "Ensure that the --etcd-cafile argument is set as appropriate (Manual)"
@@ -1114,7 +1114,7 @@ groups:
             - flag: "/etc/kubernetes/static-pod-resources/configmaps/etcd-serving-ca/ca-bundle.crt"
         remediation: |
           None required. OpenShift generates the etcd-cafile and sets the arguments appropriately in the API server. Communication with etcd is secured by the etcd serving CA.
-        scored: false
+        scored: true
 
       - id: 1.2.31
         text: "Ensure that encryption providers are appropriately configured (Manual)"
@@ -1126,7 +1126,7 @@ groups:
         remediation: |
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
           In this file, choose aescbc, kms or secretbox as the encryption provider.
-        scored: false
+        scored: true
 
       - id: 1.2.32
         text: "Ensure that the API Server only makes use of Strong Cryptographic Ciphers (Manual)"
@@ -1156,7 +1156,7 @@ groups:
           No remediation is required.
           OpenShift has deprecated and disabled unsupportedConfigOverrides.
           This field should remain null and must not be used in any supported configuration.
-        scored: false
+        scored: true
 
   - id: 1.3
     text: "Controller Manager"
@@ -1203,7 +1203,7 @@ groups:
           The OpenShift Controller Manager operator manages and updates the OpenShift Controller Manager.
           The Kubernetes Controller Manager operator manages and updates the Kubernetes Controller Manager deployed on top of OpenShift.
           This operator is configured via KubeControllerManager custom resource.
-        scored: false
+        scored: true
 
       - id: 1.3.3
         text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Manual)"
@@ -1217,7 +1217,7 @@ groups:
         remediation: |
           None required.
           OpenShift manages the service account credentials for the scheduler automatically.
-        scored: false
+        scored: true
 
       - id: 1.3.4
         text: "Ensure that the --root-ca-file argument is set as appropriate (Manual)"
@@ -1231,7 +1231,7 @@ groups:
         remediation: |
           None required.
           Certificates for OpenShift platform components are automatically created and rotated by the OpenShift Container Platform.
-        scored: false
+        scored: true
 
       - id: 1.3.5
         text: "Ensure that the --bind-address argument is set to 127.0.0.1 (Manual)"
@@ -1252,7 +1252,7 @@ groups:
           No remediation is required.
           By default, OpenShift does not expose an insecure bind address.
           The kube-controller-manager uses secure-port 10257 and restricts unauthenticated access to the /metrics endpoint.
-        scored: false
+        scored: true
 
 
   - id: 1.4
