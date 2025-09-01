@@ -645,20 +645,44 @@ groups:
       - id: 1.2.4
         text: "Use HTTPS for kubelet connections (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-certificate"][0] // empty'
+          CFG=$(oc -n openshift-kube-apiserver get cm config -o jsonpath='{.data.config\.yaml}')
 
-          oc get configmap config -n openshift-kube-apiserver -ojson \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-client-key"][0] // empty'
+          # Extract kubelet client cert/key paths (support both layouts)
+          CERT_FILE=$(printf '%s\n' "$CFG" \
+          | grep -Eo '/etc/kubernetes/static-pod-(resources/kube-apiserver-certs|certs)/secrets/kubelet-client/tls\.crt' \
+          | head -n1)
 
-          oc get configmap config -n openshift-kube-apiserver -ojson \
-            | jq -r '.data["config.yaml"]' \
-            | jq '.apiServerArguments["kubelet-https"][0] // empty' || true
+          KEY_FILE=$(printf '%s\n' "$CFG" \
+          | grep -Eo '/etc/kubernetes/static-pod-(resources/kube-apiserver-certs|certs)/secrets/kubelet-client/tls\.key' \
+          | head -n1)
+
+          # 1) pass/fail on presence of both files
+          if [ -n "$CERT_FILE" ] && [ -n "$KEY_FILE" ]; then
+            echo "pass"
+          else
+            echo "fail"
+          fi
+          KUBELET_HTTPS=$(printf '%s\n' "$CFG" \
+            | grep -Eo '(^|[[:space:]])kubelet-https:[[:space:]]*(true|false)' \
+            | awk -F: '{print $2}' \
+            | tr -d '[:space:]' \
+            | head -n1)
+
+          if [ "$KUBELET_HTTPS" = "false" ]; then
+            echo "false"
+          else
+           echo "true"
+          fi
 
           oc -n openshift-apiserver describe secret serving-cert | grep -E 'tls\.crt|tls\.key|Type:'
-        type: manual
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "pass"
+            - flag: "true"
+            - flag: "kubernetes.io/tls"
+            - flag: "tls.crt"
+            - flag: "tls.key"
         remediation: |
           OpenShift does not use the legacy --kubelet-https flag; TLS is enforced via
           kubelet client cert/key arguments and cluster CAs. Ensure:
@@ -677,6 +701,7 @@ groups:
           test_items:
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
+            - flag: "kubernetes.io/tls"
         remediation: |
           No remediation is required.
           OpenShift automatically manages kubelet authentication using X.509 certificates issued by the internal platform CA.
