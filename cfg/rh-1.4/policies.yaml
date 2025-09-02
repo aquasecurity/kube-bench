@@ -1,0 +1,486 @@
+---
+controls:
+version: rh-1.4
+id: 5
+text: "Policies"
+type: "policies"
+groups:
+  - id: 5.1
+    text: "RBAC and Service Accounts"
+    checks:
+      - id: 5.1.1
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
+        type: "manual"
+        audit: |
+          #To get a list of users and service accounts with the cluster-admin role
+          oc get clusterrolebindings -o=customcolumns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind |
+          grep cluster-admin
+          #To verity that kbueadmin is removed, no results should be returned
+          oc get secrets kubeadmin -n kube-system
+        remediation: |
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and if they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the clusterrolebinding to the cluster-admin role :
+            oc delete clusterrolebinding [name]
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize access to secrets (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove get, list and watch access to secret objects in the cluster.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible replace any use of wildcards in clusterroles and roles with specific
+          objects or actions.
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize access to create pods (Manual)"
+        type: "manual"
+        remediation: |
+          Where possible, remove create access to pod objects in the cluster.
+        scored: false
+
+      - id: 5.1.5
+        text: "Ensure that default service accounts are not actively used. (Manual)"
+        type: "manual"
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 5.1.6
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
+        type: "manual"
+        remediation: |
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
+        scored: false
+
+  - id: 5.2
+    text: "Security Context Constraints (SCCs)"
+    checks:
+      - id: 5.2.1
+        text: "Minimize the admission of privileged containers (Manual)"
+        audit: |
+          oc get scc -o json \
+          | jq -r '[.items[] | select(.allowPrivilegedContainer==false) | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCCs exist that restrict privileged containers, create one by running:
+
+          oc create -f - <<EOF
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-priv
+          allowPrivilegedContainer: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          EOF
+
+          Then apply appropriate RBAC to assign this SCC only to necessary service accounts, groups, or users.
+          Carefully avoid assigning `allowPrivilegedContainer: true` in any SCC that is broadly bound.
+        scored: true
+
+      - id: 5.2.2
+        text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
+        audit: |
+          oc get scc -o json \
+            | jq -r '[.items[] | select(.allowHostPID==true) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If SCCs with `allowHostPID: true` exist, ensure they are restricted to trusted service accounts only.
+
+          To create a restrictive SCC that prevents host PID sharing:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-hostpid
+          allowHostPID: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Apply the SCC and bind it only to users or groups that do **not** need hostPID access.
+        scored: true
+
+      - id: 5.2.3
+        text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
+        audit: |
+          oc get scc -o json \
+            | jq -r '[.items[] | select(.allowHostIPC==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCCs restrict hostIPC usage, create one that explicitly sets allowHostIPC: false:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-hostipc
+          allowHostIPC: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Then assign this SCC to general workloads and ensure any SCCs allowing hostIPC are tightly scoped via RBAC.
+        scored: true
+
+      - id: 5.2.4
+        text: "Minimize the admission of containers wishing to share the host network namespace (manual)"
+        audit: |
+          oc get scc -o json \
+            | jq -r '[.items[] | select(.allowHostNetwork==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCCs restrict host networking, create one by running:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-hostnetwork
+          allowHostNetwork: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Ensure only workloads that require `hostNetwork: true` (e.g., CNI, infra pods) are allowed to use SCCs where it is explicitly enabled. Restrict access to such SCCs using RBAC.
+        scored: true
+
+      - id: 5.2.5
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (manual)"
+        audit: |
+          oc get scc -o json \
+            | jq -r '[.items[] | select(.allowPrivilegeEscalation==false) | .metadata.name]
+                     | length
+                     | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCCs exist that restrict the use of privilege escalation, create a custom SCC:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-priv-escalation
+          allowPrivilegeEscalation: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Assign this SCC only to workloads and users that **do not require** the ability to escalate privileges.
+          Use RBAC to restrict access to SCCs where `allowPrivilegeEscalation` is `true` to only trusted service accounts or admin roles.
+        scored: true
+
+
+      - id: 5.2.6
+        text: "Minimize the admission of root containers (manual)"
+        audit: |
+          sccs=$(oc get scc -o json | jq -r '.items[] | select(.runAsUser.type == "MustRunAsNonRoot") | .metadata.name')
+          if [[ -n "$sccs" ]]; then
+            echo "pass"
+          else
+            echo "fail"
+          fi
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCC is found with `runAsUser.type: MustRunAsNonRoot`, create one as follows:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-nonroot
+          allowPrivilegeEscalation: false
+          runAsUser:
+            type: MustRunAsNonRoot
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Assign this SCC only to workloads that must not run as root.
+          If an SCC allows `RunAsAny`, audit and restrict access using RBAC to prevent misuse.
+        scored: true
+
+      - id: 5.2.7
+        text: "Minimize the admission of containers with the NET_RAW capability (manual)"
+        audit: |
+          oc get scc -o json \
+          | jq -r '[.items[]
+                    | select((.requiredDropCapabilities // []) | index("ALL"))
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
+        tests:
+          test_items:
+            - flag: "pass"
+        remediation: |
+          If no SCCs drop ALL capabilities, create a custom SCC that explicitly drops NET_RAW:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-netraw
+          requiredDropCapabilities:
+          - NET_RAW
+          allowPrivilegedContainer: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Apply this SCC to workloads that do not require NET_RAW.
+          If NET_RAW is required (e.g., for low-level networking apps), isolate those workloads with a specific SCC and restrict access via RBAC.
+        scored: true
+
+
+      - id: 5.2.8
+        text: "Minimize the admission of containers with added capabilities (manual)"
+        audit: |
+          oc get scc -o json \
+          | jq -r '[.items[]
+                    | select(.allowedCapabilities == null)
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "pass" else "fail" end'
+          oc get scc -o json \
+          | jq -r '[.items[]
+                    | select(.defaultAddCapabilities == null)
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "true" else "false" end'
+        tests:
+          test_items:
+            - flag: "pass"
+            - flag: "true"
+        remediation: |
+          If no SCCs restrict added capabilities, create a custom SCC as shown below:
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-no-added-caps
+          allowPrivilegedContainer: false
+          allowedCapabilities: []
+          defaultAddCapabilities: []
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Assign this SCC to workloads that do **not** require elevated capabilities.
+          Create separate SCCs for workloads that require specific capabilities, and use RBAC to tightly restrict access to them.
+        scored: true
+
+      - id: 5.2.9
+        text: "Minimize the admission of containers with capabilities assigned (manual)"
+        audit: |
+          oc get scc -o json \
+          | jq -r '[.items[]
+                    | select((.requiredDropCapabilities // []) | index("ALL"))
+                    | .metadata.name]
+                   | length
+                   | if . > 0 then "true" else "false" end'
+        tests:
+          test_items:
+            - flag: "true"
+        remediation: |
+          If no SCCs drop all capabilities, create one that sets 'requiredDropCapabilities: [ALL]':
+
+          ---
+          apiVersion: security.openshift.io/v1
+          kind: SecurityContextConstraints
+          metadata:
+            name: restricted-drop-all-capabilities
+          requiredDropCapabilities:
+          - ALL
+          allowPrivilegedContainer: false
+          runAsUser:
+            type: MustRunAsRange
+          seLinuxContext:
+            type: MustRunAs
+          users: []
+          groups:
+          - system:authenticated
+          ---
+
+          Apply this SCC to general-purpose workloads that do not require elevated Linux capabilities.
+          If certain workloads require capabilities, create a separate SCC with minimal permissions and scope it using RBAC.
+        scored: true
+
+      - id: 5.2.10
+        text: "Minimize access to privileged Security Context Constraints (Manual)"
+        type: "manual"
+        remediation: |
+          Remove any users and groups who do not need access to an SCC, following the
+          principle of least privilege.
+          You can remove users and groups from an SCC using the oc edit scc $NAME
+          command.
+          Additionally, you can create your own SCCs that contain the container functionality you
+          need for a particular use case and assign that SCC to users and groups if the default
+          SCCs are not appropriate for your use case.
+        scored: false
+
+
+  - id: 5.3
+    text: "Network Policies and CNI"
+    checks:
+      - id: 5.3.1
+        text: "Ensure that the CNI in use supports Network Policies (Manual)"
+        type: "manual"
+        remediation: |
+          None required.
+        scored: false
+
+      - id: 5.3.2
+        text: "Ensure that all Namespaces have Network Policies defined (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command and review the NetworkPolicy objects created in the cluster.
+          oc -n all get networkpolicy
+        remediation: |
+          Follow the documentation and create NetworkPolicy objects as you need them.
+        scored: false
+
+  - id: 5.4
+    text: "Secrets Management"
+    checks:
+      - id: 5.4.1
+        text: "Prefer using secrets as files over secrets as environment variables (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command to find references to objects which use environment variables defined from secrets.
+          oc get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind}
+          {.metadata.name} {"\n"}{end}' -A
+        remediation: |
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
+          from environment variables.
+        scored: false
+
+      - id: 5.4.2
+        text: "Consider external secret storage (Manual)"
+        type: "manual"
+        remediation: |
+          Refer to the secrets management options offered by your cloud provider or a third-party
+          secrets management solution.
+        scored: false
+
+  - id: 5.5
+    text: "Extensible Admission Control"
+    checks:
+      - id: 5.5.1
+        text: "Configure Image Provenance using image controller configuration parameters (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
+        scored: false
+
+  - id: 5.7
+    text: "General Policies"
+    checks:
+      - id: 5.7.1
+        text: "Create administrative boundaries between resources using namespaces (Manual)"
+        type: "manual"
+        audit: |
+          #Run the following command and review the namespaces created in the cluster.
+          oc get namespaces
+          #Ensure that these namespaces are the ones you need and are adequately administered as per your requirements.
+        remediation: |
+          Follow the documentation and create namespaces for objects in your deployment as you need
+          them.
+        scored: false
+
+      - id: 5.7.2
+        text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
+        type: "manual"
+        remediation: |
+          To enable the default seccomp profile, use the reserved value /runtime/default that will
+          make sure that the pod uses the default policy available on the host.
+        scored: false
+
+      - id: 5.7.3
+        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        type: "manual"
+        remediation: |
+          Follow the Kubernetes documentation and apply security contexts to your pods. For a
+          suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
+          Containers.
+        scored: false
+
+      - id: 5.7.4
+        text: "The default namespace should not be used (Manual)"
+        type: "manual"
+        audit: |
+          #Run this command to list objects in default namespace
+          oc project default
+          oc get all
+          #The only entries there should be system managed resources such as the kubernetes and openshift service
+        remediation: |
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
+          resources and that all new resources are created in a specific namespace.
+        scored: false

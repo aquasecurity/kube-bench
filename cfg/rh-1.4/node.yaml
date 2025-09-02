@@ -1,0 +1,485 @@
+---
+controls:
+version: rh-1.4
+id: 4
+text: "Worker Nodes"
+type: "node"
+groups:
+  - id: 4.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 4.1.1
+        text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/systemd/system/kubelet.service 2> /dev/null
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          By default, the kubelet service file has permissions of 644.
+        scored: true
+
+      - id: 4.1.2
+        text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
+        audit: |
+          # Should return root:root for each node
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/systemd/system/kubelet.service 2> /dev/null
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          By default, the kubelet service file has ownership of root:root.
+        scored: true
+
+      - id: 4.1.3
+        text: "If proxy kube proxy configuration file exists ensure permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-sdn namespace
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME" -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
+          fi
+        tests:
+          test_items:
+            - flag: "permissions"
+              set: true
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None needed.
+        scored: true
+
+      - id: 4.1.4
+        text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)"
+        audit: |
+          # Get the node name where the pod is running
+          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
+          # Get the pod name in the openshift-sdn namespace
+          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+          if [ -z "$POD_NAME" ]; then
+          echo "No matching pods found on the current node."
+          else
+          # Execute the stat command
+          oc exec -n openshift-sdn "$POD_NAME"  -- stat -Lc "$i %n %U:%G" /config/kube-proxy-config.yaml  2>/dev/null
+          fi
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required. The configuration is managed by OpenShift operators.
+        scored: true
+
+      - id: 4.1.5
+        text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Manual)"
+        audit: |
+          # Check permissions
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubelet.conf 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.6
+        text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Manual)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/kubelet.conf 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.7
+        text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authentication.x509.clientCAFile'
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME permissions=%a" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/kubelet-ca.crt"
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          No remediation required. OpenShift sets /etc/kubernetes/kubelet-ca.crt to 644 by default.
+          If permissions are more permissive than 644, update with: chmod 644 /etc/kubernetes/kubelet-ca.crt
+        scored: true
+
+
+      - id: 4.1.8
+        text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.9
+        text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/lib/kubelet/config.json 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "600"
+        remediation: |
+          None required.
+        scored: true
+
+      - id: 4.1.10
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /var/lib/kubelet/config.json 2> /dev/null
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          None required.
+        scored: true
+
+  - id: 4.2
+    text: "Kubelet"
+    checks:
+      - id: 4.2.1
+        text: "Activate Garbage collection in OpenShift Container Platform 4, as appropriate (Manual)"
+        audit: |
+          echo "Retrieving and inspecting garbage collection configuration from node-local kubelet configz..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig'
+        tests:
+          test_items:
+            - flag: "evictionHard"
+            - flag: "imageGCHighThresholdPercent"
+            - flag: "imageGCLowThresholdPercent"
+            - flag: "imageMinimumGCAge"
+        remediation: |
+          OpenShift manages node garbage collection through KubeletConfig custom resources per MachineConfigPool.
+          To configure or adjust garbage collection thresholds, follow the documentation:
+          https://docs.openshift.com/container-platform/latest/nodes/nodes/nodes-nodes-garbage-collection.html
+
+          Example: Create or modify a KubeletConfig object to include:
+          ---
+          evictionHard:
+            "memory.available": "200Mi"
+            "nodefs.available": "10%"
+            "imagefs.available": "15%"
+          imageGCHighThresholdPercent: 85
+          imageGCLowThresholdPercent: 80
+          imageMinimumGCAge: "2m0s"
+
+          Then apply the `KubeletConfig` to the appropriate `MachineConfigPool`.
+        scored: true
+
+      - id: 4.2.2
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        audit: |
+          echo "Checking if anonymous-auth is disabled in kubelet configuration on the current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authentication.anonymous.enabled'
+        tests:
+          test_items:
+            - flag: "false"
+        remediation: |
+          By default, OpenShift sets anonymous-auth to false in Kubelet configuration.
+          If this value is found to be true, create or patch a KubeletConfig object with:
+
+          ---
+          kind: KubeletConfig
+          apiVersion: machineconfiguration.openshift.io/v1
+          metadata:
+            name: disable-anonymous-auth
+          spec:
+            kubeletConfig:
+              authentication:
+                anonymous:
+                  enabled: false
+
+          Then apply this KubeletConfig to the appropriate MachineConfigPool.
+          See OpenShift documentation on configuring node-level security settings.
+        scored: true
+
+      - id: 4.2.3
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        audit: |
+          echo "Checking kubelet authorization mode on the current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authorization.mode'
+        tests:
+          test_items:
+            - flag: AlwaysAllow
+              set: false
+        remediation: |
+          No remediation required. By default, OpenShift uses secure authorization modes such as 'Webhook' and does not allow AlwaysAllow.
+          If AlwaysAllow is found, the node must be reconfigured using a KubeletConfig applied through the appropriate MachineConfigPool.
+        scored: true
+
+
+      - id: 4.2.4
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        audit: |
+          echo "Checking Kubelet 'clientCAFile' setting on current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig.authentication.x509.clientCAFile'
+        tests:
+          test_items:
+            - flag: "/etc/kubernetes/kubelet-ca.crt"
+        remediation: |
+          No remediation required. OpenShift sets the clientCAFile by default to /etc/kubernetes/kubelet-ca.crt.
+          Manual modification is unsupported and unnecessary as OpenShift manages Kubelet certificate authentication via the Machine Config Operator.
+        scored: true
+
+
+      - id: 4.2.5
+        text: "Verify that the read only port is not used or is set to 0 (Automated)"
+        audit: |
+          echo "Checking 'kubelet-read-only-port' argument in openshift-kube-apiserver config..."
+
+          oc -n openshift-kube-apiserver get configmap config -o json \
+            | jq -r '.data["config.yaml"]' \
+            | yq '.apiServerArguments."kubelet-read-only-port"[0]'
+        tests:
+          test_items:
+            - flag: "0"
+        remediation: |
+          No remediation is required if the read-only port is set to 0.
+          If this value is not set to 0 (or the argument is missing), create a KubeletConfig object and apply it to the appropriate MachineConfigPool to disable the read-only port.
+
+          Example KubeletConfig:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: disable-readonly-port
+          spec:
+            kubeletConfig:
+              readOnlyPort: 0
+        scored: true
+
+
+      - id: 4.2.6
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (automated)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig'
+        tests:
+          test_items:
+            - path: ".streamingConnectionIdleTimeout"
+              compare:
+                op: noteq
+                value: "0s"
+        remediation: |
+          By default, OpenShift sets streamingConnectionIdleTimeout to 4h0m0s.
+          If it is manually set to "0s", this disables timeouts — which is insecure.
+
+          To remediate, create a `KubeletConfig` CR with a safer timeout (e.g., 1h0m0s):
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: set-streaming-timeout
+          spec:
+            kubeletConfig:
+              streamingConnectionIdleTimeout: "1h0m0s"
+        scored: true
+
+      - id: 4.2.7
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (manual)"
+        audit: |
+          echo "Checking 'makeIPTablesUtilChains' setting in Kubelet config on current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig'
+        tests:
+          test_items:
+            - path: ".makeIPTablesUtilChains"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          No remediation is required.
+          By default, OpenShift sets makeIPTablesUtilChains to true.
+          This allows Kubelet to manage iptables rules and keep them in sync with the dynamic pod network configuration.
+        scored: true
+
+
+      - id: 4.2.8
+        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (manual)"
+        audit: |
+          echo "Checking 'kubeAPIQPS' setting in Kubelet config on current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig'
+        tests:
+          test_items:
+            - path: ".kubeAPIQPS"
+              compare:
+                op: gte
+                value: 1
+        remediation: |
+          OpenShift sets kubeAPIQPS to a default of 50, which is appropriate in most environments.
+          If kubeAPIQPS is set to 0, event rate limiting is disabled, which can overwhelm the kubelet with excessive events.
+
+          To configure a proper limit, create or modify a `KubeletConfig` resource with an appropriate value:
+
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: set-kubeapiqps
+          spec:
+            kubeletConfig:
+              kubeAPIQPS: 50
+        scored: true
+
+
+      - id: 4.2.9
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (manual)"
+        audit: |
+          oc get configmap config -n openshift-kube-apiserver -ojson \
+            | jq -r '.data["config.yaml"]' \
+            | jq -r '.apiServerArguments["kubelet-client-certificate"][]?'
+
+          oc get configmap config -n openshift-kube-apiserver -ojson \
+            | jq -r '.data["config.yaml"]' \
+            | jq -r '.apiServerArguments["kubelet-client-key"][]?'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
+            - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
+        remediation: |
+          No remediation is required. OpenShift manages secure TLS connections to kubelets by default using its internal certificate authority.
+          These X.509 certificates are rotated and validated automatically by the platform.
+          Manual modifications to the TLS paths or keys are not supported and can lead to cluster issues.
+        scored: true
+
+
+      - id: 4.2.10
+        text: "Ensure that the --rotate-certificates argument is not set to false (manual)"
+        audit: |
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig'
+        tests:
+          test_items:
+            - path: ".rotateCertificates"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          No remediation required. By default, OpenShift enables certificate rotation via rotateCertificates=true.
+          If disabled, you must either enable rotation via KubeletConfig or implement external certificate renewal.
+
+          Example remediation using KubeletConfig:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: enable-cert-rotation
+          spec:
+            kubeletConfig:
+              rotateCertificates: true
+        scored: true
+
+      - id: 4.2.11
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true (manual)"
+        audit: |
+          echo "Checking that RotateKubeletServerCertificate is enabled in kubelet config on current node..."
+
+          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+
+          echo "Verifying feature gate: RotateKubeletServerCertificate"
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig.featureGates.RotateKubeletServerCertificate'
+
+          echo "Verifying that certificate rotation is enabled"
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig.rotateCertificates'
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "RotateKubeletServerCertificate"
+              compare:
+                op: eq
+                value: true
+            - flag: "rotateCertificates"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          No remediation is required. OpenShift enables RotateKubeletServerCertificate by default and manages certificate rotation automatically.
+          If the feature gate or rotation setting is disabled, configure a `KubeletConfig` CR and apply it to the MachineConfigPool:
+
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: enable-server-cert-rotation
+          spec:
+            kubeletConfig:
+              rotateCertificates: true
+              featureGates:
+                RotateKubeletServerCertificate: true
+        scored: true
+
+      - id: 4.2.13
+        text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"
+        audit: |
+          # needs verification
+          # verify cipher suites
+          oc describe --namespace=openshift-ingress-operator ingresscontroller/default
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
+          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq .spec.observedConfig.servingInfo
+          oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
+          #check value for tlsSecurityProfile; null is returned if default is used
+          oc get kubeapiservers.operator.openshift.io cluster -o json |jq .spec.tlsSecurityProfile
+        type: manual
+        remediation: |
+          Follow the directions above and in the OpenShift documentation to configure the tlsSecurityProfile.
+          Configuring Ingress
+        scored: false
