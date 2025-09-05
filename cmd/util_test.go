@@ -723,6 +723,13 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		{
 			name: "openshift4",
 			args: args{
+				platform: Platform{Name: "ocp", Version: "4.13"},
+			},
+			want: "rh-1.8",
+		},
+		{
+			name: "openshift4",
+			args: args{
 				platform: Platform{Name: "ocp", Version: "4.1"},
 			},
 			want: "rh-1.0",
