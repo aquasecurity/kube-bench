@@ -1,0 +1,82 @@
+# Service account role required for 242395
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-bench-sa
+  namespace: kube-bench
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-bench-list-pods
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+    resourceNames: []
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-bench-sa-binding
+subjects:
+  - kind: ServiceAccount
+    name: kube-bench-sa
+    namespace: kube-bench
+roleRef:
+  kind: ClusterRole
+  name: kube-bench-list-pods
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-bench
+spec:
+  template:
+    spec:
+      serviceAccountName: kube-bench-sa  
+      hostPID: true
+      containers:
+        - name: kube-bench
+          imagePullPolicy: Always
+          # Push the image to your GCP Artifact Registry and then refer to it here
+          # image: <region>-docker.pkg.dev/<registry>/<repository>/kube-bench:latest
+          image: docker.io/aquasec/kube-bench:latest
+          command:
+            [
+              "kube-bench",
+              "run",
+              "--benchmark",
+              "gke-stig-kubernetes-v2r2"
+            ]
+          volumeMounts:
+            - name: var-lib-kubelet
+              mountPath: /var/lib/kubelet
+              readOnly: true
+            - name: etc-systemd
+              mountPath: /etc/systemd
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /etc/kubernetes
+              readOnly: true
+            - name: home-kubernetes
+              mountPath: /home/kubernetes
+              readOnly: true
+      restartPolicy: Never
+      volumes:
+        - name: var-lib-kubelet
+          hostPath:
+            path: "/var/lib/kubelet"
+        - name: etc-systemd
+          hostPath:
+            path: "/etc/systemd"
+        - name: etc-kubernetes
+          hostPath:
+            path: "/etc/kubernetes"
+        - name: home-kubernetes
+          hostPath:
+            path: "/home/kubernetes"
