@@ -1,0 +1,6 @@
+---
+controls:
+version: "gke-1.8.0"
+id: 2
+text: "Control Plane Configuration"
+type: "controlplane"
