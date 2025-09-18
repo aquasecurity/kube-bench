@@ -32,14 +32,14 @@ groups:
                 value: "NO_CLUSTER_ADMIN_BINDINGS"
         remediation: |
           Identify all ClusterRoleBindings to the "cluster-admin" role and review their subjects:
-          
+
             kubectl get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECTS:.subjects[*].name | grep cluster-admin
-          
+
           If non-system principals (users, groups, or service accounts) do not strictly require cluster-admin,
           rebind them to a least-privileged (Cluster)Role and then remove the excessive binding:
-          
+
             kubectl delete clusterrolebinding <binding-name>
-          
+
           Notes:
           - Do not modify bindings with the "system:" prefix that are required for core components.
           - Prefer assigning narrowly scoped Roles/ClusterRoles that grant only the permissions needed.
