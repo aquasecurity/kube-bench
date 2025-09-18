@@ -533,8 +533,10 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		switch platform.Version {
 		case "1.15", "1.16", "1.17", "1.18", "1.19":
 			return "gke-1.0"
-		case "1.29", "1.30", "1.31":
+		case "1.28", "1.29", "1.30":
 			return "gke-1.6.0"
+		case "1.31", "1.32", "1.33", "1.34":
+			return "gke-1.8.0"
 		default:
 			return "gke-1.2.0"
 		}
