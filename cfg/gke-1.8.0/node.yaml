@@ -1,0 +1,65 @@
+---
+controls:
+version: "gke-1.8.0"
+id: 3
+text: "Worker Nodes"
+type: "node"
+groups:
+  - id: 3.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 3.1.1
+        text: "Ensure that the kubeconfig file permissions are set to 644 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on each worker node.
+          For example,
+
+            chmod 644 $proxykubeconfig
+        scored: true
+
+      - id: 3.1.2
+        text: "Ensure that the kubelet kubeconfig file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the below command (based on the file location on your system) on each worker node.
+          For example:
+
+            chown root:root $proxykubeconfig
+        scored: true
+
+      - id: 3.1.3
+        text: "Ensure that the kubelet configuration file has permissions set to 644 (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the following command (using the kubelet config file location)
+
+            chmod 644 $kubeletconf
+        scored: true
+
+      - id: 3.1.4
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
+        tests:
+          test_items:
+            - flag: root:root
+        remediation: |
+          Run the following command (using the config file location identied in the Audit step)
+
+            chown root:root $kubeletconf
+        scored: true

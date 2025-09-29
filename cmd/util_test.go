@@ -686,6 +686,20 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			want: "gke-1.2.0",
 		},
 		{
+			name: "gke 1.28",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.28"},
+			},
+			want: "gke-1.6.0",
+		},
+		{
+			name: "gke 1.31",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.31"},
+			},
+			want: "gke-1.8.0",
+		},
+		{
 			name: "aliyun",
 			args: args{
 				platform: Platform{Name: "aliyun"},
@@ -719,6 +733,13 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				platform: Platform{Name: "ocp", Version: "4.11"},
 			},
 			want: "rh-1.4",
+		},
+		{
+			name: "openshift4",
+			args: args{
+				platform: Platform{Name: "ocp", Version: "4.13"},
+			},
+			want: "rh-1.8",
 		},
 		{
 			name: "openshift4",
