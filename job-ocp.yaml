@@ -20,27 +20,50 @@ metadata:
   name: kube-bench-cluster-role
 rules:
   - apiGroups:
-      - '*'
+      - ""
     resources:
-      - '*'
+      - pods
+      - services
+      - configmaps
+      - secrets
+      - nodes
+      - namespaces
     verbs:
-      - 'get'
-      - 'list'
+      - get
+      - list
   - apiGroups:
-      - '*'
+      - apps
     resources:
-      - 'pods/exec'
+      - deployments
+      - daemonsets
+      - statefulsets
     verbs:
-      - 'create'
+      - get
+      - list
   - apiGroups:
-      - '*'
+      - rbac.authorization.k8s.io
     resources:
-      - 'pods'
-      - 'namespaces'
+      - roles
+      - rolebindings
+      - clusterroles
+      - clusterrolebindings
     verbs:
-      - 'create'
-      - 'delete'
-      - 'watch'
+      - get
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - namespaces
+    verbs:
+      - create
+      - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

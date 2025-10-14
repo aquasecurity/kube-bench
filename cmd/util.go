@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/golang/glog"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -521,15 +522,21 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
 	switch platform.Name {
 	case "eks":
-		return "eks-1.5.0"
+		oldEKSVersions := []string{"1.15", "1.16", "1.17", "1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27", "1.28"}
+		if slices.Contains(oldEKSVersions, platform.Version) {
+			return "eks-1.5.0"
+		}
+		return "eks-1.7.0"
 	case "aks":
 		return "aks-1.7"
 	case "gke":
 		switch platform.Version {
 		case "1.15", "1.16", "1.17", "1.18", "1.19":
 			return "gke-1.0"
-		case "1.29", "1.30", "1.31":
+		case "1.28", "1.29", "1.30":
 			return "gke-1.6.0"
+		case "1.31", "1.32", "1.33", "1.34":
+			return "gke-1.8.0"
 		default:
 			return "gke-1.2.0"
 		}
@@ -541,6 +548,10 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 			return "rh-0.7"
 		case "4.1":
 			return "rh-1.0"
+		case "4.11":
+			return "rh-1.4"
+		case "4.13":
+			return "rh-1.8"
 		case "4.15":
 			return "rh-1.6"
 		}
@@ -618,10 +629,10 @@ func getOpenShiftInfo() Platform {
 
 func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
-
+	valid := []string{"3.10", "4.1", "4.11", "4.13", "4.15"}
 	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
-		if ocpVer == "4.15" || ocpVer == "4.1" || ocpVer == "3.10" {
+		if slices.Contains(valid, ocpVer) {
 			glog.V(1).Info(fmt.Sprintf("getOcpBenchmarkVersion found valid version for ocp: %q \n", ocpVer))
 			return ocpVer, nil
 		}

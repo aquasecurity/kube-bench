@@ -651,9 +651,16 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		want string
 	}{
 		{
-			name: "eks",
+			name: "eks 1.31",
 			args: args{
-				platform: Platform{Name: "eks"},
+				platform: Platform{Name: "eks", Version: "1.31"},
+			},
+			want: "eks-1.7.0",
+		},
+		{
+			name: "eks 1.24",
+			args: args{
+				platform: Platform{Name: "eks", Version: "1.24"},
 			},
 			want: "eks-1.5.0",
 		},
@@ -677,6 +684,20 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				platform: Platform{Name: "gke", Version: "1.22"},
 			},
 			want: "gke-1.2.0",
+		},
+		{
+			name: "gke 1.28",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.28"},
+			},
+			want: "gke-1.6.0",
+		},
+		{
+			name: "gke 1.31",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.31"},
+			},
+			want: "gke-1.8.0",
 		},
 		{
 			name: "aliyun",
@@ -705,6 +726,20 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				platform: Platform{Name: "ocp", Version: "3.10"},
 			},
 			want: "rh-0.7",
+		},
+		{
+			name: "openshift4",
+			args: args{
+				platform: Platform{Name: "ocp", Version: "4.11"},
+			},
+			want: "rh-1.4",
+		},
+		{
+			name: "openshift4",
+			args: args{
+				platform: Platform{Name: "ocp", Version: "4.13"},
+			},
+			want: "rh-1.8",
 		},
 		{
 			name: "openshift4",
