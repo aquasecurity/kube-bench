@@ -563,6 +563,10 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 			return "k3s-cis-1.24"
 		case "1.25", "1.26", "1.27":
 			return "k3s-cis-1.7"
+		case "1.28":
+			return "k3s-cis-1.8"
+		case "1.29", "1.30", "1.31", "1.32", "1.33", "1.34":
+			return "k3s-cis-1.11"
 		}
 	case "rancher":
 		switch platform.Version {
