@@ -310,6 +310,7 @@ version_mapping:
   "k3s-cis-1.7": "k3s-cis-1.7"
   "k3s-cis-1.23": "k3s-cis-1.23"
   "k3s-cis-1.24": "k3s-cis-1.24"
+  "k3s-cis-1.11": "k3s-cis-1.11"
   "rke-cis-1.7": "rke-cis-1.7"
   "rke-cis-1.23": "rke-cis-1.23"
   "rke-cis-1.24": "rke-cis-1.24"
@@ -515,6 +516,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.24":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.11":
     - "master"
     - "etcd"
     - "controlplane"
