@@ -19,7 +19,7 @@ RUN /bin/bash -c 'echo "$(<kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum 
 
 RUN chmod +x /usr/local/bin/kubectl
 
-FROM alpine:3.22.1 AS run
+FROM alpine:3.22.2 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, --no-headers support and add findutils to get GNU xargs
 # https://github.com/aquasecurity/kube-bench/issues/109
