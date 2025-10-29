@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 3.1.1
         text: "Ensure that the kubeconfig file permissions are set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -21,12 +21,12 @@ groups:
           Run the below command (based on the file location on your system) on each worker node.
           For example,
 
-            chmod 644 $proxykubeconfig
+            chmod 644 $kubeletkubeconfig
         scored: true
 
       - id: 3.1.2
         text: "Ensure that the kubelet kubeconfig file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
         tests:
           test_items:
             - flag: root:root
@@ -34,7 +34,7 @@ groups:
           Run the below command (based on the file location on your system) on each worker node.
           For example:
 
-            chown root:root $proxykubeconfig
+            chown root:root $kubeletkubeconfig
         scored: true
 
       - id: 3.1.3
