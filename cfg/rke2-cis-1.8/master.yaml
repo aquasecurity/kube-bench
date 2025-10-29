@@ -100,17 +100,21 @@ groups:
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Automated)"
 
         audit: |
-          /bin/sh -c 'if [ -e $etcdconf ]; then
-             find $etcdconf -type f -name "*etcd*" \
-            -exec stat -c "permissions=%a %n" {} +;
+          /bin/sh -c 'if [ -e "$etcdconf" ]; then
+            find "$etcdconf" -type f -name "*etcd*" \
+              -exec stat -c "permissions=%a %n" {} +
+          else
+            echo "Directory not found"
           fi'
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "Directory not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -124,11 +128,16 @@ groups:
         audit: |
           /bin/sh -c 'if [ -e "$etcdconf" ]; then
             find "$etcdconf" -type f -name "*etcd*" -exec stat -c "%U:%G %n" {} +
+          else
+            echo "Directory not found"
           fi'
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "Directory not found"
+              set: true
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -171,14 +180,21 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: stat -c %a /node/var/lib/etcd
+        audit: |
+          /bin/sh -c 'if [ -e "/node/var/lib/etcd" ]; then
+            stat -c "%a" "/node/var/lib/etcd"
+          else
+            echo "Directory not found: /node/var/lib/etcd"
+          fi'
         tests:
+          bin_op: or
           test_items:
             - flag: "700"
               compare:
                 op: eq
                 value: "700"
               set: true
+            - flag: "Directory not found: /node/var/lib/etcd"
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.
