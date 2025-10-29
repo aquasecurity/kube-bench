@@ -6,4 +6,4 @@ node:
     defaultkubeconfig: "/var/lib/kubelet/kubeconfig"
 
   kubelet:
-    defaultconf: "/etc/kubernetes/kubelet-config.yaml"
+    defaultconf: "/etc/kubernetes/kubelet/kubelet-config.yaml"
