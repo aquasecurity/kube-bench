@@ -2,7 +2,7 @@
 controls:
 version: "eks-1.7.0"
 id: 3
-text: "Worker Nodes"
+text: "Worker Node Security Configuration"
 type: "node"
 groups:
   - id: 3.1
@@ -89,7 +89,7 @@ groups:
           Disable Anonymous Authentication by setting the following parameter:
           "authentication": { "anonymous": { "enabled": false } }
 
-          Remediation Method 2.
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file on each worker node and
           ensure the below parameters are part of the KUBELET_ARGS variable string.
           For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
@@ -352,10 +352,6 @@ groups:
               compare:
                 op: gte
                 value: 0
-            - flag: --event-qps
-              path: '{.eventRecordQPS}'
-              set: false
-          bin_op: or
         remediation: |
           If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate
           level.
@@ -375,6 +371,7 @@ groups:
           test_items:
             - flag: --rotate-certificates
               path: '{.rotateCertificates}'
+              set: true
               compare:
                 op: eq
                 value: true
