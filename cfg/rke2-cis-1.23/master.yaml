@@ -98,14 +98,21 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        audit: |
+          /bin/sh -c 'if [ -d "$etcdconf" ]; then
+            find "$etcdconf" -type f -name "*etcd*" -exec stat -c "permissions=%a" {} +
+          else
+            echo "Directory not found"
+          fi'
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "644"
+            - flag: "Directory not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -114,14 +121,21 @@ groups:
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
+        audit: |
+           /bin/sh -c 'if [ -d "$etcdconf" ]; then
+            find "$etcdconf" -type f -name "*etcd*" -exec stat -c "ownership=%U:%G %n" {} +
+           else
+            echo "Directory not found"
+           fi'
         tests:
+          bin_op: or
           test_items:
-            - flag: "root:root"
+            - flag: "ownership"
               compare:
                 op: eq
                 value: "root:root"
               set: true
+            - flag: "Directory not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -162,14 +176,21 @@ groups:
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
-        audit: "stat -c permissions=%a /var/lib/rancher/rke2/server/db/etcd"
+        audit: |
+           /bin/sh -c 'if [ -d "/var/lib/rancher/rke2/server/db/etcd" ]; then
+            stat -c "permissions=%a" "/var/lib/rancher/rke2/server/db/etcd"
+           else
+            echo "Directory not found"
+           fi'
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "700"
               set: true
+            - flag: "Directory not found"
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.

@@ -126,14 +126,21 @@ groups:
 
       - id: 4.1.9
         text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        audit: |
+          /bin/sh -c 'if test -e "$kubeletconf"; then
+             stat -c "permissions=%a" "$kubeletconf"
+           else
+             echo "File not found"
+           fi'
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "644"
               set: true
+            - flag: "File not found"
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chmod 644 $kubeletconf
@@ -141,11 +148,18 @@ groups:
 
       - id: 4.1.10
         text: "Ensure that the kubelet --config configuration file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
+        audit: |
+          /bin/sh -c 'if test -e "$kubeletconf"; then
+              stat -c "%U:%G" "$kubeletconf"
+           else
+              echo "File not found"
+           fi'
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
               set: true
+            - flag: File not found
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf

@@ -765,9 +765,16 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		{
 			name: "rke2",
 			args: args{
-				platform: Platform{Name: "rke2r", Version: "1.27"},
+				platform: Platform{Name: "rke2r", Version: "1.25"},
 			},
 			want: "rke2-cis-1.7",
+		},
+		{
+			name: "rke2",
+			args: args{
+				platform: Platform{Name: "rke2r", Version: "1.26"},
+			},
+			want: "rke2-cis-1.8",
 		},
 		{
 			name: "aks",
