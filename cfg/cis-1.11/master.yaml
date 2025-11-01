@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.11"
+version: "cis-1.11.1"
 id: 1
 text: "Control Plane Security Configuration"
 type: "master"
@@ -752,7 +752,7 @@ groups:
                 value: "aescbc,kms,secretbox"
         remediation: |
           Follow the Kubernetes documentation and configure a EncryptionConfig file.
-          In this file, choose aescbc, kms or secretbox as the encryption provider.
+          In this file, choose aescbc, kms, or secretbox as the encryption provider.
         scored: false
 
       - id: 1.2.29
@@ -785,10 +785,11 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the Control Plane node and set the --service-account-extend-token-expiration parameter to false.
-          `--service-account-extend-token-expiration=false`
-          By default, this parameter is set to true.
-        scored: true
+          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+          on the Control Plane node and set the --service-account-extend-token-expiration
+          parameter to false.
+          --service-account-extend-token-expiration=false
+        scored: false
 
   - id: 1.3
     text: "Controller Manager"

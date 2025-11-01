@@ -9,8 +9,7 @@ groups:
     text: "Logging"
     checks:
       - id: 2.1.1
-        text: "Enable audit Logs (Manual)"
-        type: manual
+        text: "Enable audit Logs (Automated)"
         remediation: |
           From Console:
           1.  For each EKS Cluster in each region;
@@ -34,36 +33,37 @@ groups:
 
       - id: 2.1.2
         text: "Ensure audit logs are collected and managed (Manual)"
-        type: manual
+        type: "manual"
         remediation: |
-          Create or update the audit-policy.yaml to specify the audit logging configuration:
-          apiVersion: audit.k8s.io/v1
-          kind: Policy
-          rules:
-            - level: Metadata
+          1. Create or update the audit-policy.yaml to specify the audit logging configuration:
+              apiVersion: audit.k8s.io/v1
+              kind: Policy
+              rules:
+              - level: Metadata
               resources:
-                - group: ""
-                  resources: ["pods"]
-          Apply the audit policy configuration to the cluster:
-            kubectl apply -f <path-to-audit-policy>.yaml
-          Ensure audit logs are forwarded to a centralized logging system like CloudWatch, Elasticsearch, or another log management solution:
-            kubectl create configmap cluster-audit-policy --from-file=audit-policy.yaml -n kube-system
-            kubectl apply -f - <<EOF
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: audit-logging
-            namespace: kube-system
-          spec:
-            containers:
+              - group: ""
+              resources: ["pods"]
+          2.  Apply the audit policy configuration to the cluster:
+              kubectl apply -f <path-to-audit-policy>.yaml
+          3.  Ensure audit logs are forwarded to a centralized logging system like CloudWatch,
+              Elasticsearch, or another log management solution:
+              kubectl create configmap cluster-audit-policy --from-file=audit-policy.yaml -n kube-system
+              kubectl apply -f - <<EOF
+              apiVersion: v1
+              kind: Pod
+              metadata:
+              name: audit-logging
+              namespace: kube-system
+              spec:
+              containers:
               - name: audit-log-forwarder
-                image: my-log-forwarder-image
-                volumeMounts:
-                  - mountPath: /etc/kubernetes/audit
-                    name: audit-config
-            volumes:
+              image: my-log-forwarder-image
+              volumeMounts:
+              - mountPath: /etc/kubernetes/audit
+              name: audit-config
+              volumes:
               - name: audit-config
-                configMap:
-                  name: cluster-audit-policy
-            EOF
+              configMap:
+              name: cluster-audit-policy
+              EOF
         scored: false
