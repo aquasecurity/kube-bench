@@ -2,7 +2,7 @@
 controls:
 version: rh-1.8
 id: 5
-text: "Kubernetes Policies"
+text: "Policies"
 type: "policies"
 groups:
   - id: 5.1
@@ -278,7 +278,7 @@ groups:
     text: "Extensible Admission Control"
     checks:
       - id: 5.5.1
-        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
+        text: "Configure Image Provenance using image controller configuration parameters (Manual)"
         type: "manual"
         audit: |
           # needs verification

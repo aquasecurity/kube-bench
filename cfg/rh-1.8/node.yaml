@@ -2,7 +2,7 @@
 controls:
 version: rh-1.8
 id: 4
-text: "Worker Node Security Configuration"
+text: "Worker Nodes"
 type: "node"
 groups:
   - id: 4.1
@@ -48,7 +48,7 @@ groups:
           echo "No matching pods found on the current node."
           else
           # Execute the stat command
-          oc exec -n openshift-sdn "$POD_NAME"  - stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
+          oc exec -n openshift-sdn "$POD_NAME"  -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
           fi
         tests:
           bin_op: or
@@ -191,30 +191,55 @@ groups:
       - id: 4.2.1
         text: "Activate Garbage collection in OpenShift Container Platform 4, as appropriate (Manual)"
         audit: |
+          echo "Retrieving and inspecting garbage collection configuration from node-local kubelet configz..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc debug node/$NODE_NAME -- chroot /host grep -B4 -A1 anonymous /etc/kubernetes/kubelet.conf 2> /dev/null
-        use_multiple_values: true
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig'
         tests:
           test_items:
-            - flag: "enabled: true"
-              set: false
+            - flag: "evictionHard"
+            - flag: "imageGCHighThresholdPercent"
+            - flag: "imageGCLowThresholdPercent"
+            - flag: "imageMinimumGCAge"
         remediation: |
-          To configure, follow the directions in Garbage Collection Remediation https://docs.openshift.com/container-platform/latest/nodes/nodes/nodes-nodes-garbage-collection.html.
+          OpenShift manages node garbage collection through KubeletConfig custom resources per MachineConfigPool.
+          To configure or adjust garbage collection thresholds, follow the documentation:
+          https://docs.openshift.com/container-platform/latest/nodes/nodes/nodes-nodes-garbage-collection.html
+          Example: Create or modify a KubeletConfig object to include:
+          ---
+          evictionHard:
+            "memory.available": "200Mi"
+            "nodefs.available": "10%"
+            "imagefs.available": "15%"
+          imageGCHighThresholdPercent: 85
+          imageGCLowThresholdPercent: 80
+          imageMinimumGCAge: "2m0s"
+          Then apply the `KubeletConfig` to the appropriate `MachineConfigPool`.
         scored: true
 
       - id: 4.2.2
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
         audit: |
+          echo "Checking if anonymous-auth is disabled in kubelet configuration on the current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authentication.anonymous.enabled' 2> /dev/null
-        use_multiple_values: true
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authentication.anonymous.enabled'
         tests:
           test_items:
-            - flag: "true"
-              set: false
+            - flag: "false"
         remediation: |
-          Create a kubeletconfig to explicitly disable anonymous authentication. Examples of how
-          to do this can be found in the OpenShift documentation.
+          By default, OpenShift sets anonymous-auth to false in Kubelet configuration.
+          If this value is found to be true, create or patch a KubeletConfig object with:
+          ---
+          kind: KubeletConfig
+          apiVersion: machineconfiguration.openshift.io/v1
+          metadata:
+            name: disable-anonymous-auth
+          spec:
+            kubeletConfig:
+              authentication:
+                anonymous:
+                  enabled: false
+          Then apply this KubeletConfig to the appropriate MachineConfigPool.
+          See OpenShift documentation on configuring node-level security settings.
         scored: true
 
       - id: 4.2.3
@@ -294,20 +319,31 @@ groups:
         scored: false
 
       - id: 4.2.8
-        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (Manual)"
+        text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (manual)"
         audit: |
+          echo "Checking 'kubeAPIQPS' setting in Kubelet config on current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          echo kubeAPIQPS=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.kubeAPIQPS' 2> /dev/null)
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig'
         tests:
           test_items:
-            - flag: kubeAPIQPS
+            - path: ".kubeAPIQPS"
               compare:
                 op: gte
-                value: 0
+                value: 1
         remediation: |
-          None required by default. Follow the documentation to edit kubeletconfig parameters
-          https://docs.openshift.com/container-platform/4.15/post_installation_configuration/machine-configuration-tasks.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-machine-configuration-tasks
-        scored: false
+          OpenShift sets kubeAPIQPS to a default of 50, which is appropriate in most environments.
+          If kubeAPIQPS is set to 0, event rate limiting is disabled, which can overwhelm the kubelet with excessive events.
+          To configure a proper limit, create or modify a `KubeletConfig` resource with an appropriate value:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: set-kubeapiqps
+          spec:
+            kubeletConfig:
+              kubeAPIQPS: 50
+        scored: true
 
       - id: 4.2.9
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
@@ -321,48 +357,74 @@ groups:
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.crt"
             - flag: "/etc/kubernetes/static-pod-certs/secrets/kubelet-client/tls.key"
         remediation: |
-          OpenShift automatically manages TLS authentication for the API server communication with the node/kublet.
-          This is not configurable.
+          No remediation is required. OpenShift manages secure TLS connections to kubelets by default using its internal certificate authority.
+          These X.509 certificates are rotated and validated automatically by the platform.
+          Manual modifications to the TLS paths or keys are not supported and can lead to cluster issues.
         scored: true
 
       - id: 4.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
         audit: |
+          echo "Checking 'rotateCertificates' setting in Kubelet config on current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          echo rotateCertificates=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.rotateCertificates' 2> /dev/null)
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.rotateCertificates'
         use_multiple_values: true
         tests:
           test_items:
-            - flag: rotateCertificates
+            - flag: ".rotateCertificates"
               compare:
                 op: eq
                 value: true
         remediation: |
-          None required.
-        scored: false
+          No remediation required. By default, OpenShift enables certificate rotation via rotateCertificates=true.
+          If disabled, you must either enable rotation via KubeletConfig or implement external certificate renewal.
+          Example remediation using KubeletConfig:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: enable-cert-rotation
+          spec:
+            kubeletConfig:
+              rotateCertificates: true
+        scored: true
 
       - id: 4.2.11
-        text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
+        text: "Verify that the RotateKubeletServerCertificate argument is set to true (manual)"
         audit: |
-          #Verify the rotateKubeletServerCertificate feature gate is on
+          echo "Checking that RotateKubeletServerCertificate is enabled in kubelet config on current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          echo RotateKubeletServerCertificate=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.featureGates.RotateKubeletServerCertificate' 2> /dev/null)
-          # Verify the rotateCertificates argument is set to true
-          echo rotateCertificates=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq -r '.kubeletconfig.rotateCertificates' 2> /dev/null)
+          echo "Verifying feature gate: RotateKubeletServerCertificate"
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig.featureGates.RotateKubeletServerCertificate'
+          echo "Verifying that certificate rotation is enabled"
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
+            | jq '.kubeletconfig.rotateCertificates'
         tests:
           bin_op: and
           test_items:
-            - flag: RotateKubeletServerCertificate
+            - flag: "RotateKubeletServerCertificate"
               compare:
                 op: eq
                 value: true
-            - flag: rotateCertificates
+            - flag: "rotateCertificates"
               compare:
                 op: eq
                 value: true
         remediation: |
-          None required. By default, kubelet server certificate rotation is enabled.
-        scored: false
+          No remediation is required. OpenShift enables RotateKubeletServerCertificate by default and manages certificate rotation automatically.
+          If the feature gate or rotation setting is disabled, configure a `KubeletConfig` CR and apply it to the MachineConfigPool:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: enable-server-cert-rotation
+          spec:
+            kubeletConfig:
+              rotateCertificates: true
+              featureGates:
+                RotateKubeletServerCertificate: true
+        scored: true
 
       - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Manual)"

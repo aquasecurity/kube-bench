@@ -220,7 +220,7 @@ groups:
         scored: true
 
       - id: 4.2.4
-        text: "Verify that the --read-only-port argument is set to 0 (Manual)"
+        text: "Verify that if defined, the --read-only-port argument is set to 0 (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -454,7 +454,6 @@ groups:
           either via the --pod-max-pids command line parameter or the PodPidsLimit configuration file setting.
         scored: false
 
-
       - id: 4.2.14
         text: "Ensure that the --seccomp-default parameter is set to true (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -464,12 +463,11 @@ groups:
             - flag: --seccomp-default
               path: '{.seccompDefault}'
         remediation: |
-          Set the parameter, either via the --seccomp-default command line parameter or the seccompDefault
-          configuration file setting.
+          Set the parameter, either via the --seccomp-default command line parameter or the 
+          seccompDefault configuration file setting.
           By default the seccomp profile is not enabled.
           https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
         scored: false
-
 
       - id: 4.2.15
         text: "Ensure that the --IPAddressDeny is set to any (Manual)"

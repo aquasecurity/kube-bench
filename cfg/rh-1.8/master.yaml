@@ -108,7 +108,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Manual)"
@@ -136,7 +136,7 @@ groups:
           There is no remediation for updating the permissions of kube-scheduler-pod.yaml.
           The file is owned by an OpenShift operator and any changes to the file will result in a degraded cluster state.
           Please do not attempt to remediate the permissions of this file.
-        scored: false
+        scored: true
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Manual))"
@@ -159,7 +159,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Manual))"
@@ -187,7 +187,7 @@ groups:
           There is no remediation for updating the permissions of etcd-pod.yaml.
           The file is owned by an OpenShift operator and any changes to the file will result in a degraded cluster state.
           Please do not attempt to remediate the permissions of this file.
-        scored: false
+        scored: true
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
@@ -210,7 +210,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 600 or more restrictive (Manual)"
@@ -251,7 +251,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
@@ -292,7 +292,7 @@ groups:
             - flag: "openvswitch:openvswitch"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Manual)"
@@ -318,7 +318,7 @@ groups:
                 value: "700"
         remediation: |
           No remediation required; file permissions are managed by the etcd operator.
-        scored: false
+        scored: true
 
       - id: 1.1.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Manual)"
@@ -341,10 +341,10 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.13
-        text: "Ensure that the kubeconfig file ownership are set to 600 or more restrictive (Manual))"
+        text: "Ensure that the kubeconfig file permissions are set to 600 or more restrictive (Manual))"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubeconfig 2> /dev/null
@@ -359,7 +359,7 @@ groups:
           There is no remediation for updating the permissions of kubeconfig.
           The file is owned by an OpenShift operator and any changes to the file will result in a degraded cluster state.
           Please do not attempt to remediate the permissions of this file.
-        scored: false
+        scored: true
 
       - id: 1.1.14
         text: "Ensure that the kubeconfig file ownership is set to root:root (Manual)"
@@ -372,7 +372,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.15
         text: "Ensure that the Scheduler kubeconfig file permissions are set to 600 or more restrictive (Manual)"
@@ -400,10 +400,10 @@ groups:
           There is no remediation for updating the permissions of the kubeconfig file.
           The file is owned by an OpenShift operator and any changes to the file will result in a degraded cluster state.
           Please do not attempt to remediate the permissions of this file.
-        scored: false
+        scored: true
 
       - id: 1.1.16
-        text: "Ensure that the scheduler.conf file ownership is set to root:root (Manual)"
+        text: "Ensure that the scheduler kubeconfig file ownership is set to root:root (Manual)"
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -423,10 +423,10 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.17
-        text: "Ensure that the controller-manager.conf file permissions are set to 600 or more restrictive (Manual)"
+        text: "Ensure that the controller-manager kubeconfig file permissions are set to 600 or more restrictive (Manual)"
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -449,10 +449,10 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.18
-        text: "Ensure that the controller-manager.conf file ownership is set to root:root (Manual)"
+        text: "Ensure that the controller-manager kubeconfig file ownership is set to root:root (Manual)"
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -472,7 +472,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.19
         text: "Ensure that the OpenShift PKI directory and file ownership is set to root:root (Manual)"
@@ -500,7 +500,7 @@ groups:
             - flag: "root:root"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.20
         text: "Ensure that the OpenShift PKI certificate file permissions are set to 600 or more restrictive (Manual)"
@@ -526,7 +526,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
       - id: 1.1.21
         text: "Ensure that the OpenShift PKI key file permissions are set to 600 (Manual)"
@@ -552,7 +552,7 @@ groups:
                 value: "600"
         remediation: |
           No remediation required; file permissions are managed by the operator.
-        scored: false
+        scored: true
 
   - id: 1.2
     text: "API Server"
@@ -850,17 +850,22 @@ groups:
       - id: 1.2.20
         text: "Ensure that the maximumRetainedFiles argument is set to 10 or as appropriate (Manual)"
         audit: |
-          output=$(oc get configmap config -n openshift-kube-apiserver -o json | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["audit-log-maxbackup"][]?')
-          [ "$output" != "" ] && [ "$output" != "null" ] && echo "audit-log-maxbackup=$output" || true
+          VALUE=$(oc get configmap config -n openshift-kube-apiserver -ojson \
+            | jq -r '.data["config.yaml"]' \
+            | jq -r '.apiServerArguments["audit-log-maxbackup"][0] // empty')
+          if [ -n "$VALUE" ] && [ "$VALUE" -ge 10 ]; then
+            echo "pass (current=$VALUE)"
+          else
+            echo "fail (current=$VALUE)"
+          fi
         tests:
-          test_items:
-            - flag: "audit-log-maxbackup"
-              compare:
-                op: gte
-                value: 10
+        test_items:
+          - flag: "pass"
         remediation: |
-          None required. By default, auditing is enabled and the maximum audit log backup is set to 10.
-        scored: false
+          No remediation required.
+          By default, OpenShift retains 10 audit log backup files.
+          This provides sufficient log history for incident investigation and audit review.
+        scored: true
 
       - id: 1.2.21
         text: "Configure Kubernetes API Server Maximum Audit Log Size (Manual)"
@@ -956,7 +961,7 @@ groups:
       - id: 1.2.27
         text: "Ensure that the --client-ca-file argument is set as appropriate (Manual)"
         audit: |
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r '.apiServerArguments["client-ca-file"][]'
+          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq -r .servingInfo.clientCA
         tests:
           test_items:
             - flag: "/etc/kubernetes/static-pod-certs/configmaps/client-ca/ca-bundle.crt"
@@ -1063,30 +1068,31 @@ groups:
       - id: 1.3.2
         text: "Ensure that the --use-service-account-credentials argument is set to true (Manual)"
         audit: |
-          echo use-service-account-credentials=`oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["use-service-account-credentials"][]'`
+          oc get configmaps config -n openshift-kube-controller-manager -ojson | \
+          jq -r '.data["config.yaml"]' | \
+          jq -r '.extendedArguments["use-service-account-credentials"][]'
         tests:
           test_items:
-            - flag: "use-service-account-credentials"
-              compare:
-                op: eq
-                value: true
+            - flag: "true"
         remediation: |
           The OpenShift Controller Manager operator manages and updates the OpenShift Controller Manager.
           The Kubernetes Controller Manager operator manages and updates the Kubernetes Controller Manager deployed on top of OpenShift.
           This operator is configured via KubeControllerManager custom resource.
-        scored: false
+        scored: true
 
       - id: 1.3.3
         text: "Ensure that the --service-account-private-key-file argument is set as appropriate (Manual)"
         audit: |
-          oc get configmaps config -n openshift-kube-controller-manager -ojson | jq -r '.data["config.yaml"]' | jq -r '.extendedArguments["service-account-private-key-file"][]'
+          oc get configmaps config -n openshift-kube-controller-manager -ojson | \
+            jq -r '.data["config.yaml"]' | \
+            jq -r '.extendedArguments["service-account-private-key-file"][]'
         tests:
           test_items:
             - flag: "/etc/kubernetes/static-pod-resources/secrets/service-account-private-key/service-account.key"
         remediation: |
           None required.
           OpenShift manages the service account credentials for the scheduler automatically.
-        scored: false
+        scored: true
 
       - id: 1.3.4
         text: "Ensure that the --root-ca-file argument is set as appropriate (Manual)"

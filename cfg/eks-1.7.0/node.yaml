@@ -2,7 +2,7 @@
 controls:
 version: "eks-1.7.0"
 id: 3
-text: "Worker Node Security Configuration"
+text: "Worker Nodes"
 type: "node"
 groups:
   - id: 3.1

@@ -10,17 +10,21 @@ groups:
     checks:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning is enabled (Automated)"
+        audit: "gcloud services list --enabled"
         type: "manual"
         remediation: |
           For Images Hosted in GCR:
-          Using Command Line:
-
-            gcloud services enable containeranalysis.googleapis.com
-
+          Using Google Cloud Console
+          Go to GCR by visiting: https://console.cloud.google.com/gcr
+          Select Settings and, under the Vulnerability Scanning heading, click the TURN ON button.
+          Using Command Line
+          gcloud services enable containeranalysis.googleapis.com
           For Images Hosted in AR:
-          Using Command Line:
-
-            gcloud services enable containerscanning.googleapis.com
+          Using Google Cloud Console
+          Go to GCR by visiting: https://console.cloud.google.com/artifacts
+          Select Settings and, under the Vulnerability Scanning heading, click the ENABLE button.
+          Using Command Line
+          gcloud services enable containerscanning.googleapis.com
         scored: false
 
       - id: 5.1.2
@@ -147,6 +151,8 @@ groups:
     checks:
       - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine default service account (Automated))"
+        audit: |
+          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.config.serviceAccount'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -206,6 +212,8 @@ groups:
     checks:
       - id: 5.3.1
         text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.databaseEncryption'
         type: "manual"
         remediation: |
           To create a key:
@@ -245,6 +253,8 @@ groups:
     checks:
       - id: 5.4.1
         text: "Ensure the GKE Metadata Server is Enabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.nodePools[].config.workloadMetadataConfig'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -268,6 +278,8 @@ groups:
     checks:
       - id: 5.5.1
         text: "Ensure Container-Optimized OS (cos_containerd) is used for GKE node images (Automated)"
+        audit: |
+          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.config.imageType'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -279,6 +291,8 @@ groups:
 
       - id: 5.5.2
         text: "Ensure Node Auto-Repair is enabled for GKE nodes (Automated)"
+        audit: |
+          gcloud container node-pools describe $POOL_NAME --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.management'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -290,6 +304,8 @@ groups:
 
       - id: 5.5.3
         text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Automated)"
+        audit: |
+          gcloud container node-pools describe $POOL_NAME --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.management'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -302,6 +318,8 @@ groups:
 
       - id: 5.5.4
         text: "When creating New Clusters - Automate GKE version management using Release Channels (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq .releaseChannel.channel
         type: "manual"
         remediation: |
           Using Command Line:
@@ -315,6 +333,8 @@ groups:
 
       - id: 5.5.5
         text: "Ensure Shielded GKE Nodes are Enabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.shieldedNodes'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -327,6 +347,8 @@ groups:
 
       - id: 5.5.6
         text: "Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled (Automated)"
+        audit: |
+          gcloud container node-pools describe $POOL_NAME --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq .config.shieldedInstanceConfig
         type: "manual"
         remediation: |
           Using Command Line:
@@ -343,6 +365,8 @@ groups:
 
       - id: 5.5.7
         text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Automated)"
+        audit: |
+          gcloud container node-pools describe $POOL_NAME --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq .config.shieldedInstanceConfig
         type: "manual"
         remediation: |
           Using Command Line:
@@ -361,6 +385,8 @@ groups:
     checks:
       - id: 5.6.1
         text: "Enable VPC Flow Logs and Intranode Visibility (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.networkConfig.enableIntraNodeVisibility'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -375,6 +401,8 @@ groups:
 
       - id: 5.6.2
         text: "Ensure use of VPC-native clusters (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.ipAllocationPolicy.useIpAliases'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -391,6 +419,8 @@ groups:
 
       - id: 5.6.3
         text: "Ensure Control Plane Authorized Networks is Enabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.masterAuthorizedNetworksConfig'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -407,7 +437,9 @@ groups:
         scored: false
 
       - id: 5.6.4
-        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.privateClusterConfig.enablePrivateEndpoint'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -421,7 +453,9 @@ groups:
         scored: false
 
       - id: 5.6.5
-        text: "Ensure clusters are created with Private Nodes (Manual)"
+        text: "Ensure clusters are created with Private Nodes (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.privateClusterConfig.enablePrivateNodes'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -436,6 +470,8 @@ groups:
 
       - id: 5.6.6
         text: "Consider firewalling GKE worker nodes (Manual)"
+        audit: |
+          gcloud compute instances describe $INSTANCE_NAME --zone $COMPUTE_ZONE --format json | jq '{tags: .tags.items[], serviceaccount:.serviceAccounts[].email, network: .networkInterfaces[].network}'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -453,7 +489,62 @@ groups:
 
       - id: 5.6.7
         text: "Ensure use of Google-managed SSL Certificates (Automated)"
-        type: "manual"
+        audit: |
+          svc_json="$(kubectl get svc -A -o json 2>/dev/null                || echo '{"items":[],"__err":"SVC_FORBIDDEN"}')"
+          ing_json="$(kubectl get ingress -A -o json 2>/dev/null            || echo '{"items":[],"__err":"INGRESS_FORBIDDEN"}')"
+          mc_json ="$(kubectl get managedcertificates -A -o json 2>/dev/null || echo '{"items":[],"__err":"MC_FORBIDDEN"}')"
+          printf '%s\n%s\n%s\n' "$svc_json" "$ing_json" "$mc_json" \
+          | jq -rs '
+            (.[0] // {}) as $svcsRaw |
+            (.[1] // {}) as $ingsRaw |
+            (.[2] // {}) as $mcsRaw |
+            # If any list failed, surface an error and DO NOT print the success string
+            if ($svcsRaw.__err or $ingsRaw.__err or $mcsRaw.__err) then
+              "ERROR_KUBECTL_LIST:" +
+              ([
+                ($svcsRaw.__err // empty),
+                ($ingsRaw.__err // empty),
+                ($mcsRaw.__err // empty)
+              ] | join(","))
+            else
+              ($svcsRaw.items // []) as $svcs |
+              ($ingsRaw.items // []) as $ings |
+              ($mcsRaw.items // []) as $mcs |
+              def trim: gsub("^\\s+|\\s+$";"");
+              def hasmc($ns;$name): any($mcs[]?; .metadata.namespace==$ns and .metadata.name==$name);
+              ([
+                # Public Services (not eligible for managed certs)
+                $svcs[]? | select(.spec.type=="LoadBalancer")
+                | "FOUND_PUBLIC_LB_SERVICE:\(.metadata.namespace // "default"):\(.metadata.name)"
+              ] + [
+                # Ingresses missing managed-certs annotation
+                $ings[]? as $i
+                | ($i.metadata.annotations."networking.gke.io/managed-certificates" // "") as $ann
+                | select($ann=="")
+                | "FOUND_INGRESS_WITHOUT_MANAGED_CERT:\($i.metadata.namespace // "default"):\($i.metadata.name)"
+              ] + [
+                # Ingresses referencing non-existent ManagedCertificate(s)
+                $ings[]? as $i
+                | ($i.metadata.annotations."networking.gke.io/managed-certificates" // "") as $ann
+                | select($ann!="")
+                | ($i.metadata.namespace // "default") as $ns
+                | ($ann | split(",") | map(trim) | map(select(length>0)) | .[]) as $mc
+                | select(hasmc($ns;$mc) | not)
+                | "FOUND_MISSING_MANAGED_CERT_RESOURCE:\($ns):\($i.metadata.name):cert=\($mc)"
+              ]) as $f
+              | if ($f|length)>0
+                  then $f[]
+                  else "ALL_INGRESSES_USE_MANAGED_CERTS_AND_NO_PUBLIC_LB_SERVICES"
+                end
+            end
+          '
+        tests:
+          test_items:
+            - flag: "ALL_INGRESSES_USE_MANAGED_CERTS_AND_NO_PUBLIC_LB_SERVICES"
+              set: true
+              compare:
+                op: eq
+                value: "ALL_INGRESSES_USE_MANAGED_CERTS_AND_NO_PUBLIC_LB_SERVICES"
         remediation: |
           If services of type:LoadBalancer are discovered, consider replacing the Service with
           an Ingress.
@@ -461,13 +552,15 @@ groups:
           To configure the Ingress and use Google-managed SSL certificates, follow the
           instructions as listed at: https://cloud.google.com/kubernetes-engine/docs/how-
           to/managed-certs.
-        scored: false
+        scored: true
 
   - id: 5.7
     text: "Logging"
     checks:
       - id: 5.7.1
         text: "Ensure Logging and Cloud Monitoring is Enabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.loggingService'
         type: "manual"
         remediation: |
           To enable Logging for an existing cluster, run the following command:
@@ -487,6 +580,8 @@ groups:
 
       - id: 5.7.2
         text: "Enable Linux auditd logging (Manual)"
+        audit: |
+          kubectl get daemonsets -A -o json | jq '.items[] | select (.spec.template.spec.containers[].image | contains ("gcr.io/stackdriver-agents/stackdriver-logging-agent"))'| jq '{name: .metadata.name, annotations: .metadata.annotations."kubernetes.io/description", namespace: .metadata.namespace, status: .status}'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -506,6 +601,8 @@ groups:
     checks:
       - id: 5.8.1
         text: "Ensure authentication using Client Certificates is Disabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.masterAuth.clientKey'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -518,6 +615,8 @@ groups:
 
       - id: 5.8.2
         text: "Manage Kubernetes RBAC users with Google Groups for GKE (Manual)"
+        audit: |
+          gcloud container clusters create <cluster_name> --security-group <security_group_name>
         type: "manual"
         remediation: |
           Using Command Line:
@@ -533,6 +632,8 @@ groups:
 
       - id: 5.8.3
         text: "Ensure Legacy Authorization (ABAC) is Disabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.legacyAbac'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -546,6 +647,8 @@ groups:
     checks:
       - id: 5.9.1
         text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Manual)"
+        audit: |
+          gcloud compute disks describe $PV_NAME --zone $COMPUTE_ZONE --format json | jq '.diskEncryptionKey.kmsKeyName'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -554,6 +657,8 @@ groups:
 
       - id: 5.9.2
         text: "Enable Customer-Managed Encryption Keys (CMEK) for Boot Disks (Automated)"
+        audit: |
+          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE
         type: "manual"
         remediation: |
           Using Command Line:
@@ -573,6 +678,8 @@ groups:
     checks:
       - id: 5.10.1
         text: "Ensure Kubernetes Web UI is Disabled (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE  --format json | jq '.addonsConfig.kubernetesDashboard'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -584,6 +691,8 @@ groups:
 
       - id: 5.10.2
         text: "Ensure that Alpha clusters are not used for production workloads (Automated)"
+        audit: |
+          gcloud container clusters describe $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.enableKubernetesAlpha'
         type: "manual"
         remediation: |
           Using Command Line:
@@ -596,6 +705,8 @@ groups:
 
       - id: 5.10.3
         text: "Consider GKE Sandbox for running untrusted workloads (Manual)"
+        audit: |
+          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.config.sandboxConfig'
         type: "manual"
         remediation: |
           Using Command Line:
