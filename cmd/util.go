@@ -581,10 +581,12 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 			return "rke2-cis-1.23"
 		case "1.24":
 			return "rke2-cis-1.24"
-		case "1.25", "1.26", "1.27":
+		case "1.25":
 			return "rke2-cis-1.7"
+		case "1.26", "1.27":
+			return "rke2-cis-1.8"
 		default:
-			return "rke2-cis-1.7"
+			return "rke2-cis-1.8"
 		}
 	}
 	return ""
