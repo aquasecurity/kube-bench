@@ -719,6 +719,7 @@ groups:
       - id: 5.10.4
         text: "Enable Security Posture (Manual)"
         type: "manual"
+        audit: "gcloud container clusters --location describe"
         remediation: |
           Enable security posture via the UI, gCloud or API.
           https://cloud.google.com/kubernetes-engine/docs/how-to/protect-workload-configuration

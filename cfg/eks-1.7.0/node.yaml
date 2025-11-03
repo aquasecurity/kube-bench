@@ -352,6 +352,10 @@ groups:
               compare:
                 op: gte
                 value: 0
+            - flag: --event-qps
+              path: '{.eventRecordQPS}'
+              set: false
+          bin_op: or    
         remediation: |
           If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate
           level.

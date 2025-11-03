@@ -785,11 +785,10 @@ groups:
                 op: eq
                 value: false
         remediation: |
-          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
-          on the Control Plane node and set the --service-account-extend-token-expiration
-          parameter to false.
-          --service-account-extend-token-expiration=false
-        scored: false
+          Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the Control Plane node and set the --service-account-extend-token-expiration parameter to false.
+          `--service-account-extend-token-expiration=false`
+          By default, this parameter is set to true.
+        scored: true
 
   - id: 1.3
     text: "Controller Manager"

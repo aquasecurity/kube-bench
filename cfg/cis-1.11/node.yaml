@@ -477,14 +477,13 @@ groups:
           test_items:
             - flag: --IPAddressDeny
               path: '{.IPAddressDeny}'
-              op: eq
-              value: "any"
-            - path: '{.IPAddressAllow}'
         remediation: |
-          IPAddressDeny=any
-          IPAddressAllow={{ kubelet_secure_addresses }}
-          *Note kubelet_secure_addresses: "localhost link-local {{ kube_pods_subnets | regex_replace(',', ' ') }} {{ kube_node_addresses }} {{ loadbalancer_apiserver.address | default('')"
-          By default IPAddressDeny is not enabled.
+         Configuring the setting IPAddressDeny=any will deny service to any IP address not specified in the complimentary setting IPAddressAllow configuration parameter (
+         IPAddressDeny=any
+         IPAddressAllow={{ kubelet_secure_addresses }}
+         *Note
+           kubelet_secure_addresses: "localhost link-local {{ kube_pods_subnets |regex_replace(',', ' ') }} {{ kube_node_addresses }} {{ loadbalancer_apiserver.address | default('')"
+         By default IPAddressDeny is not enabled.
         scored: false
 
   - id: 4.3
