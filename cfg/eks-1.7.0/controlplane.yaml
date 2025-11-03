@@ -53,15 +53,15 @@ groups:
              apiVersion: v1
              kind: Pod
              metadata:
-             name: audit-logging
-             namespace: kube-system
+               name: audit-logging
+               namespace: kube-system
              spec:
-             containers:
-             - name: audit-log-forwarder
-               image: my-log-forwarder-image
-               volumeMounts:
-               - mountPath: /etc/kubernetes/audit
-                 name: audit-config
+               containers:
+               - name: audit-log-forwarder
+                 image: my-log-forwarder-image
+                 volumeMounts:
+                 - mountPath: /etc/kubernetes/audit
+                   name: audit-config
                volumes:
                - name: audit-config
                  configMap:
