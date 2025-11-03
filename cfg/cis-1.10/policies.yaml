@@ -9,7 +9,7 @@ groups:
     text: "RBAC and Service Accounts"
     checks:
       - id: 5.1.1
-        text: "Ensure that the cluster-admin role is only used where required (Automated)"
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
         audit: |
           kubectl get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].name --no-headers | while read -r role_name role_binding subject
           do
@@ -20,33 +20,22 @@ groups:
             fi;
             echo "**role_name: ${role_name} role_binding: ${role_binding} subject: ${subject} is_compliant: ${is_compliant}"
           done
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "is_compliant"
-              compare:
-                op: eq
-                value: true
+        type: "manual"
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
           Where possible, first bind users to a lower privileged role and then remove the
           clusterrolebinding to the cluster-admin role : kubectl delete clusterrolebinding [name]
           Condition: is_compliant is false if rolename is not cluster-admin and rolebinding is cluster-admin.
-        scored: true
+        scored: false
 
       - id: 5.1.2
-        text: "Minimize access to secrets (Automated)"
+        text: "Minimize access to secrets (Manual)"
         audit: "echo \"canGetListWatchSecretsAsSystemAuthenticated: $(kubectl auth can-i get,list,watch secrets --all-namespaces --as=system:authenticated)\""
-        tests:
-          test_items:
-            - flag: "canGetListWatchSecretsAsSystemAuthenticated"
-              compare:
-                op: eq
-                value: no
+        type: "manual"
         remediation: |
           Where possible, remove get, list and watch access to Secret objects in the cluster.
-        scored: true
+        scored: false
 
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
@@ -96,18 +85,13 @@ groups:
         scored: true
 
       - id: 5.1.4
-        text: "Minimize access to create pods (Automated)"
+        text: "Minimize access to create pods (Manual)"
         audit: |
           echo "canCreatePodsAsSystemAuthenticated: $(kubectl auth can-i create pods --all-namespaces --as=system:authenticated)"
-        tests:
-          test_items:
-            - flag: "canCreatePodsAsSystemAuthenticated"
-              compare:
-                op: eq
-                value: no
+        type: "manual"
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
-        scored: true
+        scored: false
       - id: 5.1.5
         text: "Ensure that default service accounts are not actively used (Automated)"
         audit: |
