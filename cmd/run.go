@@ -47,7 +47,7 @@ var runCmd = &cobra.Command{
 			exitWithError(fmt.Errorf("error validating targets: %v", err))
 		}
 		if len(targets) > 0 && !valid {
-			exitWithError(fmt.Errorf(fmt.Sprintf(`The specified --targets "%s" are not configured for the CIS Benchmark %s\n Valid targets %v`, strings.Join(targets, ","), bv, benchmarkVersionToTargetsMap[bv])))
+			exitWithError(fmt.Errorf(`The specified --targets "%s" are not configured for the CIS Benchmark %s\n Valid targets %v`, strings.Join(targets, ","), bv, benchmarkVersionToTargetsMap[bv]))
 		}
 
 		// Merge version-specific config if any.
