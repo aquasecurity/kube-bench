@@ -93,7 +93,7 @@ groups:
           objects or actions.
           Condition: role_is_compliant is false if ["*"] is found in rules.
           Condition: clusterrole_is_compliant is false if ["*"] is found in rules.
-        scored: true
+        scored: false
 
       - id: 5.1.4
         text: "Minimize access to create pods (Automated)"
@@ -125,7 +125,7 @@ groups:
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
           `automountServiceAccountToken: false`.
-        scored: true
+        scored: false
 
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
@@ -158,7 +158,7 @@ groups:
           Condition: Pod is_compliant to true when
             - ServiceAccount is automountServiceAccountToken: false and Pod is automountServiceAccountToken: false or notset
             - ServiceAccount is automountServiceAccountToken: true notset and Pod is automountServiceAccountToken: false
-        scored: true
+        scored: false
 
       - id: 5.1.7
         text: "Avoid use of system:masters group (Manual)"
