@@ -42,6 +42,7 @@ groups:
               | (.resources[]? == "secrets")
               and ((.verbs[]? == "get") or (.verbs[]? == "list") or (.verbs[]? == "watch"))
             )' | wc -l)
+
           if [ "$count" -gt 0 ]; then
             echo "SECRETS_ACCESS_FOUND"
           fi
@@ -60,11 +61,14 @@ groups:
             .items[] | select(
               .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
             )' | wc -l)
+
           wildcards_clusterroles=$(kubectl get clusterroles -o json | jq '
             .items[] | select(
               .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
             )' | wc -l)
+
           total=$((wildcards + wildcards_clusterroles))
+
           if [ "$total" -gt 0 ]; then
             echo "wildcards_present"
           fi
@@ -87,6 +91,7 @@ groups:
                 (.resources[]? == "pods" and .verbs[]? == "create")
               )
             ] | length')
+
           if [ "$access" -gt 0 ]; then
             echo "pods_create_access"
           fi
@@ -106,6 +111,7 @@ groups:
           if [ "$default_sa_count" -gt 0 ]; then
             echo "default_sa_not_auto_mounted"
           fi
+
           pods_using_default_sa=$(kubectl get pods --all-namespaces -o json | jq '
             [.items[] | select(.spec.serviceAccountName == "default")] | length')
           if [ "$pods_using_default_sa" -gt 0 ]; then
@@ -133,6 +139,7 @@ groups:
         audit: |
           pods_with_token_mount=$(kubectl get pods --all-namespaces -o json | jq '
             [.items[] | select(.spec.automountServiceAccountToken != false)] | length')
+            
           if [ "$pods_with_token_mount" -gt 0 ]; then
             echo "automountServiceAccountToken"
           fi

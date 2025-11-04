@@ -89,6 +89,7 @@ groups:
             - flag: "pass"
         remediation: |
           If no SCCs exist that restrict privileged containers, create one by running:
+
           oc create -f - <<EOF
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -103,6 +104,7 @@ groups:
           groups:
           - system:authenticated
           EOF
+
           Then apply appropriate RBAC to assign this SCC only to necessary service accounts, groups, or users.
           Carefully avoid assigning `allowPrivilegedContainer: true` in any SCC that is broadly bound.
         scored: true
@@ -119,7 +121,9 @@ groups:
             - flag: "pass"
         remediation: |
           If SCCs with `allowHostPID: true` exist, ensure they are restricted to trusted service accounts only.
+
           To create a restrictive SCC that prevents host PID sharing:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -134,6 +138,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Apply the SCC and bind it only to users or groups that do **not** need hostPID access.
         scored: true
 
@@ -149,9 +154,11 @@ groups:
             - flag: "pass"
         remediation: |
           If no SCCs restrict hostIPC usage, create one that explicitly sets allowHostIPC: false:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
+
           metadata:
             name: restricted-no-hostipc
           allowHostIPC: false
@@ -163,6 +170,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Then assign this SCC to general workloads and ensure any SCCs allowing hostIPC are tightly scoped via RBAC.
         scored: true
 
@@ -178,6 +186,7 @@ groups:
             - flag: "pass"
         remediation: |
           If no SCCs restrict host networking, create one by running:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -192,6 +201,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Ensure only workloads that require `hostNetwork: true` (e.g., CNI, infra pods) are allowed to use SCCs where it is explicitly enabled. Restrict access to such SCCs using RBAC.
         scored: true
 
@@ -207,6 +217,7 @@ groups:
             - flag: "pass"
         remediation: |
           If no SCCs exist that restrict the use of privilege escalation, create a custom SCC:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -221,6 +232,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Assign this SCC only to workloads and users that **do not require** the ability to escalate privileges.
           Use RBAC to restrict access to SCCs where `allowPrivilegeEscalation` is `true` to only trusted service accounts or admin roles.
         scored: true
@@ -244,6 +256,7 @@ groups:
                 value: 0
         remediation: |
           If no SCC is found with `runAsUser.type: MustRunAsNonRoot`, create one as follows:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -258,6 +271,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Assign this SCC only to workloads that must not run as root.
           If an SCC allows `RunAsAny`, audit and restrict access using RBAC to prevent misuse.
         scored: true
@@ -276,6 +290,7 @@ groups:
             - flag: "pass"
         remediation: |
           If no SCCs drop ALL capabilities, create a custom SCC that explicitly drops NET_RAW:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -292,6 +307,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Apply this SCC to workloads that do not require NET_RAW.
           If NET_RAW is required (e.g., for low-level networking apps), isolate those workloads with a specific SCC and restrict access via RBAC.
         scored: true
@@ -317,6 +333,7 @@ groups:
             - flag: "true"
         remediation: |
           If no SCCs restrict added capabilities, create a custom SCC as shown below:
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -333,6 +350,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Assign this SCC to workloads that do **not** require elevated capabilities.
           Create separate SCCs for workloads that require specific capabilities, and use RBAC to tightly restrict access to them.
         scored: true
@@ -351,6 +369,7 @@ groups:
             - flag: "true"
         remediation: |
           If no SCCs drop all capabilities, create one that sets 'requiredDropCapabilities: [ALL]':
+
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
@@ -367,6 +386,7 @@ groups:
           groups:
           - system:authenticated
           ---
+
           Apply this SCC to general-purpose workloads that do not require elevated Linux capabilities.
           If certain workloads require capabilities, create a separate SCC with minimal permissions and scope it using RBAC.
         scored: true
@@ -387,6 +407,7 @@ groups:
           need for a particular use case and assign that SCC to users and groups if the default
           SCCs are not appropriate for your use case.
         scored: false
+
 
   - id: 5.3
     text: "Network Policies and CNI"

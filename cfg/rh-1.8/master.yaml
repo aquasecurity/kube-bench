@@ -257,6 +257,7 @@ groups:
           # For CNI multus
           # Get the pod name in the openshift-multus namespace
           POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
           if [ -z "$POD_NAME" ]; then
             echo "No matching pods found on the current node."
           else
@@ -266,6 +267,7 @@ groups:
           fi
           # For SDN pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
           if [ -z "$POD_NAME" ]; then
             echo "No matching pods found on the current node."
           else
@@ -275,6 +277,7 @@ groups:
           fi
           # For OVS pods in 4.5
           POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
           if [ -z "$POD_NAME" ]; then
             echo "No matching pods found on the current node."
           else
@@ -852,6 +855,7 @@ groups:
           VALUE=$(oc get configmap config -n openshift-kube-apiserver -ojson \
             | jq -r '.data["config.yaml"]' \
             | jq -r '.apiServerArguments["audit-log-maxbackup"][0] // empty')
+
           if [ -n "$VALUE" ] && [ "$VALUE" -ge 10 ]; then
             echo "pass (current=$VALUE)"
           else
@@ -1034,6 +1038,7 @@ groups:
   - id: 1.3
     text: "Controller Manager"
     checks:
+
       - id: 1.3.1
         text: "Ensure that controller manager healthz endpoints are protected by RBAC (Manual)"
         type: manual
@@ -1104,6 +1109,7 @@ groups:
           None required.
           Certificates for OpenShift platform components are automatically created and rotated by the OpenShift Container Platform.
         scored: false
+        
 
   - id: 1.4
     text: "Scheduler"

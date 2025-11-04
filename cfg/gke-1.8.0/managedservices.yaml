@@ -493,11 +493,13 @@ groups:
           svc_json="$(kubectl get svc -A -o json 2>/dev/null                || echo '{"items":[],"__err":"SVC_FORBIDDEN"}')"
           ing_json="$(kubectl get ingress -A -o json 2>/dev/null            || echo '{"items":[],"__err":"INGRESS_FORBIDDEN"}')"
           mc_json ="$(kubectl get managedcertificates -A -o json 2>/dev/null || echo '{"items":[],"__err":"MC_FORBIDDEN"}')"
+
           printf '%s\n%s\n%s\n' "$svc_json" "$ing_json" "$mc_json" \
           | jq -rs '
             (.[0] // {}) as $svcsRaw |
             (.[1] // {}) as $ingsRaw |
             (.[2] // {}) as $mcsRaw |
+
             # If any list failed, surface an error and DO NOT print the success string
             if ($svcsRaw.__err or $ingsRaw.__err or $mcsRaw.__err) then
               "ERROR_KUBECTL_LIST:" +
@@ -510,8 +512,10 @@ groups:
               ($svcsRaw.items // []) as $svcs |
               ($ingsRaw.items // []) as $ings |
               ($mcsRaw.items // []) as $mcs |
+
               def trim: gsub("^\\s+|\\s+$";"");
               def hasmc($ns;$name): any($mcs[]?; .metadata.namespace==$ns and .metadata.name==$name);
+              
               ([
                 # Public Services (not eligible for managed certs)
                 $svcs[]? | select(.spec.type=="LoadBalancer")

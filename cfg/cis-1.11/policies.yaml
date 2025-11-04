@@ -108,7 +108,7 @@ groups:
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
-        
+
       - id: 5.1.5
         text: "Ensure that default service accounts are not actively used (Manual)"
         audit: |

@@ -73,11 +73,14 @@ groups:
             .items[] | select(
               .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
             )' | wc -l)
+
           wildcards_clusterroles=$(kubectl get clusterroles -o json | jq '
             .items[] | select(
               .rules[]? | (.verbs[]? == "*" or .resources[]? == "*" or .apiGroups[]? == "*")
             )' | wc -l)
+
           total=$((wildcards + wildcards_clusterroles))
+
           if [ "$total" -gt 0 ]; then
             echo "wildcards_present"
           fi
@@ -99,6 +102,7 @@ groups:
           if [ "$default_sa_count" -gt 0 ]; then
             echo "default_sa_not_auto_mounted"
           fi
+
           echo "\n🔹 Pods using default ServiceAccount:"
           pods_using_default_sa=$(kubectl get pods --all-namespaces -o json | jq '
             [.items[] | select(.spec.serviceAccountName == "default")] | length')
@@ -126,6 +130,7 @@ groups:
           echo "🔹 Pods with automountServiceAccountToken enabled:"
           pods_with_token_mount=$(kubectl get pods --all-namespaces -o json | jq '
             [.items[] | select(.spec.automountServiceAccountToken != false)] | length')
+            
           if [ "$pods_with_token_mount" -gt 0 ]; then
             echo "automountServiceAccountToken"
           fi
