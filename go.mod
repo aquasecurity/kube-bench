@@ -1,6 +1,6 @@
 module github.com/aquasecurity/kube-bench
 
-go 1.23.10
+go 1.24.8
 
 require (
 	github.com/aws/aws-sdk-go v1.35.28
