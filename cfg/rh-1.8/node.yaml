@@ -244,9 +244,8 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        type: manual
-        # Takes a lot of time for connection to fail and
         audit: |
+          echo "Checking kubelet authorization mode on the current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.authorization' 2> /dev/null
         use_multiple_values: true
@@ -276,32 +275,48 @@ groups:
       - id: 4.2.5
         text: "Verify that the read only port is not used or is set to 0 (Automated)"
         audit: |
+          echo "Checking 'kubelet-read-only-port' argument in openshift-kube-apiserver config..."
           oc -n openshift-kube-apiserver get cm config -o json | jq -r '.data."config.yaml"' | jq -r '.apiServerArguments."kubelet-read-only-port"[]'  2> /dev/null
         tests:
           test_items:
             - flag: '0'
         remediation: |
-          In earlier versions of OpenShift 4, the read-only-port argument is not used.
-          Follow the instructions in the documentation https://docs.openshift.com/container-platform/latest/post_installation_configuration/machine-configuration-tasks.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-machine-configuration-tasks
-          to create a kubeletconfig CRD and set the kubelet-read-only-port is set to 0.
+          No remediation is required if the read-only port is set to 0.
+          If this value is not set to 0 (or the argument is missing), create a KubeletConfig object and apply it to the appropriate MachineConfigPool to disable the read-only port.
+          Example KubeletConfig:
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: disable-readonly-port
+          spec:
+            kubeletConfig:
+              readOnlyPort: 0
         scored: true
 
       - id: 4.2.6
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
         audit: |
-          # Should return 1 for node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          echo streamingConnectionIdleTimeout=$(oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null)
-        use_multiple_values: true
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null
         tests:
           test_items:
-            - flag: streamingConnectionIdleTimeout
+            - path: ".streamingConnectionIdleTimeout"
               compare:
                 op: noteq
-                value: 0s
+                value: "0s"
         remediation: |
-          Follow the instructions https://docs.openshift.com/container-platform/latest/post_installation_configuration/machine-configuration-tasks.html#create-a-kubeletconfig-crd-to-edit-kubelet-parameters_post-install-machine-configuration-tasks in the documentation to create a kubeletconfig CRD and set
-          the streamingConnectionIdleTimeout to the desired value. Do not set the value to 0.
+          By default, OpenShift sets streamingConnectionIdleTimeout to 4h0m0s.
+          If it is manually set to "0s", this disables timeouts — which is insecure.
+          To remediate, create a `KubeletConfig` CR with a safer timeout (e.g., 1h0m0s):
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: set-streaming-timeout
+          spec:
+            kubeletConfig:
+              streamingConnectionIdleTimeout: "1h0m0s"
         scored: true
 
       - id: 4.2.7
@@ -310,12 +325,16 @@ groups:
           # Should return 1 for node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.makeIPTablesUtilChains' 2> /dev/null
-        use_multiple_values: true
         tests:
           test_items:
-            - flag: "true"
+            - path: ".makeIPTablesUtilChains"
+              compare:
+                op: eq
+                value: true
         remediation: |
-          None required. The makeIPTablesUtilChains argument is set to true by default.
+          No remediation is required.
+          By default, OpenShift sets makeIPTablesUtilChains to true.
+          This allows Kubelet to manage iptables rules and keep them in sync with the dynamic pod network configuration.
         scored: false
 
       - id: 4.2.8

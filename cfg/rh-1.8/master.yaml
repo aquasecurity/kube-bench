@@ -220,23 +220,19 @@ groups:
           # For CNI multus
           # Get the pod name in the openshift-multus namespace
           POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
             # Execute the stat command
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf" 2>/dev/null
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf" 2>/dev/null
-          fi
-
-          # For SDN pods
-          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
-            # Execute the stat command
-            oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
-            oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf";  2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf";  2>/dev/null
           fi
 
           # For OVS pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
@@ -258,27 +254,30 @@ groups:
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
-
           # For CNI multus
           # Get the pod name in the openshift-multus namespace
           POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
             # Execute the stat command
             oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c '$i %n %U:%G' /host/etc/cni/net.d/*.conf" 2>/dev/null
             oc exec -n openshift-multus $i -- /bin/bash -c "stat -c '$i %n %U:%G' /host/var/run/multus/cni/net.d/*.conf"  2>/dev/null
           fi
-
           # For SDN pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
           fi
-
           # For OVS pods in 4.5
           POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-          if [ -n "$POD_NAME" ]; then
+          if [ -z "$POD_NAME" ]; then
+            echo "No matching pods found on the current node."
+          else
             # Execute the stat command
             oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
             oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
@@ -344,7 +343,7 @@ groups:
         scored: true
 
       - id: 1.1.13
-        text: "Ensure that the kubeconfig file permissions are set to 600 or more restrictive (Manual))"
+        text: "Ensure that the kubeconfig file permissions are set to 600 or more restrictive (Manual)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubeconfig 2> /dev/null
