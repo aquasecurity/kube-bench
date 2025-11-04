@@ -2,6 +2,7 @@ package integration
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -31,7 +32,7 @@ func runWithKind(clientset *kubernetes.Clientset, jobName, kubebenchYAML, kubebe
 
 	output := getPodLogs(clientset, p)
 
-	err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Delete(jobName, nil)
+	err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Delete(context.Background(), jobName, metav1.DeleteOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -96,7 +97,7 @@ func deployJob(clientset *kubernetes.Clientset, kubebenchYAML, kubebenchImg stri
 	}
 	job.Spec.Template.Spec.Containers[0].Image = kubebenchImg
 
-	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(job)
+	_, err = clientset.BatchV1().Jobs(apiv1.NamespaceDefault).Create(context.Background(), job, metav1.CreateOptions{})
 
 	return err
 }
@@ -112,7 +113,7 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 		case <-timeout:
 			return nil, fmt.Errorf("podList - timed out: no Pod found for Job %s", jobName)
 		default:
-			pods, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(metav1.ListOptions{
+			pods, err := clientset.CoreV1().Pods(apiv1.NamespaceDefault).List(context.Background(), metav1.ListOptions{
 				LabelSelector: selector,
 			})
 			if err != nil {
@@ -145,7 +146,7 @@ func findPodForJob(clientset *kubernetes.Clientset, jobName string, duration tim
 func getPodLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod) string {
 	podLogOpts := corev1.PodLogOptions{}
 	req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	podLogs, err := req.Stream()
+	podLogs, err := req.Stream(context.Background())
 	if err != nil {
 		return "getPodLogs - error in opening stream"
 	}

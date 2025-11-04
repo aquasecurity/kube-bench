@@ -219,7 +219,7 @@ func (t testItem) evaluate(s string) *testOutput {
 
 	match, value, err := t.findValue(s)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "%s", err.Error())
 		return failTestItem(err.Error())
 	}
 
