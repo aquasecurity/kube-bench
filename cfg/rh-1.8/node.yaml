@@ -455,7 +455,7 @@ groups:
         remediation: |
           No remediation is required. OpenShift enables RotateKubeletServerCertificate by default and manages certificate rotation automatically.
           If the feature gate or rotation setting is disabled, configure a `KubeletConfig` CR and apply it to the MachineConfigPool:
-          
+
           ---
           apiVersion: machineconfiguration.openshift.io/v1
           kind: KubeletConfig

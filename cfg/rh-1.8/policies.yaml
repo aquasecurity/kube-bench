@@ -158,7 +158,6 @@ groups:
           ---
           apiVersion: security.openshift.io/v1
           kind: SecurityContextConstraints
-
           metadata:
             name: restricted-no-hostipc
           allowHostIPC: false
@@ -237,6 +236,7 @@ groups:
           Use RBAC to restrict access to SCCs where `allowPrivilegeEscalation` is `true` to only trusted service accounts or admin roles.
         scored: true
 
+
       - id: 5.2.6
         text: "Minimize the admission of root containers (Manual)"
         audit: |
@@ -311,6 +311,7 @@ groups:
           Apply this SCC to workloads that do not require NET_RAW.
           If NET_RAW is required (e.g., for low-level networking apps), isolate those workloads with a specific SCC and restrict access via RBAC.
         scored: true
+
 
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (Manual)"

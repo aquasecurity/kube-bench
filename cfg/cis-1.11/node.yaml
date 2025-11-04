@@ -463,7 +463,7 @@ groups:
             - flag: --seccomp-default
               path: '{.seccompDefault}'
         remediation: |
-          Set the parameter, either via the --seccomp-default command line parameter or the 
+          Set the parameter, either via the --seccomp-default command line parameter or the
           seccompDefault configuration file setting.
           By default the seccomp profile is not enabled.
           https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads

@@ -130,7 +130,7 @@ groups:
           echo "🔹 Pods with automountServiceAccountToken enabled:"
           pods_with_token_mount=$(kubectl get pods --all-namespaces -o json | jq '
             [.items[] | select(.spec.automountServiceAccountToken != false)] | length')
-            
+
           if [ "$pods_with_token_mount" -gt 0 ]; then
             echo "automountServiceAccountToken"
           fi

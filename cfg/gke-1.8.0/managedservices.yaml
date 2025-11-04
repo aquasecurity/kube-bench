@@ -515,7 +515,7 @@ groups:
 
               def trim: gsub("^\\s+|\\s+$";"");
               def hasmc($ns;$name): any($mcs[]?; .metadata.namespace==$ns and .metadata.name==$name);
-              
+
               ([
                 # Public Services (not eligible for managed certs)
                 $svcs[]? | select(.spec.type=="LoadBalancer")
