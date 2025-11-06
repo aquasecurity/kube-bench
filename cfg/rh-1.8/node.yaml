@@ -313,8 +313,9 @@ groups:
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null
         tests:
           test_items:
-            - flag: "0s"
-              set: false
+            - compare:
+              op: noteq
+              value: "0s"
         remediation: |
           By default, OpenShift sets streamingConnectionIdleTimeout to 4h0m0s.
           If it is manually set to "0s", this disables timeouts — which is insecure.
@@ -333,12 +334,17 @@ groups:
       - id: 4.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Manual)"
         audit: |
-          # Should return 1 for node
-          NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
-          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.makeIPTablesUtilChains' 2> /dev/null
+          # CIS Kubernetes Benchmark 1.4.0 (2.1.7): verify makeIPTablesUtilChains is true for each node.
+          fail=0
+          for node in $(oc get nodes -ojsonpath='{.items[*].metadata.name}'); do
+            value=$(oc get --raw /api/v1/nodes/$node/proxy/configz | jq -r '.kubeletconfig.makeIPTablesUtilChains' 2>/dev/null)
+            echo "$node makeIPTablesUtilChains=$value"
+            [ "$value" = "true" ] || fail=1
+          done
+          [ "$fail" -eq 0 ] && echo "pass" || echo "fail"
         tests:
           test_items:
-            - flag: "true"
+            - flag: "pass"
         remediation: |
           No remediation is required.
           By default, OpenShift sets makeIPTablesUtilChains to true.
