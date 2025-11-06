@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.11"
+version: "cis-1.11.1"
 id: 3
 text: "Control Plane Configuration"
 type: "controlplane"
