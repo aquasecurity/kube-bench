@@ -262,8 +262,8 @@ groups:
             echo "No matching pods found on the current node."
           else
             # Execute the stat command
-            oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c '$i %n %U:%G' /host/etc/cni/net.d/*.conf" 2>/dev/null
-            oc exec -n openshift-multus $i -- /bin/bash -c "stat -c '$i %n %U:%G' /host/var/run/multus/cni/net.d/*.conf"  2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c \"$POD_NAME %n %U:%G\" /host/etc/cni/net.d/*.conf" 2>/dev/null
+            oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c \"$POD_NAME %n %U:%G\" /host/var/run/multus/cni/net.d/*.conf" 2>/dev/null
           fi
           # For SDN pods
           POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)

@@ -14,7 +14,7 @@ groups:
         audit: |
           #To get a list of users and service accounts with the cluster-admin role
           oc get clusterrolebindings -o=custom-columns="NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind" | grep cluster-admin
-          #To verity that kbueadmin is removed, no results should be returned
+          #To verity that kubeadmin is removed, no results should be returned
           oc get secrets kubeadmin -n kube-system
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
