@@ -75,7 +75,7 @@ groups:
         scored: false
 
   - id: 5.2
-    text: "Security Context Constraints"
+    text: "Security Context Constraints (SCCs)"
     checks:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"

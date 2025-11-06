@@ -224,8 +224,8 @@ groups:
             echo "No matching pods found on the current node."
           else
             # Execute the stat command
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/etc/cni/net.d/*.conf";  2>/dev/null
-            oc exec -n openshift-multus "$POD_NAME"  -- /bin/bash -c "stat -c \"$i %n permissions=%a\" /host/var/run/multus/cni/net.d/*.conf";  2>/dev/null
+            oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
+            oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n permissions=%a" {} \; 2>/dev/null
           fi
 
           # For OVS pods
@@ -578,7 +578,7 @@ groups:
         scored: false
 
       - id: 1.2.2
-        text: "Use https for kubelet connections (Manual)"
+        text: "Use HTTPS for kubelet connections (Manual)"
         audit: |
           oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments'
           oc -n openshift-apiserver describe secret serving-cert
@@ -675,7 +675,7 @@ groups:
       - id: 1.2.9
         text: "Ensure that the admission control plugin AlwaysPullImages is set (Manual)"
         audit: |
-          #Verify the set of admissi    on-plugins for OCP 4.6 and higher
+          #Verify the set of admission-plugins for OCP 4.6 and higher
           oc -n openshift-kube-apiserver get configmap config -o json | jq -r '.data."config.yaml"' | jq '.apiServerArguments."enable-admission-plugins"'
         tests:
           test_items:
@@ -1109,7 +1109,7 @@ groups:
           None required.
           Certificates for OpenShift platform components are automatically created and rotated by the OpenShift Container Platform.
         scored: false
-        
+
 
   - id: 1.4
     text: "Scheduler"

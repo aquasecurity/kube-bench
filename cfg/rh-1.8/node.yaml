@@ -313,10 +313,8 @@ groups:
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null
         tests:
           test_items:
-            - path: ".streamingConnectionIdleTimeout"
-              compare:
-                op: noteq
-                value: "0s"
+            - flag: "0s"
+              set: false
         remediation: |
           By default, OpenShift sets streamingConnectionIdleTimeout to 4h0m0s.
           If it is manually set to "0s", this disables timeouts — which is insecure.
@@ -340,10 +338,7 @@ groups:
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.makeIPTablesUtilChains' 2> /dev/null
         tests:
           test_items:
-            - path: ".makeIPTablesUtilChains"
-              compare:
-                op: eq
-                value: true
+            - flag: "true"
         remediation: |
           No remediation is required.
           By default, OpenShift sets makeIPTablesUtilChains to true.
