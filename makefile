@@ -1,7 +1,7 @@
 SOURCES := $(shell find . -name '*.go')
 BINARY := kube-bench
-DOCKER_ORG ?= aquasec
-VERSION ?= $(shell git rev-parse --short=7 HEAD)
+DOCKER_ORG ?= voereir
+VERSION ?= v0.14.0-T5.2.0
 KUBEBENCH_VERSION ?= $(shell git describe --tags --abbrev=0)
 IMAGE_NAME ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)
 IMAGE_NAME_UBI ?= $(DOCKER_ORG)/$(BINARY):$(VERSION)-ubi
@@ -88,10 +88,10 @@ kind-run: kind-push
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind.yaml > ./hack/kind.test.yaml
 	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
 	-KUBECONFIG=$(KUBECONFIG) \
-		kubectl delete job kube-bench
+		kubectl get job kube-bench && kubectl delete job kube-bench
 	KUBECONFIG=$(KUBECONFIG) \
 		kubectl apply -f ./hack/kind.test.yaml && \
-		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \
+		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=120s && \
 		kubectl logs job/kube-bench > ./test.data && \
 		diff ./test.data integration/testdata/Expected_output.data
 
@@ -100,7 +100,7 @@ kind-run-stig: kind-push
 	sed "s/\$${VERSION}/$(VERSION)/" ./hack/kind-stig.yaml > ./hack/kind-stig.test.yaml
 	kind get kubeconfig --name="$(KIND_PROFILE)" > $(KUBECONFIG)
 	-KUBECONFIG=$(KUBECONFIG) \
-		kubectl delete job kube-bench
+		kubectl get job kube-bench && kubectl delete job kube-bench
 	KUBECONFIG=$(KUBECONFIG) \
 		kubectl apply -f ./hack/kind-stig.test.yaml && \
 		kubectl wait --for=condition=complete job.batch/kube-bench --timeout=60s && \

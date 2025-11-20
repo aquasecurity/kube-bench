@@ -184,10 +184,9 @@ groups:
         text: "Minimize access to the proxy sub-resource of Node objects (Manual)"
         type: "manual"
         remediation: |
-          Review RBAC roles and bindings in the cluster to identify users, groups,
-          or service accounts with access to the proxy sub-resource of Node objects.
-          Where possible, remove or restrict access to the node proxy sub-resource
-          to trusted administrators only.
+          Where possible, remove access to the proxy sub-resource of Node objects.
+          Restrict this permission only to identities that explicitly require kubelet-level
+          interactions.
         scored: false
 
       - id: 4.1.11
@@ -204,10 +203,9 @@ groups:
         text: "Minimize access to the service account token creation (Manual)"
         type: "manual"
         remediation: |
-          Review RBAC roles and bindings in the cluster to identify users, groups,
-          or service accounts with access to create the token sub-resource of
-          serviceaccount objects. Where possible, remove or restrict access to
-          token creation to trusted administrators only.
+          Where possible, remove access to the 'token' sub-resource of
+          ServiceAccount objects. Limit this permission only to identities that need
+          to programmatically request short-lived tokens.
         scored: false
 
   - id: 4.2

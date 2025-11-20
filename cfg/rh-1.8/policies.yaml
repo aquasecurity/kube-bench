@@ -33,6 +33,14 @@ groups:
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
         type: "manual"
+<<<<<<< HEAD
+=======
+        audit: |
+          # Run the command below to describe each cluster role and inspect it for wildcard usage
+          oc describe clusterrole
+          # Run the command below to describe each role and inspect it for wildcard usage
+          oc describe role -A
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           Where possible replace any use of wildcards in clusterroles and roles with specific
           objects or actions.
@@ -41,6 +49,12 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Manual)"
         type: "manual"
+<<<<<<< HEAD
+=======
+        audit: |
+          # Review the users who have create access to pod objects in the Kubernetes API
+          oc adm policy who-can create pod
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
@@ -55,6 +69,14 @@ groups:
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
         type: "manual"
+<<<<<<< HEAD
+=======
+        audit: |
+          # Find all pods that automatically mount service account tokens
+          oc get pods -A -o json | jq '.items[] | select(.spec.automountServiceAccountToken) | .metadata.name'
+          # Find all service accounts that automatically mount service tokens
+          oc get serviceaccounts -A -o json | jq '.items[] | select(.automountServiceAccountToken) | .metadata.name'
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           Modify the definition of pods and service accounts which do not need to mount service
           account tokens to disable it.
@@ -295,7 +317,11 @@ groups:
 
 
       - id: 5.2.8
+<<<<<<< HEAD
         text: "Minimize the admission of containers with added capabilities (manual)"
+=======
+        text: "Minimize the admission of containers with added capabilities (Manual)"
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -338,7 +364,11 @@ groups:
         scored: true
 
       - id: 5.2.9
+<<<<<<< HEAD
         text: "Minimize the admission of containers with capabilities assigned (manual)"
+=======
+        text: "Minimize the admission of containers with capabilities assigned (Manual)"
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -376,11 +406,23 @@ groups:
       - id: 5.2.10
         text: "Minimize access to privileged Security Context Constraints (Manual)"
         type: "manual"
+<<<<<<< HEAD
         remediation: |
           Remove any users and groups who do not need access to an SCC, following the
           principle of least privilege.
           You can remove users and groups from an SCC using the oc edit scc $NAME
           command.
+=======
+        audit: |
+          # All users and groups with access to SCCs that include privileged or elevated capabilities.
+          oc get scc -ojson | jq '.items[]|select(.allowHostIPC or .allowHostPID or .allowHostPorts
+            or .allowHostNetwork or .allowHostDirVolumePlugin
+            or .allowPrivilegedContainer or .runAsUser.type != "MustRunAsRange") |
+            .metadata.name,{"Group:":.groups},{"User":.users}'
+        remediation: |
+          Remove any users and groups who do not need access to an SCC, following the principle of least privilege.
+          You can remove users and groups from an SCC using the `oc edit scc $NAME` command.
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
           Additionally, you can create your own SCCs that contain the container functionality you
           need for a particular use case and assign that SCC to users and groups if the default
           SCCs are not appropriate for your use case.
@@ -436,6 +478,11 @@ groups:
       - id: 5.5.1
         text: "Configure Image Provenance using image controller configuration parameters (Manual)"
         type: "manual"
+<<<<<<< HEAD
+=======
+        audit: |
+          oc get image.config.openshift.io/cluster -o json | jq .spec.registrySources
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
         scored: false
@@ -466,6 +513,14 @@ groups:
       - id: 5.7.3
         text: "Apply Security Context to Your Pods and Containers (Manual)"
         type: "manual"
+<<<<<<< HEAD
+=======
+        audit: |
+          # obtain a list of pods that are using privileged security context constraints
+          oc get pods -A -o json | jq '.items[] | select(.metadata.annotations."openshift.io/scc"|test("privileged"?)) | .metadata.name'
+          # obtain a list of pods that are not using security context constraints at all
+          oc get pods -A -o json | jq '.items[] | select(.metadata.annotations."openshift.io/scc" == null) | .metadata.name'
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           Follow the Kubernetes documentation and apply security contexts to your pods. For a
           suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker

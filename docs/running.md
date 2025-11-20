@@ -134,7 +134,9 @@ docker push <AWS_ACCT_NUMBER>.dkr.ecr.<AWS_REGION>.amazonaws.com/k8s/kube-bench:
 | OpenShift Hardening Guide | kube-bench config |
 | ------------------------- | ----------------- |
 | ocp-3.10 +                | rh-0.7            |
-| ocp-4.1 +                 | rh-1.0            |
+| ocp-4.1-4.10              | rh-1.0            |
+| ocp-4.11-4.12             | rh-1.4            |
+| ocp-4.13 +                | rh-1.8            |
 
 kube-bench includes a set of test files for Red Hat's OpenShift hardening guide for OCP 3.10 and 4.1. To run this you will need to specify `--benchmark rh-07`, or `--version ocp-3.10` or,`--version ocp-4.5` or `--benchmark rh-1.0` 
 
@@ -155,6 +157,7 @@ oc apply -f job.yaml
 | gke-1.0       | master, controlplane, node, etcd, policies, managedservices |
 | gke-1.2.0     | master, controlplane, node, policies, managedservices       |
 | gke-1.6.0     | master, controlplane, node, policies, managedservices       |
+| gke-1.8.0     | master, controlplane, node, policies, managedservices       |
 
 kube-bench includes benchmarks for GKE. To run this you will need to specify `--benchmark gke-1.0`, `--benchmark gke-1.2.0` or `--benchmark gke-1.6.0` when you run the `kube-bench` command.
 
@@ -169,6 +172,7 @@ kubectl apply -f job-gke.yaml
 | CIS Benchmark | Targets                                                     |
 | ------------- | ----------------------------------------------------------- |
 | ack-1.0       | master, controlplane, node, etcd, policies, managedservices |
+| ack-1.8.0     | master, controlplane, node, etcd, policies, managedservices |
 
 kube-bench includes benchmarks for Alibaba Cloud Container Service For Kubernetes (ACK).
 To run this you will need to specify `--benchmark ack-1.0` when you run the `kube-bench` command.

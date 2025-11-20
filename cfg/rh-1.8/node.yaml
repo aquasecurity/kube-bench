@@ -48,7 +48,11 @@ groups:
           echo "No matching pods found on the current node."
           else
           # Execute the stat command
+<<<<<<< HEAD
           oc exec -n openshift-sdn "$POD_NAME" -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
+=======
+          oc exec -n openshift-sdn "$POD_NAME"  -- stat -Lc "$i %n permissions=%a" /config/kube-proxy-config.yaml  2>/dev/null
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
           fi
         tests:
           test_items:
@@ -275,10 +279,14 @@ groups:
         text: "Verify that the read only port is not used or is set to 0 (Automated)"
         audit: |
           echo "Checking 'kubelet-read-only-port' argument in openshift-kube-apiserver config..."
+<<<<<<< HEAD
 
           oc -n openshift-kube-apiserver get configmap config -o json \
             | jq -r '.data["config.yaml"]' \
             | yq '.apiServerArguments."kubelet-read-only-port"[0]'
+=======
+          oc -n openshift-kube-apiserver get cm config -o json | jq -r '.data."config.yaml"' | jq -r '.apiServerArguments."kubelet-read-only-port"[]'  2> /dev/null
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         tests:
           test_items:
             - flag: "0"
@@ -302,6 +310,7 @@ groups:
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (automated)"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+<<<<<<< HEAD
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
             | jq '.kubeletconfig'
         tests:
@@ -310,6 +319,14 @@ groups:
               compare:
                 op: noteq
                 value: "0s"
+=======
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.streamingConnectionIdleTimeout' 2> /dev/null
+        tests:
+          test_items:
+            - compare:
+              op: noteq
+              value: "0s"
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         remediation: |
           By default, OpenShift sets streamingConnectionIdleTimeout to 4h0m0s.
           If it is manually set to "0s", this disables timeouts — which is insecure.
@@ -331,8 +348,12 @@ groups:
           echo "Checking 'makeIPTablesUtilChains' setting in Kubelet config on current node..."
 
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+<<<<<<< HEAD
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
             | jq '.kubeletconfig'
+=======
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.makeIPTablesUtilChains' 2> /dev/null
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
         tests:
           test_items:
             - path: ".makeIPTablesUtilChains"
@@ -343,8 +364,12 @@ groups:
           No remediation is required.
           By default, OpenShift sets makeIPTablesUtilChains to true.
           This allows Kubelet to manage iptables rules and keep them in sync with the dynamic pod network configuration.
+<<<<<<< HEAD
         scored: true
 
+=======
+        scored: false
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
 
       - id: 4.2.8
         text: "Ensure that the kubeAPIQPS [--event-qps] argument is set to 0 or a level which ensures appropriate event capture (manual)"
@@ -402,12 +427,21 @@ groups:
       - id: 4.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (manual)"
         audit: |
+          echo "Checking 'rotateCertificates' setting in Kubelet config on current node..."
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
+<<<<<<< HEAD
           oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz \
             | jq '.kubeletconfig'
         tests:
           test_items:
             - path: ".rotateCertificates"
+=======
+          oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig.rotateCertificates'
+        use_multiple_values: true
+        tests:
+          test_items:
+            - flag: ".rotateCertificates"
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
               compare:
                 op: eq
                 value: true
@@ -454,6 +488,21 @@ groups:
         remediation: |
           No remediation is required. OpenShift enables RotateKubeletServerCertificate by default and manages certificate rotation automatically.
           If the feature gate or rotation setting is disabled, configure a `KubeletConfig` CR and apply it to the MachineConfigPool:
+<<<<<<< HEAD
+=======
+
+          ---
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: KubeletConfig
+          metadata:
+            name: enable-server-cert-rotation
+          spec:
+            kubeletConfig:
+              rotateCertificates: true
+              featureGates:
+                RotateKubeletServerCertificate: true
+        scored: true
+>>>>>>> 4d4a172 (VOER-3206: Add CIS 1.12.0, AKS 1.8.0, and update existing benchmarks)
 
           ---
           apiVersion: machineconfiguration.openshift.io/v1
