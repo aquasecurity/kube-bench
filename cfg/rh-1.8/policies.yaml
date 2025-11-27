@@ -13,14 +13,15 @@ groups:
         type: "manual"
         audit: |
           #To get a list of users and service accounts with the cluster-admin role
-          oc get clusterrolebindings -o=customcolumns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind |
-          grep cluster-admin
+          oc get clusterrolebindings -o=custom-columns="NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].kind" | grep cluster-admin
           #To verity that kbueadmin is removed, no results should be returned
           oc get secrets kubeadmin -n kube-system
         remediation: |
-          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and if they need this role or if they could use a role with fewer privileges.
-          Where possible, first bind users to a lower privileged role and then remove the clusterrolebinding to the cluster-admin role :
-            oc delete clusterrolebinding [name]
+          Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
+          if they need this role or if they could use a role with fewer privileges.
+          Where possible, first bind users to a lower privileged role and then remove the
+          clusterrolebinding to the cluster-admin role :
+          oc delete clusterrolebinding [name]
         scored: false
 
       - id: 5.1.2
@@ -33,6 +34,11 @@ groups:
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
         type: "manual"
+        audit: |
+          # Run the command below to describe each cluster role and inspect it for wildcard usage
+          oc describe clusterrole
+          # Run the command below to describe each role and inspect it for wildcard usage
+          oc describe role -A
         remediation: |
           Where possible replace any use of wildcards in clusterroles and roles with specific
           objects or actions.
@@ -41,6 +47,9 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Manual)"
         type: "manual"
+        audit: |
+          # Review the users who have create access to pod objects in the Kubernetes API
+          oc adm policy who-can create pod
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
@@ -55,6 +64,11 @@ groups:
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
         type: "manual"
+        audit: |
+          # Find all pods that automatically mount service account tokens
+          oc get pods -A -o json | jq '.items[] | select(.spec.automountServiceAccountToken) | .metadata.name'
+          # Find all service accounts that automatically mount service tokens
+          oc get serviceaccounts -A -o json | jq '.items[] | select(.automountServiceAccountToken) | .metadata.name'
         remediation: |
           Modify the definition of pods and service accounts which do not need to mount service
           account tokens to disable it.
@@ -160,7 +174,7 @@ groups:
         scored: true
 
       - id: 5.2.4
-        text: "Minimize the admission of containers wishing to share the host network namespace (manual)"
+        text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowHostNetwork==false) | .metadata.name]
@@ -191,7 +205,7 @@ groups:
         scored: true
 
       - id: 5.2.5
-        text: "Minimize the admission of containers with allowPrivilegeEscalation (manual)"
+        text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowPrivilegeEscalation==false) | .metadata.name]
@@ -224,7 +238,7 @@ groups:
 
 
       - id: 5.2.6
-        text: "Minimize the admission of root containers (manual)"
+        text: "Minimize the admission of root containers (Manual)"
         audit: |
           sccs=$(oc get scc -o json | jq -r '.items[] | select(.runAsUser.type == "MustRunAsNonRoot") | .metadata.name')
           if [[ -n "$sccs" ]]; then
@@ -233,8 +247,13 @@ groups:
             echo "fail"
           fi
         tests:
+          bin_op: or
           test_items:
-            - flag: "pass"
+            - flag: "MustRunAsNonRoot"
+            - flag: "MustRunAs"
+              compare:
+                op: nothave
+                value: 0
         remediation: |
           If no SCC is found with `runAsUser.type: MustRunAsNonRoot`, create one as follows:
 
@@ -258,7 +277,7 @@ groups:
         scored: true
 
       - id: 5.2.7
-        text: "Minimize the admission of containers with the NET_RAW capability (manual)"
+        text: "Minimize the admission of containers with the NET_RAW capability (Manual)"
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -295,7 +314,7 @@ groups:
 
 
       - id: 5.2.8
-        text: "Minimize the admission of containers with added capabilities (manual)"
+        text: "Minimize the admission of containers with added capabilities (Manual)"
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -338,7 +357,7 @@ groups:
         scored: true
 
       - id: 5.2.9
-        text: "Minimize the admission of containers with capabilities assigned (manual)"
+        text: "Minimize the admission of containers with capabilities assigned (Manual)"
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -376,11 +395,15 @@ groups:
       - id: 5.2.10
         text: "Minimize access to privileged Security Context Constraints (Manual)"
         type: "manual"
+        audit: |
+          # All users and groups with access to SCCs that include privileged or elevated capabilities.
+          oc get scc -ojson | jq '.items[]|select(.allowHostIPC or .allowHostPID or .allowHostPorts
+            or .allowHostNetwork or .allowHostDirVolumePlugin
+            or .allowPrivilegedContainer or .runAsUser.type != "MustRunAsRange") |
+            .metadata.name,{"Group:":.groups},{"User":.users}'
         remediation: |
-          Remove any users and groups who do not need access to an SCC, following the
-          principle of least privilege.
-          You can remove users and groups from an SCC using the oc edit scc $NAME
-          command.
+          Remove any users and groups who do not need access to an SCC, following the principle of least privilege.
+          You can remove users and groups from an SCC using the `oc edit scc $NAME` command.
           Additionally, you can create your own SCCs that contain the container functionality you
           need for a particular use case and assign that SCC to users and groups if the default
           SCCs are not appropriate for your use case.
@@ -394,7 +417,7 @@ groups:
         text: "Ensure that the CNI in use supports Network Policies (Manual)"
         type: "manual"
         remediation: |
-          None required.
+          None required. This will depend on the CNI plugin in use.
         scored: false
 
       - id: 5.3.2
@@ -415,8 +438,7 @@ groups:
         type: "manual"
         audit: |
           #Run the following command to find references to objects which use environment variables defined from secrets.
-          oc get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind}
-          {.metadata.name} {"\n"}{end}' -A
+          oc get all -o jsonpath='{range .items[?(@..secretKeyRef)]} {.kind} {.metadata.name} {"\n"}{end}' -A
         remediation: |
           If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
@@ -436,8 +458,10 @@ groups:
       - id: 5.5.1
         text: "Configure Image Provenance using image controller configuration parameters (Manual)"
         type: "manual"
+        audit: |
+          oc get image.config.openshift.io/cluster -o json | jq .spec.registrySources
         remediation: |
-          Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
+          Follow the OpenShift documentation for Image Configuration resources: https://docs.openshift.com/container-platform/4.15/openshift_images/image-configuration.html
         scored: false
 
   - id: 5.7
@@ -450,22 +474,33 @@ groups:
           #Run the following command and review the namespaces created in the cluster.
           oc get namespaces
           #Ensure that these namespaces are the ones you need and are adequately administered as per your requirements.
+          oc get namespaces -o json | jq '.items[] | select(.metadata.name|test("(?!default|kube-.|openshift|openshift-.)^.*")) | .metadata.name'
         remediation: |
-          Follow the documentation and create namespaces for objects in your deployment as you need
-          them.
+          Follow the documentation and create namespaces for objects in your deployment as you need them.
         scored: false
 
       - id: 5.7.2
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         type: "manual"
+        audit: |
+          oc get pods -A -o json | jq '.items[] | select( (.metadata.namespace | test("^kube*|^openshift*") | not)
+            and .spec.securityContext.seccompProfile.type==null) |
+            (.metadata.namespace + "/" + .metadata.name)'
         remediation: |
-          To enable the default seccomp profile, use the reserved value /runtime/default that will
-          make sure that the pod uses the default policy available on the host.
+          For any non-privileged pods or containers that do not have seccomp profiles, consider
+          using the RuntimeDefault or creating a custom seccomp profile specifically for the workload.
+          Please refer to the OpenShift documentation for working with custom seccomp profiles.
+          https://docs.openshift.com/container-platform/4.15/security/seccomp-profiles.html
         scored: false
 
       - id: 5.7.3
         text: "Apply Security Context to Your Pods and Containers (Manual)"
         type: "manual"
+        audit: |
+          # obtain a list of pods that are using privileged security context constraints
+          oc get pods -A -o json | jq '.items[] | select(.metadata.annotations."openshift.io/scc"|test("privileged"?)) | .metadata.name'
+          # obtain a list of pods that are not using security context constraints at all
+          oc get pods -A -o json | jq '.items[] | select(.metadata.annotations."openshift.io/scc" == null) | .metadata.name'
         remediation: |
           Follow the Kubernetes documentation and apply security contexts to your pods. For a
           suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
@@ -476,9 +511,11 @@ groups:
         text: "The default namespace should not be used (Manual)"
         type: "manual"
         audit: |
-          #Run this command to list objects in default namespace
-          oc project default
-          oc get all
+          # Run the following command to list all resources in the default namespace, besides the kubernetes and
+          # openshift services, which are expected to be in the default namespace
+          oc get all -n default -o json | jq '.items[] | select((.kind|test("Service"))
+            and (.metadata.name|test("openshift|kubernetes"))? | not) |
+            (.kind + "/" + .metadata.name)'
           #The only entries there should be system managed resources such as the kubernetes and openshift service
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes

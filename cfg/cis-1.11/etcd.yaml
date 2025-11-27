@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.11"
+version: "cis-1.11.1"
 id: 2
 text: "Etcd Node Configuration"
 type: "etcd"
@@ -27,6 +27,24 @@ groups:
         scored: true
 
       - id: 2.2
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
+        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--cert-file"
+              env: "ETCD_CERT_FILE"
+            - flag: "--key-file"
+              env: "ETCD_KEY_FILE"
+        remediation: |
+          Follow the etcd service documentation and configure TLS encryption.
+          Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml
+          on the master node and set the below parameters.
+          --cert-file=</path/to/ca-file>
+          --key-file=</path/to/key-file>
+        scored: true
+
+      - id: 2.3
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
@@ -42,7 +60,7 @@ groups:
           --client-cert-auth="true"
         scored: true
 
-      - id: 2.3
+      - id: 2.4
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
@@ -62,7 +80,7 @@ groups:
             --auto-tls=false
         scored: true
 
-      - id: 2.4
+      - id: 2.5
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are
         set as appropriate (Automated)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
@@ -82,7 +100,7 @@ groups:
           --peer-key-file=</path/to/peer-key-file>
         scored: true
 
-      - id: 2.5
+      - id: 2.6
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
@@ -98,7 +116,7 @@ groups:
           --peer-client-cert-auth=true
         scored: true
 
-      - id: 2.6
+      - id: 2.7
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
@@ -118,7 +136,7 @@ groups:
           --peer-auto-tls=false
         scored: true
 
-      - id: 2.7
+      - id: 2.8
         text: "Ensure that a unique Certificate Authority is used for etcd (Manual)"
         audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
         tests:
