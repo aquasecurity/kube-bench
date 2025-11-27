@@ -28,7 +28,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
       - name: Setup golangci-lint
@@ -45,7 +45,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
@@ -61,7 +61,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup Kubernetes cluster (KIND)
         uses: engineerd/setup-kind@v0.6.2
         with:
@@ -91,7 +91,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Dry-run release snapshot
