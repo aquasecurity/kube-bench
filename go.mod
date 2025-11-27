@@ -17,7 +17,7 @@ require (
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gorm v1.31.0
+	gorm.io/gorm v1.31.1
 	k8s.io/apimachinery v0.34.2
 	k8s.io/client-go v0.34.2
 )
