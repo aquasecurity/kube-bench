@@ -404,6 +404,8 @@ target_mapping:
     - "master"
     - "node"
     - "controlplane"
+    - "policies"
+    - "managedservices"
   "eks-1.0.1":
     - "master"
     - "node"
