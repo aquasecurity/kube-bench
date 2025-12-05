@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.8.0"
+version: "gke-1.9.0"
 id: 4
 text: "Kubernetes Policies"
 type: "policies"
@@ -173,6 +173,35 @@ groups:
       - id: 4.1.7
         text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
         type: "manual"
+        audit: |
+          kubectl get clusterrole,role -A -o json | jq -r '
+            def risky_verbs: ["bind","impersonate","escalate"];
+
+            .items[]
+            | . as $r
+            | [ $r.rules[]? 
+                | select(
+                    (.verbs // [] | any(. as $v | $v == "bind" or $v == "impersonate" or $v == "escalate"))
+                  )
+                | {
+                    resources: ((.resources // ["*"]) | join(",")),
+                    verbs: ((.verbs // []) | map(select(IN("bind","impersonate","escalate"))) | join(","))
+                  }
+              ] as $matches
+            | select($matches | length > 0)
+            | [
+                $r.kind,
+                $r.metadata.name,
+                ($r.metadata.namespace // "cluster-wide"),
+                ($matches | map(.resources) | unique | join(",")),
+                ($matches | map(.verbs) | unique | join(","))
+              ] | @tsv
+          ' | awk -F'\t' 'BEGIN{
+            printf "%-15s %-40s %-20s %-40s %-30s\n","KIND","NAME","NAMESPACE","RESOURCES","VERBS"
+            print  "--------------- ---------------------------------------- -------------------- ---------------------------------------- ------------------------------"
+          }{
+            printf "%-15s %-40s %-20s %-40s %-30s\n",$1,$2,$3,$4,$5
+          }'
         remediation: |
           Where possible, remove the impersonate, bind and escalate rights from subjects.
         scored: false
@@ -327,6 +356,10 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the cluster enforces Pod Security Standard Baseline profile or stricter for all namespaces. (Manual)"
+        audit: |
+          diff \
+            <(kubectl get namespace -l pod-security.kubernetes.io/enforce=baseline -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}') \
+            <(kubectl get namespace -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}') 
         type: "manual"
         remediation: |
           Ensure that Pod Security Admission is in place for every namespace which contains
@@ -398,7 +431,7 @@ groups:
                 op: eq
                 value: "NO_ENV_SECRET_REFERENCES"
         remediation: |
-          if possible, rewrite application code to read secrets from mounted secret files, rather than
+          If possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
         scored: true
 
@@ -418,7 +451,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
-          Also see recommendation 5.10.4.
+          Also see recommendation 5.1.4.
         scored: false
 
   - id: 4.6
@@ -427,6 +460,8 @@ groups:
       - id: 4.6.1
         text: "Create administrative boundaries between resources using namespaces (Manual)"
         type: "manual"
+        audit: |
+          kubectl get namespaces
         remediation: |
           Follow the documentation and create namespaces for objects in your deployment as you need
           them.
@@ -435,6 +470,9 @@ groups:
       - id: 4.6.2
         text: "Ensure that the seccomp profile is set to RuntimeDefault in your pod definitions (Automated)"
         type: "manual"
+        audit: |
+          kubectl get pods --all-namespaces -o json |\
+           jq -r '.items[] | select(.metadata.annotations."seccomp.security.alpha.kubernetes.io/pod" == "runtime/default" or .spec.securityContext.seccompProfile.type == "RuntimeDefault") | {namespace: .metadata.namespace, name: .metadata.name, seccompProfile: .spec.securityContext.seccompProfile.type}'
         remediation: |
           Use security context to enable the RuntimeDefault seccomp profile in your pod
           definitions. An example is as below:
