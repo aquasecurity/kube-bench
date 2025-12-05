@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.8.0"
+version: "gke-1.9.0"
 id: 5
 text: "Managed Services"
 type: "managedservices"
