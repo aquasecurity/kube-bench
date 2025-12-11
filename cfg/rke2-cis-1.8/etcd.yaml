@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.8"
+version: "rke2-cis-1.8"
 id: 2
 text: "Etcd Node Configuration"
 type: "etcd"
