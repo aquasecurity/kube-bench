@@ -1,4 +1,4 @@
-FROM golang:1.25.4 AS build
+FROM golang:1.25.5 AS build
 WORKDIR /go/src/github.com/aquasecurity/kube-bench/
 COPY makefile makefile
 COPY go.mod go.sum ./
@@ -19,7 +19,7 @@ RUN /bin/bash -c 'echo "$(<kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum 
 
 RUN chmod +x /usr/local/bin/kubectl
 
-FROM alpine:3.22.2 AS run
+FROM alpine:3.23.0 AS run
 WORKDIR /opt/kube-bench/
 # add GNU ps for -C, -o cmd, --no-headers support and add findutils to get GNU xargs
 # https://github.com/aquasecurity/kube-bench/issues/109
