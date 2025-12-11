@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.8"
+version: "rke2-cis-1.8"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
