@@ -1,4 +1,4 @@
-FROM golang:1.24.9 AS builder
+FROM golang:1.24.11 AS builder
 
 ENV OUTPUT_DIR=/out
 ENV KUBECTL_VERSION="v1.31.4"
