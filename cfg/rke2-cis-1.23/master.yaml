@@ -106,7 +106,6 @@ groups:
               echo "Directory not found"
             fi
           '
-        use_multiple_values: true
         tests:
           bin_op: or
           test_items:

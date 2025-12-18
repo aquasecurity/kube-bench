@@ -126,8 +126,8 @@ groups:
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: |
           /bin/sh -c '
-          if [ -e $etcdconf ]; then
-            stat -c "ownership=%U:%G %n" $etcdconf
+          if [ -e "$etcdconf" ]; then
+            stat -c "ownership=%U:%G %n" "$etcdconf"
           else
             echo "Directory not found"
           fi
@@ -211,7 +211,7 @@ groups:
         audit: "stat -c %U:%G /var/lib/rancher/rke2/server/db/etcd"
         tests:
           test_items:
-            - flag: "root:root"
+            - flag: "etcd:etcd"
               set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
