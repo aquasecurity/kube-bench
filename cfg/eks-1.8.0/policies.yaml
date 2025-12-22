@@ -169,7 +169,7 @@ groups:
         remediation: |
           Where possible, remove the impersonate, bind and escalate rights from subjects.
         scored: false
-      
+
       - id: 4.1.9
         text: "Minimize access to create PersistentVolume objects (Manual)"
         type: "manual"
