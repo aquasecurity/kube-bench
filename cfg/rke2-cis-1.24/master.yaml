@@ -99,12 +99,13 @@ groups:
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: |
-          /bin/sh -c 'if [ -d "$etcdconf" ]; then
-            find "$etcdconf" -type f -name "*etcd*" -exec stat -c "permissions=%a" {} +
-          else
-            echo "Directory not found"
-          fi'
-        use_multiple_values: true
+          /bin/sh -c '
+            if [ -e "$etcdconf" ]; then
+              stat -c "permissions=%a %n" "$etcdconf"
+            else
+              echo "Directory not found"
+            fi
+          '
         tests:
           bin_op: or
           test_items:
@@ -122,11 +123,13 @@ groups:
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: |
-          /bin/sh -c 'if [ -d "$etcdconf" ]; then
-           find "$etcdconf" -type f -name "*etcd*" -exec stat -c "ownership=%U:%G %n" {} +
-          else
-           echo "Directory not found"
-          fi'
+          /bin/sh -c '
+            if [ -e $etcdconf ]; then
+              stat -c "ownership=%U:%G %n" $etcdconf
+            else
+              echo "Directory not found"
+            fi
+          '
         tests:
           bin_op: or
           test_items:
