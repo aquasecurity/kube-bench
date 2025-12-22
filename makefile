@@ -11,7 +11,7 @@ uname := $(shell uname -s)
 BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le,linux/s390x
 DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
-KUBECTL_VERSION ?= 1.35.0-alpha.2
+KUBECTL_VERSION ?= 1.35.0
 ARCH ?= $(shell go env GOARCH)
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
