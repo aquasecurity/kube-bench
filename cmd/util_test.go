@@ -658,6 +658,27 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			want: "eks-1.7.0",
 		},
 		{
+			name: "eks 1.29",
+			args: args{
+				platform: Platform{Name: "eks", Version: "1.29"},
+			},
+			want: "eks-1.7.0",
+		},
+		{
+			name: "eks 1.30",
+			args: args{
+				platform: Platform{Name: "eks", Version: "1.30"},
+			},
+			want: "eks-1.7.0",
+		},
+		{
+			name: "eks 1.32",
+			args: args{
+				platform: Platform{Name: "eks", Version: "1.32"},
+			},
+			want: "eks-1.8.0",
+		},
+		{
 			name: "eks 1.24",
 			args: args{
 				platform: Platform{Name: "eks", Version: "1.24"},
