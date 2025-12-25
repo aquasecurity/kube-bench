@@ -160,7 +160,7 @@ groups:
           For example, the following command would enable private access to the Kubernetes
           API as well as limited public access over the internet from a single IP address (noting
           the /32 CIDR suffix):
-          aws eks update-cluster-config --region $AWS_REGION --name $CLUSTER_NAME --resources-vpc-config endpointPrivateAccess=true,endpointPrivateAccess=true,publicAccessCidrs="203.0.113.5/32"
+          aws eks update-cluster-config --region $AWS_REGION --name $CLUSTER_NAME --resources-vpc-config endpointPrivateAccess=true,publicAccessCidrs="203.0.113.5/32"
 
           Note: The CIDR blocks specified cannot include reserved addresses.
           There is a maximum number of CIDR blocks that you can specify. For more information,

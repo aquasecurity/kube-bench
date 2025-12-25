@@ -398,7 +398,7 @@ groups:
           /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each
           worker node and add the below parameter at the end of the KUBELET_ARGS variable
           string.
-          --RotateCertificate=true
+          --rotate-certificates=true
         scored: true
 
       - id: 3.2.9

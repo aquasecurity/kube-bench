@@ -287,14 +287,14 @@ groups:
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Automated)"
         audit: |
           kubectl get pods --all-namespaces -o json | \
-            jq -r 'if any(.items[]?.spec.containers[]?; .securityContext?.allowPrivilegeEscalation == true) then "ALLOWPRIVILEGEESCALTION_FOUND" else "NO_ALLOWPRIVILEGEESCALTION" end'
+            jq -r 'if any(.items[]?.spec.containers[]?; .securityContext?.allowPrivilegeEscalation == true) then "ALLOWPRIVILEGEESCALTION_FOUND" else "NO_ALLOWPRIVILEGEESCALATION" end'
         tests:
           test_items:
-            - flag: "NO_ALLOWPRIVILEGEESCALTION"
+            - flag: "NO_ALLOWPRIVILEGEESCALATION"
               set: true
               compare:
                 op: eq
-                value: "NO_ALLOWPRIVILEGEESCALTION"
+                value: "NO_ALLOWPRIVILEGEESCALATION"
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of containers with .spec.allowPrivilegeEscalation set to true.
