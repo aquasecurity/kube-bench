@@ -22,12 +22,12 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup Go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
-      - name: Checkout code
-        uses: actions/checkout@v6
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
       - name: Setup golangci-lint
@@ -39,12 +39,12 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup Go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
-      - name: Checkout code
-        uses: actions/checkout@v6
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
@@ -55,12 +55,12 @@ jobs:
     name: E2e tests
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup Go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
-      - name: Checkout code
-        uses: actions/checkout@v6
       - name: Setup Kubernetes cluster (KIND)
         uses: engineerd/setup-kind@v0.6.2
         with:
@@ -85,14 +85,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [e2e, unit]
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          go-version-file: go.mod
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: go.mod
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v6
         with:
