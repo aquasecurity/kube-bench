@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.8"
+version: "rke2-cis-1.8"
 id: 1
 text: "Control Plane Security Configuration"
 type: "master"
@@ -98,15 +98,14 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Automated)"
-
         audit: |
-          /bin/sh -c 'if [ -e "$etcdconf" ]; then
-            find "$etcdconf" -type f -name "*etcd*" \
-              -exec stat -c "permissions=%a %n" {} +
+          /bin/sh -c '
+          if [ -e "$etcdconf" ]; then
+            stat -c "permissions=%a %n" "$etcdconf"
           else
             echo "Directory not found"
-          fi'
-        use_multiple_values: true
+          fi
+          '
         tests:
           bin_op: or
           test_items:
@@ -126,16 +125,21 @@ groups:
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: |
-          /bin/sh -c 'if [ -e "$etcdconf" ]; then
-            find "$etcdconf" -type f -name "*etcd*" -exec stat -c "%U:%G %n" {} +
+          /bin/sh -c '
+          if [ -e "$etcdconf" ]; then
+            stat -c "ownership=%U:%G %n" "$etcdconf"
           else
             echo "Directory not found"
-          fi'
-        use_multiple_values: true
+          fi
+          '
         tests:
           bin_op: or
           test_items:
-            - flag: "root:root"
+            - flag: "ownership"
+              compare:
+                op: eq
+                value: "root:root"
+              set: true
             - flag: "Directory not found"
               set: true
         remediation: |
@@ -181,20 +185,20 @@ groups:
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
         audit: |
-          /bin/sh -c 'if [ -e "/node/var/lib/etcd" ]; then
-            stat -c "%a" "/node/var/lib/etcd"
+          /bin/sh -c 'if [ -e "/var/lib/rancher/rke2/server/db/etcd" ]; then
+            stat -c "permissions=%a %n" "/var/lib/rancher/rke2/server/db/etcd"
           else
-            echo "Directory not found: /node/var/lib/etcd"
+            echo "Directory not found: /var/lib/rancher/rke2/server/db/etcd"
           fi'
         tests:
           bin_op: or
           test_items:
-            - flag: "700"
+            - flag: "permissions"
               compare:
-                op: eq
+                op: bitmask
                 value: "700"
               set: true
-            - flag: "Directory not found: /node/var/lib/etcd"
+            - flag: "Directory not found: /var/lib/rancher/rke2/server/db/etcd"
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.
@@ -204,7 +208,7 @@ groups:
 
       - id: 1.1.12
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
-        audit: "stat -c %U:%G /node/var/lib/etcd"
+        audit: "stat -c %U:%G /var/lib/rancher/rke2/server/db/etcd"
         tests:
           test_items:
             - flag: "etcd:etcd"
