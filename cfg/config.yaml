@@ -292,6 +292,8 @@ version_mapping:
   "eks-1.1.0": "eks-1.1.0"
   "eks-1.2.0": "eks-1.2.0"
   "eks-1.5.0": "eks-1.5.0"
+  "eks-1.7.0": "eks-1.7.0"
+  "eks-1.8.0": "eks-1.8.0"
   "gke-1.0": "gke-1.0"
   "gke-1.2.0": "gke-1.2.0"
   "gke-1.6.0": "gke-1.6.0"
@@ -314,6 +316,7 @@ version_mapping:
   "rke-cis-1.23": "rke-cis-1.23"
   "rke-cis-1.24": "rke-cis-1.24"
   "rke2-cis-1.7": "rke2-cis-1.7"
+  "rke2-cis-1.8": "rke2-cis-1.8"
   "rke2-cis-1.23": "rke2-cis-1.23"
   "rke2-cis-1.24": "rke2-cis-1.24"
 
@@ -445,6 +448,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "eks-1.8.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "rh-0.7":
     - "master"
     - "node"
@@ -539,6 +548,12 @@ target_mapping:
     - "node"
     - "policies"
   "rke2-cis-1.7":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.8":
     - "master"
     - "etcd"
     - "controlplane"

@@ -1,6 +1,6 @@
 ---
 controls:
-version: "cis-1.9"
+version: "rke2-cis-1.8"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -9,155 +9,56 @@ groups:
     text: "RBAC and Service Accounts"
     checks:
       - id: 5.1.1
-        text: "Ensure that the cluster-admin role is only used where required (Automated)"
-        audit: |
-          kubectl get clusterrolebindings -o=custom-columns=NAME:.metadata.name,ROLE:.roleRef.name,SUBJECT:.subjects[*].name --no-headers | while read -r role_name role_binding subject
-          do
-            if [[ "${role_name}" != "cluster-admin" && "${role_binding}" == "cluster-admin" ]]; then
-              is_compliant="false"
-            else
-              is_compliant="true"
-            fi;
-            echo "**role_name: ${role_name} role_binding: ${role_binding} subject: ${subject} is_compliant: ${is_compliant}"
-          done
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "is_compliant"
-              compare:
-                op: eq
-                value: true
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
+        type: "manual"
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
           Where possible, first bind users to a lower privileged role and then remove the
-          clusterrolebinding to the cluster-admin role : kubectl delete clusterrolebinding [name]
-          Condition: is_compliant is false if rolename is not cluster-admin and rolebinding is cluster-admin.
+          clusterrolebinding to the cluster-admin role :
+          kubectl delete clusterrolebinding [name]
         scored: false
 
       - id: 5.1.2
-        text: "Minimize access to secrets (Automated)"
-        audit: "echo \"canGetListWatchSecretsAsSystemAuthenticated: $(kubectl auth can-i get,list,watch secrets --all-namespaces --as=system:authenticated)\""
-        tests:
-          test_items:
-            - flag: "canGetListWatchSecretsAsSystemAuthenticated"
-              compare:
-                op: eq
-                value: no
+        text: "Minimize access to secrets (Manual)"
+        type: "manual"
         remediation: |
           Where possible, remove get, list and watch access to Secret objects in the cluster.
         scored: false
 
       - id: 5.1.3
-        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
-        audit: |
-          # Check Roles
-          kubectl get roles --all-namespaces -o custom-columns=ROLE_NAMESPACE:.metadata.namespace,ROLE_NAME:.metadata.name --no-headers | while read -r role_namespace role_name
-          do
-            role_rules=$(kubectl get role -n "${role_namespace}" "${role_name}" -o=json | jq -c '.rules')
-            if echo "${role_rules}" | grep -q "\[\"\*\"\]"; then
-              role_is_compliant="false"
-            else
-              role_is_compliant="true"
-            fi;
-            echo "**role_name: ${role_name} role_namespace: ${role_namespace} role_rules: ${role_rules} role_is_compliant: ${role_is_compliant}"
-          done
-
-          # Check ClusterRoles
-          kubectl get clusterroles -o custom-columns=CLUSTERROLE_NAME:.metadata.name --no-headers | while read -r clusterrole_name
-          do
-            clusterrole_rules=$(kubectl get clusterrole "${clusterrole_name}" -o=json | jq -c '.rules')
-            if echo "${clusterrole_rules}" | grep -q "\[\"\*\"\]"; then
-              clusterrole_is_compliant="false"
-            else
-              clusterrole_is_compliant="true"
-            fi;
-          echo "**clusterrole_name: ${clusterrole_name} clusterrole_rules: ${clusterrole_rules} clusterrole_is_compliant: ${clusterrole_is_compliant}"
-          done
-        use_multiple_values: true
-        tests:
-          bin_op: or
-          test_items:
-            - flag: "role_is_compliant"
-              compare:
-                op: eq
-                value: true
-              set: true
-            - flag: "clusterrole_is_compliant"
-              compare:
-                op: eq
-                value: true
-              set: true
+        text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
+        type: "manual"
         remediation: |
-          Where possible replace any use of wildcards ["*"] in roles and clusterroles with specific
+          Where possible replace any use of wildcards in clusterroles and roles with specific
           objects or actions.
-          Condition: role_is_compliant is false if ["*"] is found in rules.
-          Condition: clusterrole_is_compliant is false if ["*"] is found in rules.
         scored: false
 
       - id: 5.1.4
-        text: "Minimize access to create pods (Automated)"
-        audit: |
-          echo "canCreatePodsAsSystemAuthenticated: $(kubectl auth can-i create pods --all-namespaces --as=system:authenticated)"
-        tests:
-          test_items:
-            - flag: "canCreatePodsAsSystemAuthenticated"
-              compare:
-                op: eq
-                value: no
+        text: "Minimize access to create pods (Manual)"
+        type: "manual"
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
+
       - id: 5.1.5
-        text: "Ensure that default service accounts are not actively used (Automated)"
-        audit: |
-          kubectl get serviceaccount --all-namespaces --field-selector metadata.name=default -o=json | jq -r '.items[] | " namespace: \(.metadata.namespace), kind: \(.kind), name: \(.metadata.name), automountServiceAccountToken: \(.automountServiceAccountToken | if . == null then "notset" else . end )"' | xargs -L 1
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "automountServiceAccountToken"
-              compare:
-                op: eq
-                value: false
-              set: true
+        text: "Ensure that default service accounts are not actively used. (Manual)"
+        type: "manual"
+        audit: check_for_default_sa.sh
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
           Modify the configuration of each default service account to include this value
-          `automountServiceAccountToken: false`.
+          automountServiceAccountToken: false
+          Permissive - Kubernetes provides default service accounts to be used.
         scored: false
 
       - id: 5.1.6
-        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
-        audit: |
-          kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
-          do
-            # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
-            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n "${pod_namespace}" "${pod_service_account}" -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            pod_is_automountserviceaccounttoken=$(echo "${pod_is_automountserviceaccounttoken}" | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            if [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && ( [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ] ); then
-              is_compliant="true"
-            elif [ "${svacc_is_automountserviceaccounttoken}" = "true" ] && [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
-              is_compliant="true"
-            else
-              is_compliant="false"
-            fi
-            echo "**namespace: ${pod_namespace} pod_name: ${pod_name} service_account: ${pod_service_account} pod_is_automountserviceaccounttoken: ${pod_is_automountserviceaccounttoken} svacc_is_automountServiceAccountToken: ${svacc_is_automountserviceaccounttoken} is_compliant: ${is_compliant}"
-          done
-        use_multiple_values: true
-        tests:
-          test_items:
-            - flag: "is_compliant"
-              compare:
-                op: eq
-                value: true
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
+        type: "manual"
         remediation: |
-          Modify the definition of ServiceAccounts and Pods which do not need to mount service
-          account tokens to disable it, with `automountServiceAccountToken: false`.
-          If both the ServiceAccount and the Pod's .spec specify a value for automountServiceAccountToken, the Pod spec takes precedence.
-          Condition: Pod is_compliant to true when
-            - ServiceAccount is automountServiceAccountToken: false and Pod is automountServiceAccountToken: false or notset
-            - ServiceAccount is automountServiceAccountToken: true notset and Pod is automountServiceAccountToken: false
+          Modify the definition of pods and service accounts which do not need to mount service
+          account tokens to disable it.
         scored: false
 
       - id: 5.1.7
@@ -234,7 +135,8 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostPID` containers.
-        scored: false
+          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
+        scored: true
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
@@ -242,7 +144,8 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostIPC` containers.
-        scored: false
+          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
+        scored: true
 
       - id: 5.2.5
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
@@ -250,7 +153,8 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostNetwork` containers.
-        scored: false
+          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
+        scored: true
 
       - id: 5.2.6
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
@@ -289,7 +193,7 @@ groups:
         type: "manual"
         remediation: |
           Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applications which do not require any Linux capabities to operate consider adding
+          contains applicaions which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
@@ -334,6 +238,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
+          Permissive - Enabling Network Policies can prevent certain applications from communicating with each other.
         scored: false
 
   - id: 5.4
@@ -402,4 +307,5 @@ groups:
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
+          Permissive - Kubernetes provides a default namespace.
         scored: false
