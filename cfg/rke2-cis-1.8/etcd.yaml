@@ -30,7 +30,7 @@ groups:
           --cert-file=</path/to/ca-file>
           --key-file=</path/to/key-file>
         scored: true
-        
+
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
         audit: |
@@ -106,7 +106,7 @@ groups:
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
-        audit: 
+        audit:
           cat /var/lib/rancher/rke2/server/db/etcd/config
         tests:
           bin_op: or

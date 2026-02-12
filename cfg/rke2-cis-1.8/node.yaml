@@ -29,7 +29,7 @@ groups:
           Not Applicable - Clusters provisioned by RKE does not require or maintain a configuration file for the kubelet service.
           All configuration is passed in as arguments at container run time.
         scored: true
-        
+
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
         audit: |
@@ -492,4 +492,3 @@ groups:
           Decide on an appropriate level for this parameter and set it,
           either via the --pod-max-pids command line parameter or the PodPidsLimit configuration file setting.
         scored: false
-        
