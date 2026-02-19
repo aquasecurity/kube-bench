@@ -52,7 +52,6 @@ groups:
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
         audit: "cat $etcdconf"
         tests:
-          test_items:
           bin_op: or
           test_items:
             - flag: "auto-tls"
