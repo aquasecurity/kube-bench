@@ -179,7 +179,7 @@ groups:
 
             .items[]
             | . as $r
-            | [ $r.rules[]? 
+            | [ $r.rules[]?
                 | select(
                     (.verbs // [] | any(. as $v | $v == "bind" or $v == "impersonate" or $v == "escalate"))
                   )
@@ -359,7 +359,7 @@ groups:
         audit: |
           diff \
             <(kubectl get namespace -l pod-security.kubernetes.io/enforce=baseline -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}') \
-            <(kubectl get namespace -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}') 
+            <(kubectl get namespace -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
         type: "manual"
         remediation: |
           Ensure that Pod Security Admission is in place for every namespace which contains

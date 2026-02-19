@@ -619,7 +619,7 @@ groups:
             gcloud container clusters create CLUSTER_NAME \
               --location=CONTROL_PLANE_LOCATION \
               --security-group="gke-security-groups@DOMAIN"
-          
+
           Command line statement to update an existing cluster:
             gcloud container clusters update CLUSTER_NAME \
               --location=CONTROL_PLANE_LOCATION \
