@@ -10,16 +10,17 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config
+        audit: "cat $etcdconf"
         tests:
           bin_op: and
           test_items:
             - flag: "cert-file"
+              path: "{.client-transport-security.cert-file}"
               compare:
                 op: eq
                 value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.crt"
             - flag: "key-file"
+              path: "{.client-transport-security.key-file}"
               compare:
                 op: eq
                 value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.key"
@@ -33,11 +34,11 @@ groups:
 
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config
+        audit: "cat $etcdconf"
         tests:
           test_items:
             - flag: "client-cert-auth"
+              path: "{.client-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
@@ -49,12 +50,13 @@ groups:
 
       - id: 2.3
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config
+        audit: "cat $etcdconf"
         tests:
+          test_items:
           bin_op: or
           test_items:
-            - flag: "--auto-tls"
+            - flag: "auto-tls"
+              path: "{.client-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
@@ -66,16 +68,15 @@ groups:
 
       - id: 2.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config | grep -A5 "peer-transport-security"
+        audit: "cat $etcdconf"
+        audit_config: "cat $etcdconf"
         tests:
-          bin_op: and
           test_items:
-            - flag: "cert-file"
+            - path: "{.peer-transport-security.cert-file}"
               compare:
                 op: eq
                 value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.crt"
-            - flag: "key-file"
+            - path: "{.peer-transport-security.key-file}"
               compare:
                 op: eq
                 value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.key"
@@ -90,11 +91,11 @@ groups:
 
       - id: 2.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config | grep -A5 "peer-transport-security"
+        audit: "cat $etcdconf"
         tests:
           test_items:
             - flag: "client-cert-auth"
+              path: "{.peer-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
@@ -106,12 +107,12 @@ groups:
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
-        audit:
-          cat /var/lib/rancher/rke2/server/db/etcd/config
+        audit: "cat $etcdconf"
         tests:
           bin_op: or
           test_items:
-            - flag: "--peer-auto-tls"
+            - flag: "peer-auto-tls"
+              path: "{.peer-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
@@ -122,15 +123,16 @@ groups:
         scored: true
 
       - id: 2.7
-        text: "Ensure that a unique Certificate Authority is used for etcd (RKE2)"
-        audit: |
-          cat /var/lib/rancher/rke2/server/db/etcd/config
+        text: "Ensure that a unique Certificate Authority is used for etcd (Automated)"
+        audit: "cat $etcdconf"
+        audit_config: "cat $etcdconf"
         tests:
           test_items:
-            - flag: "trusted-ca-file"
+            - path: "{.peer-transport-security.trusted-ca-file}"
               compare:
                 op: eq
-                value: "/var/lib/rancher/rke2/server/tls/etcd/server-ca.crt"
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-ca.crt"
+              set: true
         remediation: |
           [Manual test]
           Follow the etcd documentation and create a dedicated certificate authority setup for the

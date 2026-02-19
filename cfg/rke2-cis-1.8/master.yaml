@@ -210,17 +210,23 @@ groups:
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
         audit: |
           /bin/sh -c '
-          if [ -d /var/lib/rancher/rke2/server/db/etcd ]; then
-            stat -c "%U:%G" /var/lib/rancher/rke2/server/db/etcd
+          if [ -e "$etcdconf" ]; then
+            stat -c "ownership=%U:%G %n" "$etcdconf"
           else
-            exit 0
-          fi'
+            echo "Directory not found"
+          fi
+          '
+        type: "skip"
         tests:
+          bin_op: or
           test_items:
-            - flag: "root:root"
+            - flag: "ownership"
               compare:
                 op: eq
                 value: "root:root"
+              set: true
+            - flag: "Directory not found"
+              set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.

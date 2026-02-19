@@ -10,41 +10,33 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)"
-        audit: |
-          /bin/sh -c '
-          if [ -f /etc/systemd/system/kubelet.service ]; then
-            stat -c "permissions=%a" /etc/systemd/system/kubelet.service
-          else
-            echo "permissions=NA"
-          fi'
+        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
-            - flag: "permissions=NA"
+            - flag: "permissions"
               compare:
-                op: eq
-                value: "permissions=NA"
+                op: bitmask
+                value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chmod 600 $kubeletsvc
-          Not Applicable - Clusters provisioned by RKE does not require or maintain a configuration file for the kubelet service.
+          Not Applicable - Clusters provisioned by RKE doesn't require or maintain a configuration file for the kubelet service.
           All configuration is passed in as arguments at container run time.
         scored: true
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: |
-          /bin/sh -c '
-          if [ -f /etc/systemd/system/kubelet.service ]; then
-            stat -c "ownership=%U:%G" /etc/systemd/system/kubelet.service
-          else
-            echo "ownership=NA"
-          fi'
+        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c ownership=%U:%G $kubeletsvc; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
-            - flag: "ownership=NA"
+            - flag: "ownership"
               compare:
                 op: eq
-                value: "ownership=NA"
+                value: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -195,11 +187,19 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: |
-          grep -A2 "anonymous:" /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/00-rke2-defaults.conf
+        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
+        audit_config: >
+          /bin/sh -c '
+          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
+            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
+          fi'
         tests:
           test_items:
-            - flag: "enabled: false"
+            - flag: "anonymous-auth"
+              path: '{.authentication.anonymous.enabled}'
+              compare:
+                op: eq
+                value: false
         remediation: |
           If using a Kubelet config file, edit the file to set `authentication: anonymous: enabled` to
           `false`.
@@ -214,11 +214,19 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: |
-          grep -A2 "authorization:" /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/00-rke2-defaults.conf
+        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
+        audit_config: >
+          /bin/sh -c '
+          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
+            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
+          fi'
         tests:
           test_items:
-            - flag: "mode: Webhook"
+            - flag: authorization-mode
+              path: '{.authorization.mode}'
+              compare:
+                op: nothave
+                value: AlwaysAllow
         remediation: |
           If using a Kubelet config file, edit the file to set `authorization.mode` to Webhook. If
           using executable arguments, edit the kubelet service file
