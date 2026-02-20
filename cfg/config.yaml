@@ -327,6 +327,7 @@ version_mapping:
   "rke2-cis-1.8": "rke2-cis-1.8"
   "rke2-cis-1.23": "rke2-cis-1.23"
   "rke2-cis-1.24": "rke2-cis-1.24"
+  "oke-1.7.0": "oke-1.7.0"
 
 target_mapping:
   "cis-1.5":
@@ -585,3 +586,8 @@ target_mapping:
     - "controlplane"
     - "node"
     - "policies"
+  "oke-1.7.0":
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
