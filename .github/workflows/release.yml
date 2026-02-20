@@ -5,7 +5,6 @@ on:
     tags:
       - "v*"
 env:
-  GO_VERSION: "1.23.6"
   KIND_VERSION: "v0.11.1"
   KIND_IMAGE: "kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6"
 
@@ -14,14 +13,14 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
       - name: Run unit tests
         run: make tests
       - name: Setup Kubernetes cluster (KIND)

@@ -14,7 +14,6 @@ on:
       - "LICENSE"
       - "NOTICE"
 env:
-  GO_VERSION: "1.23.6"
   KIND_VERSION: "v0.11.1"
   KIND_IMAGE: "kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6"
 
@@ -23,12 +22,12 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
         uses: actions/checkout@v6
+      - name: Setup Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
       - name: yaml-lint
         uses: ibiqlik/action-yamllint@v3
       - name: Setup golangci-lint
@@ -40,12 +39,12 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
         uses: actions/checkout@v6
+      - name: Setup Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
       - name: Run unit tests
         run: make tests
       - name: Upload code coverage
@@ -56,12 +55,12 @@ jobs:
     name: E2e tests
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
         uses: actions/checkout@v6
+      - name: Setup Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
       - name: Setup Kubernetes cluster (KIND)
         uses: engineerd/setup-kind@v0.6.2
         with:
@@ -86,14 +85,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [e2e, unit]
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
       - name: Dry-run release snapshot
         uses: goreleaser/goreleaser-action@v6
         with:
