@@ -9,7 +9,7 @@ groups:
     text: "Image Registry and Image Scanning"
     checks:
       - id: 5.1.1
-        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third party provider (Manual)"
+        text: "Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third party provider (Automated)"
         type: "manual"
         remediation: |
           To utilize AWS ECR for Image scanning please follow the steps below:
@@ -95,7 +95,7 @@ groups:
     text: "Identity and Access Management (IAM)"
     checks:
       - id: 5.2.1
-        text: "Prefer using dedicated Amazon EKS Service Accounts (Manual)"
+        text: "Prefer using dedicated Amazon EKS Service Accounts (Automated)"
         type: "manual"
         remediation: |
           With IAM roles for service accounts on Amazon EKS clusters, you can associate an
@@ -144,7 +144,7 @@ groups:
     text: "Cluster Networking"
     checks:
       - id: 5.4.1
-        text: "Restrict Access to the Control Plane Endpoint (Manual)"
+        text: "Restrict Access to the Control Plane Endpoint (Automated)"
         type: "manual"
         remediation: |
           By enabling private endpoint access to the Kubernetes API server, all communication
@@ -170,7 +170,7 @@ groups:
         scored: false
 
       - id: 5.4.2
-        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
         type: "manual"
         remediation: |
           By enabling private endpoint access to the Kubernetes API server, all communication
@@ -182,11 +182,11 @@ groups:
           aws eks update-cluster-config --region $AWS_REGION --name $CLUSTER_NAME --resources-vpc-config endpointPrivateAccess=true,endpointPublicAccess=false
 
           Note: For more detailed information, see the EKS Cluster Endpoint documentation link
-          in the references section.
+          https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
         scored: false
 
       - id: 5.4.3
-        text: "Ensure clusters are created with Private Nodes (Manual)"
+        text: "Ensure clusters are created with Private Nodes (Automated)"
         type: "manual"
         remediation: |
           aws eks update-cluster-config \
@@ -196,7 +196,7 @@ groups:
         scored: false
 
       - id: 5.4.4
-        text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
+        text: "Ensure Network Policy is Enabled and set as appropriate (Automated)"
         type: "manual"
         remediation: |
           Utilize Calico or other network policy engine to segment and isolate your traffic.

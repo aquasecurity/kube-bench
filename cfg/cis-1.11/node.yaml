@@ -466,6 +466,7 @@ groups:
           Set the parameter, either via the --seccomp-default command line parameter or the
           seccompDefault configuration file setting.
           By default the seccomp profile is not enabled.
+          https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads
         scored: false
 
       - id: 4.2.15
