@@ -111,6 +111,9 @@ master:
       - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
+    client_cert_file: /var/lib/rancher/rke2/server/tls/etcd/server-client.crt
+    client_key_file: /var/lib/rancher/rke2/server/tls/etcd/server-client.key
+
 
   flanneld:
     optional: true
@@ -136,12 +139,13 @@ node:
 
   kubelet:
     cafile:
+      - "/var/lib/rancher/rke2/agent/client-ca.crt"
+      - "/var/lib/rancher/rke2/server/tls/server-ca.crt"
       - "/etc/kubernetes/pki/ca.crt"
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
       - "/var/snap/microk8s/current/certs/ca.crt"
       - "/var/lib/rancher/rke2/agent/server.crt"
-      - "/var/lib/rancher/rke2/agent/client-ca.crt"
       - "/var/lib/rancher/k3s/agent/client-ca.crt"
     svc:
       # These paths must also be included
@@ -169,6 +173,7 @@ node:
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
+      - "/var/lib/rancher/rke2/agent/etc/kubelet.conf.d"
       - "/var/lib/kubelet/config.yaml"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
@@ -239,6 +244,7 @@ etcd:
       - /var/lib/etcd/data.etcd
       - /var/lib/rancher/k3s/server/db/etcd
     confs:
+      - /var/lib/rancher/rke2/server/db/etcd/config
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest

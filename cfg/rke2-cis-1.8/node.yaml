@@ -10,32 +10,41 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
+        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chmod 600 $kubeletsvc
-          Not Applicable - Clusters provisioned by RKE doesn’t require or maintain a configuration file for the kubelet service.
+          Not Applicable - Clusters provisioned by RKE doesn't require or maintain a configuration file for the kubelet service.
           All configuration is passed in as arguments at container run time.
         scored: true
+
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; else echo \"File not found\"; fi"'
+        audit: '/bin/sh -c "if test -e $kubeletsvc; then stat -c ownership=%U:%G $kubeletsvc; else echo \"File not found\"; fi"'
         tests:
+          bin_op: or
           test_items:
-            - flag: root:root
+            - flag: "ownership"
+              compare:
+                op: eq
+                value: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
           chown root:root $kubeletsvc
-          Not Applicable - Clusters provisioned by RKE doesn’t require or maintain a configuration file for the kubelet service.
+          Not Applicable - Clusters provisioned by RKE does not require or maintain a configuration file for the kubelet service.
            All configuration is passed in as arguments at container run time.
         scored: true
+
       - id: 4.1.3
         text: "If proxy kubeconfig file exists ensure permissions are set to 600 or more restrictive (Automated)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
@@ -52,6 +61,7 @@ groups:
           For example,
           chmod 600 $proxykubeconfig
         scored: true
+
       - id: 4.1.4
         text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Automated)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
@@ -63,6 +73,7 @@ groups:
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chown root:root $proxykubeconfig
         scored: true
+
       - id: 4.1.5
         text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 600 or more restrictive (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
@@ -77,6 +88,7 @@ groups:
           For example,
           chmod 600 $kubeletkubeconfig
         scored: true
+
       - id: 4.1.6
         text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
@@ -88,9 +100,15 @@ groups:
           For example,
           chown root:root $kubeletkubeconfig
         scored: true
+
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 600 or more restrictive (Automated)"
-        audit: "stat -c permissions=%a /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: |
+          if [ -f /var/lib/rancher/rke2/agent/client-ca.crt ]; then
+            stat -c permissions=%a /var/lib/rancher/rke2/agent/client-ca.crt
+          else
+            echo "NA"
+          fi
         tests:
           test_items:
             - flag: "permissions"
@@ -101,9 +119,15 @@ groups:
           Run the following command to modify the file permissions of the
           --client-ca-file chmod 600 <filename>
         scored: true
+
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
-        audit: "stat -c %U:%G /node/etc/kubernetes/ssl/kube-ca.pem"
+        audit: |
+          if [ -f /var/lib/rancher/rke2/agent/client-ca.crt ]; then
+            stat -c %U:%G /var/lib/rancher/rke2/agent/client-ca.crt
+          else
+            echo "NA"
+          fi
         tests:
           test_items:
             - flag: root:root
@@ -114,6 +138,7 @@ groups:
           Run the following command to modify the ownership of the --client-ca-file.
           chown root:root <filename>
         scored: true
+
       - id: 4.1.9
         text: "If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Automated)"
         audit: |
@@ -136,6 +161,7 @@ groups:
           Not Applicable - Clusters provisioned by RKE do not require or maintain a configuration file for the kubelet.
           All configuration is passed in as arguments at container run time.
         scored: true
+
       - id: 4.1.10
         text: "If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Manual)"
         audit: |
@@ -152,19 +178,24 @@ groups:
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf
-          Not Applicable - Clusters provisioned by RKE doesn’t require or maintain a configuration file for the kubelet.
+          Not Applicable - Clusters provisioned by RKE does not require or maintain a configuration file for the kubelet.
           All configuration is passed in as arguments at container run time.
         scored: false
+
   - id: 4.2
     text: "Kubelet"
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
+        audit_config: >
+          /bin/sh -c '
+          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
+            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
+          fi'
         tests:
           test_items:
-            - flag: "--anonymous-auth"
+            - flag: "anonymous-auth"
               path: '{.authentication.anonymous.enabled}'
               compare:
                 op: eq
@@ -180,13 +211,18 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
+        audit_config: >
+          /bin/sh -c '
+          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
+            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
+          fi'
         tests:
           test_items:
-            - flag: --authorization-mode
+            - flag: authorization-mode
               path: '{.authorization.mode}'
               compare:
                 op: nothave
@@ -201,14 +237,23 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit: |
+          /bin/sh -c '
+          if grep -q "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt" \
+            /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/* 2>/dev/null; then
+            echo "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
+          else
+            echo "clientCAFile=NA"
+          fi'
         tests:
           test_items:
-            - flag: --client-ca-file
-              path: '{.authentication.x509.clientCAFile}'
+            - flag: "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
+              compare:
+                op: eq
+                value: "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
         remediation: |
           If using a Kubelet config file, edit the file to set `authentication.x509.clientCAFile` to
           the location of the client CA file.
@@ -220,6 +265,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.4
         text: "Verify that the --read-only-port argument is set to 0 (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -245,6 +291,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.5
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -271,6 +318,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: false
+
       - id: 4.2.6
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -296,6 +344,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.7
         text: "Ensure that the --hostname-override argument is not set (Manual)"
         audit: "/bin/ps -fC $kubeletbin "
@@ -312,6 +361,7 @@ groups:
           systemctl restart kubelet.service
           Not Applicable - Clusters provisioned by RKE set the --hostname-override to avoid any hostname configuration errors
         scored: false
+
       - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -336,6 +386,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: false
+
       - id: 4.2.9
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -360,6 +411,7 @@ groups:
           systemctl restart kubelet.service
           Permissive - When generating serving certificates, functionality could break in conjunction with hostname overrides which are required for certain cloud providers.
         scored: false
+
       - id: 4.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -386,6 +438,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.11
         text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -410,6 +463,7 @@ groups:
           systemctl restart kubelet.service
           Not Applicable - Clusters provisioned by RKE handles certificate rotation directly through RKE.
         scored: false
+
       - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
@@ -433,6 +487,7 @@ groups:
           systemctl daemon-reload
           systemctl restart kubelet.service
         scored: true
+
       - id: 4.2.13
         text: "Ensure that a limit is set on pod PIDs (Manual)"
         audit: "/bin/ps -fC $kubeletbin"

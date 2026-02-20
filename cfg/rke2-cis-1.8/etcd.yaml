@@ -10,14 +10,20 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
         tests:
           bin_op: and
           test_items:
-            - flag: "--cert-file"
-              env: "ETCD_CERT_FILE"
-            - flag: "--key-file"
-              env: "ETCD_KEY_FILE"
+            - flag: "cert-file"
+              path: "{.client-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.crt"
+            - flag: "key-file"
+              path: "{.client-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.key"
         remediation: |
           Follow the etcd service documentation and configure TLS encryption.
           Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml
@@ -28,11 +34,11 @@ groups:
 
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
         tests:
           test_items:
-            - flag: "--client-cert-auth"
-              env: "ETCD_CLIENT_CERT_AUTH"
+            - flag: "client-cert-auth"
+              path: "{.client-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
@@ -44,15 +50,12 @@ groups:
 
       - id: 2.3
         text: "Ensure that the --auto-tls argument is not set to true (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
         tests:
           bin_op: or
           test_items:
-            - flag: "--auto-tls"
-              env: "ETCD_AUTO_TLS"
-              set: false
-            - flag: "--auto-tls"
-              env: "ETCD_AUTO_TLS"
+            - flag: "auto-tls"
+              path: "{.client-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
@@ -64,14 +67,18 @@ groups:
 
       - id: 2.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
+        audit_config: "cat $etcdconf"
         tests:
-          bin_op: and
           test_items:
-            - flag: "--peer-cert-file"
-              env: "ETCD_PEER_CERT_FILE"
-            - flag: "--peer-key-file"
-              env: "ETCD_PEER_KEY_FILE"
+            - path: "{.peer-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.crt"
+            - path: "{.peer-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.key"
         remediation: |
           Follow the etcd service documentation and configure peer TLS encryption as appropriate
           for your etcd cluster.
@@ -83,11 +90,11 @@ groups:
 
       - id: 2.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
         tests:
           test_items:
-            - flag: "--peer-client-cert-auth"
-              env: "ETCD_PEER_CLIENT_CERT_AUTH"
+            - flag: "client-cert-auth"
+              path: "{.peer-transport-security.client-cert-auth}"
               compare:
                 op: eq
                 value: true
@@ -99,15 +106,12 @@ groups:
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
         tests:
           bin_op: or
           test_items:
-            - flag: "--peer-auto-tls"
-              env: "ETCD_PEER_AUTO_TLS"
-              set: false
-            - flag: "--peer-auto-tls"
-              env: "ETCD_PEER_AUTO_TLS"
+            - flag: "peer-auto-tls"
+              path: "{.peer-transport-security.auto-tls}"
               compare:
                 op: eq
                 value: false
@@ -119,11 +123,14 @@ groups:
 
       - id: 2.7
         text: "Ensure that a unique Certificate Authority is used for etcd (Automated)"
-        audit: "/bin/ps -ef | /bin/grep $etcdbin | /bin/grep -v grep"
+        audit: "cat $etcdconf"
+        audit_config: "cat $etcdconf"
         tests:
           test_items:
-            - flag: "--trusted-ca-file"
-              env: "ETCD_TRUSTED_CA_FILE"
+            - path: "{.peer-transport-security.trusted-ca-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-ca.crt"
               set: true
         remediation: |
           [Manual test]
