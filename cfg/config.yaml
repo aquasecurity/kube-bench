@@ -513,6 +513,11 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "gke-stig-kubernetes-v2r2":
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "tkgi-1.2.53":
     - "master"
     - "etcd"

@@ -1,0 +1,7 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+node:
+  kubelet:
+    confs:
+      - "/home/kubernetes/kubelet-config.yaml"
+      - "/etc/kubernetes/kubelet-config.yaml"
