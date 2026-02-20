@@ -43,14 +43,14 @@ RUN apk add jq
 # Add bash for running helper scripts
 RUN apk add bash
 
-ENV PATH=$PATH:/usr/local/mount-from-host/bin:/go/bin
+ENV PATH=$PATH:/usr/local/mount-from-host/bin
 
 COPY --from=build /go/bin/kube-bench /usr/local/bin/kube-bench
 COPY --from=build /usr/local/bin/kubectl /usr/local/bin/kubectl
 COPY entrypoint.sh .
 COPY cfg/ cfg/
-COPY helper_scripts/check_files_owner_in_dir.sh /go/bin/
-RUN chmod a+x /go/bin/check_files_owner_in_dir.sh
+COPY helper_scripts/check_files_owner_in_dir.sh /usr/local/bin/
+RUN chmod a+x /usr/local/bin/check_files_owner_in_dir.sh
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["install"]
 
