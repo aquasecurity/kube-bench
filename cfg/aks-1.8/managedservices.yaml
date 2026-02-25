@@ -167,4 +167,3 @@ groups:
         type: "manual"
         remediation: "No remediation"
         scored: false
-        

@@ -328,4 +328,3 @@ groups:
           kubectl get deployment my-app -n default -o yaml | sed 's/namespace: default/namespace: my-namespace/' | kubectl apply -f -
           kubectl delete deployment my-app -n default
         scored: true
-

@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 2.1.1
         text: "Enable audit Logs"
-        type: "manual" 
+        type: "manual"
         remediation: |
           Azure audit logs are enabled and managed in the Azure portal. To enable log collection for
           the Kubernetes master components in your AKS cluster, open the Azure portal in a web

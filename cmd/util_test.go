@@ -800,7 +800,7 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		{
 			name: "aks",
 			args: args{
-				platform: Platform{Name: "aks", Version: "1.27"},
+				platform: Platform{Name: "aks", Version: "1.29"},
 			},
 			want: "aks-1.7",
 		},
