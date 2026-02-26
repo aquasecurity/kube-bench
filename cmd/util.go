@@ -534,7 +534,7 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 		}
 	case "aks":
 		switch platform.Version {
-		case "1.19", "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27", "1.28":
+		case "1.19", "1.20", "1.21", "1.22", "1.23", "1.24":
 			return "aks-1.0"
 		case "1.29", "1.30", "1.31":
 			return "aks-1.7"
