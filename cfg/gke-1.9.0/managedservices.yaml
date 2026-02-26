@@ -144,7 +144,7 @@ groups:
     text: "Identity and Access Management (IAM)"
     checks:
       - id: 5.2.1
-        text: "Ensure GKE clusters are not running using the Compute Engine default service account (Automated))"
+        text: "Ensure GKE clusters are not running using the Compute Engine default service account (Automated)"
         audit: |
           gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --location $LOCATION --project $PROJECT_ID --format json | jq '.config.serviceAccount'
         type: "manual"
@@ -459,7 +459,7 @@ groups:
       - id: 5.6.6
         text: "Consider firewalling GKE worker nodes (Manual)"
         audit: |
-          gcloud compute instances describe $CLUSTER_NAME --location $LOCATION --project $PROJECT_ID --format json | \
+          gcloud compute instances describe $CLUSTER_NAME --zone $LOCATION --project $PROJECT_ID --format json | \
           jq '{tags: .tags.items[], serviceaccount:.serviceAccounts[].email, network: .networkInterfaces[].network}'
         type: "manual"
         remediation: |
@@ -481,7 +481,7 @@ groups:
         audit: |
           svc_json="$(kubectl get svc -A -o json 2>/dev/null                || echo '{"items":[],"__err":"SVC_FORBIDDEN"}')"
           ing_json="$(kubectl get ingress -A -o json 2>/dev/null            || echo '{"items":[],"__err":"INGRESS_FORBIDDEN"}')"
-          mc_json ="$(kubectl get managedcertificates -A -o json 2>/dev/null || echo '{"items":[],"__err":"MC_FORBIDDEN"}')"
+          mc_json="$(kubectl get managedcertificates -A -o json 2>/dev/null || echo '{"items":[],"__err":"MC_FORBIDDEN"}')"
 
           printf '%s\n%s\n%s\n' "$svc_json" "$ing_json" "$mc_json" \
           | jq -rs '
