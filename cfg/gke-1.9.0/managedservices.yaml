@@ -10,8 +10,11 @@ groups:
     checks:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning is enabled (Automated)"
-        audit: "gcloud services list --enabled"
-        type: "manual"
+        audit: "/bin/sh -c 'if gcloud services list --enabled | grep -q containerscanning.googleapis.com; then echo enabled; else echo disabled; fi'"
+        tests:
+          test_items:
+            - flag: enabled
+        remediate:
         remediation: |
           For Images Hosted in GCR:
           Using Google Cloud Console
