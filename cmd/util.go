@@ -538,8 +538,6 @@ func getPlatformBenchmarkVersion(platform Platform) string {
 			return "aks-1.0"
 		case "1.29", "1.30", "1.31":
 			return "aks-1.7"
-		case "1.32", "1.33", "1.34":
-			return "aks-1.8"
 		default:
 			return "aks-1.8"
 		}
