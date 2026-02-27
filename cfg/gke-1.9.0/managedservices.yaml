@@ -14,7 +14,6 @@ groups:
         tests:
           test_items:
             - flag: enabled
-        remediate:
         remediation: |
           For Images Hosted in GCR:
           Using Google Cloud Console
@@ -28,7 +27,7 @@ groups:
           Select Settings and, under the Vulnerability Scanning heading, click the ENABLE button.
           Using Command Line
           gcloud services enable containerscanning.googleapis.com
-        scored: false
+        scored: true
 
       - id: 5.1.2
         text: "Minimize user access to Container Image repositories (Manual)"
