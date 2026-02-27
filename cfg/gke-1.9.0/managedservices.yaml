@@ -148,8 +148,33 @@ groups:
       - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine default service account (Automated)"
         audit: |
-          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --location $LOCATION --project $PROJECT_ID --format json | jq '.config.serviceAccount'
-        type: "manual"
+          /bin/bash -c "
+          # Check for required variables
+          if [[ -z \$PROJECT_ID ]] || [[ -z \$CLUSTER_NAME ]] || [[ -z \$LOCATION ]]; then
+            echo 'MISSING_REQUIRED_VARIABLES'
+            exit 1
+          fi
+
+          # Get NODE_POOL if not already set
+          if [[ -z \$NODE_POOL ]]; then
+            NODE_POOL=\$(gcloud container clusters describe \$CLUSTER_NAME --location \$LOCATION --project \$PROJECT_ID --format='value(nodePools[0].name)' 2>/dev/null)
+            [[ -z \$NODE_POOL ]] && { echo 'FAILED_NODE_POOL'; exit 1; }
+          fi
+          
+          # Get service account from node pool
+          SA=\$(gcloud container node-pools describe \$NODE_POOL --cluster \$CLUSTER_NAME --location \$LOCATION --project \$PROJECT_ID --format='value(config.serviceAccount)' 2>/dev/null)
+          [[ -z \$SA ]] && { echo 'FAILED_SERVICE_ACCOUNT'; exit 1; }
+          
+          # Check if service account is 'default'
+          [[ \"\$SA\" == \"default\" ]] && echo 'DEFAULT_SA_IN_USE' || echo 'DEFAULT_SA_NOT_IN_USE'
+          "
+        tests:
+          test_items:
+            - flag: "DEFAULT_SA_NOT_IN_USE"
+              set: true
+              compare:
+                op: eq
+                value: "DEFAULT_SA_NOT_IN_USE"
         remediation: |
           Using Command Line:
           To create a minimally privileged service account:
@@ -178,7 +203,7 @@ groups:
           Note: The workloads will need to be migrated to the new Node pool, and the old node
           pools that use the default service account should be deleted to complete the
           remediation.
-        scored: false
+        scored: true
 
       - id: 5.2.2
         text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Manual)"
