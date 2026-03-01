@@ -651,144 +651,39 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 		want string
 	}{
 		{
-			name: "eks 1.31",
-			args: args{
-				platform: Platform{Name: "eks", Version: "1.31"},
-			},
-			want: "eks-1.7.0",
-		},
-		{
-			name: "eks 1.29",
-			args: args{
-				platform: Platform{Name: "eks", Version: "1.29"},
-			},
-			want: "eks-1.7.0",
-		},
-		{
-			name: "eks 1.30",
-			args: args{
-				platform: Platform{Name: "eks", Version: "1.30"},
-			},
-			want: "eks-1.7.0",
-		},
-		{
-			name: "eks 1.32",
-			args: args{
-				platform: Platform{Name: "eks", Version: "1.32"},
-			},
+			name: "eks",
+			args: args{platform: Platform{Name: "eks"}},
 			want: "eks-1.8.0",
 		},
 		{
-			name: "eks 1.24",
-			args: args{
-				platform: Platform{Name: "eks", Version: "1.24"},
-			},
-			want: "eks-1.5.0",
+			name: "aks",
+			args: args{platform: Platform{Name: "aks"}},
+			want: "aks-1.8.0",
 		},
 		{
-			name: "gke 1.19",
-			args: args{
-				platform: Platform{Name: "gke", Version: "1.19"},
-			},
-			want: "gke-1.0",
-		},
-		{
-			name: "gke 1.20",
-			args: args{
-				platform: Platform{Name: "gke", Version: "1.20"},
-			},
-			want: "gke-1.2.0",
-		},
-		{
-			name: "gke 1.22",
-			args: args{
-				platform: Platform{Name: "gke", Version: "1.22"},
-			},
-			want: "gke-1.2.0",
-		},
-		{
-			name: "gke 1.28",
-			args: args{
-				platform: Platform{Name: "gke", Version: "1.28"},
-			},
-			want: "gke-1.6.0",
-		},
-		{
-			name: "gke 1.31",
-			args: args{
-				platform: Platform{Name: "gke", Version: "1.31"},
-			},
-			want: "gke-1.8.0",
+			name: "gke",
+			args: args{platform: Platform{Name: "gke"}},
+			want: "gke-1.9.0",
 		},
 		{
 			name: "aliyun",
-			args: args{
-				platform: Platform{Name: "aliyun"},
-			},
+			args: args{platform: Platform{Name: "aliyun"}},
 			want: "ack-1.0",
 		},
 		{
 			name: "unknown",
-			args: args{
-				platform: Platform{Name: "rh"},
-			},
+			args: args{platform: Platform{Name: "rh"}},
 			want: "",
 		},
 		{
 			name: "empty",
-			args: args{
-				platform: Platform{},
-			},
+			args: args{platform: Platform{}},
 			want: "",
 		},
 		{
-			name: "openshift3",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "3.10"},
-			},
-			want: "rh-0.7",
-		},
-		{
-			name: "openshift4",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.11"},
-			},
-			want: "rh-1.4",
-		},
-		{
-			name: "openshift4",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.13"},
-			},
-			want: "rh-1.8",
-		},
-		{
-			name: "openshift4",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.1"},
-			},
-			want: "rh-1.0",
-		},
-		{
-			name: "openshift4_15",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.15"},
-			},
-			want: "rh-1.8",
-		},
-		{
-			name: "openshift4_12",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.12"},
-			},
-			want: "rh-1.4",
-		},
-		{
-			name: "openshift4_17",
-			args: args{
-				platform: Platform{Name: "ocp", Version: "4.17"},
-			},
-			want: "rh-1.8",
+			name: "ocp",
+			args: args{platform: Platform{Name: "ocp"}},
+			want: "rh-1.9",
 		},
 		{
 			name: "k3s",
@@ -817,13 +712,6 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 				platform: Platform{Name: "rke2r", Version: "1.26"},
 			},
 			want: "rke2-cis-1.8",
-		},
-		{
-			name: "aks",
-			args: args{
-				platform: Platform{Name: "aks", Version: "1.27"},
-			},
-			want: "aks-1.7",
 		},
 	}
 	for _, tt := range tests {

@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.8.0"
+version: "gke-1.9.0"
 id: 5
 text: "Managed Services"
 type: "managedservices"
@@ -604,20 +604,24 @@ groups:
         scored: false
 
       - id: 5.8.2
-        text: "Manage Kubernetes RBAC users with Google Groups for GKE (Manual)"
-        audit: |
-          gcloud container clusters create <cluster_name> --security-group <security_group_name>
-        type: "manual"
+        text: "Manage Kubernetes RBAC users for GKE with groups in Google Workspace (Manual)"
+        audit: gcloud container clusters describe $CLUSTER_NAME --location $LOCATION --project $PROJECT_ID --format=json | jq '{Enabled: .authenticatorGroupsConfig.enabled, "Security Group": .authenticatorGroupsConfig.securityGroup}'
         remediation: |
-          Using Command Line:
-          Follow the G Suite Groups instructions at: https://cloud.google.com/kubernetes-
-          engine/docs/how-to/role-based-access-control#google-groups-for-gke.
+          Create the required group in Google Workspace named:
+            gke-security-groups@DOMAIN
 
-          Then, create a cluster with:
-            gcloud container clusters create <cluster_name> --security-group <security_group_name>
+          To create a new cluster:
+            gcloud container clusters create CLUSTER_NAME \
+              --location=CONTROL_PLANE_LOCATION \
+              --security-group="gke-security-groups@DOMAIN"
 
-          Finally create Roles, ClusterRoles, RoleBindings, and ClusterRoleBindings that
-          reference the G Suite Groups.
+          To update an existing cluster:
+            gcloud container clusters update CLUSTER_NAME \
+              --location=CONTROL_PLANE_LOCATION \
+              --security-group="gke-security-groups@DOMAIN"
+
+          Finally, create Roles, ClusterRoles, RoleBindings, and
+          ClusterRoleBindings that reference the Google Workspace groups.
         scored: false
 
       - id: 5.8.3
@@ -694,23 +698,46 @@ groups:
         scored: false
 
       - id: 5.10.3
-        text: "Consider GKE Sandbox for running untrusted workloads (Manual)"
+        text: "Consider GKE Sandbox for running untrusted workloads (Automated)"
         audit: |
-          gcloud container node-pools describe $NODE_POOL --cluster $CLUSTER_NAME --zone $COMPUTE_ZONE --format json | jq '.config.sandboxConfig'
+          gcloud container node-pools describe $NODE_POOL \
+            --cluster $CLUSTER_NAME \
+            --zone $COMPUTE_ZONE \
+            --format="value(config.sandboxConfig.type)"
+
         type: "manual"
         remediation: |
-          Using Command Line:
-          To enable GKE Sandbox on an existing cluster, a new Node pool must be created,
-          which can be done using:
-            gcloud container node-pools create <node_pool_name> --zone <compute-zone> \
-              --cluster <cluster_name> --image-type=cos_containerd --sandbox="type=gvisor"
+          To enable GKE Sandbox on an existing cluster, create a new Node pool:
+
+            gcloud container node-pools create <node_pool_name> \
+              --zone <compute-zone> \
+              --cluster <cluster_name> \
+              --image-type=cos_containerd \
+              --sandbox="type=gvisor"
         scored: false
 
-      - id: 5.10.5
-        text: "Enable Security Posture (Manual)"
-        audit: "gcloud container clusters --location describe"
+
+      - id: 5.10.4
+        text: "Enable Security Posture (Automated)"
+        audit: gcloud container clusters describe $CLUSTER_NAME --location $LOCATION --project $PROJECT_ID --format json | jq '.securityPostureConfig'
         type: "manual"
         remediation: |
-          Enable security posture via the UI, gCloud or API.
-          https://cloud.google.com/kubernetes-engine/docs/how-to/protect-workload-configuration
+          To enable Security Posture for a new cluster:
+
+            gcloud container clusters create CLUSTER_NAME \
+              --location=CONTROL_PLANE_LOCATION \
+              --security-posture=standard
+
+          Or:
+
+            gcloud container clusters create CLUSTER_NAME \
+              --location=CONTROL_PLANE_LOCATION \
+              --security-posture=enterprise
+
+          To update an existing cluster:
+
+            gcloud container clusters update CLUSTER_NAME \
+              --location=CONTROL_PLANE_LOCATION \
+              --security-posture=standard
         scored: false
+
