@@ -520,81 +520,122 @@ func IsAKS(ctx context.Context, k8sClient kubernetes.Interface) (bool, error) {
 
 func getPlatformBenchmarkVersion(platform Platform) string {
 	glog.V(3).Infof("getPlatformBenchmarkVersion platform: %s", platform)
+
 	switch platform.Name {
 	case "eks":
-		switch platform.Version {
-		case "1.15", "1.16", "1.17", "1.18", "1.19":
-			return "eks-1.0.1"
-		case "1.29", "1.30", "1.31":
-			return "eks-1.7.0"
-		case "1.32", "1.33", "1.34":
-			return "eks-1.8.0"
-		default:
-			return "eks-1.5.0"
-		}
+		return eksBenchmark(platform.Version)
 	case "aks":
-		return "aks-1.7"
+		return aksBenchmark(platform.Version)
 	case "gke":
-		switch platform.Version {
-		case "1.15", "1.16", "1.17", "1.18", "1.19":
-			return "gke-1.0"
-		case "1.28", "1.29", "1.30":
-			return "gke-1.6.0"
-		case "1.31", "1.32", "1.33", "1.34":
-			return "gke-1.8.0"
-		default:
-			return "gke-1.2.0"
-		}
+		return gkeBenchmark(platform.Version)
+	case "ocp":
+		return ocpBenchmark(platform.Version)
+	case "k3s":
+		return k3sBenchmark(platform.Version)
+	case "rancher":
+		return rkeBenchmark(platform.Version)
+	case "rke2r":
+		return rke2Benchmark(platform.Version)
 	case "aliyun":
 		return "ack-1.0"
-	case "ocp":
-		switch platform.Version {
-		case "3.10":
-			return "rh-0.7"
-		case "4.1":
-			return "rh-1.0"
-		case "4.11":
-			return "rh-1.4"
-		case "4.13":
-			return "rh-1.8"
-		}
 	case "vmware":
 		return "tkgi-1.2.53"
-	case "k3s":
-		switch platform.Version {
-		case "1.23":
-			return "k3s-cis-1.23"
-		case "1.24":
-			return "k3s-cis-1.24"
-		case "1.25", "1.26", "1.27":
-			return "k3s-cis-1.7"
-		}
-	case "rancher":
-		switch platform.Version {
-		case "1.23":
-			return "rke-cis-1.23"
-		case "1.24":
-			return "rke-cis-1.24"
-		case "1.25", "1.26", "1.27":
-			return "rke-cis-1.7"
-		default:
-			return "rke-cis-1.7"
-		}
-	case "rke2r":
-		switch platform.Version {
-		case "1.23":
-			return "rke2-cis-1.23"
-		case "1.24":
-			return "rke2-cis-1.24"
-		case "1.25":
-			return "rke2-cis-1.7"
-		case "1.26", "1.27":
-			return "rke2-cis-1.8"
-		default:
-			return "rke2-cis-1.8"
-		}
+	default:
+		return ""
 	}
-	return ""
+}
+
+func eksBenchmark(version string) string {
+	switch version {
+	case "1.15", "1.16", "1.17", "1.18", "1.19":
+		return "eks-1.0.1"
+	case "1.29", "1.30", "1.31":
+		return "eks-1.7.0"
+	case "1.32", "1.33", "1.34":
+		return "eks-1.8.0"
+	default:
+		return "eks-1.5.0"
+	}
+}
+
+func aksBenchmark(version string) string {
+	switch version {
+	case "1.19", "1.20", "1.21", "1.22", "1.23", "1.24":
+		return "aks-1.0"
+	case "1.29", "1.30", "1.31":
+		return "aks-1.7"
+	default:
+		return "aks-1.8"
+	}
+}
+
+func gkeBenchmark(version string) string {
+	switch version {
+	case "1.15", "1.16", "1.17", "1.18", "1.19":
+		return "gke-1.0"
+	case "1.28", "1.29", "1.30":
+		return "gke-1.6.0"
+	case "1.31", "1.32", "1.33", "1.34":
+		return "gke-1.8.0"
+	default:
+		return "gke-1.2.0"
+	}
+}
+
+func ocpBenchmark(version string) string {
+	switch version {
+	case "3.10":
+		return "rh-0.7"
+	case "4.1":
+		return "rh-1.0"
+	case "4.11":
+		return "rh-1.4"
+	case "4.13":
+		return "rh-1.8"
+	default:
+		return ""
+	}
+}
+
+func k3sBenchmark(version string) string {
+	switch version {
+	case "1.23":
+		return "k3s-cis-1.23"
+	case "1.24":
+		return "k3s-cis-1.24"
+	case "1.25", "1.26", "1.27":
+		return "k3s-cis-1.7"
+	default:
+		return ""
+	}
+}
+
+func rkeBenchmark(version string) string {
+	switch version {
+	case "1.23":
+		return "rke-cis-1.23"
+	case "1.24":
+		return "rke-cis-1.24"
+	case "1.25", "1.26", "1.27":
+		return "rke-cis-1.7"
+	default:
+		return "rke-cis-1.7"
+	}
+}
+
+func rke2Benchmark(version string) string {
+	switch version {
+	case "1.23":
+		return "rke2-cis-1.23"
+	case "1.24":
+		return "rke2-cis-1.24"
+	case "1.25":
+		return "rke2-cis-1.7"
+	case "1.26", "1.27":
+		return "rke2-cis-1.8"
+	default:
+		return "rke2-cis-1.8"
+	}
 }
 
 func getOpenShiftInfo() Platform {

@@ -173,8 +173,10 @@ node:
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/var/lib/rancher/rke2/agent/etc/kubelet.conf.d"
       - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/azure.json"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/etc/kubernetes/kubelet/config.json"
@@ -313,6 +315,7 @@ version_mapping:
   "ocp-4.13": "rh-1.8"
   "aks-1.0": "aks-1.0"
   "aks-1.7": "aks-1.7"
+  "aks-1.8": "aks-1.8"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
@@ -478,6 +481,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "aks-1.7":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "aks-1.8":
     - "master"
     - "node"
     - "controlplane"
