@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type PsqlConnInfo struct {
@@ -17,6 +18,7 @@ type PsqlConnInfo struct {
 	DbName   string
 	SslMode  string
 	Password string
+	Schema   string
 }
 
 func getPsqlConnInfo() (PsqlConnInfo, error) {
@@ -55,12 +57,21 @@ func getPsqlConnInfo() (PsqlConnInfo, error) {
 		return PsqlConnInfo{}, fmt.Errorf("%s_PGSQL_PASSWORD env var is required", envVarsPrefix)
 	}
 
+	var schema string
+	if value := viper.GetString("PGSQL_SCHEMA"); value != "" {
+		schema = value
+	} else {
+		schema = ""
+		glog.V(2).Info("No schema set.")
+	}
+
 	return PsqlConnInfo{
 		Host:     host,
 		User:     user,
 		DbName:   dbName,
 		SslMode:  sslMode,
 		Password: password,
+		Schema:   schema,
 	}, nil
 }
 
@@ -97,7 +108,18 @@ func savePgsql(jsonInfo string) {
 		exitWithError(err)
 	}
 
-	db, err := gorm.Open(postgres.Open(PsqlConnInfo.toString()), &gorm.Config{})
+	var db *gorm.DB
+
+	if PsqlConnInfo.Schema == "" {
+		db, err = gorm.Open(postgres.Open(PsqlConnInfo.toString()), &gorm.Config{})
+	} else {
+		db, err = gorm.Open(postgres.Open(PsqlConnInfo.toString()), &gorm.Config{
+			NamingStrategy: schema.NamingStrategy{
+				TablePrefix:   fmt.Sprintf("%s.", PsqlConnInfo.Schema), // schema name
+				SingularTable: false,
+			}})
+	}
+
 	if err != nil {
 		exitWithError(fmt.Errorf("received error connecting to database: %s", err))
 	}
