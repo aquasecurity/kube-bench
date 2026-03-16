@@ -126,10 +126,10 @@ groups:
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: |
           /bin/sh -c '
-          if [ -e "$etcdconf" ]; then
-            stat -c "ownership=%U:%G %n" "$etcdconf"
+          if [ -e "/var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml" ]; then
+          stat -c "ownership=%U:%G %n" "/var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml"
           else
-            echo "Directory not found"
+          echo "Directory not found"
           fi
           '
         tests:
