@@ -3,7 +3,7 @@ module github.com/aquasecurity/kube-bench
 go 1.25.0
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.41.3
+	github.com/aws/aws-sdk-go-v2 v1.41.4
 	github.com/aws/aws-sdk-go-v2/config v1.32.11
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.68.1
 	github.com/fatih/color v1.18.0
