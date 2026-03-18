@@ -247,6 +247,7 @@ etcd:
       - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /var/lib/rancher/rke2/server/db/etcd/config
+      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
@@ -255,7 +256,6 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
-      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
