@@ -160,11 +160,11 @@ groups:
             NODE_POOL=\$(gcloud container clusters describe \$CLUSTER_NAME --location \$LOCATION --project \$PROJECT_ID --format='value(nodePools[0].name)' 2>/dev/null)
             [[ -z \$NODE_POOL ]] && { echo 'FAILED_NODE_POOL'; exit 1; }
           fi
-          
+
           # Get service account from node pool
           SA=\$(gcloud container node-pools describe \$NODE_POOL --cluster \$CLUSTER_NAME --location \$LOCATION --project \$PROJECT_ID --format='value(config.serviceAccount)' 2>/dev/null)
           [[ -z \$SA ]] && { echo 'FAILED_SERVICE_ACCOUNT'; exit 1; }
-          
+
           # Check if service account is 'default'
           [[ \"\$SA\" == \"default\" ]] && echo 'DEFAULT_SA_IN_USE' || echo 'DEFAULT_SA_NOT_IN_USE'
           "
