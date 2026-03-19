@@ -57,12 +57,19 @@ groups:
             - flag: "auto-tls"
               path: "{.client-transport-security.auto-tls}"
               compare:
-                op: eq
-                value: false
+                op: noteq
+                value: true
+
+            - flag: "auto-tls"
+              path: "{.client-transport-security.auto-tls}"
+              set: false
+
         remediation: |
-          Edit the etcd pod specification file $etcdconf on the master
-          node and either remove the --auto-tls parameter or set it to false.
+          Edit the etcd pod specification file $etcdconf on the master node
+          and either remove the --auto-tls parameter or set it to false.
+
             --auto-tls=false
+
         scored: true
 
       - id: 2.4
@@ -113,8 +120,13 @@ groups:
             - flag: "peer-auto-tls"
               path: "{.peer-transport-security.auto-tls}"
               compare:
-                op: eq
-                value: false
+                op: noteq
+                value: true
+
+            - flag: "peer-auto-tls"
+              path: "{.peer-transport-security.auto-tls}"
+              set: false
+
         remediation: |
           Edit the etcd pod specification file $etcdconf on the master
           node and either remove the --peer-auto-tls parameter or set it to false.
