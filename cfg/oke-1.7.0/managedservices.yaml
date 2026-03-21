@@ -1,0 +1,158 @@
+---
+controls:
+version: "oke-1.7.0"
+id: 5
+text: "Managed services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Oracle Cloud Security Penetration and Vulnerability Testing (Manual)"
+        type: "manual"
+        remediation: |
+          As a service administrator, you can run tests for some Oracle Cloud services. Before running the tests, you must first review the Oracle Cloud Testing Policies section.
+          Note:
+          You must have an Oracle Account with the necessary privileges to file service maintenance requests, and you must be signed in to the environment that will be the subject of the penetration and vulnerability testing.
+          Submitting a Cloud Security Testing Notification: https://docs.cloud.oracle.com/en-us/iaas/Content/Security/Concepts/security_testing-policy.htm
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access control to Container Engine for Kubernetes (Manual)"
+        type: "manual"
+        remediation: |
+          By default, users are not assigned any Kubernetes RBAC roles (or clusterroles) by default. So before attempting to create a new role (or clusterrole), you must be assigned an appropriately privileged role (or clusterrole). A number of such roles and clusterroles are always created by default, including the cluster-admin clusterrole (for a full list, see Default Roles and Role Bindings in the Kubernetes documentation). The cluster-admin clusterrole essentially confers super-user privileges. A user granted the cluster-admin clusterrole can perform any operation across all namespaces in a given cluster.
+          Note that Oracle Cloud Infrastructure tenancy administrators already have sufficient privileges, and do not require the cluster-admin clusterrole.
+          See: Granting the Kubernetes RBAC cluster-admin clusterrole (https://docs.oracle.com/en-us/iaas/Content/ContEng/Concepts/contengaboutaccesscontrol.htm)
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only (Manual)"
+        type: "manual"
+        remediation: |
+          To access a cluster using kubectl, you have to set up a Kubernetes configuration file (commonly known as a 'kubeconfig' file) for the cluster. The kubeconfig file (by default named config and stored in the $HOME/.kube directory) provides the necessary details to access the cluster. Having set up the kubeconfig file, you can start using kubectl to manage the cluster.
+
+          The steps to follow when setting up the kubeconfig file depend on how you want to access the cluster:
+            • To access the cluster using kubectl in Cloud Shell, run an Oracle Cloud Infrastructure CLI command in the Cloud Shell window to set up the kubeconfig file.
+            • To access the cluster using a local installation of kubectl:
+              1. Generate an API signing key pair (if you don't already have one).
+              2. Upload the public key of the API signing key pair.
+              3. Install and configure the Oracle Cloud Infrastructure CLI.
+              4. Set up the kubeconfig file.
+          See Setting Up Local Access to Clusters (https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengdownloadkubeconfigfile.htm#localdownload)
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        type: "manual"
+        remediation: |
+          If using Oracle Cloud Infrastructure Container Registry: Utilize OCI IAM policies to control access to container registry.
+
+          If using a third party registry: Follow best practices based on vendor recommendations.
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated Service Accounts (Automated)"
+        type: "manual"
+        remediation: |
+          When you create a pod, if you do not specify a service account, it is automatically assigned the default service account in the same namespace. If you get the raw json or yaml for a pod you have created (for example, kubectl get pods/<podname> -o yaml), you can see the spec.serviceAccountName field has been automatically set.
+          See Configure Service Accounts for Pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
+
+  - id: 5.3
+    text: "Cloud Key Management Service (Cloud KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Encrypting Kubernetes Secrets at Rest in Etcd (Manual)"
+        type: "manual"
+        remediation: |
+          You can create a cluster in one tenancy that uses a master encryption key in a different tenancy. In this case, you have to write cross-tenancy policies to enable the cluster in its tenancy to access the master encryption key in the Vault service's tenancy. Note that if you want to create a cluster and specify a master encryption key that's in a different tenancy, you cannot use the Console to create the cluster.
+          For example, assume the cluster is in the ClusterTenancy, and the master encryption key is in the KeyTenancy. Users belonging to a group (OKEAdminGroup) in the ClusterTenancy have permissions to create clusters. A dynamic group (OKEAdminDynGroup) has been created in the cluster, with the rule ALL {resource.type = 'cluster', resource.compartment.id = 'ocid1.compartment.oc1..<unique_ID>'}, so all clusters created in the ClusterTenancy belong to the dynamic group.
+          In the root compartment of the KeyTenancy, the following policies:
+          
+            • use the ClusterTenancy's OCID to map ClusterTenancy to the alias OKE_Tenancy
+            • use the OCIDs of OKEAdminGroup and OKEAdminDynGroup to map them to the aliases RemoteOKEAdminGroup and RemoteOKEClusterDynGroup respectively
+            • give RemoteOKEAdminGroup and RemoteOKEClusterDynGroup the ability to list, view, and perform cryptographic operations with a particular master key in the KeyTenancy
+
+            Define tenancy OKE_Tenancy as ocid1.tenancy.oc1..<unique_ID>
+            Define dynamic-group RemoteOKEClusterDynGroup as ocid1.dynamicgroup.oc1..<unique_ID>
+            Define group RemoteOKEAdminGroup as ocid1.group.oc1..<unique_ID>
+            Admit dynamic-group RemoteOKEClusterDynGroup of tenancy ClusterTenancy to use keys in tenancy where target.key.id = 'ocid1.key.oc1..<unique_ID>'
+            Admit group RemoteOKEAdminGroup of tenancy ClusterTenancy to use keys in tenancy where target.key.id = 'ocid1.key.oc1..<unique_ID>'
+
+          In the root compartment of the ClusterTenancy, the following policies:
+
+            • use the KeyTenancy's OCID to map KeyTenancy to the alias KMS_Tenancy
+            • give OKEAdminGroup and OKEAdminDynGroup the ability to use master keys in the KeyTenancy
+            • allow OKEAdminDynGroup to use a specific master key obtained from the KeyTenancy in the ClusterTenancy
+
+            Define tenancy KMS_Tenancy as ocid1.tenancy.oc1..<unique_ID>
+            Endorse group OKEAdminGroup to use keys in tenancy KMS_Tenancy
+            Endorse dynamic-group OKEAdminDynGroup to use keys in tenancy KMS_Tenancy
+            Allow dynamic-group OKEAdminDynGroup to use keys in tenancy where target.key.id = 'ocid1.key.oc1..<unique_ID>'
+
+          See Accessing Object Storage Resources Across Tenancies for more examples of writing cross-tenancy policies.
+          Having entered the policies, you can now run a command similar to the following to create a cluster in the ClusterTenancy that uses the master key obtained from the KeyTenancy:
+
+            oci ce cluster create --name oke-with-cross-kms --kubernetes-version v1.16.8 --vcn-id ocid1.vcn.oc1.iad.<unique_ID> --service-lb-subnet-ids '["ocid1.subnet.oc1.iad.<unique_ID>"]' --compartment-id ocid1.compartment.oc1..<unique_ID> --kms-key-id ocid1.key.oc1.iad.<unique_ID>
+        scored: false
+
+  - id: 5.4
+    text: "Cluster Networking"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Automated)"
+        type: "manual"
+        remediation: |
+          Enable Master Authorized Networks to restrict access to the cluster's control plane (master endpoint) to only an allowlist (whitelist) of authorized IPs.
+        scored: false
+      
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
+        type: "manual"
+        remediation: |
+          Disable access to the Kubernetes API from outside the node network if it is not required.
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Automated)"
+        type: "manual"
+        remediation: |
+          Disable public IP addresses for cluster nodes, so that they only have private IP addresses. Private Nodes are nodes with no public IP addresses.
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Automated)"
+        type: "manual"
+        remediation: |
+          Configure Network Policy for the Cluster
+        scored: false
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        type: "manual"
+        remediation: |
+          Your load balancer vendor can provide details on configuring HTTPS with TLS.
+        scored: false
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Access Control and Container Engine for Kubernetes (Manual)"
+        type: "manual"
+        remediation: |
+          Example: Granting the Kubernetes RBAC cluster-admin clusterrole
+
+          Follow these steps to grant a user who is not a tenancy administrator the Kubernetes RBAC cluster-admin clusterrole on a cluster deployed on Oracle Cloud Infrastructure:
+            1. If you haven't already done so, follow the steps to set up the cluster's kubeconfig configuration file and (if necessary) set the KUBECONFIG environment variable to point to the file. Note that you must set up your own kubeconfig file. You cannot access a cluster using a kubeconfig file that a different user set up. See Setting Up Cluster Access (https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengdownloadkubeconfigfile.htm#Setting_Up_Cluster_Access).
+            2. In a terminal window, grant the Kubernetes RBAC cluster-admin clusterrole to the user by entering:
+              $ kubectl create clusterrolebinding <my-cluster-admin-binding> --clusterrole=cluster-admin --user=<user_OCID>
+              where:
+                • is a string of your choice to be used as the name for the binding between the user and the Kubernetes RBAC cluster-admin clusterrole. For example, jdoe_clst_adm
+                • <user_OCID> is the user's OCID (obtained from the Console ). For example, ocid1.user.oc1..aaaaa...zutq (abbreviated for readability).
+                For example:
+                $ kubectl create clusterrolebinding jdoe_clst_adm --clusterrole=cluster-admin --user=ocid1.user.oc1..aaaaa...zutq
