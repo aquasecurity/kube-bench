@@ -173,8 +173,10 @@ node:
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/var/lib/rancher/rke2/agent/etc/kubelet.conf.d"
       - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/azure.json"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/etc/kubernetes/kubelet/config.json"
@@ -245,6 +247,7 @@ etcd:
       - /var/lib/rancher/k3s/server/db/etcd
     confs:
       - /var/lib/rancher/rke2/server/db/etcd/config
+      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
@@ -253,7 +256,6 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
-      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
@@ -314,6 +316,7 @@ version_mapping:
   "ocp-4.13": "rh-1.8"
   "aks-1.0": "aks-1.0"
   "aks-1.7": "aks-1.7"
+  "aks-1.8": "aks-1.8"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
@@ -485,6 +488,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "aks-1.7":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "aks-1.8":
     - "master"
     - "node"
     - "controlplane"

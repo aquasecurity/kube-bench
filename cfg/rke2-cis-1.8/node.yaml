@@ -141,6 +141,7 @@ groups:
 
       - id: 4.1.9
         text: "If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Automated)"
+        type: skip
         audit: |
           /bin/sh -c 'if test -e "$kubeletconf"; then
             stat -c "permissions=%a" "$kubeletconf"
@@ -160,10 +161,11 @@ groups:
           chmod 600 $kubeletconf
           Not Applicable - Clusters provisioned by RKE do not require or maintain a configuration file for the kubelet.
           All configuration is passed in as arguments at container run time.
-        scored: true
+        scored: false
 
       - id: 4.1.10
         text: "If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Manual)"
+        type: skip
         audit: |
           /bin/sh -c 'if test -e "$kubeletconf"; then
             stat -c "%U:%G" "$kubeletconf"
@@ -187,12 +189,8 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
-        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
-        audit_config: >
-          /bin/sh -c '
-          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
-            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
-          fi'
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: "anonymous-auth"
@@ -214,12 +212,8 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
-        audit: "/bin/sh -c 'cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 2>/dev/null' "
-        audit_config: >
-          /bin/sh -c '
-          if ls /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf 1>/dev/null 2>&1; then
-            /bin/cat /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/*.conf
-          fi'
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: authorization-mode
@@ -240,20 +234,15 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          /bin/sh -c '
-          if grep -q "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt" \
-            /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/* 2>/dev/null; then
-            echo "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
-          else
-            echo "clientCAFile=NA"
-          fi'
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
-            - flag: "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
+            - flag: clientCAFile
+              path: "{.authentication.x509.clientCAFile}"
               compare:
                 op: eq
-                value: "clientCAFile: /var/lib/rancher/rke2/agent/client-ca.crt"
+                value: "/var/lib/rancher/rke2/agent/client-ca.crt"
         remediation: |
           If using a Kubelet config file, edit the file to set `authentication.x509.clientCAFile` to
           the location of the client CA file.
@@ -269,7 +258,7 @@ groups:
       - id: 4.2.4
         text: "Verify that the --read-only-port argument is set to 0 (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           bin_op: or
           test_items:
@@ -293,9 +282,9 @@ groups:
         scored: true
 
       - id: 4.2.5
-        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)"
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --streaming-connection-idle-timeout
@@ -322,7 +311,7 @@ groups:
       - id: 4.2.6
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --make-iptables-util-chains
@@ -348,6 +337,7 @@ groups:
       - id: 4.2.7
         text: "Ensure that the --hostname-override argument is not set (Manual)"
         audit: "/bin/ps -fC $kubeletbin "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --hostname-override
@@ -365,7 +355,7 @@ groups:
       - id: 4.2.8
         text: "Ensure that the eventRecordQPS argument is set to a level which ensures appropriate event capture (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --event-qps
@@ -390,7 +380,7 @@ groups:
       - id: 4.2.9
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --tls-cert-file
@@ -415,18 +405,18 @@ groups:
       - id: 4.2.10
         text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: "/bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -f $kubeletconf; then cat $kubeletconf; fi'"
         tests:
+          bin_op: or
           test_items:
-            - flag: --rotate-certificates
-              path: '{.rotateCertificates}'
+            - flag: "--rotate-certificates=false"
+              set: false
+            - path: "{.rotateCertificates}"
               compare:
                 op: eq
                 value: true
-            - flag: --rotate-certificates
-              path: '{.rotateCertificates}'
+            - path: "{.rotateCertificates}"
               set: false
-          bin_op: or
         remediation: |
           If using a Kubelet config file, edit the file to add the line `rotateCertificates` to `true` or
           remove it altogether to use the default value.
@@ -442,7 +432,7 @@ groups:
       - id: 4.2.11
         text: "Verify that the RotateKubeletServerCertificate argument is set to true (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           bin_op: or
           test_items:
@@ -467,7 +457,7 @@ groups:
       - id: 4.2.12
         text: "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --tls-cipher-suites
@@ -491,7 +481,7 @@ groups:
       - id: 4.2.13
         text: "Ensure that a limit is set on pod PIDs (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
-        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        audit_config: /bin/sh -c 'if test -d $kubeletconf; then cat $kubeletconf/*; elif test -e $kubeletconf; then cat $kubeletconf; fi'
         tests:
           test_items:
             - flag: --pod-max-pids
