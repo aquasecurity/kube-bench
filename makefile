@@ -11,8 +11,11 @@ uname := $(shell uname -s)
 BUILDX_PLATFORM ?= linux/amd64,linux/arm64,linux/arm,linux/ppc64le,linux/s390x
 DOCKER_ORGS ?= aquasec public.ecr.aws/aquasecurity
 GOARCH ?= $@
+# Kubernetes stable RPM repo minor for UBI images (pkgs.k8s.io .../v${K8S_PKGS_VERSION}/rpm/). Override: make build-docker-ubi K8S_PKGS_VERSION=1.33
+K8S_PKGS_VERSION ?= 1.34
+
 KUBECTL_VERSION ?= 1.36.0-alpha.1
-ARCH ?= $(shell go env GOARCH)
+ARCH ?= $(shell go env GOARCH 2>/dev/null || echo amd64)
 
 ifneq ($(findstring Microsoft,$(shell uname -r)),)
 	BUILD_OS := windows
@@ -33,7 +36,10 @@ docker:
 	set -xe; \
 	for org in $(DOCKER_ORGS); do \
 		docker buildx build --tag $${org}/kube-bench:${VERSION} \
-		--platform $(BUILDX_PLATFORM) --push . ; \
+				--platform $(BUILDX_PLATFORM) --push . \
+				--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+				--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+				--build-arg K8S_PKGS_VERSION=$(K8S_PKGS_VERSION) ; \
 	done
 
 build: $(BINARY)
@@ -47,19 +53,20 @@ build-fips:
 # builds the current dev docker version
 build-docker:
 	docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
-                     	--build-arg VCS_REF=$(VERSION) \
-		     	--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-	             	--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg VCS_REF=$(VERSION) \
+			--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+			--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+			--build-arg K8S_PKGS_VERSION=$(K8S_PKGS_VERSION) \
 			--build-arg TARGETARCH=$(ARCH) \
-                       	-t $(IMAGE_NAME) .
+				-t $(IMAGE_NAME) .
 
 build-docker-ubi:
 	docker build -f Dockerfile.ubi --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
             		--build-arg VCS_REF=$(VERSION) \
-			--build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
-			--build-arg KUBECTL_VERSION=$(KUBECTL_VERSION) \
+            --build-arg KUBEBENCH_VERSION=$(KUBEBENCH_VERSION) \
+			--build-arg K8S_PKGS_VERSION=$(K8S_PKGS_VERSION) \
 			--build-arg TARGETARCH=$(ARCH) \
-            		-t $(IMAGE_NAME_UBI) .
+				-t $(IMAGE_NAME_UBI) .
 
 # unit tests
 tests:
