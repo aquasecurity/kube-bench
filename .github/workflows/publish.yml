@@ -13,7 +13,7 @@ env:
 jobs:
   publish:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-2404-2core
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v6
