@@ -11,7 +11,7 @@ env:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-2404-2core
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
