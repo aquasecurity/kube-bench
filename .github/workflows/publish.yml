@@ -15,6 +15,16 @@ jobs:
     name: Publish
     runs-on: ubuntu-2404-2core
     steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force > /dev/null
+          df -h
       - name: Check Out Repo
         uses: actions/checkout@v6
       - name: Set up QEMU
