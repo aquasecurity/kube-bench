@@ -606,7 +606,7 @@ func k3sBenchmark(version string) string {
 	case "1.25", "1.26", "1.27":
 		return "k3s-cis-1.7"
 	default:
-		return ""
+		return "k3s-cis-1.8"
 	}
 }
 

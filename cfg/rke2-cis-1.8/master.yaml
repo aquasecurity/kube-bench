@@ -127,7 +127,7 @@ groups:
         audit: |
           /bin/sh -c '
           if [ -e "$etcdconf" ]; then
-            stat -c "ownership=%U:%G %n" "$etcdconf"
+          stat -c "ownership=%U:%G %n" "$etcdconf"
           else
             echo "Directory not found"
           fi
