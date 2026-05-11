@@ -599,14 +599,18 @@ func ocpBenchmark(version string) string {
 
 func k3sBenchmark(version string) string {
 	switch version {
-	case "1.23":
+	case "1.22", "1.23":
 		return "k3s-cis-1.23"
 	case "1.24":
 		return "k3s-cis-1.24"
-	case "1.25", "1.26", "1.27":
+	case "1.25":
 		return "k3s-cis-1.7"
-	default:
+	case "1.26":
 		return "k3s-cis-1.8"
+	case "1.27", "1.28", "1.29":
+		return "k3s-cis-1.9"
+	default:
+		return "k3s-cis-1.9"
 	}
 }
 

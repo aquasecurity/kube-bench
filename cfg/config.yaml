@@ -321,6 +321,8 @@ version_mapping:
   "cis-1.24-microk8s": "cis-1.24-microk8s"
   "tkgi-1.2.53": "tkgi-1.2.53"
   "k3s-cis-1.7": "k3s-cis-1.7"
+  "k3s-cis-1.8": "k3s-cis-1.8"
+  "k3s-cis-1.9": "k3s-cis-1.9"
   "k3s-cis-1.23": "k3s-cis-1.23"
   "k3s-cis-1.24": "k3s-cis-1.24"
   "rke-cis-1.7": "rke-cis-1.7"
@@ -535,6 +537,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.8":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.9":
     - "master"
     - "etcd"
     - "controlplane"
