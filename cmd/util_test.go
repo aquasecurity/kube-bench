@@ -714,11 +714,18 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			want: "gke-1.6.0",
 		},
 		{
-			name: "gke 1.31",
+			name: "gke 1.30",
 			args: args{
-				platform: Platform{Name: "gke", Version: "1.31"},
+				platform: Platform{Name: "gke", Version: "1.30"},
 			},
 			want: "gke-1.8.0",
+		},
+		{
+			name: "gke 1.33",
+			args: args{
+				platform: Platform{Name: "gke", Version: "1.33"},
+			},
+			want: "gke-1.9.0",
 		},
 		{
 			name: "aliyun",
