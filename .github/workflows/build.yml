@@ -33,7 +33,7 @@ jobs:
       - name: Setup golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.5.0
+          version: v2.11.4
           args: --verbose --timeout 2m
   unit:
     name: Unit tests
