@@ -635,10 +635,12 @@ func rke2Benchmark(version string) string {
 		return "rke2-cis-1.24"
 	case "1.25":
 		return "rke2-cis-1.7"
-	case "1.26", "1.27":
+	case "1.26":
 		return "rke2-cis-1.8"
+	case "1.27", "1.28", "1.29":
+		return "rke2-cis-1.9"
 	default:
-		return "rke2-cis-1.8"
+		return "rke2-cis-1.9"
 	}
 }
 
