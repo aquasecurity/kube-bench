@@ -573,6 +573,8 @@ func gkeBenchmark(version string) string {
 	switch version {
 	case "1.15", "1.16", "1.17", "1.18", "1.19":
 		return "gke-1.0"
+	case "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27":
+		return "gke-1.2.0"
 	case "1.28", "1.29":
 		return "gke-1.6.0"
 	case "1.30":
@@ -580,7 +582,7 @@ func gkeBenchmark(version string) string {
 	case "1.31", "1.32", "1.33", "1.34":
 		return "gke-1.9.0"
 	default:
-		return "gke-1.2.0"
+		return "gke-1.9.0"
 	}
 }
 
