@@ -9,7 +9,7 @@ groups:
     text: "RBAC and Service Accounts"
     checks:
       - id: 4.1.1
-        text: "Ensure that the cluster-admin role is only used where required (Automated)"
+        text: "Ensure that the cluster-admin role is only used where required (Manual)"
         audit: |
           kubectl get clusterrolebindings -o json | jq -r '
             [
@@ -46,7 +46,7 @@ groups:
         scored: true
 
       - id: 4.1.2
-        text: "Minimize access to secrets (Automated)"
+        text: "Minimize access to secrets (Manual)"
         audit: |
           count=$(kubectl get roles --all-namespaces -o json | jq '
             .items[]
@@ -67,7 +67,7 @@ groups:
         scored: true
 
       - id: 4.1.3
-        text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
+        text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
         audit: |
           wildcards=$(kubectl get roles --all-namespaces -o json | jq '
             .items[] | select(
@@ -125,7 +125,7 @@ groups:
         scored: true
 
       - id: 4.1.5
-        text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
+        text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
         audit: |
           echo "🔹 Pods with automountServiceAccountToken enabled:"
           pods_with_token_mount=$(kubectl get pods --all-namespaces -o json | jq '
@@ -485,7 +485,7 @@ groups:
         scored: false
 
       - id: 4.6.3
-        text: "Apply Security Context to Your Pods and Containers (Manual)"
+        text: "Apply Security Context to Pods and Containers (Manual)"
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and apply security contexts to your pods. For a
@@ -494,7 +494,7 @@ groups:
         scored: false
 
       - id: 4.6.4
-        text: "The default namespace should not be used (Automated)"
+        text: "The default namespace should not be used (Manual)"
         audit: |
           output=$(kubectl get all -n default --no-headers 2>/dev/null | grep -v '^service\s\+kubernetes\s' || true)
           if [ -z "$output" ]; then echo "DEFAULT_NAMESPACE_UNUSED"; else echo "DEFAULT_NAMESPACE_IN_USE"; fi
@@ -508,4 +508,4 @@ groups:
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
-        scored: true
+        scored: false
