@@ -727,8 +727,8 @@ groups:
         text: "Ensure that the --request-timeout argument is set as appropriate (Automated)"
         audit: "/bin/ps -ef | grep $apiserverbin | grep -v grep"
         tests:
-                  test_items:
-                              - flag: "--request-timeout"
+          test_items:
+            - flag: "--request-timeout"
         remediation: |
           Edit the API server pod specification file $apiserverconf
           and set the below parameter as appropriate and if needed.
