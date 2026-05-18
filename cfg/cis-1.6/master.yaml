@@ -1004,7 +1004,7 @@ groups:
         tests:
           bin_op: or
           test_items:
-            - flag: "--bind-address"h
+            - flag: "--bind-address"
               compare:
                 op: eq
                 value: "127.0.0.1"
