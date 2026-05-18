@@ -1,0 +1,176 @@
+---
+controls:
+version: "rke2-cis-1.9"
+id: 2
+text: "Etcd Node Configuration"
+type: "etcd"
+groups:
+  # When possible, we check the flag, the environment variable, and the configuration file
+  # kube-bench does not allow nested bin_ops, so when multiple flags are being checked in a single test,
+  # we only check the config path.
+  - id: 2
+    text: "Etcd Node Configuration"
+    checks:
+      - id: 2.1
+        text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: and
+          test_items:
+            - path: "{.client-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.crt"
+            - path: "{.client-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/server-client.key"
+        remediation: |
+          By default, RKE2 generates cert and key files for etcd.
+          These are located in /var/lib/rancher/rke2/server/tls/etcd/.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use custom cert and key files.
+        scored: true
+
+      - id: 2.2
+        text: "Ensure that the --client-cert-auth argument is set to true (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--client-cert-auth"
+              env: "ETCD_CLIENT_CERT_AUTH"
+              compare:
+                op: eq
+                value: true
+            - path: "{.client-transport-security.client-cert-auth}"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          By default, RKE2 sets the --client-cert-auth parameter to true.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to disable client certificate authentication.
+        scored: true
+
+      - id: 2.3
+        text: "Ensure that the --auto-tls argument is not set to true (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
+              set: false
+            - flag: "--auto-tls"
+              env: "ETCD_AUTO_TLS"
+              compare:
+                op: eq
+                value: false
+            - path: "{.client-transport-security.auto-tls}"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          By default, RKE2 does not set the --auto-tls parameter.
+          If this check fails, edit the etcd pod specification file $etcdconf on the master
+          node and either remove the --auto-tls parameter or set it to false.
+          client-transport-security:
+            auto-tls: false
+        scored: true
+
+      - id: 2.4
+        text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: and
+          test_items:
+            - path: "{.peer-transport-security.cert-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.crt"
+            - path: "{.peer-transport-security.key-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-server-client.key"
+        remediation: |
+          By default, RKE2 generates peer cert and key files for etcd.
+          These are located in /var/lib/rancher/rke2/server/tls/etcd/.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use custom peer cert and key files.
+        scored: true
+
+      - id: 2.5
+        text: "Ensure that the --peer-client-cert-auth argument is set to true (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--peer-client-cert-auth"
+              env: "ETCD_PEER_CLIENT_CERT_AUTH"
+              compare:
+                op: eq
+                value: true
+            - path: "{.peer-transport-security.client-cert-auth}"
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          By default, RKE2 sets the --peer-cert-auth parameter to true.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to disable peer client certificate authentication.
+        scored: true
+
+      - id: 2.6
+        text: "Ensure that the --peer-auto-tls argument is not set to true (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
+              set: false
+            - flag: "--peer-auto-tls"
+              env: "ETCD_PEER_AUTO_TLS"
+              compare:
+                op: eq
+                value: false
+              set: true
+            - path: "{.peer-transport-security.auto-tls}"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          By default, RKE2 does not set the --peer-auto-tls parameter.
+          If this check fails, edit the etcd pod specification file $etcdconf on the master
+          node and either remove the --peer-auto-tls parameter or set it to false.
+          peer-transport-security:
+            auto-tls: false
+        scored: true
+
+      - id: 2.7
+        text: "Ensure that a unique Certificate Authority is used for etcd (Automated)"
+        audit: "/bin/ps -fC $etcdbin"
+        audit_config: "cat $etcdconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--trusted-ca-file"
+              env: "ETCD_TRUSTED_CA_FILE"
+            - path: "{.peer-transport-security.trusted-ca-file}"
+              compare:
+                op: eq
+                value: "/var/lib/rancher/rke2/server/tls/etcd/peer-ca.crt"
+              set: true
+        remediation: |
+          By default, RKE2 generates a unique certificate authority for etcd.
+          This is located at /var/lib/rancher/rke2/server/tls/etcd/peer-ca.crt.
+          If this check fails, ensure that the configuration file $etcdconf
+          has not been modified to use a shared certificate authority.
+        scored: true
