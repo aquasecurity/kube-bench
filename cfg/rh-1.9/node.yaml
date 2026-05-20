@@ -1,6 +1,6 @@
 ---
 controls:
-version: rh-1.8
+version: rh-1.9
 id: 4
 text: "Worker Nodes"
 type: "node"
