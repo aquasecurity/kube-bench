@@ -10,6 +10,7 @@ groups:
     checks:
       - id: 2.1
         text: "Ensure that the --cert-file and --key-file arguments are set as appropriate (Manual)"
+        type: manual
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -32,10 +33,11 @@ groups:
         remediation: |
           OpenShift does not use the etcd-certfile or etcd-keyfile flags.
           Certificates for etcd are managed by the etcd cluster operator.
-        scored: true
+        scored: false
 
       - id: 2.2
         text: "Ensure that the --client-cert-auth argument is set to true (Manual)"
+        type: manual
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -56,10 +58,11 @@ groups:
                 value: true
         remediation: |
           This setting is managed by the cluster etcd operator. No remediation required."
-        scored: true
+        scored: false
 
       - id: 2.3
         text: "Ensure that the --auto-tls argument is not set to true (Manual)"
+        type: manual
         audit: |
           # Returns 0 if found, 1 if not found
           # Get the node name where the pod is running
@@ -81,10 +84,11 @@ groups:
                 value: "1"
         remediation: |
           This setting is managed by the cluster etcd operator. No remediation required.
-        scored: true
+        scored: false
 
       - id: 2.4
         text: "Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Manual)"
+        type: manual
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -106,10 +110,11 @@ groups:
                 value: '\/etc\/kubernetes\/static-pod-certs\/secrets\/etcd-all-(peer|certs)\/etcd-peer-.*\.(?:crt|key)'
         remediation: |
           None. This configuration is managed by the etcd operator.
-        scored: true
+        scored: false
 
       - id: 2.5
         text: "Ensure that the --peer-client-cert-auth argument is set to true (Manual)"
+        type: manual
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -130,10 +135,11 @@ groups:
                 value: true
         remediation: |
           This setting is managed by the cluster etcd operator. No remediation required.
-        scored: true
+        scored: false
 
       - id: 2.6
         text: "Ensure that the --peer-auto-tls argument is not set to true (Manual)"
+        type: manual
         audit: |
           # Returns 0 if found, 1 if not found
           # Get the node name where the pod is running
@@ -155,10 +161,11 @@ groups:
                 value: "1"
         remediation: |
           This setting is managed by the cluster etcd operator. No remediation required.
-        scored: true
+        scored: false
 
       - id: 2.7
         text: "Ensure that a unique Certificate Authority is used for etcd (Manual)"
+        type: manual
         audit: |
           # Get the node name where the pod is running
           NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
@@ -180,4 +187,4 @@ groups:
                 value: '\/etc\/kubernetes\/static-pod-certs\/configmaps\/(?:etcd-(?:serving|peer-client)-ca\/ca-bundle\.crt|etcd-all-bundles\/server-ca-bundle\.crt)'
         remediation: |
           None required. Certificates for etcd are managed by the OpenShift cluster etcd operator.
-        scored: true
+        scored: false

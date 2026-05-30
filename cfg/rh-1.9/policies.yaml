@@ -65,6 +65,7 @@ groups:
     checks:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"
+        type: manual
         audit: |
           oc get scc -o json \
           | jq -r '[.items[] | select(.allowPrivilegedContainer==false) | .metadata.name]
@@ -93,10 +94,11 @@ groups:
 
           Then apply appropriate RBAC to assign this SCC only to necessary service accounts, groups, or users.
           Carefully avoid assigning `allowPrivilegedContainer: true` in any SCC that is broadly bound.
-        scored: true
+        scored: false
 
       - id: 5.2.2
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
+        type: manual
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowHostPID==true) | .metadata.name]
@@ -126,10 +128,11 @@ groups:
           ---
 
           Apply the SCC and bind it only to users or groups that do **not** need hostPID access.
-        scored: true
+        scored: false
 
       - id: 5.2.3
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
+        type: manual
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowHostIPC==false) | .metadata.name]
@@ -157,10 +160,11 @@ groups:
           ---
 
           Then assign this SCC to general workloads and ensure any SCCs allowing hostIPC are tightly scoped via RBAC.
-        scored: true
+        scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host network namespace (manual)"
+        type: "manual"
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowHostNetwork==false) | .metadata.name]
@@ -188,10 +192,11 @@ groups:
           ---
 
           Ensure only workloads that require `hostNetwork: true` (e.g., CNI, infra pods) are allowed to use SCCs where it is explicitly enabled. Restrict access to such SCCs using RBAC.
-        scored: true
+        scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers with allowPrivilegeEscalation (manual)"
+        type: "manual"
         audit: |
           oc get scc -o json \
             | jq -r '[.items[] | select(.allowPrivilegeEscalation==false) | .metadata.name]
@@ -220,11 +225,12 @@ groups:
 
           Assign this SCC only to workloads and users that **do not require** the ability to escalate privileges.
           Use RBAC to restrict access to SCCs where `allowPrivilegeEscalation` is `true` to only trusted service accounts or admin roles.
-        scored: true
+        scored: false
 
 
       - id: 5.2.6
         text: "Minimize the admission of root containers (manual)"
+        type: manual
         audit: |
           sccs=$(oc get scc -o json | jq -r '.items[] | select(.runAsUser.type == "MustRunAsNonRoot") | .metadata.name')
           if [[ -n "$sccs" ]]; then
@@ -255,10 +261,11 @@ groups:
 
           Assign this SCC only to workloads that must not run as root.
           If an SCC allows `RunAsAny`, audit and restrict access using RBAC to prevent misuse.
-        scored: true
+        scored: false
 
       - id: 5.2.7
         text: "Minimize the admission of containers with the NET_RAW capability (manual)"
+        type: "manual"
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -291,11 +298,12 @@ groups:
 
           Apply this SCC to workloads that do not require NET_RAW.
           If NET_RAW is required (e.g., for low-level networking apps), isolate those workloads with a specific SCC and restrict access via RBAC.
-        scored: true
+        scored: false
 
 
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (manual)"
+        type: manual
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -335,10 +343,11 @@ groups:
 
           Assign this SCC to workloads that do **not** require elevated capabilities.
           Create separate SCCs for workloads that require specific capabilities, and use RBAC to tightly restrict access to them.
-        scored: true
+        scored: false
 
       - id: 5.2.9
         text: "Minimize the admission of containers with capabilities assigned (manual)"
+        type: "manual"
         audit: |
           oc get scc -o json \
           | jq -r '[.items[]
@@ -371,7 +380,7 @@ groups:
 
           Apply this SCC to general-purpose workloads that do not require elevated Linux capabilities.
           If certain workloads require capabilities, create a separate SCC with minimal permissions and scope it using RBAC.
-        scored: true
+        scored: false
 
       - id: 5.2.10
         text: "Minimize access to privileged Security Context Constraints (Manual)"
@@ -476,11 +485,15 @@ groups:
         text: "The default namespace should not be used (Manual)"
         type: "manual"
         audit: |
-          #Run this command to list objects in default namespace
-          oc project default
-          oc get all
-          #The only entries there should be system managed resources such as the kubernetes and openshift service
+          # List non-system resources in the default namespace (excluding expected kubernetes/openshift services)
+          oc get all -n default -o json \
+            | jq -r '.items[]
+              | select(.kind == "Service")
+              | select(.metadata.name | test("^(kubernetes|openshift)$") | not)
+              | (.kind + "/" + .metadata.name)'
+
+          # If anything is returned, review and move it to an appropriate namespace.
         remediation: |
-          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
-          resources and that all new resources are created in a specific namespace.
+          Ensure that namespaces are created to allow for appropriate segregation of Kubernetes resources
+          and that all new resources are created in a specific namespace.
         scored: false
