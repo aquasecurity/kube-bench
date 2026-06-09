@@ -11,27 +11,28 @@ RUN make build && cp kube-bench /go/bin/kube-bench
 
 FROM alpine:3.23.4 AS run
 WORKDIR /opt/kube-bench/
+
 # add GNU ps for -C, -o cmd, --no-headers support and add findutils to get GNU xargs
 # https://github.com/aquasecurity/kube-bench/issues/109
 # https://github.com/aquasecurity/kube-bench/issues/1656
-RUN apk --no-cache add procps findutils
 
 # Upgrading apk-tools to remediate CVE-2021-36159 - https://snyk.io/vuln/SNYK-ALPINE314-APKTOOLS-1533752
-# https://github.com/aquasecurity/kube-bench/issues/943
-RUN apk --no-cache upgrade apk-tools
+# https://github.com/aquasecurity/kube-bench/issues/943
 
 # Openssl is used by OpenShift tests
 # https://github.com/aquasecurity/kube-bench/issues/535
 # Ensuring that we update/upgrade before installing openssl, to mitigate CVE-2021-3711 and CVE-2021-3712
-RUN apk update && apk upgrade && apk --no-cache add openssl
-
-# Add glibc for running oc command 
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-RUN apk add gcompat
-RUN apk add jq
-
+# Add glibc for running oc command
 # Add bash for running helper scripts
-RUN apk add --no-cache bash kubectl
+RUN apk --no-cache upgrade \
+    && apk --no-cache add \
+        bash \
+        findutils \
+        gcompat \
+        jq \
+        kubectl \
+        openssl \
+        procps
 
 ENV PATH=$PATH:/usr/local/mount-from-host/bin:/go/bin
 

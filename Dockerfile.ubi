@@ -14,13 +14,8 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal AS run
 ARG K8S_PKGS_VERSION=1.34
 
 RUN microdnf install -y yum findutils openssl \
-  && yum -y update-minimal --security --sec-severity=Moderate --sec-severity=Important --sec-severity=Critical \
   && yum update -y \
-  && yum install -y glibc \
-  && yum update -y glibc \
-  && yum install -y procps \
-  && yum update -y procps \
-  && yum install jq -y \
+  && yum install -y glibc jq procps \
   && printf '%s\n' '[kubernetes]' 'name=Kubernetes' \
        "baseurl=https://pkgs.k8s.io/core:/stable:/v${K8S_PKGS_VERSION}/rpm/" \
        'enabled=1' 'gpgcheck=1' \
