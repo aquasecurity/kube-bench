@@ -1,0 +1,63 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+master:
+  components:
+    - apiserver
+    - scheduler
+    - controllermanager
+    - etcd
+    - policies
+  apiserver:
+    bins:
+      - kube-apiserver
+    confs:
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-apiserver.yaml
+    defaultconf: /var/lib/rancher/rke2/agent/pod-manifests/kube-apiserver.yaml
+  scheduler:
+    bins:
+      - kube-scheduler
+    confs:
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-scheduler.yaml
+    kubeconfig:
+      - /var/lib/rancher/rke2/server/cred/scheduler.kubeconfig
+    defaultconf: /var/lib/rancher/rke2/agent/pod-manifests/kube-scheduler.yaml
+  controllermanager:
+    bins:
+      - kube-controller-manager
+    confs:
+      - /var/lib/rancher/rke2/agent/pod-manifests/kube-controller-manager.yaml
+    kubeconfig:
+      - /var/lib/rancher/rke2/server/cred/controller.kubeconfig
+    defaultconf: /var/lib/rancher/rke2/agent/pod-manifests/kube-controller-manager.yaml
+  etcd:
+    bins:
+      - etcd
+    datadirs:
+      - /var/lib/rancher/rke2/server/db/etcd
+    defaultconf: /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
+
+etcd:
+  components:
+    - etcd
+
+  etcd:
+    bins:
+      - etcd
+    defaultconf: /var/lib/rancher/rke2/server/db/etcd/config
+
+node:
+  components:
+    - kubelet
+    - proxy
+  kubelet:
+    confs:
+      - /var/lib/rancher/rke2/agent/etc/kubelet.conf.d/00-rke2-defaults.conf
+    defaultkubeconfig: /var/lib/rancher/rke2/agent/kubelet.kubeconfig
+    defaultcafile: /var/lib/rancher/rke2/agent/client-ca.crt
+  proxy:
+    defaultkubeconfig: /var/lib/rancher/rke2/agent/kubeproxy.kubeconfig
+
+policies:
+  components:
+    - policies
