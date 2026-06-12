@@ -100,13 +100,7 @@ groups:
         text: "Minimize the admission of containers wishing to share the host process ID namespace (Manual)"
         type: manual
         audit: |
-          oc get scc -o json \
-            | jq -r '[.items[] | select(.allowHostPID==true) | .metadata.name]
-                     | length
-                     | if . > 0 then "pass" else "fail" end'
-        tests:
-          test_items:
-            - flag: "pass"
+          oc get scc -o json | jq '.items[] | select(.allowHostPID) | .metadata.name'
         remediation: |
           If SCCs with `allowHostPID: true` exist, ensure they are restricted to trusted service accounts only.
 

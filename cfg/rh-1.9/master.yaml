@@ -264,42 +264,25 @@ groups:
 
       - id: 1.1.10
         text: "Ensure that the Container Network Interface file ownership is set to root:root (Manual)"
-        type: "manual"
         audit: |
-          # Get the node name where the pod is running
-          NODE_NAME=$(oc get pod "$HOSTNAME" -o=jsonpath='{.spec.nodeName}')
-          # For CNI multus
-          # Get the pod name in the openshift-multus namespace
-          POD_NAME=$(oc get pods -n openshift-multus -l app=multus --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          # Multus (CNI)
+          for i in $(oc get pods -n openshift-multus -l app=multus -o name); do
+            oc exec -n openshift-multus "$i" -- /bin/bash -c 'stat -c "%U:%G %n" /host/etc/cni/net.d/*.conf' 2>/dev/null
+            oc exec -n openshift-multus "$i" -- /bin/bash -c 'stat -c "%U:%G %n" /host/var/run/multus/cni/net.d/*.conf' 2>/dev/null
+          done
 
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
-          # Execute the stat command
-          oc exec -n openshift-multus "$POD_NAME" -- /bin/bash -c "stat -c '$i %n %U:%G' /host/etc/cni/net.d/*.conf" 2>/dev/null
-          oc exec -n openshift-multus $i -- /bin/bash -c "stat -c '$i %n %U:%G' /host/var/run/multus/cni/net.d/*.conf"  2>/dev/null
-          fi
-          # For SDN pods
-          POD_NAME=$(oc get pods -n openshift-sdn -l app=sdn --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          # OpenShift SDN
+          for i in $(oc get pods -n openshift-sdn -l app=sdn -o name); do
+            oc exec -n openshift-sdn "$i" -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "%U:%G %n" {} \; 2>/dev/null
+            oc exec -n openshift-sdn "$i" -- find /var/run/openshift-sdn -type f -exec stat -c "%U:%G %n" {} \; 2>/dev/null
+          done
 
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
-          # Execute the stat command
-          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/lib/cni/networks/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
-          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openshift-sdn -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
-          fi
-          # For OVS pods in 4.5
-          POD_NAME=$(oc get pods -n openshift-sdn -l app=ovs --field-selector spec.nodeName="$NODE_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
-          if [ -z "$POD_NAME" ]; then
-           echo "No matching pods found on the current node."
-          else
-          # Execute the stat command
-          oc exec -n openshift-sdn "$POD_NAME"  -- find /var/run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
-          oc exec -n openshift-sdn "$POD_NAME"  -- find /etc/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
-          oc exec -n openshift-sdn "$POD_NAME"  -- find /run/openvswitch -type f -exec stat -c "$i %n %U:%G" {} \; 2>/dev/null
-          fi
+          # OVS
+          for i in $(oc get pods -n openshift-sdn -l app=ovs -o name); do
+            oc exec -n openshift-sdn "$i" -- find /var/run/openvswitch -type f -exec stat -c "%U:%G %n" {} \; 2>/dev/null
+            oc exec -n openshift-sdn "$i" -- find /etc/openvswitch -type f -exec stat -c "%U:%G %n" {} \; 2>/dev/null
+            oc exec -n openshift-sdn "$i" -- find /run/openvswitch -type f -exec stat -c "%U:%G %n" {} \; 2>/dev/null
+          done
         use_multiple_values: true
         tests:
           test_items:
@@ -336,7 +319,7 @@ groups:
         scored: false
 
       - id: 1.1.12
-        text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Manual)"
+        text: "Ensure that the etcd data directory ownership is set to root:root (Manual)"
         type: "manual"
         audit: |
           # Get the node name where the pod is running
@@ -1162,7 +1145,7 @@ groups:
         audit: |
           oc get cm -n openshift-authentication v4-0-config-system-cliconfig -o jsonpath='{.data.v4\-0\-config\-system\-cliconfig}' | jq .servingInfo
           oc get kubeapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
-          oc get openshiftapiservers.operator.openshift.io cluster -o json |jq.spec.observedConfig.servingInfo
+          oc get openshiftapiservers.operator.openshift.io cluster -o json | jq.spec.observedConfig.servingInfo
           oc describe --namespace=openshift-ingress-operator ingresscontroller/default
         remediation: |
           Verify that the tlsSecurityProfile is set to the value you chose.
