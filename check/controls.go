@@ -26,7 +26,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v3"
 )
 
 const (
