@@ -150,6 +150,7 @@ node:
     svc:
       # These paths must also be included
       #  in the 'confs' property below
+      - "/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
       - "/etc/systemd/system/kubelet.service"
       - "/lib/systemd/system/kubelet.service"
       - "/etc/systemd/system/snap.kubelet.daemon.service"
