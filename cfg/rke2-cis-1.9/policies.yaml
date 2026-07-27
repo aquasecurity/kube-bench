@@ -31,11 +31,18 @@ groups:
         scored: true
 
       - id: 5.1.2
-        text: "Minimize access to secrets (Manual)"
-        type: "manual"
+        text: "Minimize access to secrets (Automated)"
+        type: manual
+        audit: "echo \"canGetListWatchSecretsAsSystemAuthenticated: $(kubectl auth can-i get,list,watch secrets --all-namespaces --as=system:authenticated)\""
+        tests:
+          test_items:
+            - flag: "canGetListWatchSecretsAsSystemAuthenticated"
+              compare:
+                op: eq
+                value: no
         remediation: |
           Where possible, remove get, list and watch access to Secret objects in the cluster.
-        scored: false
+        scored: true
 
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
@@ -45,57 +52,58 @@ groups:
           do
             role_rules=$(kubectl get role -n "${role_namespace}" "${role_name}" -o=json | jq -c '.rules')
             if echo "${role_rules}" | grep -q "\[\"\*\"\]"; then
-              printf "**role_name: %-50s role_namespace: %-25s role_rules: %s is_compliant: false\n" "${role_name}" "${role_namespace}" "${role_rules}"
+              printf "**role_name: %-50s  role_namespace: %-25s role_rules: %s is_compliant: false\n" "${role_name}" "${role_namespace}" "${role_rules}"
             else
               printf "**role_name: %-50s role_namespace: %-25s is_compliant: true\n" "${role_name}" "${role_namespace}"
-            fi
+            fi;
           done
 
-          cr_whitelist="admin cluster-admin rke2-cloud-controller-manager local-path-provisioner-role"
+          cr_whitelist="cluster-admin rke2-cloud-controller-manager local-path-provisioner-role"
           cr_whitelist="$cr_whitelist system:kube-controller-manager system:kubelet-api-admin system:controller:namespace-controller"
           cr_whitelist="$cr_whitelist system:controller:disruption-controller system:controller:generic-garbage-collector"
           cr_whitelist="$cr_whitelist system:controller:horizontal-pod-autoscaler system:controller:resourcequota-controller"
-
           # Check ClusterRoles
           kubectl get clusterroles -o custom-columns=CLUSTERROLE_NAME:.metadata.name --no-headers | while read -r clusterrole_name
           do
             clusterrole_rules=$(kubectl get clusterrole "${clusterrole_name}" -o=json | jq -c '.rules')
-            if echo "${cr_whitelist}" | grep -qw "${clusterrole_name}"; then
+            if echo "${cr_whitelist}" | grep -q "${clusterrole_name}"; then
               printf "**clusterrole_name: %-50s is_whitelist: true  is_compliant: true\n" "${clusterrole_name}"
             elif echo "${clusterrole_rules}" | grep -q "\[\"\*\"\]"; then
-              printf "**clusterrole_name: %-50s clusterrole_rules: %s is_whitelist: false is_compliant: false\n" "${clusterrole_name}" "${clusterrole_rules}"
+              echo "**clusterrole_name: ${clusterrole_name} clusterrole_rules: ${clusterrole_rules} is_compliant: false"
             else
               printf "**clusterrole_name: %-50s is_whitelist: false is_compliant: true\n" "${clusterrole_name}"
-            fi
+            fi;
           done
         use_multiple_values: true
         tests:
           test_items:
             - flag: "is_compliant"
               compare:
-                op: nothave
-                value: "false"
+                op: eq
+                value: true
         remediation: |
-          Where possible, replace any use of wildcards in ClusterRoles and Roles with specific resources and verbs.
-          RKE2 gives exceptions for the following ClusterRoles, which are required for regular operations:
-          - admin
-          - cluster-admin
-          - rke2-cloud-controller-manager
-          - system:kube-controller-manager
-          - system:kubelet-api-admin
-          - system:controller:namespace-controller
-          - system:controller:disruption-controller
-          - system:controller:generic-garbage-collector
-          - system:controller:horizontal-pod-autoscaler
-          - system:controller:resourcequota-controller
+          Where possible replace any use of wildcards in clusterroles and roles with specific objects or actions.
+          RKE2 gives exceptions for following cluster roles, which are required for regular operations:
+          - rke2-cloud-controller-manager, local-path-provisioner-role, cluster-admin
+          - system:kube-controller-manager, system:kubelet-api-admin, system:controller:namespace-controller,
+          - system:controller:disruption-controller, system:controller:generic-garbage-collector,
+          - system:controller:horizontal-pod-autoscaler, system:controller:resourcequota-controller
         scored: true
 
       - id: 5.1.4
-        text: "Minimize access to create pods (Manual)"
-        type: "manual"
+        type: manual
+        text: "Minimize access to create pods (Automated)"
+        audit: |
+          echo "canCreatePodsAsSystemAuthenticated: $(kubectl auth can-i create pods --all-namespaces --as=system:authenticated)"
+        tests:
+          test_items:
+            - flag: "canCreatePodsAsSystemAuthenticated"
+              compare:
+                op: eq
+                value: no
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
-        scored: false
+        scored: true
 
       - id: 5.1.5
         text: "Ensure that default service accounts are not actively used. (Automated)"
@@ -132,25 +140,26 @@ groups:
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
         audit: |
-          kubectl get pods -n kube-system -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccountName,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
+          kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
           do
-            if [ "${pod_service_account}" = "<none>" ] || [ -z "${pod_service_account}" ]; then
+            # Skip pods with no service account
+            if [ "${pod_service_account}" = "<none>" ]; then
               continue
             fi
-
+            # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
             svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n "${pod_namespace}" "${pod_service_account}" -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
             pod_is_automountserviceaccounttoken=$(echo "${pod_is_automountserviceaccounttoken}" | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-
-            if [ "${pod_namespace}" = "kube-system" ]; then
+            if [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && ( [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ] ); then
               is_compliant="true"
-            elif [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && { [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ]; }; then
-              is_compliant="true"
-            elif [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
+            elif [ "${svacc_is_automountserviceaccounttoken}" = "true" ] && [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
               is_compliant="true"
             else
               is_compliant="false"
             fi
-
+            # Whitelist kube-system namespace as these pods are expected to contact the apiserver
+            if [ "${pod_namespace}" = "kube-system" ]; then
+              is_compliant="true"
+            fi
             echo "**namespace: ${pod_namespace} pod_name: ${pod_name} service_account: ${pod_service_account} pod_is_automountserviceaccounttoken: ${pod_is_automountserviceaccounttoken} svacc_is_automountServiceAccountToken: ${svacc_is_automountserviceaccounttoken} is_compliant: ${is_compliant}"
           done
         use_multiple_values: true
@@ -246,8 +255,7 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostPID` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
-        scored: true
+        scored: false
 
       - id: 5.2.4
         text: "Minimize the admission of containers wishing to share the host IPC namespace (Manual)"
@@ -255,8 +263,7 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostIPC` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
-        scored: true
+        scored: false
 
       - id: 5.2.5
         text: "Minimize the admission of containers wishing to share the host network namespace (Manual)"
@@ -264,8 +271,7 @@ groups:
         remediation: |
           Add policies to each namespace in the cluster which has user workloads to restrict the
           admission of `hostNetwork` containers.
-          Permissive - Enabling Pod Security Policy can cause applications to unexpectedly fail.
-        scored: true
+        scored: false
 
       - id: 5.2.6
         text: "Minimize the admission of containers with allowPrivilegeEscalation (Manual)"
@@ -303,8 +309,8 @@ groups:
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
         remediation: |
-          Review the use of capabilites in applications running on your cluster. Where a namespace
-          contains applicaions which do not require any Linux capabities to operate consider adding
+          Review the use of capabilities in applications running on your cluster. Where a namespace
+          contains applications which do not require any Linux capabities to operate consider adding
           a PSP which forbids the admission of containers which do not drop all capabilities.
         scored: false
 
@@ -349,7 +355,6 @@ groups:
         type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
-          Permissive - Enabling Network Policies can prevent certain applications from communicating with each other.
         scored: false
 
   - id: 5.4
@@ -418,5 +423,4 @@ groups:
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.
-          Permissive - Kubernetes provides a default namespace.
         scored: false
