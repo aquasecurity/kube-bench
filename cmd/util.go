@@ -596,6 +596,8 @@ func ocpBenchmark(version string) string {
 		return "rh-1.4"
 	case "4.13":
 		return "rh-1.8"
+	case "4.14":
+		return "rh-1.9"
 	default:
 		return ""
 	}
@@ -683,7 +685,7 @@ func getOpenShiftInfo() Platform {
 
 func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
-	valid := []string{"3.10", "4.1", "4.11", "4.13"}
+	valid := []string{"3.10", "4.1", "4.11", "4.13", "4.14"}
 	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
 		if slices.Contains(valid, ocpVer) {
