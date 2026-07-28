@@ -1405,3 +1405,53 @@ func TestExecuteJSONPathOnEncryptionConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestFlagTestItemFindValueSpaceSeparator(t *testing.T) {
+	cases := []struct {
+		name      string
+		item      testItem
+		str       string
+		wantValue string
+	}{
+		{
+			name:      "space separated value is read when the test compares a value",
+			item:      testItem{Flag: "--metrics-bind-address", Compare: compare{Op: "eq", Value: "127.0.0.1"}},
+			str:       "1:23 /usr/bin/ovnkube --metrics-bind-address 127.0.0.1 --loglevel=4",
+			wantValue: "127.0.0.1",
+		},
+		{
+			name:      "equals separated value keeps working",
+			item:      testItem{Flag: "--metrics-bind-address", Compare: compare{Op: "eq", Value: "127.0.0.1"}},
+			str:       "1:23 /usr/bin/ovnkube --metrics-bind-address=127.0.0.1",
+			wantValue: "127.0.0.1",
+		},
+		{
+			name:      "a following flag is not taken as the value",
+			item:      testItem{Flag: "--profiling", Compare: compare{Op: "eq", Value: "true"}},
+			str:       "1:23 ../kubernetes/kube-apiserver --profiling --secure-port=0",
+			wantValue: "true",
+		},
+		{
+			name:      "presence-only test is unchanged by a following token",
+			item:      testItem{Flag: "--profiling", Set: true},
+			str:       "1:23 ../kubernetes/kube-apiserver --profiling somethingelse",
+			wantValue: "true",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ft := flagTestItem(c.item)
+			match, value, err := ft.findValue(c.str)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !match {
+				t.Fatalf("expected %q to match %q", c.item.Flag, c.str)
+			}
+			if value != c.wantValue {
+				t.Errorf("got value %q, want %q", value, c.wantValue)
+			}
+		})
+	}
+}
