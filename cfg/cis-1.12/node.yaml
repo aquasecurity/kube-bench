@@ -10,13 +10,15 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; else echo "File not found"; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chmod 600 $kubeletsvc
@@ -38,7 +40,7 @@ groups:
 
       - id: 4.1.3
         text: "If proxy kubeconfig file exists ensure permissions are set to 600 or more restrictive (Manual)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; else echo "File not found"; fi'' '
         tests:
           bin_op: or
           test_items:
@@ -47,6 +49,7 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -55,11 +58,12 @@ groups:
 
       - id: 4.1.4
         text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; else echo "File not found"; fi'' '
         tests:
           bin_op: or
           test_items:
             - flag: root:root
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example, chown root:root $proxykubeconfig
@@ -67,13 +71,15 @@ groups:
 
       - id: 4.1.5
         text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; else echo "File not found"; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -82,10 +88,12 @@ groups:
 
       - id: 4.1.6
         text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; else echo "File not found"; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the each worker node.
           For example,
@@ -128,13 +136,15 @@ groups:
 
       - id: 4.1.9
         text: "If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; else echo "File not found"; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chmod 600 $kubeletconf
@@ -142,10 +152,12 @@ groups:
 
       - id: 4.1.10
         text: "If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; else echo "File not found"; fi'' '
         tests:
+          bin_op: or
           test_items:
             - flag: root:root
+            - flag: "File not found"
         remediation: |
           Run the following command (using the config file location identified in the Audit step)
           chown root:root $kubeletconf

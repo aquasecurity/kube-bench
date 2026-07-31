@@ -10,13 +10,15 @@ groups:
     checks:
       - id: 1.1.1
         text: "Ensure that the API server pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
+        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the
           control plane node.
@@ -25,10 +27,12 @@ groups:
 
       - id: 1.1.2
         text: "Ensure that the API server pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
+        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chown root:root $apiserverconf
@@ -36,13 +40,15 @@ groups:
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chmod 600 $controllermanagerconf
@@ -50,10 +56,12 @@ groups:
 
       - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chown root:root $controllermanagerconf
@@ -61,13 +69,15 @@ groups:
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chmod 600 $schedulerconf
@@ -75,10 +85,12 @@ groups:
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chown root:root $schedulerconf
@@ -86,14 +98,16 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; else echo \"File not found\"; fi'"
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -102,11 +116,13 @@ groups:
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; fi'"
+        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; else echo \"File not found\"; fi'"
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -189,14 +205,16 @@ groups:
       - id: 1.1.13
         text: "Ensure that the default administrative credential file permissions are set to 600 (Automated)"
         audit: |
-         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then stat -c "permissions=%a %n" $adminconf; fi; done
+         found=""; for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then found="yes"; stat -c "permissions=%a %n" $adminconf; fi; done; if test -z "$found"; then echo "File not found"; fi
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chmod 600 /etc/kubernetes/admin.conf
@@ -207,14 +225,16 @@ groups:
       - id: 1.1.14
         text: "Ensure that the default administrative credential file ownership is set to root:root (Automated)"
         audit: |
-         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then stat -c "ownership=%U:%G %n" $adminconf; fi; done
+         found=""; for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then found="yes"; stat -c "ownership=%U:%G %n" $adminconf; fi; done; if test -z "$found"; then echo "File not found"; fi
         use_multiple_values: true
         tests:
+          bin_op: or
           test_items:
             - flag: "ownership"
               compare:
                 op: eq
                 value: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example, chown root:root /etc/kubernetes/admin.conf
@@ -224,13 +244,15 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -239,10 +261,12 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -251,13 +275,15 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "permissions"
               compare:
                 op: bitmask
                 value: "600"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -266,10 +292,12 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; else echo \"File not found\"; fi'"
         tests:
+          bin_op: or
           test_items:
             - flag: "root:root"
+            - flag: "File not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,

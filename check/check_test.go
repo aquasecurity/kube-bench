@@ -94,6 +94,53 @@ func TestCheck_Run(t *testing.T) {
 			},
 			Expected: FAIL,
 		},
+		{
+			// A file permission check whose audit guards against a missing
+			// file produces no output when the file is absent, which no
+			// test_item can match. See issue #1881.
+			name: "File permission check should FAIL for a missing file when the audit is silent about it",
+			check: Check{
+				Scored: true,
+				Audit:  "/bin/sh -c 'if test -e /no/such/file; then stat -c permissions=%a /no/such/file; fi'",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "permissions",
+					Set:  true,
+					Compare: compare{
+						Op:    "bitmask",
+						Value: "600",
+					},
+				}}},
+			},
+			Expected: FAIL,
+		},
+		{
+			// Echoing a sentinel in the else branch and accepting it with
+			// bin_op: or makes the same check PASS, because a file that does
+			// not exist has no permissions to get wrong.
+			name: "File permission check should PASS for a missing file when the audit reports it",
+			check: Check{
+				Scored: true,
+				Audit:  "/bin/sh -c 'if test -e /no/such/file; then stat -c permissions=%a /no/such/file; else echo \"File not found\"; fi'",
+				Tests: &tests{
+					BinOp: or,
+					TestItems: []*testItem{
+						{
+							Flag: "permissions",
+							Set:  true,
+							Compare: compare{
+								Op:    "bitmask",
+								Value: "600",
+							},
+						},
+						{
+							Flag: "File not found",
+							Set:  true,
+						},
+					},
+				},
+			},
+			Expected: PASS,
+		},
 	}
 
 	for _, testCase := range testCases {

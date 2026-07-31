@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -70,6 +71,114 @@ func TestYamlFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failure walking cfg dir: %v\n", err)
 	}
+}
+
+// benchmarksGuardingFileExistence lists the benchmark directories that have
+// been reviewed for https://github.com/aquasecurity/kube-bench/issues/1881.
+// Older benchmarks share the same defect and can be added here as they are
+// fixed.
+var benchmarksGuardingFileExistence = []string{"cis-1.12"}
+
+// missingFileSentinel is echoed by an audit command when the file it inspects
+// does not exist.
+const missingFileSentinel = "File not found"
+
+// checksWhereMissingFileIsAFinding lists the checks that intentionally keep
+// reporting FAIL when the audited file is absent, because its absence is the
+// finding rather than a property of a file that is not there.
+var checksWhereMissingFileIsAFinding = map[string]string{
+	// The file is the encryption provider configuration: if it is missing,
+	// encryption of secrets at rest is not configured at all.
+	"cis-1.12/master.yaml 1.2.28": "no encryption provider configuration means encryption is not configured",
+	// The file is the client certificate authority: if it is missing, the
+	// kubelet has no CA to authenticate API server clients against.
+	"cis-1.12/node.yaml 4.1.7": "a missing client CA file is a finding of its own",
+	"cis-1.12/node.yaml 4.1.8": "a missing client CA file is a finding of its own",
+}
+
+// A check whose audit command guards against a missing file, for example
+//
+//	/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'
+//
+// produces no output at all when the file is absent. A test_item that looks
+// for a flag in that output can never match, so the check is reported as FAIL
+// for a file that simply does not exist. The guard is then pointless: without
+// it stat would fail and the check would be reported as FAIL as well.
+//
+// Such checks must tolerate the empty output, the way cis-1.12/node.yaml 4.1.2
+// does: the audit echoes a sentinel in its else branch and the tests accept
+// either the real value or that sentinel via bin_op: or.
+func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
+	for _, benchmark := range benchmarksGuardingFileExistence {
+		dir := filepath.Join(cfgDir, benchmark)
+		files, err := filepath.Glob(filepath.Join(dir, "*.yaml"))
+		if err != nil {
+			t.Fatalf("failure globbing %q: %v", dir, err)
+		}
+		if len(files) == 0 {
+			t.Fatalf("no benchmark files found in %q", dir)
+		}
+
+		for _, path := range files {
+			in, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("error opening file %s: %v", path, err)
+			}
+
+			c := new(Controls)
+			if err := yaml.Unmarshal(in, c); err != nil {
+				t.Fatalf("failed to load YAML from %s: %v", path, err)
+			}
+
+			for _, group := range c.Groups {
+				for _, check := range group.Checks {
+					if !auditGuardsFileExistence(check.Audit) {
+						continue
+					}
+					key := fmt.Sprintf("%s/%s %s", benchmark, filepath.Base(path), check.ID)
+					if _, ok := checksWhereMissingFileIsAFinding[key]; ok {
+						continue
+					}
+					if !toleratesEmptyAuditOutput(check.Tests) {
+						t.Errorf("%s: check %s guards against a missing file but reports FAIL when it is missing: "+
+							"the audit should echo a sentinel in its else branch and the tests should accept it with bin_op: or",
+							path, check.ID)
+					}
+				}
+			}
+		}
+	}
+}
+
+func auditGuardsFileExistence(audit string) bool {
+	for _, guard := range []string{"test -e", "test -f", "[[ -e", "[ -e"} {
+		if strings.Contains(audit, guard) {
+			return true
+		}
+	}
+	return false
+}
+
+func toleratesEmptyAuditOutput(ts *tests) bool {
+	if ts == nil || len(ts.TestItems) == 0 {
+		return true
+	}
+	satisfied := false
+	for _, item := range ts.TestItems {
+		// A test_item that requires a flag to be absent, or that matches the
+		// sentinel echoed when the file does not exist, is satisfied by the
+		// empty output.
+		if !item.Set || item.Flag == missingFileSentinel {
+			satisfied = true
+			break
+		}
+	}
+	if !satisfied {
+		return false
+	}
+	// The remaining test_items are not satisfied by the empty output, so they
+	// must not be combined with the tolerant one by the default AND.
+	return len(ts.TestItems) == 1 || ts.BinOp == or
 }
 
 func TestNewControls(t *testing.T) {
