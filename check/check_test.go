@@ -114,13 +114,14 @@ func TestCheck_Run(t *testing.T) {
 			Expected: FAIL,
 		},
 		{
-			// Echoing a sentinel in the else branch and accepting it with
-			// bin_op: or makes the same check PASS, because a file that does
-			// not exist has no permissions to get wrong.
-			name: "File permission check should PASS for a missing file when the audit reports it",
+			// A bare stat exits non-zero for a missing file. runAudit turns
+			// that into an error and the check FAILs on the error path,
+			// before any test_item is evaluated - which is why the audit
+			// needs `|| true`.
+			name: "File permission check should FAIL for a missing file when the audit exits non-zero",
 			check: Check{
 				Scored: true,
-				Audit:  "/bin/sh -c 'if test -e /no/such/file; then stat -c permissions=%a /no/such/file; else echo \"File not found\"; fi'",
+				Audit:  "/bin/sh -c 'stat -c permissions=%a /no/such/file'",
 				Tests: &tests{
 					BinOp: or,
 					TestItems: []*testItem{
@@ -133,7 +134,37 @@ func TestCheck_Run(t *testing.T) {
 							},
 						},
 						{
-							Flag: "File not found",
+							Flag: "No such file or directory",
+							Set:  true,
+						},
+					},
+				},
+			},
+			Expected: FAIL,
+		},
+		{
+			// With `|| true` the audit exits zero, kube-bench captures
+			// stat's own error message (stderr is collected together with
+			// stdout), and accepting it with bin_op: or makes the check
+			// PASS: a file that does not exist has no permissions to get
+			// wrong.
+			name: "File permission check should PASS for a missing file when stat reports it",
+			check: Check{
+				Scored: true,
+				Audit:  "/bin/sh -c 'stat -c permissions=%a /no/such/file || true'",
+				Tests: &tests{
+					BinOp: or,
+					TestItems: []*testItem{
+						{
+							Flag: "permissions",
+							Set:  true,
+							Compare: compare{
+								Op:    "bitmask",
+								Value: "600",
+							},
+						},
+						{
+							Flag: "No such file or directory",
 							Set:  true,
 						},
 					},

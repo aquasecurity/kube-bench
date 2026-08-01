@@ -79,9 +79,10 @@ func TestYamlFiles(t *testing.T) {
 // fixed.
 var benchmarksGuardingFileExistence = []string{"cis-1.12"}
 
-// missingFileSentinel is echoed by an audit command when the file it inspects
-// does not exist.
-const missingFileSentinel = "File not found"
+// missingFileSentinel is the message stat prints when the file an audit
+// command inspects does not exist. kube-bench collects stderr together with
+// stdout, so a test_item can match it directly.
+const missingFileSentinel = "No such file or directory"
 
 // checksWhereMissingFileIsAFinding lists the checks that intentionally keep
 // reporting FAIL when the audited file is absent, because its absence is the
@@ -102,12 +103,18 @@ var checksWhereMissingFileIsAFinding = map[string]string{
 //
 // produces no output at all when the file is absent. A test_item that looks
 // for a flag in that output can never match, so the check is reported as FAIL
-// for a file that simply does not exist. The guard is then pointless: without
-// it stat would fail and the check would be reported as FAIL as well.
+// for a file that simply does not exist.
 //
-// Such checks must tolerate the empty output, the way cis-1.12/node.yaml 4.1.2
-// does: the audit echoes a sentinel in its else branch and the tests accept
-// either the real value or that sentinel via bin_op: or.
+// File permission and ownership checks therefore use a bare stat with
+// `|| true`:
+//
+//	/bin/sh -c 'stat -c permissions=%a $apiserverconf || true'
+//
+// stat's own error message ("No such file or directory", collected from
+// stderr) is accepted alongside the real value via bin_op: or, and `|| true`
+// keeps the audit's exit code zero so the check is not failed on the error
+// path before the test_items are evaluated. Existence guards remain only in
+// the checks where a missing file is the finding itself.
 func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
 	for _, benchmark := range benchmarksGuardingFileExistence {
 		dir := filepath.Join(cfgDir, benchmark)
@@ -132,16 +139,21 @@ func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
 
 			for _, group := range c.Groups {
 				for _, check := range group.Checks {
-					if !auditGuardsFileExistence(check.Audit) {
+					key := fmt.Sprintf("%s/%s %s", benchmark, filepath.Base(path), check.ID)
+					if auditGuardsFileExistence(check.Audit) {
+						if _, ok := checksWhereMissingFileIsAFinding[key]; !ok {
+							t.Errorf("%s: check %s guards against a missing file: "+
+								"use a bare stat with `|| true` and accept its error message with bin_op: or",
+								path, check.ID)
+						}
 						continue
 					}
-					key := fmt.Sprintf("%s/%s %s", benchmark, filepath.Base(path), check.ID)
-					if _, ok := checksWhereMissingFileIsAFinding[key]; ok {
+					if !auditToleratesMissingFile(check.Audit) {
 						continue
 					}
 					if !toleratesEmptyAuditOutput(check.Tests) {
-						t.Errorf("%s: check %s guards against a missing file but reports FAIL when it is missing: "+
-							"the audit should echo a sentinel in its else branch and the tests should accept it with bin_op: or",
+						t.Errorf("%s: check %s tolerates a missing file in its audit but reports FAIL when it is missing: "+
+							"the tests should accept stat's error message with bin_op: or",
 							path, check.ID)
 					}
 				}
@@ -157,6 +169,12 @@ func auditGuardsFileExistence(audit string) bool {
 		}
 	}
 	return false
+}
+
+// auditToleratesMissingFile reports whether the audit lets a stat on a
+// missing file surface its error message instead of failing the command.
+func auditToleratesMissingFile(audit string) bool {
+	return strings.Contains(audit, "stat -c") && strings.Contains(audit, "|| true")
 }
 
 func toleratesEmptyAuditOutput(ts *tests) bool {
