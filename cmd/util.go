@@ -573,12 +573,16 @@ func gkeBenchmark(version string) string {
 	switch version {
 	case "1.15", "1.16", "1.17", "1.18", "1.19":
 		return "gke-1.0"
-	case "1.28", "1.29", "1.30":
-		return "gke-1.6.0"
-	case "1.31", "1.32", "1.33", "1.34":
-		return "gke-1.8.0"
-	default:
+	case "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27":
 		return "gke-1.2.0"
+	case "1.28", "1.29":
+		return "gke-1.6.0"
+	case "1.30":
+		return "gke-1.8.0"
+	case "1.31", "1.32", "1.33", "1.34":
+		return "gke-1.9.0"
+	default:
+		return "gke-1.9.0"
 	}
 }
 
@@ -592,6 +596,8 @@ func ocpBenchmark(version string) string {
 		return "rh-1.4"
 	case "4.13":
 		return "rh-1.8"
+	case "4.14":
+		return "rh-1.9"
 	default:
 		return ""
 	}
@@ -599,14 +605,18 @@ func ocpBenchmark(version string) string {
 
 func k3sBenchmark(version string) string {
 	switch version {
-	case "1.23":
+	case "1.22", "1.23":
 		return "k3s-cis-1.23"
 	case "1.24":
 		return "k3s-cis-1.24"
-	case "1.25", "1.26", "1.27":
+	case "1.25":
 		return "k3s-cis-1.7"
+	case "1.26":
+		return "k3s-cis-1.8"
+	case "1.27", "1.28", "1.29":
+		return "k3s-cis-1.9"
 	default:
-		return ""
+		return "k3s-cis-1.9"
 	}
 }
 
@@ -631,10 +641,12 @@ func rke2Benchmark(version string) string {
 		return "rke2-cis-1.24"
 	case "1.25":
 		return "rke2-cis-1.7"
-	case "1.26", "1.27":
+	case "1.26":
 		return "rke2-cis-1.8"
+	case "1.27", "1.28", "1.29":
+		return "rke2-cis-1.9"
 	default:
-		return "rke2-cis-1.8"
+		return "rke2-cis-1.9"
 	}
 }
 
@@ -675,7 +687,7 @@ func getOpenShiftInfo() Platform {
 
 func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
-	valid := []string{"3.10", "4.1", "4.11", "4.13"}
+	valid := []string{"3.10", "4.1", "4.11", "4.13", "4.14"}
 	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
 		if slices.Contains(valid, ocpVer) {
