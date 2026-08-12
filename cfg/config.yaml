@@ -111,6 +111,9 @@ master:
       - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
+    client_cert_file: /var/lib/rancher/rke2/server/tls/etcd/server-client.crt
+    client_key_file: /var/lib/rancher/rke2/server/tls/etcd/server-client.key
+
 
   flanneld:
     optional: true
@@ -136,12 +139,13 @@ node:
 
   kubelet:
     cafile:
+      - "/var/lib/rancher/rke2/agent/client-ca.crt"
+      - "/var/lib/rancher/rke2/server/tls/server-ca.crt"
       - "/etc/kubernetes/pki/ca.crt"
       - "/etc/kubernetes/certs/ca.crt"
       - "/etc/kubernetes/cert/ca.pem"
       - "/var/snap/microk8s/current/certs/ca.crt"
       - "/var/lib/rancher/rke2/agent/server.crt"
-      - "/var/lib/rancher/rke2/agent/client-ca.crt"
       - "/var/lib/rancher/k3s/agent/client-ca.crt"
     svc:
       # These paths must also be included
@@ -169,7 +173,10 @@ node:
       - "/var/lib/rancher/k3s/agent/kubelet.kubeconfig"
     confs:
       - "/etc/kubernetes/kubelet-config.yaml"
+      - "/etc/kubernetes/kubelet/kubelet-config.json"
+      - "/var/lib/rancher/rke2/agent/etc/kubelet.conf.d"
       - "/var/lib/kubelet/config.yaml"
+      - "/etc/kubernetes/azure.json"
       - "/var/lib/kubelet/config.yml"
       - "/etc/kubernetes/kubelet/kubelet-config.json"
       - "/etc/kubernetes/kubelet/config.json"
@@ -239,6 +246,8 @@ etcd:
       - /var/lib/etcd/data.etcd
       - /var/lib/rancher/k3s/server/db/etcd
     confs:
+      - /var/lib/rancher/rke2/server/db/etcd/config
+      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yaml
       - /etc/kubernetes/manifests/etcd.yml
       - /etc/kubernetes/manifests/etcd.manifest
@@ -247,7 +256,6 @@ etcd:
       - /var/snap/etcd/common/etcd.conf.yaml
       - /var/snap/microk8s/current/args/etcd
       - /usr/lib/systemd/system/etcd.service
-      - /var/lib/rancher/rke2/agent/pod-manifests/etcd.yaml
       - /var/lib/rancher/k3s/server/db/etcd/config
     defaultconf: /etc/kubernetes/manifests/etcd.yaml
     defaultdatadir: /var/lib/etcd/default.etcd
@@ -300,18 +308,23 @@ version_mapping:
   "gke-1.2.0": "gke-1.2.0"
   "gke-1.6.0": "gke-1.6.0"
   "gke-1.8.0": "gke-1.8.0"
+  "gke-1.9.0": "gke-1.9.0"
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
   "ocp-4.11": "rh-1.4"
   "ocp-4.13": "rh-1.8"
+  "ocp-4.14": "rh-1.9"
   "aks-1.0": "aks-1.0"
   "aks-1.7": "aks-1.7"
+  "aks-1.8": "aks-1.8"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
   "tkgi-1.2.53": "tkgi-1.2.53"
   "k3s-cis-1.7": "k3s-cis-1.7"
+  "k3s-cis-1.8": "k3s-cis-1.8"
+  "k3s-cis-1.9": "k3s-cis-1.9"
   "k3s-cis-1.23": "k3s-cis-1.23"
   "k3s-cis-1.24": "k3s-cis-1.24"
   "rke-cis-1.7": "rke-cis-1.7"
@@ -319,6 +332,7 @@ version_mapping:
   "rke-cis-1.24": "rke-cis-1.24"
   "rke2-cis-1.7": "rke2-cis-1.7"
   "rke2-cis-1.8": "rke2-cis-1.8"
+  "rke2-cis-1.9": "rke2-cis-1.9"
   "rke2-cis-1.23": "rke2-cis-1.23"
   "rke2-cis-1.24": "rke2-cis-1.24"
 
@@ -426,6 +440,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "gke-1.9.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "eks-1.0.1":
     - "master"
     - "node"
@@ -477,6 +497,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
+  "aks-1.8":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
   "ack-1.0":
     - "master"
     - "node"
@@ -502,6 +528,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "etcd"
+  "rh-1.9":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "etcd"
   "eks-stig-kubernetes-v1r6":
     - "node"
     - "controlplane"
@@ -520,6 +552,12 @@ target_mapping:
     - "node"
     - "policies"
   "k3s-cis-1.8":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "k3s-cis-1.9":
     - "master"
     - "etcd"
     - "controlplane"
@@ -562,6 +600,12 @@ target_mapping:
     - "node"
     - "policies"
   "rke2-cis-1.8":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.9":
     - "master"
     - "etcd"
     - "controlplane"
