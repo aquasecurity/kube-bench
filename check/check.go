@@ -230,6 +230,13 @@ func (c *Check) execute() (finalOutput *testOutput, err error) {
 
 	glog.V(3).Infof("Running %d test_items", len(ts.TestItems))
 	for i, t := range ts.TestItems {
+		// an empty list entry in the benchmark yaml unmarshals to a nil *testItem,
+		// and the len() check on TestItems counts it, so guard before using it
+		if t == nil {
+			glog.V(1).Infof("skipping empty test_item %d in check %s", i, c.ID)
+			expectedResultArr[i] = ""
+			continue
+		}
 
 		t.isMultipleOutput = c.IsMultiple
 
