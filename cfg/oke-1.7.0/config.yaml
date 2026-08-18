@@ -1,0 +1,13 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+
+node:
+  kubelet:
+    confs:
+      - "/etc/kubernetes/kubelet-config.json"
+
+    svc:
+      - "/etc/systemd/system/kubelet.service.d/00-default.conf"
+  
+    defaultconf: "/etc/kubernetes/kubelet-config.json"
+    defaultsvc: "/etc/systemd/system/kubelet.service.d/00-default.conf"

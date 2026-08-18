@@ -1,0 +1,300 @@
+---
+controls:
+version: "oke-1.7.0"
+id: 3
+text: "Worker Nodes"
+type: "node"
+groups:
+  - id: 3.1
+    text: "Worker Node Configuration Files"
+    checks:
+      - id: 3.1.1
+        text: "Ensure that the $kubeletkubeconfig file permissions are set to 644 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c permissions=%a $kubeletkubeconfig; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node. For example,
+
+            chmod 644 $kubeletkubeconfig
+        scored: true
+
+      - id: 3.1.2
+        text: "Ensure that the $kubeletkubeconfig file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; else echo \"File not found\"; fi'' '
+        tests:
+          bin_op: or
+          test_items:
+            - flag: root:root
+            - flag: "File not found"
+        remediation: |
+          Run the below command (based on the file location on your system) on the each worker node. For example,
+
+            chown root:root $kubeletkubeconfig
+        scored: true
+
+      - id: 3.1.3
+        text: "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        tests:
+          test_items:
+            - flag: "permissions"
+              compare:
+                op: bitmask
+                value: "644"
+        remediation: |
+          Run the following command (using the config file location identied in the Audit step):
+
+            chmod 644 $kubeletconf
+        scored: true
+
+      - id: 3.1.4
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; else echo \"File not found\"; fi'' '
+        tests:
+          bin_op: or
+          test_items:
+            - flag: root:root
+            - flag: "File not found"
+        remediation: |
+          Run the below command (using the config file location identied in the Audit step) on the each worker node. For example,
+
+            chown root:root $kubeletconf
+        scored: true
+
+  - id: 3.2
+    text: "Kubelet"
+    checks:
+      - id: 3.2.1
+        text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--anonymous-auth"
+              path: '{.authentication.anonymous.enabled}'
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --anonymous-auth=false
+
+          Based on your system, restart the kubelet service and check status
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: false
+
+      - id: 3.2.2
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: or
+          test_items:
+            - flag: "--authentication-mode"
+              compare:
+                op: noteq
+                value: "AlwaysAllow"
+            - path: '{.authentication.webhook.enabled}'
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --authorization-mode=Webhook
+          
+          Based on your system, restart the kubelet service and check status
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.3
+        text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--client-ca-file"
+              path: '{.authentication.x509.clientCAFile}'
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --client-ca-file=/etc/kubernetes/ca.crt \
+
+          Based on your system, restart the kubelet service and check status
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.4
+        text: "Ensure that the --read-only-port argument is set to 0 (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--read-only-port"
+              path: '{.readOnlyPort}'
+              compare:
+                op: eq
+                value: "0"
+        remediation: |
+          If modifying the Kubelet config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --read-only-port=0
+
+          For all remediations:
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.5
+        text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--streaming-connection-idle-timeout"
+              path: '{.streamingConnectionIdleTimeout}'
+              compare:
+                op: noteq
+                value: "0"
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --streaming-connection-idle-timeout
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: false
+
+      - id: 3.2.6
+        text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--make-iptables-util-chains"
+              path: '{.makeIPTablesUtilChains}'
+              compare:
+                op: eq
+                value: "true"
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --make-iptables-util-chains:true
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: false
+
+      - id: 3.2.7
+        text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--event-qps"
+              path: '{.eventRecordQPS}'
+              compare:
+                op: eq
+                value: "0"
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --event-qps=0
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.8
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          bin_op: and
+          test_items:
+            - flag: "--tls-cert-file"
+              path: '{.tlsCertFile}'
+            - flag: "--tls-private-key-file"
+              path: '{.tlsPrivateKeyFile}'
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+          Verify that the `tls-cert-file=/var/lib/kubelet/pki/tls.pem`.
+          Verify that the `tls-private-key-file=/var/lib/kubelet/pki/tls.key`.
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.9
+        text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--rotate-certificates"
+              path: '{.rotateCertificates}'
+              compare:
+                op: noteq
+                value: false
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+          Verify that the `--rotate-certificates` is present.
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
+
+      - id: 3.2.10
+        text: "Ensure that the --rotate-server-certificates argument is set to true (Automated)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: "--rotate-server-certificates"
+              path: '{.featureGates.RotateKubeletServerCertificate}'
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          If modifying the Kubelet service config file, edit the kubelet.service file $kubeletsvc and set the below parameter
+
+            --rotate-server-certificates=true
+
+          Based on your system, restart the kubelet service and check status
+
+            systemctl daemon-reload
+            systemctl restart kubelet.service
+            systemctl status kubelet -l
+        scored: true
