@@ -462,3 +462,73 @@ func TestControls_ASFF(t *testing.T) {
 		})
 	}
 }
+
+func TestControls_ApplyOverrides(t *testing.T) {
+	base := []byte(`
+---
+type: "master"
+groups:
+- id: G1
+  checks:
+  - id: G1/C1
+    text: "original text"
+    scored: true
+    remediation: "original remediation"
+  - id: G1/C2
+    text: "untouched"
+    scored: true
+`)
+
+	t.Run("Replaces matching checks and leaves others alone", func(t *testing.T) {
+		controls, err := NewControls(MASTER, base, "")
+		assert.NoError(t, err)
+
+		override := []byte(`
+checks:
+- id: G1/C1
+  text: "patched text"
+  scored: false
+  remediation: "patched remediation"
+`)
+		err = controls.ApplyOverrides(override)
+		assert.NoError(t, err)
+
+		c1 := controls.Groups[0].Checks[0]
+		assert.Equal(t, "patched text", c1.Text)
+		assert.Equal(t, false, c1.Scored)
+		assert.Equal(t, "patched remediation", c1.Remediation)
+
+		c2 := controls.Groups[0].Checks[1]
+		assert.Equal(t, "untouched", c2.Text)
+		assert.Equal(t, true, c2.Scored)
+	})
+
+	t.Run("Empty override leaves controls unchanged", func(t *testing.T) {
+		controls, err := NewControls(MASTER, base, "")
+		assert.NoError(t, err)
+
+		err = controls.ApplyOverrides([]byte(""))
+		assert.NoError(t, err)
+
+		c1 := controls.Groups[0].Checks[0]
+		assert.Equal(t, "original text", c1.Text)
+		assert.Equal(t, true, c1.Scored)
+		assert.Equal(t, "original remediation", c1.Remediation)
+	})
+
+	t.Run("Unknown ids in the override are ignored", func(t *testing.T) {
+		controls, err := NewControls(MASTER, base, "")
+		assert.NoError(t, err)
+
+		override := []byte(`
+checks:
+- id: G9/C9
+  text: "does not exist"
+`)
+		err = controls.ApplyOverrides(override)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "original text", controls.Groups[0].Checks[0].Text)
+		assert.Equal(t, "untouched", controls.Groups[0].Checks[1].Text)
+	})
+}

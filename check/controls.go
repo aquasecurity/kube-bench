@@ -95,6 +95,47 @@ func NewControls(t NodeType, in []byte, detectedVersion string) (*Controls, erro
 	return c, nil
 }
 
+// overrides holds a set of check definitions that replace matching checks in a
+// benchmark, keyed by check id.
+type overrides struct {
+	Checks []*Check `yaml:"checks"`
+}
+
+// ApplyOverrides replaces any check whose id matches an entry in the override
+// data with the override definition. Checks that aren't listed are left as they
+// are, so an override file only needs to contain the checks you want to change
+// rather than a copy of the whole benchmark. An empty override leaves the
+// controls untouched.
+func (controls *Controls) ApplyOverrides(in []byte) error {
+	o := new(overrides)
+	if err := yaml.Unmarshal(in, o); err != nil {
+		return fmt.Errorf("failed to unmarshal overrides: %s", err)
+	}
+
+	byID := make(map[string]*Check, len(o.Checks))
+	for _, c := range o.Checks {
+		if c == nil || c.ID == "" {
+			continue
+		}
+		byID[c.ID] = c
+	}
+
+	if len(byID) == 0 {
+		return nil
+	}
+
+	for _, group := range controls.Groups {
+		for i, chk := range group.Checks {
+			if ov, ok := byID[chk.ID]; ok {
+				group.Checks[i] = ov
+				glog.V(1).Infof("overriding check %s", chk.ID)
+			}
+		}
+	}
+
+	return nil
+}
+
 // RunChecks runs the checks with the given Runner. Only checks for which the filter Predicate returns `true` will run.
 func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap map[string]bool) Summary {
 	var g []*Group

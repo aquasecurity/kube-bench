@@ -111,6 +111,16 @@ func runChecks(nodetype check.NodeType, testYamlFile, detectedVersion string) {
 		exitWithError(fmt.Errorf("error setting up %s controls: %v", nodetype, err))
 	}
 
+	if overrideFile != "" {
+		override, err := os.ReadFile(overrideFile)
+		if err != nil {
+			exitWithError(fmt.Errorf("error opening %s override file: %v", overrideFile, err))
+		}
+		if err := controls.ApplyOverrides(override); err != nil {
+			exitWithError(fmt.Errorf("error applying overrides from %s: %v", overrideFile, err))
+		}
+	}
+
 	runner := check.NewRunner()
 	filter, err := NewRunFilter(filterOpts)
 	if err != nil {
