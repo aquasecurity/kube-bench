@@ -1,0 +1,51 @@
+---
+controls:
+version: "gke-stig-kubernetes-v1r6"
+id: 2
+text: "Control Plane Configuration"
+type: "controlplane"
+groups:
+  - id: 2.1
+    text: "DISA Category Code I - API Server Security"
+    checks:
+
+      - id: V-242400
+        text: "The Kubernetes API server must have Alpha APIs disabled"
+        type: "manual"
+        remediation: |
+          Check the release channel using the GCP gcloud CLI.
+          gcloud container clusters describe <ClusterName> --region <RegionName> --format json | jq -r '.releaseChannel.channel'
+          This should be set to "STABLE". Any "Alpha" clusters will need to be rebuilt on the STABLE release channel.
+
+  - id: 2.2
+    text: "DISA Category Code II - Controller Manager Security"
+    checks:       
+      - id: V-242443
+        text: " Kubernetes must contain the latest updates as authorized by IAVMs, CTOs, DTMs, and STIGs. (Manual)"
+        type: "manual"
+        remediation: |
+         Upgrade Kubernetes to a supported version.
+
+      - id: V-242461
+        text: "Kubernetes API Server audit logs must be enabled. (Manual)"
+        type: "manual"
+        remediation: |
+            Enable control plane logging for API Server, Audit, Authenticator, Controller Manager, and Scheduler.
+            Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/view-logs#control-plane-access-logs
+
+      - id: V-242462
+        text: "The Kubernetes API Server must be set to audit log max size | Component of GKE Control Plane"
+        type: "skip"
+
+      - id: V-242463
+        text: "The Kubernetes API Server must be set to audit log maximum backup | Component of GKE Control Plane"
+        type: "skip"
+
+      - id: V-242464
+        text: "The Kubernetes API Server audit log retention must be set | Component of GKE Control Plane"
+        type: "skip"
+
+      - id: V-242394
+        text: "The Kubernetes API Server audit log path must be set | Component of GKE Control Plane"
+        type: "skip"
+
