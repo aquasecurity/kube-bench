@@ -473,7 +473,7 @@ groups:
     checks:
       - id: 4.3.1
         text: "Ensure that the kube-proxy metrics service is bound to localhost (Automated)"
-        audit: "/bin/ps -fC $proxybin"
+        audit: "/bin/ps -fC $proxybin || true"
         audit_config: "/bin/sh -c 'if test -e $proxykubeconfig; then cat $proxykubeconfig; fi'"
         tests:
           bin_op: or

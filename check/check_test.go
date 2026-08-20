@@ -94,6 +94,33 @@ func TestCheck_Run(t *testing.T) {
 			},
 			Expected: FAIL,
 		},
+		{
+			// Regression for #2036: the 4.3.1 kube-proxy check must not FAIL
+			// when no kube-proxy process is running. The audit greps the
+			// process list (header only, flag absent) and tolerates the
+			// non-zero exit of a process-listing command via "|| true", so the
+			// "bin_op: or" + "set: false" branch can evaluate to PASS.
+			name: "Scored kube-proxy check should PASS when the process is absent",
+			check: Check{
+				Scored: true,
+				Audit:  "echo 'UID PID PPID C STIME TTY TIME CMD' || true",
+				Tests: &tests{
+					BinOp: or,
+					TestItems: []*testItem{
+						{
+							Flag:    "--metrics-bind-address",
+							Set:     true,
+							Compare: compare{Op: "has", Value: "127.0.0.1"},
+						},
+						{
+							Flag: "--metrics-bind-address",
+							Set:  false,
+						},
+					},
+				},
+			},
+			Expected: PASS,
+		},
 	}
 
 	for _, testCase := range testCases {
