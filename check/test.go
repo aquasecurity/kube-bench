@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v3"
 	"k8s.io/client-go/util/jsonpath"
 )
 
