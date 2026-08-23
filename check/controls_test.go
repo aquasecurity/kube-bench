@@ -73,21 +73,16 @@ func TestYamlFiles(t *testing.T) {
 	}
 }
 
-// benchmarksGuardingFileExistence lists the benchmark directories that have
-// been reviewed for https://github.com/aquasecurity/kube-bench/issues/1881.
+// benchmarksWithoutFileExistenceGuards lists the benchmark directories that
+// have been reviewed for https://github.com/aquasecurity/kube-bench/issues/1881.
 // Older benchmarks share the same defect and can be added here as they are
 // fixed.
-var benchmarksGuardingFileExistence = []string{"cis-1.12"}
+var benchmarksWithoutFileExistenceGuards = []string{"cis-1.12"}
 
-// missingFileSentinel is the message stat prints when the file an audit
-// command inspects does not exist. kube-bench collects stderr together with
-// stdout, so a test_item can match it directly.
-const missingFileSentinel = "No such file or directory"
-
-// checksWhereMissingFileIsAFinding lists the checks that intentionally keep
-// reporting FAIL when the audited file is absent, because its absence is the
-// finding rather than a property of a file that is not there.
-var checksWhereMissingFileIsAFinding = map[string]string{
+// checksWhereTheGuardIsDeliberate lists the checks that keep an existence
+// guard on purpose, because the absence of the file is the finding rather
+// than a property of a file that is not there.
+var checksWhereTheGuardIsDeliberate = map[string]string{
 	// The file is the encryption provider configuration: if it is missing,
 	// encryption of secrets at rest is not configured at all.
 	"cis-1.12/master.yaml 1.2.28": "no encryption provider configuration means encryption is not configured",
@@ -101,22 +96,20 @@ var checksWhereMissingFileIsAFinding = map[string]string{
 //
 //	/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'
 //
-// produces no output at all when the file is absent. A test_item that looks
-// for a flag in that output can never match, so the check is reported as FAIL
-// for a file that simply does not exist.
+// succeeds with no output at all when the file is absent. A test_item that
+// looks for a flag in that output can never match, so the check is reported
+// as FAIL with nothing to say about why - see issue #1881.
 //
-// File permission and ownership checks therefore use a bare stat with
-// `|| true`:
+// File permission and ownership checks therefore run stat directly:
 //
-//	/bin/sh -c 'stat -c permissions=%a $apiserverconf || true'
+//	/bin/sh -c 'stat -c permissions=%a $apiserverconf'
 //
-// stat's own error message ("No such file or directory", collected from
-// stderr) is accepted alongside the real value via bin_op: or, and `|| true`
-// keeps the audit's exit code zero so the check is not failed on the error
-// path before the test_items are evaluated. Existence guards remain only in
-// the checks where a missing file is the finding itself.
-func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
-	for _, benchmark := range benchmarksGuardingFileExistence {
+// A missing file still FAILs, but stat exits non-zero and its own message
+// ("No such file or directory", collected from stderr) reaches the user in
+// the check's Reason instead of being swallowed. Guards remain only where a
+// missing file is the finding itself.
+func TestFilePermissionChecksDoNotHideAMissingFile(t *testing.T) {
+	for _, benchmark := range benchmarksWithoutFileExistenceGuards {
 		dir := filepath.Join(cfgDir, benchmark)
 		files, err := filepath.Glob(filepath.Join(dir, "*.yaml"))
 		if err != nil {
@@ -139,23 +132,16 @@ func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
 
 			for _, group := range c.Groups {
 				for _, check := range group.Checks {
+					if !auditGuardsFileExistence(check.Audit) {
+						continue
+					}
 					key := fmt.Sprintf("%s/%s %s", benchmark, filepath.Base(path), check.ID)
-					if auditGuardsFileExistence(check.Audit) {
-						if _, ok := checksWhereMissingFileIsAFinding[key]; !ok {
-							t.Errorf("%s: check %s guards against a missing file: "+
-								"use a bare stat with `|| true` and accept its error message with bin_op: or",
-								path, check.ID)
-						}
+					if _, ok := checksWhereTheGuardIsDeliberate[key]; ok {
 						continue
 					}
-					if !auditToleratesMissingFile(check.Audit) {
-						continue
-					}
-					if !toleratesEmptyAuditOutput(check.Tests) {
-						t.Errorf("%s: check %s tolerates a missing file in its audit but reports FAIL when it is missing: "+
-							"the tests should accept stat's error message with bin_op: or",
-							path, check.ID)
-					}
+					t.Errorf("%s: check %s hides a missing file behind an existence guard: "+
+						"run stat directly so its error reaches the user",
+						path, check.ID)
 				}
 			}
 		}
@@ -163,40 +149,15 @@ func TestChecksGuardingFileExistenceTolerateMissingFile(t *testing.T) {
 }
 
 func auditGuardsFileExistence(audit string) bool {
+	if !strings.Contains(audit, "stat -c") {
+		return false
+	}
 	for _, guard := range []string{"test -e", "test -f", "[[ -e", "[ -e"} {
 		if strings.Contains(audit, guard) {
 			return true
 		}
 	}
 	return false
-}
-
-// auditToleratesMissingFile reports whether the audit lets a stat on a
-// missing file surface its error message instead of failing the command.
-func auditToleratesMissingFile(audit string) bool {
-	return strings.Contains(audit, "stat -c") && strings.Contains(audit, "|| true")
-}
-
-func toleratesEmptyAuditOutput(ts *tests) bool {
-	if ts == nil || len(ts.TestItems) == 0 {
-		return true
-	}
-	satisfied := false
-	for _, item := range ts.TestItems {
-		// A test_item that requires a flag to be absent, or that matches the
-		// sentinel echoed when the file does not exist, is satisfied by the
-		// empty output.
-		if !item.Set || item.Flag == missingFileSentinel {
-			satisfied = true
-			break
-		}
-	}
-	if !satisfied {
-		return false
-	}
-	// The remaining test_items are not satisfied by the empty output, so they
-	// must not be combined with the tolerant one by the default AND.
-	return len(ts.TestItems) == 1 || ts.BinOp == or
 }
 
 func TestNewControls(t *testing.T) {
