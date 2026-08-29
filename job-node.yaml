@@ -33,6 +33,9 @@ spec:
             - name: lib-systemd
               mountPath: /lib/systemd/
               readOnly: true
+            - name: usr-lib-systemd
+              mountPath: /usr/lib/systemd/
+              readOnly: true
             - name: srv-kubernetes
               mountPath: /srv/kubernetes/
               readOnly: true
@@ -73,6 +76,9 @@ spec:
         - name: lib-systemd
           hostPath:
             path: "/lib/systemd"
+        - name: usr-lib-systemd
+          hostPath:
+            path: "/usr/lib/systemd"
         - name: srv-kubernetes
           hostPath:
             path: "/srv/kubernetes"
