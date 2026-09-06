@@ -596,6 +596,8 @@ func ocpBenchmark(version string) string {
 		return "rh-1.4"
 	case "4.13":
 		return "rh-1.8"
+	case "4.14":
+		return "rh-1.9"
 	default:
 		return ""
 	}
@@ -639,10 +641,12 @@ func rke2Benchmark(version string) string {
 		return "rke2-cis-1.24"
 	case "1.25":
 		return "rke2-cis-1.7"
-	case "1.26", "1.27":
+	case "1.26":
 		return "rke2-cis-1.8"
+	case "1.27", "1.28", "1.29":
+		return "rke2-cis-1.9"
 	default:
-		return "rke2-cis-1.8"
+		return "rke2-cis-1.9"
 	}
 }
 
@@ -683,7 +687,7 @@ func getOpenShiftInfo() Platform {
 
 func getOcpValidVersion(ocpVer string) (string, error) {
 	ocpOriginal := ocpVer
-	valid := []string{"3.10", "4.1", "4.11", "4.13"}
+	valid := []string{"3.10", "4.1", "4.11", "4.13", "4.14"}
 	for !isEmpty(ocpVer) {
 		glog.V(3).Info(fmt.Sprintf("getOcpBenchmarkVersion check for ocp: %q \n", ocpVer))
 		if slices.Contains(valid, ocpVer) {

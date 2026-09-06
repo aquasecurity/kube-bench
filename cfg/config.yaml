@@ -297,7 +297,8 @@ version_mapping:
   "1.31": "cis-1.11"
   "1.32": "cis-1.12"
   "1.33": "cis-1.12"
-  "1.34": "cis-1.12"
+  "1.34": "cis-2.0"
+  "1.35": "cis-2.0"
   "eks-1.0.1": "eks-1.0.1"
   "eks-1.1.0": "eks-1.1.0"
   "eks-1.2.0": "eks-1.2.0"
@@ -314,6 +315,7 @@ version_mapping:
   "ocp-4.0": "rh-1.0"
   "ocp-4.11": "rh-1.4"
   "ocp-4.13": "rh-1.8"
+  "ocp-4.14": "rh-1.9"
   "aks-1.0": "aks-1.0"
   "aks-1.7": "aks-1.7"
   "aks-1.8": "aks-1.8"
@@ -331,6 +333,7 @@ version_mapping:
   "rke-cis-1.24": "rke-cis-1.24"
   "rke2-cis-1.7": "rke2-cis-1.7"
   "rke2-cis-1.8": "rke2-cis-1.8"
+  "rke2-cis-1.9": "rke2-cis-1.9"
   "rke2-cis-1.23": "rke2-cis-1.23"
   "rke2-cis-1.24": "rke2-cis-1.24"
 
@@ -408,6 +411,12 @@ target_mapping:
     - "etcd"
     - "policies"
   "cis-1.12":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "etcd"
+    - "policies"
+  "cis-2.0":
     - "master"
     - "node"
     - "controlplane"
@@ -526,6 +535,12 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "etcd"
+  "rh-1.9":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "etcd"
   "eks-stig-kubernetes-v1r6":
     - "node"
     - "controlplane"
@@ -592,6 +607,12 @@ target_mapping:
     - "node"
     - "policies"
   "rke2-cis-1.8":
+    - "master"
+    - "etcd"
+    - "controlplane"
+    - "node"
+    - "policies"
+  "rke2-cis-1.9":
     - "master"
     - "etcd"
     - "controlplane"
