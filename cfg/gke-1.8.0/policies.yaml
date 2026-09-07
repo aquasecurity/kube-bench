@@ -458,7 +458,7 @@ groups:
       - id: 4.6.4
         text: "The default namespace should not be used (Automated)"
         audit: |
-          output=$(kubectl get all -n default --no-headers 2>/dev/null | grep -v '^service\s\+kubernetes\s' || true)
+          output=$(kubectl get all -n default --no-headers 2>/dev/null | grep -Ev '^service(/|[[:space:]]+)kubernetes[[:space:]]' || true)
           if [ -z "$output" ]; then echo "DEFAULT_NAMESPACE_UNUSED"; else echo "DEFAULT_NAMESPACE_IN_USE"; fi
         tests:
           test_items:
