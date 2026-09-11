@@ -809,14 +809,35 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			args: args{
 				platform: Platform{Name: "k3s", Version: "1.28"},
 			},
-			want: "k3s-cis-1.9",
+			want: "k3s-cis-1.10",
 		},
 		{
 			name: "k3s 1.29",
 			args: args{
 				platform: Platform{Name: "k3s", Version: "1.29"},
 			},
-			want: "k3s-cis-1.9",
+			want: "k3s-cis-1.11",
+		},
+		{
+			name: "k3s 1.30",
+			args: args{
+				platform: Platform{Name: "k3s", Version: "1.30"},
+			},
+			want: "k3s-cis-1.11",
+		},
+		{
+			name: "k3s 1.31",
+			args: args{
+				platform: Platform{Name: "k3s", Version: "1.31"},
+			},
+			want: "k3s-cis-1.11",
+		},
+		{
+			name: "k3s 1.32",
+			args: args{
+				platform: Platform{Name: "k3s", Version: "1.32"},
+			},
+			want: "k3s-cis-1.11",
 		},
 		{
 			name: "rancher1",
