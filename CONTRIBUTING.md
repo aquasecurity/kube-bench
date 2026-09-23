@@ -1,6 +1,6 @@
 Thank you for taking an interest in contributing to kube-bench !
 
-## Contributing, bug reporting, openning issues and starting discussions
+## Contributing, bug reporting, opening issues and starting discussions
 
 ### Issues
 
