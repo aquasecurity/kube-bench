@@ -59,6 +59,7 @@ var (
 	filterOpts           FilterOpts
 	includeTestOutput    bool
 	outputFile           string
+	overrideFile         string
 	configFileError      error
 	controlsCollection   []*check.Controls
 )
@@ -173,6 +174,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&skipIds, "skip", "", "List of comma separated values of checks to be skipped")
 	RootCmd.PersistentFlags().BoolVar(&includeTestOutput, "include-test-output", false, "Prints the actual result when test fails")
 	RootCmd.PersistentFlags().StringVar(&outputFile, "outputfile", "", "Writes the results to output file when run with --json or --junit")
+	RootCmd.PersistentFlags().StringVar(&overrideFile, "override-file", "", "YAML file with check definitions that override matching checks (by id) in the benchmark")
 
 	RootCmd.PersistentFlags().StringVarP(
 		&filterOpts.CheckList,
