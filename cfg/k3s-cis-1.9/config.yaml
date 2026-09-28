@@ -42,7 +42,7 @@ node:
     bins:
       - containerd
     confs:
-      - /var/lib/rancher/k3s/agent/kubelet.kubeconfig
+      - /var/lib/rancher/k3s/agent/etc/kubelet.conf.d/00-k3s-defaults.conf
     defaultkubeconfig: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
     defaultcafile: /var/lib/rancher/k3s/agent/client-ca.crt
   proxy:

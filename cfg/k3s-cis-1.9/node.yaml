@@ -211,7 +211,7 @@ groups:
       - id: 4.2.4
         text: "Verify that the --read-only-port argument is set to 0 (Automated)"
         audit: |
-          journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1 | grep -o -- "--read-only-port=0"
+          journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
         tests:
           bin_op: or
@@ -244,7 +244,7 @@ groups:
             - flag: --streaming-connection-idle-timeout
               path: '{.streamingConnectionIdleTimeout}'
               compare:
-                op: noteqx
+                op: noteq
                 value: 0
             - flag: --streaming-connection-idle-timeout
               path: '{.streamingConnectionIdleTimeout}'
