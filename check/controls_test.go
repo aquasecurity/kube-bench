@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v3"
 )
 
 const cfgDir = "../cfg/"
@@ -95,7 +95,6 @@ groups:
 		// then
 		assert.EqualError(t, err, "failed to unmarshal YAML: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `BOOM` into check.Controls")
 	})
-
 }
 
 func TestControls_RunChecks_SkippedCmd(t *testing.T) {
@@ -204,7 +203,7 @@ groups:
 		var runAll Predicate = func(group *Group, c *Check) bool {
 			return true
 		}
-		var emptySkipList = make(map[string]bool, 0)
+		emptySkipList := make(map[string]bool, 0)
 		// when
 		controls.RunChecks(runner, runAll, emptySkipList)
 		// then
@@ -336,7 +335,8 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
 					}
 
 					if out.TestCases[iGroup*iCheck+iCheck].SystemOut != string(jsonBytes) {
-						t.Errorf("Expected\n\t%v\n\tbut got\n\t%v",
+						t.Errorf(
+							"Expected\n\t%v\n\tbut got\n\t%v",
 							out.TestCases[iGroup*iCheck+iCheck].SystemOut,
 							string(jsonBytes),
 						)
@@ -345,7 +345,8 @@ func TestControls_JUnitIncludesJSON(t *testing.T) {
 			}
 
 			if !bytes.Equal(junitBytes, tc.expect) {
-				t.Errorf("Expected\n\t%v\n\tbut got\n\t%v",
+				t.Errorf(
+					"Expected\n\t%v\n\tbut got\n\t%v",
 					string(tc.expect),
 					string(junitBytes),
 				)
@@ -393,7 +394,8 @@ func TestControls_ASFF(t *testing.T) {
 						ID:   "g1",
 						Text: "Group text",
 						Checks: []*Check{
-							{ID: "check1id",
+							{
+								ID:             "check1id",
 								Text:           "check1text",
 								State:          FAIL,
 								Remediation:    "fix me",
@@ -403,7 +405,8 @@ func TestControls_ASFF(t *testing.T) {
 							},
 						},
 					},
-				}},
+				},
+			},
 			want: []types.AwsSecurityFinding{
 				{
 					AwsAccountId:  aws.String("foo account"),
