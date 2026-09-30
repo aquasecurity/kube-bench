@@ -431,6 +431,9 @@ groups:
           test_items:
             - flag: --seccomp-default
               path: '{.seccompDefault}'
+              compare:
+                op: eq
+                value: true
         remediation: |
           If enabled, the kubelet will use the RuntimeDefault seccomp profile by default, which is defined by the container runtime, instead of using the Unconfined (seccomp disabled) mode (default).
           If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `seccomp-default` to
