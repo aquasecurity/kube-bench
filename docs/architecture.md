@@ -46,6 +46,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | k3s-cis-1.8          | master, controlplane, node, etcd, policies |
 | k3s-cis-1.9          | master, controlplane, node, etcd, policies |
 | k3s-cis-1.10         | master, controlplane, node, etcd, policies |
+| k3s-cis-1.11         | master, controlplane, node, etcd, policies |
 | cis-1.24-microk8s    | master, controlplane, node, etcd, policies |
 
 The following table shows the valid DISA STIG versions
