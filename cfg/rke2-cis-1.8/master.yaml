@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 1.1.1
         text: "Ensure that the API server pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $apiserverconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -27,7 +27,7 @@ groups:
 
       - id: 1.1.2
         text: "Ensure that the API server pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $apiserverconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -40,7 +40,7 @@ groups:
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $controllermanagerconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -56,7 +56,7 @@ groups:
 
       - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $controllermanagerconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -69,7 +69,7 @@ groups:
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $schedulerconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -85,7 +85,7 @@ groups:
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $schedulerconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -100,11 +100,8 @@ groups:
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Manual)"
         audit: |
           /bin/sh -c '
-          if [ -e "$etcdconf" ]; then
-            stat -c "permissions=%a %n" "$etcdconf"
-          else
-            echo "Directory not found"
-          fi
+          stat -c "permissions=%a %n" "$etcdconf"
+          
           '
         tests:
           bin_op: or
@@ -113,7 +110,6 @@ groups:
               compare:
                 op: bitmask
                 value: "600"
-            - flag: "Directory not found"
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
           For example,
@@ -126,11 +122,8 @@ groups:
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
         audit: |
           /bin/sh -c '
-          if [ -e "$etcdconf" ]; then
           stat -c "ownership=%U:%G" "$etcdconf"
-          else
-            echo "Directory not found"
-          fi
+          
           '
         tests:
           bin_op: or
@@ -140,7 +133,6 @@ groups:
                 op: eq
                 value: "root:root"
               set: true
-            - flag: "Directory not found"
               set: true
         remediation: |
           Run the below command (based on the file location on your system) on the control plane node.
@@ -185,11 +177,8 @@ groups:
       - id: 1.1.11
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
         audit: |
-          /bin/sh -c 'if [ -e "/var/lib/rancher/rke2/server/db/etcd" ]; then
-            stat -c "permissions=%a %n" "/var/lib/rancher/rke2/server/db/etcd"
-          else
-            echo "Directory not found: /var/lib/rancher/rke2/server/db/etcd"
-          fi'
+          /bin/sh -c 'stat -c "permissions=%a %n" "/var/lib/rancher/rke2/server/db/etcd"
+          '
         tests:
           bin_op: or
           test_items:
@@ -198,7 +187,6 @@ groups:
                 op: bitmask
                 value: "700"
               set: true
-            - flag: "Directory not found: /var/lib/rancher/rke2/server/db/etcd"
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
           from the command 'ps -ef | grep etcd'.
@@ -210,11 +198,8 @@ groups:
         text: "Ensure that the etcd data directory ownership is set to etcd:etcd (Automated)"
         audit: |
           /bin/sh -c '
-          if [ -e "$etcdconf" ]; then
-            stat -c "ownership=%U:%G" "$etcdconf"
-          else
-            echo "Directory not found"
-          fi
+          stat -c "ownership=%U:%G" "$etcdconf"
+          
           '
         tests:
           bin_op: or
@@ -224,7 +209,6 @@ groups:
                 op: eq
                 value: "root:root"
               set: true
-            - flag: "Directory not found"
               set: true
         remediation: |
           On the etcd server node, get the etcd data directory, passed as an argument --data-dir,
@@ -264,7 +248,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -281,7 +265,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
@@ -295,7 +279,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -312,7 +296,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
