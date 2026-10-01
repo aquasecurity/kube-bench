@@ -418,7 +418,7 @@ groups:
         type: "manual"
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
-          Also see recommendation 5.10.4.
+          Also see recommendation 5.1.4.
         scored: false
 
   - id: 4.6

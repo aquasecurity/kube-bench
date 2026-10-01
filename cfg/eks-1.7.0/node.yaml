@@ -89,7 +89,7 @@ groups:
           Disable Anonymous Authentication by setting the following parameter:
           "authentication": { "anonymous": { "enabled": false } }
 
-          Remediation Method 2.
+          Remediation Method 2:
           If using executable arguments, edit the kubelet service file on each worker node and
           ensure the below parameters are part of the KUBELET_ARGS variable string.
           For systems using systemd, such as the Amazon EKS Optimised Amazon Linux or
@@ -375,6 +375,7 @@ groups:
           test_items:
             - flag: --rotate-certificates
               path: '{.rotateCertificates}'
+              set: true
               compare:
                 op: eq
                 value: true
