@@ -1,6 +1,6 @@
 ---
 controls:
-version: "k3s-cis-1.9"
+version: "k3s-cis-1.10"
 id: 4
 text: "Worker Node Security Configuration"
 type: "node"
@@ -197,8 +197,7 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          /bin/sh -c 'if test "$(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l)" -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep  "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep  "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
         tests:
           test_items:
             - flag: --client-ca-file

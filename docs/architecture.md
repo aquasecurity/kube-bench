@@ -23,9 +23,10 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.7              | master, controlplane, node, etcd, policies |
 | cis-1.8              | master, controlplane, node, etcd, policies |
 | cis-1.9              | master, controlplane, node, etcd, policies |
-| cis-1.10              | master, controlplane, node, etcd, policies |
-| cis-1.11              | master, controlplane, node, etcd, policies |
-| cis-1.12              | master, controlplane, node, etcd, policies |
+| cis-1.10             | master, controlplane, node, etcd, policies |
+| cis-1.11             | master, controlplane, node, etcd, policies |
+| cis-1.12             | master, controlplane, node, etcd, policies |
+| cis-2.0              | master, controlplane, node, etcd, policies |
 | gke-1.0              | master, controlplane, node, etcd, policies, managedservices |
 | gke-1.2.0            | controlplane, node, policies, managedservices |
 | gke-1.6.0            | controlplane, node, policies, managedservices |
@@ -39,6 +40,13 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | rh-0.7               | master,node|
 | rh-1.0               | master, controlplane, node, etcd, policies |
 | cis-1.6-k3s          | master, controlplane, node, etcd, policies |
+| k3s-cis-1.23         | master, controlplane, node, etcd, policies |
+| k3s-cis-1.24         | master, controlplane, node, etcd, policies |
+| k3s-cis-1.7          | master, controlplane, node, etcd, policies |
+| k3s-cis-1.8          | master, controlplane, node, etcd, policies |
+| k3s-cis-1.9          | master, controlplane, node, etcd, policies |
+| k3s-cis-1.10         | master, controlplane, node, etcd, policies |
+| k3s-cis-1.11         | master, controlplane, node, etcd, policies |
 | cis-1.24-microk8s    | master, controlplane, node, etcd, policies |
 
 The following table shows the valid DISA STIG versions

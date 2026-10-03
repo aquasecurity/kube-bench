@@ -1,6 +1,6 @@
 ---
 controls:
-version: "k3s-cis-1.9"
+version: "k3s-cis-1.11"
 id: 4
 text: "Worker Node Security Configuration"
 type: "node"
@@ -197,8 +197,7 @@ groups:
 
       - id: 4.2.3
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
-        audit: |
-          /bin/sh -c 'if test "$(journalctl -m -u k3s | grep "Running kube-apiserver" | wc -l)" -gt 0; then journalctl -m -u k3s | grep "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'
+        audit: '/bin/sh -c ''if test $(journalctl -m -u k3s | grep  "Running kube-apiserver" | wc -l) -gt 0; then journalctl -m -u k3s | grep  "Running kube-apiserver" | tail -n1 | grep "client-ca-file"; else echo "--client-ca-file=/var/lib/rancher/k3s/server/tls/request-header-ca.crt"; fi'' '
         tests:
           test_items:
             - flag: --client-ca-file
@@ -209,7 +208,7 @@ groups:
         scored: true
 
       - id: 4.2.4
-        text: "Verify that the --read-only-port argument is set to 0 (Automated)"
+        text: "Verify that if defined, the --read-only-port argument is set to 0 (Automated)"
         audit: |
           journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1
         audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
@@ -422,6 +421,24 @@ groups:
           If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `podPidsLimit` to
           kubelet-arg:
             - "pod-max-pids=<value>"
+        scored: false
+
+      - id: 4.2.14
+        text: "Ensure that the --seccomp-default parameter is set to true (Manual)"
+        audit: "journalctl -m -u k3s -u k3s-agent | grep 'Running kubelet' | tail -n1"
+        audit_config: "/bin/sh -c 'if test -e $kubeletconf; then /bin/cat $kubeletconf; fi' "
+        tests:
+          test_items:
+            - flag: --seccomp-default
+              path: '{.seccompDefault}'
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          If enabled, the kubelet will use the RuntimeDefault seccomp profile by default, which is defined by the container runtime, instead of using the Unconfined (seccomp disabled) mode (default).
+          If using a K3s config file /etc/rancher/k3s/config.yaml, edit the file to set `seccomp-default` to
+          kubelet-arg:
+           - "seccomp-default=true"
         scored: false
 
   - id: 4.3

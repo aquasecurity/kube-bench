@@ -1,6 +1,6 @@
 ---
 controls:
-version: "k3s-cis-1.9"
+version: "k3s-cis-1.11"
 id: 1
 text: "Control Plane Security Configuration"
 type: "master"
@@ -21,7 +21,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the api server within the k3s process. There is no API server pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.2
         text: "Ensure that the API server pod specification file ownership is set to root:root (Automated)"
@@ -33,7 +33,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the api server within the k3s process. There is no API server pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 600 or more restrictive (Automated)"
@@ -48,7 +48,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the controller manager within the k3s process. There is no controller manager pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root (Automated)"
@@ -60,7 +60,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the controller manager within the k3s process. There is no controller manager pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Automated)"
@@ -75,7 +75,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the scheduler within the k3s process. There is no scheduler pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Automated)"
@@ -87,7 +87,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds the scheduler within the k3s process. There is no scheduler pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Automated)"
@@ -103,7 +103,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds etcd within the k3s process. There is no etcd pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
@@ -116,7 +116,7 @@ groups:
         remediation: |
           Not Applicable.
           By default, K3s embeds etcd within the k3s process. There is no etcd pod specification file.
-        scored: false
+        scored: true
 
       - id: 1.1.9
         text: "Ensure that the Container Network Interface file permissions are set to 600 or more restrictive (Automated)"
@@ -177,7 +177,7 @@ groups:
           Not Applicable.
           For K3s, etcd is embedded within the k3s process. There is no separate etcd process.
           Therefore the etcd data directory ownership is managed by the k3s process and should be root:root.
-        scored: false
+        scored: true
 
       - id: 1.1.13
         text: "Ensure that the admin.conf file permissions are set to 600 or more restrictive (Automated)"
@@ -280,7 +280,7 @@ groups:
         scored: true
 
       - id: 1.1.20
-        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 600 or more restrictive (Manual)"
+        text: "Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive (Automated)"
         audit: "/bin/sh -c 'stat -c permissions=%a /var/lib/rancher/k3s/server/tls/*.crt'"
         use_multiple_values: true
         tests:
@@ -288,12 +288,13 @@ groups:
             - flag: "permissions"
               compare:
                 op: bitmask
-                value: "600"
+                value: "644"
         remediation: |
           Run the below command (based on the file location on your system) on the master node.
           For example,
-          chmod -R 600 /var/lib/rancher/k3s/server/tls/*.crt
-        scored: false
+          chmod -R 644 /var/lib/rancher/k3s/server/tls/*.crt
+          By default, k3s sets PKI certificate file permissions to 644, more restrictive permissions such as 600 are supported.
+        scored: true
 
       - id: 1.1.21
         text: "Ensure that the Kubernetes PKI key file permissions are set to 600 (Automated)"
@@ -790,13 +791,29 @@ groups:
             - flag: "--tls-cipher-suites"
               compare:
                 op: valid_elements
-                value: "TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_GCM_SHA384"
+                value: "TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_GCM_SHA384"
         remediation: |
           By default, the K3s kube-apiserver complies with this test. Changes to these values may cause regression, therefore ensure that all apiserver clients support the new TLS configuration before applying it in production deployments.
           If a custom TLS configuration is required, consider also creating a custom version of this rule that aligns with your requirements.
           If this check fails, remove any custom configuration around `tls-cipher-suites` or update the /etc/rancher/k3s/config.yaml file to match the default by adding the following:
           kube-apiserver-arg:
             - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        scored: true
+
+      - id: 1.2.30
+        text: "Ensure that the --service-account-extend-token-expiration parameter is set to false (Automated)"
+        audit: "journalctl -m -u k3s | grep 'Running kube-apiserver' | tail -n1 | grep 'service-account-extend-token-expiration'"
+        tests:
+          test_items:
+            - flag: "--service-account-extend-token-expiration"
+              compare:
+                op: eq
+                value: false
+        remediation: |
+          Edit the K3s config file /etc/rancher/k3s/config.yaml and set the --service-account-extend-token-expiration parameter to false before reloading k3s, as below:
+          kube-apiserver-arg:
+           - "service-account-extend-token-expiration=false"
+          By default, this parameter is set to true.
         scored: true
 
   - id: 1.3
