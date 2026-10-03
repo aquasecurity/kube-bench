@@ -71,6 +71,20 @@ func TestTestExecute(t *testing.T) {
 			expectedTestResult: "'--insecure-port' is equal to '0'",
 		},
 		{
+			// space separator with -- prefix
+			check:              controls.Groups[0].Checks[2],
+			str:                "2:45 ../kubernetes/kube-apiserver --insecure-port 0 --anonymous-auth",
+			strConfig:          "",
+			expectedTestResult: "'--insecure-port' is equal to '0'",
+		},
+		{
+			// space separator with -- prefix, value at end of string
+			check:              controls.Groups[0].Checks[3],
+			str:                "2:45 ../kubernetes/kube-apiserver --secure-port=0 --audit-log-maxage 40",
+			strConfig:          "",
+			expectedTestResult: "'--audit-log-maxage' is greater or equal to 30",
+		},
+		{
 			check:              controls.Groups[0].Checks[3],
 			str:                "2:45 ../kubernetes/kube-apiserver --secure-port=0 --audit-log-maxage=40 --option",
 			strConfig:          "",
@@ -89,6 +103,13 @@ func TestTestExecute(t *testing.T) {
 			expectedTestResult: "'--admission-control' does not have 'AlwaysAdmit'",
 		},
 		{
+			// space separator preserves comma-separated value
+			check:              controls.Groups[0].Checks[5],
+			str:                "2:45 ../kubernetes/kube-apiserver --option --admission-control WebHook,RBAC ---audit-log-maxage=40",
+			strConfig:          "",
+			expectedTestResult: "'--admission-control' does not have 'AlwaysAdmit'",
+		},
+		{
 			check:              controls.Groups[0].Checks[6],
 			str:                "2:45 .. --kubelet-clientkey=foo --kubelet-client-certificate=bar --admission-control=Webhook,RBAC",
 			strConfig:          "",
@@ -103,6 +124,20 @@ func TestTestExecute(t *testing.T) {
 		{
 			check:              controls.Groups[0].Checks[8],
 			str:                "permissions=SomeValue",
+			strConfig:          "",
+			expectedTestResult: "'permissions' is equal to 'SomeValue'",
+		},
+		{
+			// space separator with bare flag (no -- prefix)
+			check:              controls.Groups[0].Checks[8],
+			str:                "permissions SomeValue",
+			strConfig:          "",
+			expectedTestResult: "'permissions' is equal to 'SomeValue'",
+		},
+		{
+			// space separator with bare flag, value at end of string
+			check:              controls.Groups[0].Checks[8],
+			str:                "permissions SomeValue someFlag someOtherValue",
 			strConfig:          "",
 			expectedTestResult: "'permissions' is equal to 'SomeValue'",
 		},
