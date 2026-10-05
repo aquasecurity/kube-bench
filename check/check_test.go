@@ -94,6 +94,45 @@ func TestCheck_Run(t *testing.T) {
 			},
 			Expected: FAIL,
 		},
+		{
+			// A file permission check whose audit guards against a missing
+			// file succeeds with no output when the file is absent, which no
+			// test_item can match. See issue #1881.
+			name: "File permission check FAILs for a missing file when the audit hides it",
+			check: Check{
+				Scored: true,
+				Audit:  "/bin/sh -c 'if test -e /no/such/file; then stat -c permissions=%a /no/such/file; fi'",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "permissions",
+					Set:  true,
+					Compare: compare{
+						Op:    "bitmask",
+						Value: "600",
+					},
+				}}},
+			},
+			Expected: FAIL,
+		},
+		{
+			// A bare stat exits non-zero for a missing file, so the check
+			// FAILs on the error path before any test_item is evaluated. The
+			// state is the same as above; what differs is that stat gets to
+			// say why, which the next test asserts.
+			name: "File permission check FAILs for a missing file with a bare stat",
+			check: Check{
+				Scored: true,
+				Audit:  "/bin/sh -c 'stat -c permissions=%a /no/such/file'",
+				Tests: &tests{TestItems: []*testItem{{
+					Flag: "permissions",
+					Set:  true,
+					Compare: compare{
+						Op:    "bitmask",
+						Value: "600",
+					},
+				}}},
+			},
+			Expected: FAIL,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -103,6 +142,48 @@ func TestCheck_Run(t *testing.T) {
 				t.Errorf("expected %s, actual %s", testCase.Expected, testCase.check.State)
 			}
 		})
+	}
+}
+
+// The point of running stat directly rather than behind `if test -e` is not
+// the state - a missing file FAILs either way - but whether kube-bench can
+// say why. The guarded audit succeeds with no output and leaves nothing to
+// report; the bare one exits non-zero and runAudit carries stat's own
+// message into the check's Reason (stderr is collected together with stdout).
+func TestCheck_RunSaysWhyAFilePermissionCheckFailed(t *testing.T) {
+	permissions := func() *tests {
+		return &tests{TestItems: []*testItem{{
+			Flag:    "permissions",
+			Set:     true,
+			Compare: compare{Op: "bitmask", Value: "600"},
+		}}}
+	}
+
+	guarded := Check{
+		ID:     "guarded",
+		Scored: true,
+		Audit:  "/bin/sh -c 'if test -e /no/such/file; then stat -c permissions=%a /no/such/file; fi'",
+		Tests:  permissions(),
+	}
+	if state := guarded.run(); state != FAIL {
+		t.Errorf("guarded audit: expected %s, got %s", FAIL, state)
+	}
+	if guarded.Reason != "" || guarded.ActualValue != "" {
+		t.Errorf("guarded audit: expected nothing to report, got reason %q and actual value %q",
+			guarded.Reason, guarded.ActualValue)
+	}
+
+	bare := Check{
+		ID:     "bare",
+		Scored: true,
+		Audit:  "/bin/sh -c 'stat -c permissions=%a /no/such/file'",
+		Tests:  permissions(),
+	}
+	if state := bare.run(); state != FAIL {
+		t.Errorf("bare audit: expected %s, got %s", FAIL, state)
+	}
+	if !strings.Contains(bare.Reason, "No such file or directory") {
+		t.Errorf("bare audit: expected the reason to name the missing file, got %q", bare.Reason)
 	}
 }
 
