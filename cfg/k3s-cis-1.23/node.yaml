@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $kubeletsvc'' '
         type: "skip"
         tests:
           test_items:
@@ -25,7 +25,7 @@ groups:
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $kubeletsvc'' '
         type: "skip"
         tests:
           test_items:
@@ -55,7 +55,7 @@ groups:
 
       - id: 4.1.4
         text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)"
-        audit: '/bin/sh -c ''if test -e /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig; then stat -c %U:%G /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G /var/lib/rancher/k3s/agent/kubeproxy.kubeconfig'' '
         tests:
           bin_op: or
           test_items:
@@ -156,7 +156,7 @@ groups:
 
       - id: 4.1.9
         text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $kubeletconf'' '
         type: "skip"
         tests:
           test_items:
@@ -171,7 +171,7 @@ groups:
 
       - id: 4.1.10
         text: "Ensure that the kubelet --config configuration file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $kubeletconf'' '
         type: "skip"
         tests:
           test_items:

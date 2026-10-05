@@ -236,7 +236,7 @@ groups:
         scored: true
       - id: V-242406
         text: "The Kubernetes kubelet configuration file must be owned by root (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletkubeconfig; then stat -c %U:%G $kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $kubeletkubeconfig'' '
         tests:
           test_items:
             - flag: root:root
@@ -247,7 +247,7 @@ groups:
         scored: true
       - id: V-242407
         text: "The Kubernetes kubelet configuration files must have file permissions set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $kubeletconf'' '
         tests:
           test_items:
             - flag: "permissions"

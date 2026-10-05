@@ -11,7 +11,7 @@ groups:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
         type: "skip"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c permissions=%a $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $kubeletsvc'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -26,7 +26,7 @@ groups:
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
         type: "skip"
-        audit: '/bin/sh -c ''if test -e $kubeletsvc; then stat -c %U:%G $kubeletsvc; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $kubeletsvc'' '
         tests:
           test_items:
             - flag: root:root
@@ -37,7 +37,7 @@ groups:
 
       - id: 4.1.3
         text: "If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive (Manual)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $proxykubeconfig'' '
         tests:
           bin_op: or
           test_items:
@@ -54,7 +54,7 @@ groups:
 
       - id: 4.1.4
         text: "If proxy kubeconfig file exists ensure ownership is set to root:root (Manual)"
-        audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $proxykubeconfig'' '
         tests:
           bin_op: or
           test_items:
@@ -66,7 +66,7 @@ groups:
 
       - id: 4.1.5
         text: "Ensure that the --kubeconfig kubelet.conf file permissions are set to 644 or more restrictive (Automated)"
-        audit: '/bin/sh -c ''if test -e /node$kubeletkubeconfig; then stat -c permissions=%a /node$kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a /node$kubeletkubeconfig'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -81,7 +81,7 @@ groups:
 
       - id: 4.1.6
         text: "Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root (Automated)"
-        audit: '/bin/sh -c ''if test -e /node$kubeletkubeconfig; then stat -c %U:%G /node$kubeletkubeconfig; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G /node$kubeletkubeconfig'' '
         tests:
           test_items:
             - flag: root:root
@@ -119,7 +119,7 @@ groups:
       - id: 4.1.9
         text: "Ensure that the kubelet --config configuration file has permissions set to 644 or more restrictive (Automated)"
         type: "skip"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''stat -c permissions=%a $kubeletconf'' '
         tests:
           test_items:
             - flag: "permissions"
@@ -137,7 +137,7 @@ groups:
       - id: 4.1.10
         text: "Ensure that the kubelet --config configuration file ownership is set to root:root (Automated)"
         type: "skip"
-        audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
+        audit: '/bin/sh -c ''stat -c %U:%G $kubeletconf'' '
         tests:
           test_items:
             - flag: root:root

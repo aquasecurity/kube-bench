@@ -71,7 +71,7 @@ groups:
 
       - id: 1.1.13
         text: "Ensure that the admin.kubeconfig file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/admin.kubeconfig; then stat -c permissions=%a /var/lib/rancher/k3s/server/cred/admin.kubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a /var/lib/rancher/k3s/server/cred/admin.kubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -86,7 +86,7 @@ groups:
 
       - id: 1.1.14
         text: "Ensure that the admin.kubeconfig file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e /var/lib/rancher/k3s/server/cred/admin.kubeconfig; then stat -c %U:%G /var/lib/rancher/k3s/server/cred/admin.kubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G /var/lib/rancher/k3s/server/cred/admin.kubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
@@ -98,7 +98,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.kubeconfig file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -113,7 +113,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.kubeconfig file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
@@ -125,7 +125,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the cloud-controller.kubeconfig file permissions are set to 644 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -140,7 +140,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the $controllermanagerkubeconfig file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
