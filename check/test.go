@@ -138,6 +138,8 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 		if len(vals) > 0 {
 			if vals[3] != "" {
 				value = vals[3]
+			} else if v, ok := t.spaceSeparatedValue(s); ok {
+				value = v
 			} else {
 				// --bool-flag
 				if strings.HasPrefix(t.Flag, "--") {
@@ -153,6 +155,25 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 	glog.V(3).Infof("In flagTestItem.findValue %s", value)
 
 	return match, value, err
+}
+
+// spaceSeparatedValue handles flags written as "--flag value" rather than
+// "--flag=value". Whether such a flag takes a value cannot be decided from the
+// command line alone -- "--bool-flag next" looks identical -- so the
+// space-separated form is only read when the test compares against a value.
+// A following token that itself starts with "-" is the next flag rather than a
+// value, so it is left alone and the flag keeps its boolean reading.
+func (t flagTestItem) spaceSeparatedValue(s string) (string, bool) {
+	if t.Compare.Op == "" {
+		return "", false
+	}
+
+	re := regexp.MustCompile(regexp.QuoteMeta(t.Flag) + `\s+([^\s-][^\s]*)`)
+	if m := re.FindStringSubmatch(s); len(m) > 1 {
+		return m[1], true
+	}
+
+	return "", false
 }
 
 func (t pathTestItem) findValue(s string) (match bool, value string, err error) {
