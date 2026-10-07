@@ -1,0 +1,9 @@
+---
+## Version-specific settings that override the values in cfg/config.yaml
+## These settings are required if you are using the --asff option to report findings to AWS Security Hub
+## AWS account number is required.
+AWS_ACCOUNT: "<AWS_ACCT_NUMBER>"
+## AWS region is required.
+AWS_REGION: "<AWS_REGION>"
+## EKS Cluster ARN is required.
+CLUSTER_ARN: "<AWS_CLUSTER_ARN>"
