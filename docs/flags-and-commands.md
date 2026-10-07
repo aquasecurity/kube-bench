@@ -24,6 +24,7 @@ Flag | Description
 --noresults | Disable printing of results section to stdout.
 --nototals | Disable calculating and printing of totals for failed, passed, ... checks across all sections 
 --outputfile | Writes the results to output file when run with --json or --junit
+--override-file | YAML file with check definitions that override matching checks (by id) in the benchmark. See [Overriding individual tests](#overriding-individual-tests).
 --pgsql | Save the results to PostgreSQL
 --scored | Run the scored CIS checks (default true)
 --skip string | List of comma separated values of checks to be skipped
@@ -96,6 +97,26 @@ as a comma-delimited list on the command line with the `--skip` flag.
 `kube-bench --skip="1.1,1.2.1,1.3.3"`
 Will skip 1.1.X group and individual checks 1.2.1, 1.3.3.
 Skipped checks returns [INFO] output. 
+
+#### Overriding individual tests
+
+If you only need to change a handful of tests for your environment, you can point `kube-bench` at an override file instead of copying and maintaining a whole benchmark directory.
+
+`kube-bench --override-file myoverrides.yaml`
+
+The override file is a small YAML file with a `checks` list. Any check whose `id` matches an entry in the list is replaced by the definition in the override file; checks that aren't listed run unchanged. This works with the top-level command as well as `kube-bench run`, so the same file can carry overrides for any target (master, node, etcd, ...).
+
+```yaml
+checks:
+- id: 1.2.1
+  text: "Ensure that the --anonymous-auth argument is set to false (Manual)"
+  type: manual
+  scored: false
+  remediation: |
+    We accept the risk of anonymous auth in this cluster.
+```
+
+Each override entry is a full check definition (the same schema used in the benchmark files under `cfg/`), so include all of the fields you want the check to end up with, not just the ones you're changing.
 
 #### Exit code
 
