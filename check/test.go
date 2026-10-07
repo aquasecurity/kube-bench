@@ -126,20 +126,35 @@ func (t flagTestItem) findValue(s string) (match bool, value string, err error) 
 		// Expects flags in the form;
 		// --flag=somevalue
 		// flag: somevalue
+		// flag somevalue
 		// --flag
 		// somevalue
 		// DOESN'T COVER - use pathTestItem implementation of findValue() for this
 		// flag:
 		//	 - wehbook
-		pttn := `(` + t.Flag + `)(=|: *)*([^\s]*) *`
+
+		// Match the flag of interest:
+		pttn1 := `(` + t.Flag + `)`
+		// Consume any number of `=` or `:` separators:
+		pttn2 := `[=:]*`
+		// Consume any whitespace after separator:
+		pttn3 := `\s*`
+		// Match any number of non-whitespace characters as the flag value:
+		pttn4 := `(\S*)`
+		pttn := pttn1 + pttn2 + pttn3 + pttn4
+
 		flagRe := regexp.MustCompile(pttn)
 		vals := flagRe.FindStringSubmatch(s)
 
 		if len(vals) > 0 {
-			if vals[3] != "" {
-				value = vals[3]
+			// If there is a match
+			if vals[2] != "" && !strings.HasPrefix(vals[2], "--") {
+				// If the "flag value" capture group matched text and the match
+				// does not look like another flag
+				value = vals[2]
 			} else {
-				// --bool-flag
+				// If there is no "flag value" or it is another flag,
+				// then this is a bool flag
 				if strings.HasPrefix(t.Flag, "--") {
 					value = "true"
 				} else {
