@@ -243,3 +243,26 @@ hello
 		})
 	}
 }
+
+// An empty list entry under test_items unmarshals to a nil *testItem. The
+// len(TestItems) check upstream counts it, so execute() used to dereference nil.
+func TestCheckExecuteSkipsNilTestItem(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("execute panicked on a nil test_item: %v", r)
+		}
+	}()
+
+	c := &Check{
+		ID:   "1.1.1",
+		Text: "check with an empty test_item",
+		Tests: &tests{
+			TestItems: []*testItem{nil},
+		},
+		AuditOutput: "some output",
+	}
+
+	if _, err := c.execute(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
