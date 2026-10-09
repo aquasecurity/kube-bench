@@ -51,29 +51,7 @@ groups:
       - id: 5.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Manual)"
         audit: |
-          # Check Roles
-          kubectl get roles --all-namespaces -o custom-columns=ROLE_NAMESPACE:.metadata.namespace,ROLE_NAME:.metadata.name --no-headers | while read -r role_namespace role_name
-          do
-            role_rules=$(kubectl get role -n "${role_namespace}" "${role_name}" -o=json | jq -c '.rules')
-            if echo "${role_rules}" | grep -q "\[\"\*\"\]"; then
-              role_is_compliant="false"
-            else
-              role_is_compliant="true"
-            fi;
-            echo "**role_name: ${role_name} role_namespace: ${role_namespace} role_rules: ${role_rules} role_is_compliant: ${role_is_compliant}"
-          done
-
-          # Check ClusterRoles
-          kubectl get clusterroles -o custom-columns=CLUSTERROLE_NAME:.metadata.name --no-headers | while read -r clusterrole_name
-          do
-            clusterrole_rules=$(kubectl get clusterrole "${clusterrole_name}" -o=json | jq -c '.rules')
-            if echo "${clusterrole_rules}" | grep -q "\[\"\*\"\]"; then
-              clusterrole_is_compliant="false"
-            else
-              clusterrole_is_compliant="true"
-            fi;
-          echo "**clusterrole_name: ${clusterrole_name} clusterrole_rules: ${clusterrole_rules} clusterrole_is_compliant: ${clusterrole_is_compliant}"
-          done
+          kube-bench cis-audit roles
         use_multiple_values: true
         tests:
           bin_op: or
@@ -131,20 +109,7 @@ groups:
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
         audit: |
-          kubectl get pods --all-namespaces -o custom-columns=POD_NAMESPACE:.metadata.namespace,POD_NAME:.metadata.name,POD_SERVICE_ACCOUNT:.spec.serviceAccount,POD_IS_AUTOMOUNTSERVICEACCOUNTTOKEN:.spec.automountServiceAccountToken --no-headers | while read -r pod_namespace pod_name pod_service_account pod_is_automountserviceaccounttoken
-          do
-            # Retrieve automountServiceAccountToken's value for ServiceAccount and Pod, set to notset if null or <none>.
-            svacc_is_automountserviceaccounttoken=$(kubectl get serviceaccount -n "${pod_namespace}" "${pod_service_account}" -o json | jq -r '.automountServiceAccountToken' | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            pod_is_automountserviceaccounttoken=$(echo "${pod_is_automountserviceaccounttoken}" | sed -e 's/<none>/notset/g' -e 's/null/notset/g')
-            if [ "${svacc_is_automountserviceaccounttoken}" = "false" ] && ( [ "${pod_is_automountserviceaccounttoken}" = "false" ] || [ "${pod_is_automountserviceaccounttoken}" = "notset" ] ); then
-              is_compliant="true"
-            elif [ "${svacc_is_automountserviceaccounttoken}" = "true" ] && [ "${pod_is_automountserviceaccounttoken}" = "false" ]; then
-              is_compliant="true"
-            else
-              is_compliant="false"
-            fi
-            echo "**namespace: ${pod_namespace} pod_name: ${pod_name} service_account: ${pod_service_account} pod_is_automountserviceaccounttoken: ${pod_is_automountserviceaccounttoken} svacc_is_automountServiceAccountToken: ${svacc_is_automountserviceaccounttoken} is_compliant: ${is_compliant}"
-          done
+          kube-bench cis-audit serviceaccounts
         use_multiple_values: true
         tests:
           test_items:
