@@ -10,7 +10,7 @@ groups:
     checks:
       - id: 1.1.1
         text: "Ensure that the API server pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c permissions=%a $apiserverconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $apiserverconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -25,7 +25,7 @@ groups:
 
       - id: 1.1.2
         text: "Ensure that the API server pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $apiserverconf; then stat -c %U:%G $apiserverconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $apiserverconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -36,7 +36,7 @@ groups:
 
       - id: 1.1.3
         text: "Ensure that the controller manager pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c permissions=%a $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $controllermanagerconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -50,7 +50,7 @@ groups:
 
       - id: 1.1.4
         text: "Ensure that the controller manager pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerconf; then stat -c %U:%G $controllermanagerconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $controllermanagerconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -61,7 +61,7 @@ groups:
 
       - id: 1.1.5
         text: "Ensure that the scheduler pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c permissions=%a $schedulerconf; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $schedulerconf'"
         tests:
           test_items:
             - flag: "permissions"
@@ -75,7 +75,7 @@ groups:
 
       - id: 1.1.6
         text: "Ensure that the scheduler pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerconf; then stat -c %U:%G $schedulerconf; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $schedulerconf'"
         tests:
           test_items:
             - flag: "root:root"
@@ -86,7 +86,7 @@ groups:
 
       - id: 1.1.7
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c permissions=%a; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $etcdconf'"
         use_multiple_values: true
         tests:
           test_items:
@@ -102,7 +102,7 @@ groups:
 
       - id: 1.1.8
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $etcdconf; then find $etcdconf -name '*etcd*' | xargs stat -c %U:%G; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $etcdconf'"
         use_multiple_values: true
         tests:
           test_items:
@@ -189,7 +189,7 @@ groups:
       - id: 1.1.13
         text: "Ensure that the default administrative credential file permissions are set to 600 (Automated)"
         audit: |
-         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then stat -c "permissions=%a %n" $adminconf; fi; done
+         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do stat -c "permissions=%a %n" $adminconf; done
         use_multiple_values: true
         tests:
           test_items:
@@ -207,7 +207,7 @@ groups:
       - id: 1.1.14
         text: "Ensure that the default administrative credential file ownership is set to root:root (Automated)"
         audit: |
-         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do if test -e $adminconf; then stat -c "ownership=%U:%G %n" $adminconf; fi; done
+         for adminconf in /etc/kubernetes/admin.conf /etc/kubernetes/super-admin.conf; do stat -c "ownership=%U:%G %n" $adminconf; done
         use_multiple_values: true
         tests:
           test_items:
@@ -224,7 +224,7 @@ groups:
 
       - id: 1.1.15
         text: "Ensure that the scheduler.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c permissions=%a $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -239,7 +239,7 @@ groups:
 
       - id: 1.1.16
         text: "Ensure that the scheduler.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $schedulerkubeconfig; then stat -c %U:%G $schedulerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $schedulerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
@@ -251,7 +251,7 @@ groups:
 
       - id: 1.1.17
         text: "Ensure that the controller-manager.conf file permissions are set to 600 or more restrictive (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c permissions=%a $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c permissions=%a $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "permissions"
@@ -266,7 +266,7 @@ groups:
 
       - id: 1.1.18
         text: "Ensure that the controller-manager.conf file ownership is set to root:root (Automated)"
-        audit: "/bin/sh -c 'if test -e $controllermanagerkubeconfig; then stat -c %U:%G $controllermanagerkubeconfig; fi'"
+        audit: "/bin/sh -c 'stat -c %U:%G $controllermanagerkubeconfig'"
         tests:
           test_items:
             - flag: "root:root"
