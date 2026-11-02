@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -10,8 +10,8 @@ import (
 	"testing"
 )
 
-func TestLoadCertificate(t *testing.T) {
-	tmp, err := os.MkdirTemp("", "TestFakeLoadCertificate")
+func TestLoadRootCAs(t *testing.T) {
+	tmp, err := os.MkdirTemp("", "TestFakeLoadRootCAs")
 	if err != nil {
 		t.Fatalf("unable to create temp directory: %v", err)
 	}
@@ -57,14 +57,14 @@ FAjB57z2NcIgJuVpQnGRYtr/JcH2Qdsq8bLtXaojUIWOOqoTDRLYozdMOOQ=
 
 	for id, c := range cases {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
-			tlsCert, err := loadCertificate(c.file)
+			rootCAs, err := loadRootCAs(c.file)
 			if !c.fail {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 				}
 
-				if tlsCert == nil {
-					t.Errorf("missing returned TLS Certificate")
+				if rootCAs == nil {
+					t.Errorf("missing returned RootCAs pool")
 				}
 			} else {
 				if err == nil {
@@ -86,7 +86,7 @@ func TestGetWebData(t *testing.T) {
 			http.StatusInternalServerError)
 	}
 	token := "dummyToken"
-	var tlsCert tls.Certificate
+	var rootCAs *x509.CertPool
 
 	cases := []struct {
 		fn   http.HandlerFunc
@@ -106,7 +106,7 @@ func TestGetWebData(t *testing.T) {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			ts := httptest.NewServer(c.fn)
 			defer ts.Close()
-			data, err := getWebData(ts.URL, token, &tlsCert)
+			data, err := getWebData(ts.URL, token, rootCAs)
 			if !c.fail {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
@@ -135,7 +135,7 @@ func TestGetWebDataWithRetry(t *testing.T) {
 			http.StatusInternalServerError)
 	}
 	token := "dummyToken"
-	var tlsCert tls.Certificate
+	var rootCAs *x509.CertPool
 
 	cases := []struct {
 		fn   http.HandlerFunc
@@ -155,7 +155,7 @@ func TestGetWebDataWithRetry(t *testing.T) {
 		t.Run(strconv.Itoa(id), func(t *testing.T) {
 			ts := httptest.NewServer(c.fn)
 			defer ts.Close()
-			data, err := getWebDataWithRetry(ts.URL, token, &tlsCert)
+			data, err := getWebDataWithRetry(ts.URL, token, rootCAs)
 			if !c.fail {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)

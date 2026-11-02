@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
@@ -39,9 +39,9 @@ func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 	cacertfile := fmt.Sprintf("%s/ca.crt", serviceaccount)
 	tokenfile := fmt.Sprintf("%s/token", serviceaccount)
 
-	tlsCert, err := loadCertificate(cacertfile)
+	rootCAs, err := loadRootCAs(cacertfile)
 	if err != nil {
-		glog.V(2).Infof("Failed loading certificate Error: %s", err)
+		glog.V(2).Infof("Failed loading CA certificate Error: %s", err)
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 	}
 	token := strings.TrimSpace(string(tb))
 
-	data, err := getWebDataWithRetry(k8sVersionURL, token, tlsCert)
+	data, err := getWebDataWithRetry(k8sVersionURL, token, rootCAs)
 	if err != nil {
 		glog.V(2).Infof("Failed to get data Error: %s", err)
 		return nil, err
@@ -68,11 +68,11 @@ func getKubeVersionFromRESTAPI() (*KubeVersion, error) {
 // The idea of this function is so if Kubernetes DNS is not completely seetup and the
 // Container where kube-bench is running needs time for DNS configure.
 // Basically try 10 times, waiting 1 second until either it is successful or it fails.
-func getWebDataWithRetry(k8sVersionURL, token string, cacert *tls.Certificate) (data []byte, err error) {
+func getWebDataWithRetry(k8sVersionURL, token string, rootCAs *x509.CertPool) (data []byte, err error) {
 	tries := 0
 	// We retry a few times in case the DNS service has not had time to come up
 	for tries < 10 {
-		data, err = getWebData(k8sVersionURL, token, cacert)
+		data, err = getWebData(k8sVersionURL, token, rootCAs)
 		if err == nil {
 			return
 		}
@@ -111,12 +111,15 @@ func extractVersion(data []byte) (*KubeVersion, error) {
 	}, nil
 }
 
-func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
+func getWebData(srvURL, token string, rootCAs *x509.CertPool) ([]byte, error) {
 	glog.V(2).Info(fmt.Sprintf("getWebData srvURL: %s\n", srvURL))
 
+	// Trust the cluster CA from the serviceaccount mount. Previously the CA PEM
+	// was incorrectly placed in tls.Config.Certificates (client certs) and
+	// InsecureSkipVerify was set, so the API server identity was never verified.
 	tlsConf := &tls.Config{
-		Certificates:       []tls.Certificate{*cacert},
-		InsecureSkipVerify: true,
+		RootCAs:    rootCAs,
+		MinVersion: tls.VersionTLS12,
 	}
 	tr := &http.Transport{
 		TLSClientConfig: tlsConf,
@@ -146,21 +149,19 @@ func getWebData(srvURL, token string, cacert *tls.Certificate) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func loadCertificate(certFile string) (*tls.Certificate, error) {
+func loadRootCAs(certFile string) (*x509.CertPool, error) {
 	cacert, err := os.ReadFile(certFile)
 	if err != nil {
 		return nil, err
 	}
 
-	var tlsCert tls.Certificate
-	block, _ := pem.Decode(cacert)
-	if block == nil {
-		return nil, fmt.Errorf("unable to Decode certificate")
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(cacert) {
+		return nil, fmt.Errorf("unable to parse CA certificate from %s", certFile)
 	}
 
-	glog.V(2).Info("Loading CA certificate")
-	tlsCert.Certificate = append(tlsCert.Certificate, block.Bytes)
-	return &tlsCert, nil
+	glog.V(2).Info("Loaded API server CA certificate into RootCAs pool")
+	return pool, nil
 }
 
 func getKubernetesURL() string {
