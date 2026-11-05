@@ -18,10 +18,35 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/golang/glog"
 )
+
+// kubectlUnreachableRe matches the errors kubectl prints when it cannot reach
+// the API server. An audit that shells out to kubectl produces nothing but this
+// message when kube-bench runs without a usable kubeconfig - the standard
+// in-pod job.yaml deployment, or when a client configuration flag makes kubectl
+// drop the configuration it had (kubernetes/kubernetes#93474).
+var kubectlUnreachableRe = regexp.MustCompile(
+	`(?m)^(?:The connection to the server .* was refused.*|Unable to connect to the server[: ].*|Couldn't connect to the server.*|error: connection refused.*)$`)
+
+// kubectlUnreachable returns the first kubectl connectivity error found in the
+// audit outputs, or "" when the audit produced usable data. It only inspects
+// outputs of audits that actually invoke kubectl, so unrelated commands that
+// happen to echo such a line are left alone.
+func kubectlUnreachable(audit string, outputs ...string) string {
+	if !strings.Contains(audit, "kubectl") {
+		return ""
+	}
+	for _, out := range outputs {
+		if m := kubectlUnreachableRe.FindString(out); m != "" {
+			return strings.TrimSpace(m)
+		}
+	}
+	return ""
+}
 
 // NodeType indicates the type of node (master, node).
 type NodeType string
@@ -151,6 +176,20 @@ func (c *Check) run() State {
 	var lastCommand string
 
 	lastCommand, err := c.runAuditCommands()
+
+	// kubectl could not reach the API server, so the audit produced no data -
+	// only the connection error. Evaluating that error text as if it were audit
+	// output reports a compliance result that was never measured, so record why
+	// the check did not run instead.
+	if unreachable := kubectlUnreachable(c.Audit+c.AuditConfig+c.AuditEnv,
+		c.AuditEnvOutput, c.AuditOutput, c.AuditConfigOutput); unreachable != "" {
+		c.Reason = fmt.Sprintf("kubectl could not connect to the API server: %s", unreachable)
+		c.State = WARN
+		c.ActualValue = ""
+		glog.V(3).Info(c.Reason)
+		return c.State
+	}
+
 	if err == nil {
 		finalOutput, err = c.execute()
 	}
