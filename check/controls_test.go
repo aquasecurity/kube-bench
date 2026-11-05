@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -63,6 +64,51 @@ func TestYamlFiles(t *testing.T) {
 				t.Logf("YAML file successfully unmarshalled: %s", path)
 			} else {
 				t.Fatalf("failed to load YAML from %s: %v", path, err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("failure walking cfg dir: %v\n", err)
+	}
+}
+
+// validate that the kubelet checks we're shipping audit the kubelet and not the apiserver
+func TestKubeletChecksAuditKubelet(t *testing.T) {
+	// cis-1.6-k3s is a deprecated profile that still audits the apiserver here.
+	const skipProfile = "cis-1.6-k3s"
+
+	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			t.Fatalf("failure accessing path %q: %v\n", path, err)
+		}
+		if info.IsDir() || filepath.Base(filepath.Dir(path)) == skipProfile {
+			return nil
+		}
+
+		in, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("error opening file %s: %v", path, err)
+		}
+
+		c := new(Controls)
+		if err := yaml.Unmarshal(in, c); err != nil {
+			t.Fatalf("failed to load YAML from %s: %v", path, err)
+		}
+		if c.Type != NODE {
+			return nil
+		}
+
+		for _, g := range c.Groups {
+			if g.ID != "4.2" {
+				continue
+			}
+			for _, check := range g.Checks {
+				for _, audit := range []string{check.Audit, check.AuditConfig} {
+					if strings.Contains(audit, "Running kube-apiserver") {
+						t.Errorf("%s: kubelet check %s audits kube-apiserver", path, check.ID)
+					}
+				}
 			}
 		}
 		return nil
