@@ -27,6 +27,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | cis-1.11             | master, controlplane, node, etcd, policies |
 | cis-1.12             | master, controlplane, node, etcd, policies |
 | cis-2.0              | master, controlplane, node, etcd, policies |
+| cis-2.1              | master, controlplane, node, etcd, policies |
 | gke-1.0              | master, controlplane, node, etcd, policies, managedservices |
 | gke-1.2.0            | controlplane, node, policies, managedservices |
 | gke-1.6.0            | controlplane, node, policies, managedservices |
