@@ -305,6 +305,7 @@ version_mapping:
   "eks-1.5.0": "eks-1.5.0"
   "eks-1.7.0": "eks-1.7.0"
   "eks-1.8.0": "eks-1.8.0"
+  "eks-2.0.0": "eks-2.0.0"
   "gke-1.0": "gke-1.0"
   "gke-1.2.0": "gke-1.2.0"
   "gke-1.6.0": "gke-1.6.0"
@@ -486,6 +487,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "eks-1.8.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "managedservices"
+  "eks-2.0.0":
     - "master"
     - "node"
     - "controlplane"
