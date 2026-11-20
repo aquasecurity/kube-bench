@@ -551,8 +551,10 @@ func eksBenchmark(version string) string {
 		return "eks-1.0.1"
 	case "1.29", "1.30", "1.31":
 		return "eks-1.7.0"
-	case "1.32", "1.33", "1.34":
+	case "1.32", "1.33":
 		return "eks-1.8.0"
+	case "1.34", "1.35":
+		return "eks-2.0.0"
 	default:
 		return "eks-1.5.0"
 	}
