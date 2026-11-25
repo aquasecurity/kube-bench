@@ -900,21 +900,21 @@ func Test_getPlatformBenchmarkVersion(t *testing.T) {
 			args: args{
 				platform: Platform{Name: "aks", Version: "1.29"},
 			},
-			want: "aks-2.1",
+			want: "aks-2.0",
 		},
 		{
 			name: "aks 1.32",
 			args: args{
 				platform: Platform{Name: "aks", Version: "1.32"},
 			},
-			want: "aks-2.1",
+			want: "aks-2.0",
 		},
 		{
 			name: "aks 1.35",
 			args: args{
 				platform: Platform{Name: "aks", Version: "1.35"},
 			},
-			want: "aks-2.1",
+			want: "aks-2.0",
 		},
 	}
 	for _, tt := range tests {
