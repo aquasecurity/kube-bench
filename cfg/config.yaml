@@ -319,7 +319,7 @@ version_mapping:
   "aks-1.0": "aks-1.0"
   "aks-1.7": "aks-1.7"
   "aks-1.8": "aks-1.8"
-  "aks-2.1": "aks-2.1"
+  "aks-2.0": "aks-2.0"
   "ack-1.0": "ack-1.0"
   "cis-1.6-k3s": "cis-1.6-k3s"
   "cis-1.24-microk8s": "cis-1.24-microk8s"
@@ -513,7 +513,7 @@ target_mapping:
     - "controlplane"
     - "policies"
     - "managedservices"
-  "aks-2.1":
+  "aks-2.0":
     - "master"
     - "node"
     - "controlplane"
