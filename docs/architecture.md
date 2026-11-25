@@ -37,7 +37,7 @@ The following table shows the valid targets based on the CIS Benchmark version.
 | ack-1.0              | master, controlplane, node, etcd, policies, managedservices |
 | aks-1.0              | controlplane, node, policies, managedservices |
 | aks-1.7              | controlplane, node, policies, managedservices |
-| aks-2.1              | controlplane, node, policies, managedservices |
+| aks-2.0              | controlplane, node, policies, managedservices |
 | rh-0.7               | master,node|
 | rh-1.0               | master, controlplane, node, etcd, policies |
 | cis-1.6-k3s          | master, controlplane, node, etcd, policies |
