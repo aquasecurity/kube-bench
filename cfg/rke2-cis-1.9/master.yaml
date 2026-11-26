@@ -97,6 +97,7 @@ groups:
         scored: true
 
       - id: 1.1.7
+        na_if_missing: true
         text: "Ensure that the etcd pod specification file permissions are set to 600 or more restrictive (Manual)"
         audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c permissions=%a $etcdconf; fi'"
         tests:
@@ -114,6 +115,7 @@ groups:
         scored: false
 
       - id: 1.1.8
+        na_if_missing: true
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Manual)"
         audit: "/bin/sh -c 'if test -e $etcdconf; then stat -c %U:%G $etcdconf; fi'"
         tests:
@@ -165,6 +167,7 @@ groups:
         scored: false
 
       - id: 1.1.11
+        na_if_missing: true
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Manual)"
         audit: "stat -c permissions=%a $etcddatadir"
         tests:

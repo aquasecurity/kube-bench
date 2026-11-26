@@ -28,6 +28,7 @@ var colors = map[check.State]*color.Color{
 	check.FAIL: color.New(color.FgRed),
 	check.WARN: color.New(color.FgYellow),
 	check.INFO: color.New(color.FgBlue),
+	check.NA:   color.New(color.FgCyan),
 }
 
 var (

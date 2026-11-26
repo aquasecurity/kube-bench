@@ -97,6 +97,7 @@ groups:
         scored: true
 
       - id: 1.1.7
+        na_if_missing: true
         text: "Ensure that the etcd pod specification file permissions are set to 644 or more restrictive (Automated)"
         audit: |
           /bin/sh -c '
@@ -121,6 +122,7 @@ groups:
         scored: true
 
       - id: 1.1.8
+        na_if_missing: true
         text: "Ensure that the etcd pod specification file ownership is set to root:root (Automated)"
         audit: |
           /bin/sh -c '
@@ -184,6 +186,7 @@ groups:
         scored: false
 
       - id: 1.1.11
+        na_if_missing: true
         text: "Ensure that the etcd data directory permissions are set to 700 or more restrictive (Automated)"
         audit: |
           /bin/sh -c 'if [ -d "/var/lib/rancher/rke2/server/db/etcd" ]; then

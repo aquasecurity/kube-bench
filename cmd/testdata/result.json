@@ -117,6 +117,7 @@
     "total_pass": 49,
     "total_fail": 12,
     "total_warn": 14,
-    "total_info": 0
+    "total_info": 0,
+    "total_na": 0
   }
 }

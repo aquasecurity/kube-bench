@@ -127,9 +127,10 @@ groups:
         scored: true
 
       - id: 4.1.9
+        na_if_missing: true
         text: "If the kubelet config.yaml configuration file is being used validate permissions set to 600 or more restrictive (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
-        type: "skip"
+        type: "na"
         tests:
           test_items:
             - flag: "permissions"
@@ -143,9 +144,10 @@ groups:
         scored: true
 
       - id: 4.1.10
+        na_if_missing: true
         text: "If the kubelet config.yaml configuration file is being used validate file ownership is set to root:root (Automated)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
-        type: "skip"
+        type: "na"
         tests:
           test_items:
             - flag: root:root
