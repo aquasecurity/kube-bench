@@ -38,9 +38,13 @@ const (
 	WARN State = "WARN"
 	// INFO informational message
 	INFO State = "INFO"
+	// NA check is not applicable to this node.
+	NA State = "NA"
 
 	// SKIP for when a check should be skipped.
 	SKIP = "skip"
+	// NOT_APPLICABLE for when a check is explicitly not applicable.
+	NOT_APPLICABLE = "na"
 
 	// MASTER a master node
 	MASTER NodeType = "master"
@@ -85,6 +89,10 @@ type Check struct {
 	AuditEnvOutput    string `json:"-"`
 	AuditConfigOutput string `json:"-"`
 	DisableEnvTesting bool   `json:"-"`
+	// NAIfMissing marks a check as Not Applicable when the audited file or
+	// directory is absent from the node (for example etcd on a control-plane
+	// only node, or a kubelet config file managed by RKE2).
+	NAIfMissing bool `yaml:"na_if_missing" json:"-"`
 }
 
 // Runner wraps the basic Run method.
@@ -134,6 +142,14 @@ func (c *Check) run() State {
 		return c.State
 	}
 
+	// If check type is na, force result to NA
+	if c.Type == NOT_APPLICABLE {
+		c.Reason = "Test marked as not applicable"
+		c.State = NA
+		glog.V(3).Info(c.Reason)
+		return c.State
+	}
+
 	// If there aren't any tests defined this is a FAIL or WARN
 	if c.Tests == nil || len(c.Tests.TestItems) == 0 {
 		c.Reason = "No tests defined"
@@ -151,6 +167,18 @@ func (c *Check) run() State {
 	var lastCommand string
 
 	lastCommand, err := c.runAuditCommands()
+
+	// A missing resource is not a failed control for checks that opt in to
+	// this behaviour. Without this, a control-plane-only node (no local etcd)
+	// or an RKE2 node (no standalone kubelet config) is reported as FAIL or,
+	// when a "not found" sentinel test item exists, as a misleading PASS.
+	if c.naBecauseResourceMissing() {
+		c.Reason = "Audited resource is not present on this node"
+		c.State = NA
+		glog.V(3).Info(c.Reason)
+		return c.State
+	}
+
 	if err == nil {
 		finalOutput, err = c.execute()
 	}
@@ -190,6 +218,52 @@ func (c *Check) run() State {
 		glog.V(2).Info(c.Reason)
 	}
 	return c.State
+}
+
+// naBecauseResourceMissing reports whether a check that opted in to
+// na_if_missing should be treated as Not Applicable because none of the
+// resources it audits exist on this node.
+func (c *Check) naBecauseResourceMissing() bool {
+	if !c.NAIfMissing {
+		return false
+	}
+
+	// Explicitly typed checks have already been handled above.
+	if c.Type == SKIP || c.Type == MANUAL || c.Type == NOT_APPLICABLE {
+		return false
+	}
+
+	if !resourceMissing(c.AuditOutput) {
+		return false
+	}
+
+	// Checks that also audit a config file must still be evaluated when that
+	// config file is present, even if the primary audit produced no output.
+	if c.AuditConfig != "" && !resourceMissing(c.AuditConfigOutput) {
+		return false
+	}
+
+	return true
+}
+
+// resourceMissing interprets the output of an audit command. Benchmark audits
+// traditionally report a missing file or directory with one of these sentinels,
+// or with no output at all when the command is guarded by `test -e`.
+func resourceMissing(output string) bool {
+	s := strings.ToLower(strings.TrimSpace(output))
+	if s == "" {
+		return true
+	}
+	for _, marker := range []string{
+		"file not found",
+		"directory not found",
+		"no such file or directory",
+	} {
+		if strings.Contains(s, marker) {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *Check) runAuditCommands() (lastCommand string, err error) {

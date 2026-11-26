@@ -222,8 +222,8 @@ func printSummary(summary check.Summary, sectionName string) {
 	}
 
 	colors[res].Printf("== Summary %s ==\n", sectionName)
-	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n\n",
-		summary.Pass, summary.Fail, summary.Warn, summary.Info,
+	fmt.Printf("%d checks PASS\n%d checks FAIL\n%d checks WARN\n%d checks INFO\n%d checks NA\n\n",
+		summary.Pass, summary.Fail, summary.Warn, summary.Info, summary.NA,
 	)
 }
 
@@ -492,6 +492,7 @@ func getSummaryTotals(controlsCollection []*check.Controls) check.Summary {
 		totalSummary.Warn = totalSummary.Warn + summary.Warn
 		totalSummary.Pass = totalSummary.Pass + summary.Pass
 		totalSummary.Info = totalSummary.Info + summary.Info
+		totalSummary.NA = totalSummary.NA + summary.NA
 	}
 	return totalSummary
 }

@@ -711,7 +711,7 @@ func TestPrintSummary(t *testing.T) {
 	out, _ := io.ReadAll(r)
 	os.Stdout = rescueStdout
 
-	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n\n")
+	assert.Contains(t, string(out), "49 checks PASS\n12 checks FAIL\n14 checks WARN\n0 checks INFO\n0 checks NA\n\n")
 }
 
 func TestPrettyPrintNoSummary(t *testing.T) {

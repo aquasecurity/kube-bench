@@ -64,6 +64,7 @@ type Group struct {
 	Fail   int      `json:"fail"`
 	Warn   int      `json:"warn"`
 	Info   int      `json:"info"`
+	NA     int      `json:"na"`
 	Text   string   `json:"desc"`
 	Checks []*Check `json:"results"`
 }
@@ -74,6 +75,7 @@ type Summary struct {
 	Fail int `json:"total_fail"`
 	Warn int `json:"total_warn"`
 	Info int `json:"total_info"`
+	NA   int `json:"total_na"`
 }
 
 // Predicate a predicate on the given Group and Check arguments.
@@ -99,7 +101,7 @@ func NewControls(t NodeType, in []byte, detectedVersion string) (*Controls, erro
 func (controls *Controls) RunChecks(runner Runner, filter Predicate, skipIDMap map[string]bool) Summary {
 	var g []*Group
 	m := make(map[string]*Group)
-	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info = 0, 0, 0, 0
+	controls.Summary.Pass, controls.Summary.Fail, controls.Summary.Warn, controls.Info, controls.Summary.NA = 0, 0, 0, 0, 0
 
 	for _, group := range controls.Groups {
 		for _, check := range group.Checks {
@@ -158,7 +160,7 @@ func (controls *Controls) JUnit() ([]byte, error) {
 	suite := reporters.JUnitTestSuite{
 		Name:      controls.Text,
 		TestCases: []reporters.JUnitTestCase{},
-		Tests:     controls.Summary.Pass + controls.Summary.Fail + controls.Summary.Info + controls.Summary.Warn,
+		Tests:     controls.Summary.Pass + controls.Summary.Fail + controls.Summary.Info + controls.Summary.Warn + controls.Summary.NA,
 		Failures:  controls.Summary.Fail,
 	}
 	for _, g := range controls.Groups {
@@ -181,8 +183,8 @@ func (controls *Controls) JUnit() ([]byte, error) {
 			switch check.State {
 			case FAIL:
 				tc.FailureMessage = &reporters.JUnitFailureMessage{Message: check.Remediation}
-			case WARN, INFO:
-				// WARN and INFO are two different versions of skipped tests. Either way it would be a false positive/negative to report
+			case WARN, INFO, NA:
+				// WARN, INFO and NA are versions of skipped tests. Either way it would be a false positive/negative to report
 				// it any other way.
 				tc.Skipped = &reporters.JUnitSkipped{}
 			case PASS:
@@ -309,6 +311,8 @@ func summarize(controls *Controls, state State) {
 		controls.Summary.Warn++
 	case INFO:
 		controls.Summary.Info++
+	case NA:
+		controls.Summary.NA++
 	default:
 		glog.Warningf("Unrecognized state %s", state)
 	}
@@ -324,6 +328,8 @@ func summarizeGroup(group *Group, state State) {
 		group.Warn++
 	case INFO:
 		group.Info++
+	case NA:
+		group.NA++
 	default:
 		glog.Warningf("Unrecognized state %s", state)
 	}
